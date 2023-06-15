@@ -8,6 +8,8 @@ export function DatasetProvider({ dataset_url, children }) {
     url: dataset_url,
     selectedObs: null,
     selectedVar: null,
+    selectedMultiObs: [],
+    selectedMultiVar: [],
   });
 
   return (
@@ -37,6 +39,20 @@ function datasetReducer(dataset, action) {
     }
     case "varSelected": {
       return { ...dataset, selectedVar: action.var };
+    }
+    case "multiVarSelected": {
+      return {
+        ...dataset,
+        selectedMultiVar: [...dataset.selectedMultiVar, action.var],
+      };
+    }
+    case "multiVarDeselected": {
+      return {
+        ...dataset,
+        selectedMultiVar: dataset.selectedMultiVar.filter(
+          (a) => a !== action.var
+        ),
+      };
     }
     default: {
       throw Error("Unknown action: " + action.type);

@@ -4,7 +4,7 @@ import React from "react";
 import { Heatmap } from "./Heatmap.js";
 import { DatasetProvider } from "./DatasetContext.js";
 import { ObsColsList } from "./ObsList.js";
-import { VarNamesList } from "./VarList.js";
+import { MultiVarNamesList } from "./VarList.js";
 
 export default function App({ dataset_url }) {
   return (
@@ -15,7 +15,8 @@ export default function App({ dataset_url }) {
             <ObsColsList />
           </div>
           <div className="col-3 mh-100">
-            <VarNamesList />
+            {/* <VarNamesList /> */}
+            <MultiVarNamesList />
           </div>
           <div className="col-6 mh-100">
             <Heatmap />

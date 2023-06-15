@@ -9,7 +9,7 @@ export function Heatmap() {
   let [hasSelections, setHasSelections] = useState(false);
 
   useEffect(() => {
-    if (dataset.selectedObs && dataset.selectedVar) {
+    if (dataset.selectedObs && dataset.selectedMultiVar) {
       setHasSelections(true);
       fetch(new URL("heatmap", process.env.REACT_APP_API_URL), {
         method: "POST",
