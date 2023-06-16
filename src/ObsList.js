@@ -1,5 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { React, useEffect, useState } from "react";
 import { useDataset, useDatasetDispatch } from "./DatasetContext";
 
@@ -7,7 +7,7 @@ export function ObsColsList() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [obsColsList, setObsColsList] = useState([]);
-  let [active, setActive] = useState([]);
+  let [active, setActive] = useState(null);
 
   useEffect(() => {
     fetch(new URL("obs/cols", process.env.REACT_APP_API_URL), {
@@ -45,7 +45,7 @@ export function ObsColsList() {
   ));
 
   return (
-    <div>
+    <div className="h-100">
       <h5>{dataset.url}</h5>
       <div className="list-group overflow-auto mh-100">{obsList}</div>
     </div>

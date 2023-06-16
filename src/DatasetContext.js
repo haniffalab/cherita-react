@@ -10,6 +10,7 @@ export function DatasetProvider({ dataset_url, children }) {
     selectedVar: null,
     selectedMultiObs: [],
     selectedMultiVar: [],
+    colorscale: "Viridis",
   });
 
   return (
@@ -52,6 +53,12 @@ function datasetReducer(dataset, action) {
         selectedMultiVar: dataset.selectedMultiVar.filter(
           (a) => a !== action.var
         ),
+      };
+    }
+    case "colorscaleSelected": {
+      return {
+        ...dataset,
+        colorscale: action.colorscale,
       };
     }
     default: {

@@ -1,5 +1,4 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min";
 import { React, useEffect, useState } from "react";
 import { useDataset, useDatasetDispatch } from "./DatasetContext";
 
@@ -45,7 +44,7 @@ export function VarNamesList() {
   ));
 
   return (
-    <div>
+    <div className="h-100">
       <h5>{dataset.url}</h5>
       <div className="list-group overflow-auto mh-100">{varList}</div>
     </div>
@@ -102,7 +101,7 @@ export function MultiVarNamesList() {
   ));
 
   return (
-    <div>
+    <div className="h-100">
       <h5>{dataset.url}</h5>
       <div className="list-group overflow-auto mh-100">{varList}</div>
     </div>
@@ -146,7 +145,7 @@ export function VarColsList() {
   ));
 
   return (
-    <div>
+    <div className="h-100">
       <h5>{dataset.url}</h5>
       <div className="list-group overflow-auto mh-100">{varList}</div>
     </div>
