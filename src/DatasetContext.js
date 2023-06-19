@@ -1,17 +1,15 @@
 import { createContext, useContext, useReducer } from "react";
+import { DATASET_DEFAULTS } from "./constants";
 
 export const DatasetContext = createContext(null);
 export const DatasetDispatchContext = createContext(null);
 
-export function DatasetProvider({ dataset_url, children }) {
-  const [dataset, dispatch] = useReducer(datasetReducer, {
-    url: dataset_url,
-    selectedObs: null,
-    selectedVar: null,
-    selectedMultiObs: [],
-    selectedMultiVar: [],
-    colorscale: "Viridis",
-  });
+export function DatasetProvider({ config, children }) {
+  const [dataset, dispatch] = useReducer(datasetReducer, createDataset);
+
+  function createDataset(config) {
+    return { ...DATASET_DEFAULTS, ...config };
+  }
 
   return (
     <DatasetContext.Provider value={dataset}>
@@ -33,32 +31,44 @@ export function useDatasetDispatch() {
 function datasetReducer(dataset, action) {
   switch (action.type) {
     case "setDataset": {
-      return action.dataset;
+      return { ...dataset, url: { ...dataset.url, [action.key]: action.url } };
     }
     case "obsSelected": {
-      return { ...dataset, selectedObs: action.obs };
+      return {
+        ...dataset,
+        selectedObs: { ...dataset.obs, [action.key]: action.obs },
+      };
     }
     case "varSelected": {
-      return { ...dataset, selectedVar: action.var };
+      return {
+        ...dataset,
+        selectedVar: { ...dataset.selectedVar, [action.key]: action.var },
+      };
     }
     case "multiVarSelected": {
       return {
         ...dataset,
-        selectedMultiVar: [...dataset.selectedMultiVar, action.var],
+        selectedMultiVar: {
+          ...dataset.selectedMultiVar,
+          [action.key]: [...dataset.selectedMultiVar[action.key], action.var],
+        },
       };
     }
     case "multiVarDeselected": {
       return {
         ...dataset,
-        selectedMultiVar: dataset.selectedMultiVar.filter(
-          (a) => a !== action.var
-        ),
+        selectedMultiVar: {
+          ...dataset.selectedMultiVar,
+          [action.key]: dataset.selectedMultiVar[action.key].filter(
+            (a) => a !== action.var
+          ),
+        },
       };
     }
     case "colorscaleSelected": {
       return {
         ...dataset,
-        colorscale: action.colorscale,
+        colorscale: { ...dataset.colorscale, [action.key]: action.colorscale },
       };
     }
     default: {

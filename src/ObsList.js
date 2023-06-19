@@ -3,7 +3,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { React, useEffect, useState } from "react";
 import { useDataset, useDatasetDispatch } from "./DatasetContext";
 
-export function ObsColsList() {
+export function ObsColsList({ config = null, group = "default" }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [obsColsList, setObsColsList] = useState([]);

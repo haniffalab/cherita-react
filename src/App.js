@@ -5,9 +5,9 @@ import { DatasetProvider } from "./DatasetContext.js";
 import { ObsColsList } from "./ObsList.js";
 import { MultiVarNamesList } from "./VarList.js";
 
-export default function App({ dataset_url }) {
+export default function App({ config }) {
   return (
-    <DatasetProvider dataset_url={dataset_url}>
+    <DatasetProvider config={config}>
       <div className="container-fluid" style={{ height: "100vh" }}>
         <div className="row h-50">
           <div className="col-3 h-100">

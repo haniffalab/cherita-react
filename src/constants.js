@@ -18,3 +18,12 @@ export const PLOTLY_COLORSCALES = [
   "YlGnBu",
   "YlOrRd",
 ];
+
+export const DATASET_DEFAULTS = {
+  url: { default: "" },
+  selectedObs: { default: null },
+  selectedVar: { default: null },
+  selectedMultiObs: { default: [] },
+  selectedMultiVar: { default: [] },
+  colorscale: { default: "Viridis" },
+};
