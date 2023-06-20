@@ -9,20 +9,28 @@ export default function App({ config }) {
   return (
     <DatasetProvider config={config}>
       <div className="container-fluid" style={{ height: "100vh" }}>
-        <div className="row h-50">
+        <div className="row h-100">
           <div className="col-3 h-100">
             <ObsColsList />
           </div>
-          <div className="col-3 h-100">
-            {/* <VarNamesList /> */}
-            <MultiVarNamesList />
+          <div className="col-9 h-100">
+            <div className="row h-50">
+              <div className="col-6 h-100">
+                <MultiVarNamesList config={{ selectedMultiVar: "key1" }} />
+              </div>
+              <div className="col-6 h-100">
+                <Heatmap config={{ selectedMultiVar: "key1" }} />
+              </div>
+            </div>
+            <div className="row h-50">
+              <div className="col-6 h-100">
+                <MultiVarNamesList config={{ selectedMultiVar: "key2" }} />
+              </div>
+              <div className="col-6 h-100">
+                <Heatmap config={{ selectedMultiVar: "key2" }} />
+              </div>
+            </div>
           </div>
-          <div className="col-6 h-100">
-            <Heatmap />
-          </div>
-        </div>
-        <div className="row h-50">
-          <Heatmap />
         </div>
       </div>
     </DatasetProvider>

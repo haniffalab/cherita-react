@@ -5,23 +5,24 @@ import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "./DatasetContext";
 import { PLOTLY_COLORSCALES } from "./constants";
 
-export function HeatmapControls() {
+export function HeatmapControls({ config = null, group = "default" }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  let [active, setActive] = useState(dataset.colorscale);
+  const colorscale = dataset.colorscale[config?.url || group];
+  let [active, setActive] = useState(colorscale);
 
   useEffect(() => {
-    setActive(dataset.colorscale);
-  }, [dataset.colorscale]);
+    setActive(colorscale);
+  }, [colorscale]);
 
   const colormapList = PLOTLY_COLORSCALES.map((item) => (
     <Dropdown.Item
       key={item}
       active={active === item}
       onClick={() => {
-        setActive(item);
         dispatch({
           type: "colorscaleSelected",
+          key: config?.colorscale || group,
           colorscale: item,
         });
       }}
@@ -33,22 +34,29 @@ export function HeatmapControls() {
   return (
     <Dropdown>
       <Dropdown.Toggle id="dropdownColorscale" variant="light">
-        {dataset.colorscale}
+        {colorscale}
       </Dropdown.Toggle>
       <Dropdown.Menu>{colormapList}</Dropdown.Menu>
     </Dropdown>
   );
 }
 
-export function Heatmap() {
+export function Heatmap({ config = null, group = "default" }) {
   const dataset = useDataset();
   let [data, setData] = useState([]);
   let [layout, setLayout] = useState({});
   let [hasSelections, setHasSelections] = useState(false);
-  let [colorscale, setColorscale] = useState(dataset.colorscale);
+  const configDataset = {
+    url: dataset.url[config?.url || group],
+    selectedObs: dataset.selectedObs[config?.selectedObs || group],
+    selectedMultiVar:
+      dataset.selectedMultiVar[config?.selectedMultiVar || group],
+    colorscale: dataset.colorscale[config?.colorscale || group],
+  };
+  let [colorscale, setColorscale] = useState(configDataset.colorscale);
 
   useEffect(() => {
-    if (dataset.selectedObs && dataset.selectedMultiVar.length) {
+    if (configDataset.selectedObs && configDataset.selectedMultiVar.length) {
       setHasSelections(true);
       fetch(new URL("heatmap", process.env.REACT_APP_API_URL), {
         method: "POST",
@@ -58,9 +66,9 @@ export function Heatmap() {
           Accept: "application/json",
         },
         body: JSON.stringify({
-          url: dataset.url,
-          selectedObs: dataset.selectedObs,
-          selectedMultiVar: dataset.selectedMultiVar,
+          url: configDataset.url,
+          selectedObs: configDataset.selectedObs,
+          selectedMultiVar: configDataset.selectedMultiVar,
         }),
       })
         .then((response) => response.json())
@@ -72,22 +80,25 @@ export function Heatmap() {
     } else {
       setHasSelections(false);
     }
-  }, [dataset.url, dataset.selectedObs, dataset.selectedMultiVar]);
+  }, [
+    configDataset.url,
+    configDataset.selectedObs,
+    configDataset.selectedMultiVar,
+  ]);
 
   useEffect(() => {
-    console.log("update colorscale");
-    setColorscale(dataset.colorscale);
+    setColorscale(configDataset.colorscale);
     setData((d) =>
       d.map((i) => {
-        return { ...i, colorscale: dataset.colorscale };
+        return { ...i, colorscale: configDataset.colorscale };
       })
     );
-  }, [colorscale, dataset.colorscale]);
+  }, [colorscale, configDataset.colorscale]);
 
   if (hasSelections) {
     return (
       <div className="container text-center">
-        <h5>{dataset.url}</h5>
+        <h5>{configDataset.url}</h5>
         <HeatmapControls />
         <Plot
           data={data}
@@ -100,7 +111,7 @@ export function Heatmap() {
   }
   return (
     <div className="h-100">
-      <h5>{dataset.url}</h5>
+      <h5>{configDataset.url}</h5>
       <p>Select OBS and VAR</p>
     </div>
   );

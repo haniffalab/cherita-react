@@ -8,12 +8,9 @@ const config = {
     default:
       "https://storage.googleapis.com/haniffalab/test/breast_cancer-visium-anndata.zarr",
   },
-  selectedObs: {
-    key1: null,
-    key2: "graphclust",
-  },
   selectedMultiVar: {
     key1: [],
+    key2: [],
   },
 };
 root.render(

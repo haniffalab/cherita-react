@@ -1,14 +1,15 @@
 import { createContext, useContext, useReducer } from "react";
 import { DATASET_DEFAULTS } from "./constants";
+import merge from "lodash.merge";
 
 export const DatasetContext = createContext(null);
 export const DatasetDispatchContext = createContext(null);
 
 export function DatasetProvider({ config, children }) {
-  const [dataset, dispatch] = useReducer(datasetReducer, createDataset);
+  const [dataset, dispatch] = useReducer(datasetReducer, createDataset(config));
 
   function createDataset(config) {
-    return { ...DATASET_DEFAULTS, ...config };
+    return merge(DATASET_DEFAULTS, config);
   }
 
   return (

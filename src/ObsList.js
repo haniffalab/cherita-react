@@ -9,6 +9,12 @@ export function ObsColsList({ config = null, group = "default" }) {
   const [obsColsList, setObsColsList] = useState([]);
   let [active, setActive] = useState(null);
 
+  // const { url } = { url: dataset.url[config?.url || group] };
+  const { url, selectedObs } = {
+    url: dataset.url[config?.url || group],
+    selectedObs: dataset.selectedObs[config?.selectedObs || group],
+  };
+
   useEffect(() => {
     fetch(new URL("obs/cols", process.env.REACT_APP_API_URL), {
       method: "POST",
@@ -17,13 +23,17 @@ export function ObsColsList({ config = null, group = "default" }) {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({ url: dataset.url }),
+      body: JSON.stringify({ url: url }),
     })
       .then((response) => response.json())
       .then((data) => {
         setObsColsList(data);
       });
-  }, [dataset.url]);
+  }, [url]);
+
+  useEffect(() => {
+    setActive(selectedObs);
+  }, [selectedObs]);
 
   const obsList = obsColsList.map((item) => (
     <button
@@ -33,9 +43,9 @@ export function ObsColsList({ config = null, group = "default" }) {
         active === item && "active"
       }`}
       onClick={() => {
-        setActive(item);
         dispatch({
           type: "obsSelected",
+          key: config?.selectedObs || group,
           obs: item,
         });
       }}
@@ -46,7 +56,7 @@ export function ObsColsList({ config = null, group = "default" }) {
 
   return (
     <div className="h-100">
-      <h5>{dataset.url}</h5>
+      <h5>{url}</h5>
       <div className="list-group overflow-auto mh-100">{obsList}</div>
     </div>
   );
