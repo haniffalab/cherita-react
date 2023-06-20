@@ -19,7 +19,6 @@ export function HeatmapControls() {
       key={item}
       active={active === item}
       onClick={() => {
-        setActive(item);
         dispatch({
           type: "colorscaleSelected",
           colorscale: item,
