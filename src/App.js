@@ -4,6 +4,7 @@ import { Heatmap } from "./Heatmap.js";
 import { DatasetProvider } from "./DatasetContext.js";
 import { ObsColsList } from "./ObsList.js";
 import { MultiVarNamesList } from "./VarList.js";
+import { Dotplot } from "./Dotplot.js";
 
 export default function App({ dataset_url }) {
   return (
@@ -22,7 +23,7 @@ export default function App({ dataset_url }) {
           </div>
         </div>
         <div className="row h-50">
-          <Heatmap />
+          <Dotplot />
         </div>
       </div>
     </DatasetProvider>

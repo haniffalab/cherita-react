@@ -5,7 +5,7 @@ import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "./DatasetContext";
 import { PLOTLY_COLORSCALES } from "./constants";
 
-export function HeatmapControls() {
+export function DotplotControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   let [active, setActive] = useState(dataset.colorscale);
@@ -39,7 +39,7 @@ export function HeatmapControls() {
   );
 }
 
-export function Heatmap() {
+export function Dotplot() {
   const dataset = useDataset();
   const colorscale = useRef(dataset.colorscale);
   let [data, setData] = useState([]);
@@ -47,17 +47,18 @@ export function Heatmap() {
   let [hasSelections, setHasSelections] = useState(false);
 
   const updateColorscale = useCallback((colorscale) => {
-    setData((d) =>
-      d.map((i) => {
-        return { ...i, colorscale: colorscale };
-      })
-    );
+    setLayout((l) => {
+      return {
+        ...l,
+        coloraxis: { ...l.coloraxis, colorscale: colorscale },
+      };
+    });
   }, []);
 
   useEffect(() => {
     if (dataset.selectedObs && dataset.selectedMultiVar.length) {
       setHasSelections(true);
-      fetch(new URL("heatmap", process.env.REACT_APP_API_URL), {
+      fetch(new URL("dotplot", process.env.REACT_APP_API_URL), {
         method: "POST",
         mode: "cors",
         headers: {
@@ -96,7 +97,7 @@ export function Heatmap() {
     return (
       <div className="container text-center">
         <h5>{dataset.url}</h5>
-        <HeatmapControls />
+        <DotplotControls />
         <Plot
           data={data}
           layout={layout}
