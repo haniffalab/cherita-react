@@ -10,7 +10,7 @@ export default function App({ dataset_url }) {
   return (
     <DatasetProvider dataset_url={dataset_url}>
       <div className="container-fluid" style={{ height: "100vh" }}>
-        <div className="row h-50">
+        <div className="row h-50" style={{ marginBottom: "150px" }}>
           <div className="col-3 h-100">
             <ObsColsList />
           </div>
