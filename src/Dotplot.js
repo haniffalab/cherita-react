@@ -21,16 +21,24 @@ export function DotplotControls({
   setScaleRange,
   setExpressionCutoff,
   setMeanOnlyExpressed,
+  setStandardScale,
 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const [active, setActive] = useState(dataset.colorscale);
+  const [activeColorscale, setActiveColorscale] = useState(dataset.colorscale);
+  const [activeStandardScale, setActiveStandardScale] = useState("None");
   const [cutoff, setCutoff] = useState(expressionCutoff);
   const scaleMinRef = useRef(null);
   const scaleMaxRef = useRef(null);
 
+  const standardScaleOptions = [
+    { value: null, name: "None" },
+    { value: "group", name: "Group" },
+    { value: "var", name: "Var" },
+  ];
+
   useEffect(() => {
-    setActive(dataset.colorscale);
+    setActiveColorscale(dataset.colorscale);
   }, [dataset.colorscale]);
 
   useEffect(() => {
@@ -41,7 +49,7 @@ export function DotplotControls({
   const colormapList = PLOTLY_COLORSCALES.map((item) => (
     <Dropdown.Item
       key={item}
-      active={active === item}
+      active={activeColorscale === item}
       onClick={() => {
         dispatch({
           type: "colorscaleSelected",
@@ -50,6 +58,19 @@ export function DotplotControls({
       }}
     >
       {item}
+    </Dropdown.Item>
+  ));
+
+  const standardScaleList = standardScaleOptions.map((item) => (
+    <Dropdown.Item
+      key={item.value}
+      active={activeStandardScale === item.name}
+      onClick={() => {
+        setActiveStandardScale(item.name);
+        setStandardScale(item.value);
+      }}
+    >
+      {item.name}
     </Dropdown.Item>
   ));
 
@@ -62,6 +83,17 @@ export function DotplotControls({
           </Dropdown.Toggle>
           <Dropdown.Menu>{colormapList}</Dropdown.Menu>
         </Dropdown>
+      </ButtonGroup>
+      <ButtonGroup>
+        <InputGroup>
+          <InputGroup.Text>Standard scale</InputGroup.Text>
+          <Dropdown>
+            <Dropdown.Toggle id="dropdownStandardScale" variant="light">
+              {activeStandardScale}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
+          </Dropdown>
+        </InputGroup>
       </ButtonGroup>
       <ButtonGroup>
         <ToggleButton
@@ -195,6 +227,7 @@ export function Dotplot() {
           selectedMultiVar: dataset.selectedMultiVar,
           expressionCutoff: expressionCutoff,
           meanOnlyExpressed: meanOnlyExpressed,
+          standardScale: standardScale,
         }),
       })
         .then((response) => response.json())
@@ -219,6 +252,7 @@ export function Dotplot() {
     dataset.selectedMultiVar,
     expressionCutoff,
     meanOnlyExpressed,
+    standardScale,
     updateColorscale,
   ]);
 
@@ -252,6 +286,7 @@ export function Dotplot() {
           setScaleRange={setScaleRange}
           setExpressionCutoff={setExpressionCutoff}
           setMeanOnlyExpressed={setMeanOnlyExpressed}
+          setStandardScale={setStandardScale}
         />
         <Plot
           data={data}
