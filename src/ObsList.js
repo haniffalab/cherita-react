@@ -25,6 +25,10 @@ export function ObsColsList() {
       });
   }, [dataset.url]);
 
+  useEffect(() => {
+    setActive(dataset.selectedObs);
+  }, [dataset.selectedObs]);
+
   const obsList = obsColsList.map((item) => (
     <button
       type="button"
@@ -33,7 +37,6 @@ export function ObsColsList() {
         active === item && "active"
       }`}
       onClick={() => {
-        setActive(item);
         dispatch({
           type: "obsSelected",
           obs: item,
