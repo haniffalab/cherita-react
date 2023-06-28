@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import { React, useEffect, useState } from "react";
-import { useDataset, useDatasetDispatch } from "./DatasetContext";
+import React, { useEffect, useState } from "react";
+import { useDataset, useDatasetDispatch } from "../context/DatasetContext";
 
 export function VarNamesList() {
   const dataset = useDataset();

@@ -1,9 +1,9 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
-import { React, useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
-import { useDataset, useDatasetDispatch } from "./DatasetContext";
-import { PLOTLY_COLORSCALES } from "./constants";
+import { useDataset, useDatasetDispatch } from "../context/DatasetContext";
+import { PLOTLY_COLORSCALES } from "../constants/constants";
 
 export function HeatmapControls() {
   const dataset = useDataset();

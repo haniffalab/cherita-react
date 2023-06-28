@@ -1,27 +1,38 @@
 {
   "name": "@haniffalab/cherita-react",
-  "version": "0.1.0",
+  "version": "0.1.8",
   "author": "",
   "license": "",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "bootstrap": "^5.3.0",
     "jquery": "^3.7.0",
     "plotly.js": "^2.23.2",
     "popper.js": "^1.16.1",
-    "react": "^18.2.0",
     "react-bootstrap": "^2.7.4",
-    "react-dom": "^18.2.0",
-    "react-plotly.js": "^2.6.0",
-    "react-scripts": "^5.0.1"
+    "react-plotly.js": "^2.6.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.22.5",
+    "@babel/core": "^7.22.5",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@babel/preset-env": "^7.22.5",
+    "@babel/preset-react": "^7.22.5",
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-config-react-app": "^7.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "babel src/lib --out-dir dist --copy-files",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

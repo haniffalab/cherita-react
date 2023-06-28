@@ -1,10 +1,12 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React from "react";
-import { Heatmap } from "./Heatmap.js";
-import { DatasetProvider } from "./DatasetContext.js";
-import { ObsColsList } from "./ObsList.js";
-import { MultiVarNamesList } from "./VarList.js";
-import { Dotplot } from "./Dotplot.js";
+import {
+  DatasetProvider,
+  ObsColsList,
+  MultiVarNamesList,
+  Heatmap,
+  Dotplot,
+} from "@haniffalab/cherita-react";
 
 export default function App({ dataset_url }) {
   return (
@@ -12,6 +14,7 @@ export default function App({ dataset_url }) {
       <div className="container-fluid" style={{ height: "100vh" }}>
         <div className="row h-50" style={{ marginBottom: "150px" }}>
           <div className="col-3 h-100">
+            {" "}
             <ObsColsList />
           </div>
           <div className="col-3 h-100">
