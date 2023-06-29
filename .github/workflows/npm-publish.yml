@@ -1,7 +1,5 @@
 name: Publish package to npmjs
 on:
-    push:
-        branches: [ main, dev ]
     release:
         types: [published]
 jobs:
