@@ -9,7 +9,7 @@ export function VarNamesList() {
   let [active, setActive] = useState([]);
 
   useEffect(() => {
-    fetch(new URL("var/names", process.env.REACT_APP_API_URL), {
+    fetch(new URL("var/names", import.meta.env.VITE_API_URL), {
       method: "POST",
       mode: "cors",
       headers: {
@@ -61,7 +61,7 @@ export function MultiVarNamesList() {
   let [active, setActive] = useState([]);
 
   useEffect(() => {
-    fetch(new URL("var/names", process.env.REACT_APP_API_URL), {
+    fetch(new URL("var/names", import.meta.env.VITE_API_URL), {
       method: "POST",
       mode: "cors",
       headers: {

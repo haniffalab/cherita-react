@@ -57,7 +57,7 @@ export function Heatmap() {
   useEffect(() => {
     if (dataset.selectedObs && dataset.selectedMultiVar.length) {
       setHasSelections(true);
-      fetch(new URL("heatmap", process.env.REACT_APP_API_URL), {
+      fetch(new URL("heatmap", import.meta.env.VITE_API_URL), {
         method: "POST",
         mode: "cors",
         headers: {

@@ -10,7 +10,7 @@ export function ObsColsList() {
   let [active, setActive] = useState(null);
 
   useEffect(() => {
-    fetch(new URL("obs/cols", process.env.REACT_APP_API_URL), {
+    fetch(new URL("obs/cols", import.meta.env.VITE_API_URL), {
       method: "POST",
       mode: "cors",
       headers: {

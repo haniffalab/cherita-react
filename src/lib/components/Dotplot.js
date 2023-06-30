@@ -211,10 +211,9 @@ export function Dotplot() {
   }, []);
 
   useEffect(() => {
-    console.log("fetchdata");
     if (dataset.selectedObs && dataset.selectedMultiVar.length) {
       setHasSelections(true);
-      fetch(new URL("dotplot", process.env.REACT_APP_API_URL), {
+      fetch(new URL("dotplot", import.meta.env.VITE_API_URL), {
         method: "POST",
         mode: "cors",
         headers: {
