@@ -1,6 +1,6 @@
-export { ObsColsList } from "./components/ObsList";
-export { VarNamesList, MultiVarNamesList } from "./components/VarList";
-export { Heatmap } from "./components/Heatmap";
-export { Dotplot } from "./components/Dotplot";
+export { ObsColsList } from "./components/obs-list/ObsList";
+export { VarNamesList, MultiVarNamesList } from "./components/var-list/VarList";
+export { Heatmap } from "./components/heatmap/Heatmap";
+export { Dotplot } from "./components/dotplot/Dotplot";
 export { PLOTLY_COLORSCALES } from "./constants/constants";
 export { DatasetProvider } from "./context/DatasetContext";

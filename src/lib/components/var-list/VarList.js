@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
-import { useDataset, useDatasetDispatch } from "../context/DatasetContext";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export function VarNamesList() {
   const dataset = useDataset();
@@ -25,15 +25,15 @@ export function VarNamesList() {
   }, [dataset.url]);
 
   useEffect(() => {
-    setActive(dataset.selectedVar);
+    setActive(dataset.selectedVar.matrix_index);
   }, [dataset.selectedVar]);
 
   const varList = varNames.map((item) => (
     <button
       type="button"
-      key={item}
+      key={item.matrix_index}
       className={`list-group-item list-grou-item-action ${
-        active === item && "active"
+        active === item.matrix_index && "active"
       }`}
       onClick={() => {
         dispatch({
@@ -42,7 +42,7 @@ export function VarNamesList() {
         });
       }}
     >
-      {item}
+      {item.name}
     </button>
   ));
 
@@ -77,18 +77,18 @@ export function MultiVarNamesList() {
   }, [dataset.url]);
 
   useEffect(() => {
-    setActive(dataset.selectedMultiVar);
+    setActive(dataset.selectedMultiVar.map((i) => i.matrix_index));
   }, [dataset.selectedMultiVar]);
 
   const varList = varNames.map((item) => (
     <button
       type="button"
-      key={item}
+      key={item.matrix_index}
       className={`list-group-item list-grou-item-action ${
-        active.includes(item) && "active"
+        active.includes(item.matrix_index) && "active"
       }`}
       onClick={() => {
-        if (active.includes(item)) {
+        if (active.includes(item.matrix_index)) {
           dispatch({
             type: "multiVarDeselected",
             var: item,
@@ -101,7 +101,7 @@ export function MultiVarNamesList() {
         }
       }}
     >
-      {item}
+      {item.name}
     </button>
   ));
 
