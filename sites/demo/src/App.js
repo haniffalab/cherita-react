@@ -7,6 +7,7 @@ import {
   Heatmap,
   Dotplot,
 } from "@haniffalab/cherita-react";
+import { Matrixplot } from "../../../src/lib/components/matrixplot/Matrixplot";
 
 export default function App({ dataset_url }) {
   return (
@@ -27,6 +28,9 @@ export default function App({ dataset_url }) {
         </div>
         <div className="row h-50">
           <Dotplot />
+        </div>
+        <div className="row h-50">
+          <Matrixplot />
         </div>
       </div>
     </DatasetProvider>
