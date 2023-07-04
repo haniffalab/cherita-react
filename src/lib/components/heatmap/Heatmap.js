@@ -2,8 +2,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
-import { useDataset, useDatasetDispatch } from "../context/DatasetContext";
-import { PLOTLY_COLORSCALES } from "../constants/constants";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { PLOTLY_COLORSCALES } from "../../constants/constants";
 
 export function HeatmapControls() {
   const dataset = useDataset();
@@ -57,7 +57,7 @@ export function Heatmap() {
   useEffect(() => {
     if (dataset.selectedObs && dataset.selectedMultiVar.length) {
       setHasSelections(true);
-      fetch(new URL("heatmap", process.env.REACT_APP_API_URL), {
+      fetch(new URL("heatmap", import.meta.env.VITE_API_URL), {
         method: "POST",
         mode: "cors",
         headers: {
@@ -67,7 +67,7 @@ export function Heatmap() {
         body: JSON.stringify({
           url: dataset.url,
           selectedObs: dataset.selectedObs,
-          selectedMultiVar: dataset.selectedMultiVar,
+          selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
         }),
       })
         .then((response) => response.json())
@@ -87,7 +87,6 @@ export function Heatmap() {
   ]);
 
   useEffect(() => {
-    console.log("update colorscale");
     colorscale.current = dataset.colorscale;
     updateColorscale(colorscale.current);
   }, [dataset.colorscale, updateColorscale]);

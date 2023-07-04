@@ -2,8 +2,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
-import { useDataset, useDatasetDispatch } from "../context/DatasetContext";
-import { PLOTLY_COLORSCALES } from "../constants/constants";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { PLOTLY_COLORSCALES } from "../../constants/constants";
 import {
   Button,
   ButtonGroup,
@@ -211,10 +211,9 @@ export function Dotplot() {
   }, []);
 
   useEffect(() => {
-    console.log("fetchdata");
     if (dataset.selectedObs && dataset.selectedMultiVar.length) {
       setHasSelections(true);
-      fetch(new URL("dotplot", process.env.REACT_APP_API_URL), {
+      fetch(new URL("dotplot", import.meta.env.VITE_API_URL), {
         method: "POST",
         mode: "cors",
         headers: {
@@ -224,7 +223,7 @@ export function Dotplot() {
         body: JSON.stringify({
           url: dataset.url,
           selectedObs: dataset.selectedObs,
-          selectedMultiVar: dataset.selectedMultiVar,
+          selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
           expressionCutoff: expressionCutoff,
           meanOnlyExpressed: meanOnlyExpressed,
           standardScale: standardScale,

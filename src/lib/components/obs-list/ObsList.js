@@ -1,7 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import React, { useEffect, useState } from "react";
-import { useDataset, useDatasetDispatch } from "../context/DatasetContext";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export function ObsColsList() {
   const dataset = useDataset();
@@ -10,7 +10,7 @@ export function ObsColsList() {
   let [active, setActive] = useState(null);
 
   useEffect(() => {
-    fetch(new URL("obs/cols", process.env.REACT_APP_API_URL), {
+    fetch(new URL("obs/cols", import.meta.env.VITE_API_URL), {
       method: "POST",
       mode: "cors",
       headers: {
