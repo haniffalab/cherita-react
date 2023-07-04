@@ -4,7 +4,9 @@ import {
   DatasetProvider,
   ObsColsList,
   MultiVarNamesList,
+  VarNamesList,
   Heatmap,
+  Scatterplot,
   Dotplot,
 } from "@haniffalab/cherita-react";
 
@@ -27,6 +29,9 @@ export default function App({ dataset_url }) {
         </div>
         <div className="row h-50">
           <Dotplot />
+        </div>
+        <div className="row h-50">
+          <Scatterplot />
         </div>
       </div>
     </DatasetProvider>
