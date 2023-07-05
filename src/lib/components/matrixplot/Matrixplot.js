@@ -84,12 +84,11 @@ export function Matrixplot() {
   const [standardScale, setStandardScale] = useState(null);
 
   const updateColorscale = useCallback((colorscale) => {
-    setLayout((l) => {
-      return {
-        ...l,
-        coloraxis: { ...l.coloraxis, colorscale: colorscale },
-      };
-    });
+    setData((d) =>
+      d.map((i) => {
+        return { ...i, colorscale: colorscale };
+      })
+    );
   }, []);
 
   useEffect(() => {
