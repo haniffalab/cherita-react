@@ -131,8 +131,6 @@ export function Scatterplot({
 
   return (
     <>
-      <h5>{dataset.url}</h5>
-      <ScatterplotControls />
       <div className="position-relative" style={{ height: "500px" }}>
         <DeckGL
           layers={layers}
