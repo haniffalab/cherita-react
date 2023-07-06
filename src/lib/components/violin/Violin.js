@@ -5,6 +5,7 @@ import Plot from "react-plotly.js";
 import { useDataset } from "../../context/DatasetContext";
 import { VIOLIN_MODES } from "../../constants/constants";
 import { ButtonGroup, ButtonToolbar, InputGroup } from "react-bootstrap";
+import { fetchData } from "../../utils/requests";
 
 export function ViolinControls({ setScale }) {
   const [activeScale, setActiveScale] = useState("width");
@@ -65,24 +66,20 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     if (mode === VIOLIN_MODES.MULTIKEY) {
       if (dataset.selectedMultiVar.length) {
         setHasSelections(true);
-        fetch(new URL("violin", import.meta.env.VITE_API_URL), {
-          method: "POST",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            url: dataset.url,
-            keys: dataset.selectedMultiVar.map((i) => i.name),
-            scale: scale,
-          }),
+        fetchData("violin", {
+          url: dataset.url,
+          keys: dataset.selectedMultiVar.map((i) => i.name),
+          scale: scale,
         })
-          .then((response) => response.json())
           .then((data) => {
             setData(data.data);
             setLayout(data.layout);
             updateColorscale(colorscale.current);
+          })
+          .catch((response) => {
+            response.json().then((json) => {
+              console.log(json.message);
+            });
           });
       } else {
         setHasSelections(false);
@@ -90,25 +87,21 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     } else if (mode === VIOLIN_MODES.GROUPBY) {
       if (dataset.selectedObs && dataset.selectedVar) {
         setHasSelections(true);
-        fetch(new URL("violin", import.meta.env.VITE_API_URL), {
-          method: "POST",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-          },
-          body: JSON.stringify({
-            url: dataset.url,
-            keys: dataset.selectedVar.name,
-            selectedObs: dataset.selectedObs,
-            scale: scale,
-          }),
+        fetchData("violin", {
+          url: dataset.url,
+          keys: dataset.selectedVar.name,
+          selectedObs: dataset.selectedObs,
+          scale: scale,
         })
-          .then((response) => response.json())
           .then((data) => {
             setData(data.data);
             setLayout(data.layout);
             updateColorscale(colorscale.current);
+          })
+          .catch((response) => {
+            response.json().then((json) => {
+              console.log(json.message);
+            });
           });
       } else {
         setHasSelections(false);

@@ -2,6 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import React, { useEffect, useState } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { fetchData } from "../../utils/requests";
 
 export function ObsColsList() {
   const dataset = useDataset();
@@ -10,18 +11,14 @@ export function ObsColsList() {
   let [active, setActive] = useState(null);
 
   useEffect(() => {
-    fetch(new URL("obs/cols", import.meta.env.VITE_API_URL), {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ url: dataset.url }),
-    })
-      .then((response) => response.json())
+    fetchData("obs/cols", { url: dataset.url })
       .then((data) => {
         setObsColsList(data);
+      })
+      .catch((response) => {
+        response.json().then((json) => {
+          console.log(json.message);
+        });
       });
   }, [dataset.url]);
 

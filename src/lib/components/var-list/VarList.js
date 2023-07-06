@@ -1,5 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
+import { fetchData } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { SELECTION_MODES } from "../../constants/constants";
 
@@ -12,18 +13,14 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
   );
 
   useEffect(() => {
-    fetch(new URL("var/names", import.meta.env.VITE_API_URL), {
-      method: "POST",
-      mode: "cors",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ url: dataset.url }),
-    })
-      .then((response) => response.json())
+    fetchData("var/names", { url: dataset.url })
       .then((data) => {
         setVarNames(data);
+      })
+      .catch((response) => {
+        response.json().then((json) => {
+          console.log(json.message);
+        });
       });
   }, [dataset.url]);
 

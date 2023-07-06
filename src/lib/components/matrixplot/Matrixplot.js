@@ -5,6 +5,7 @@ import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { PLOTLY_COLORSCALES } from "../../constants/constants";
 import { ButtonGroup, ButtonToolbar, InputGroup } from "react-bootstrap";
+import { fetchData } from "../../utils/requests";
 
 export function MatrixplotControls({ setStandardScale }) {
   const dataset = useDataset();
@@ -94,25 +95,21 @@ export function Matrixplot() {
   useEffect(() => {
     if (dataset.selectedObs && dataset.selectedMultiVar.length) {
       setHasSelections(true);
-      fetch(new URL("matrixplot", import.meta.env.VITE_API_URL), {
-        method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          url: dataset.url,
-          selectedObs: dataset.selectedObs,
-          selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
-          standardScale: standardScale,
-        }),
+      fetchData("matrixplot", {
+        url: dataset.url,
+        selectedObs: dataset.selectedObs,
+        selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
+        standardScale: standardScale,
       })
-        .then((response) => response.json())
         .then((data) => {
           setData(data.data);
           setLayout(data.layout);
           updateColorscale(colorscale.current);
+        })
+        .catch((response) => {
+          response.json().then((json) => {
+            console.log(json.message);
+          });
         });
     } else {
       setHasSelections(false);

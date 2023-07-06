@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { PLOTLY_COLORSCALES } from "../../constants/constants";
+import { fetchData } from "../../utils/requests";
 
 export function HeatmapControls() {
   const dataset = useDataset();
@@ -57,24 +58,20 @@ export function Heatmap() {
   useEffect(() => {
     if (dataset.selectedObs && dataset.selectedMultiVar.length) {
       setHasSelections(true);
-      fetch(new URL("heatmap", import.meta.env.VITE_API_URL), {
-        method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          url: dataset.url,
-          selectedObs: dataset.selectedObs,
-          selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
-        }),
+      fetchData("heatmap", {
+        url: dataset.url,
+        selectedObs: dataset.selectedObs,
+        selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
       })
-        .then((response) => response.json())
         .then((data) => {
           setData(data.data);
           setLayout(data.layout);
           updateColorscale(colorscale.current);
+        })
+        .catch((response) => {
+          response.json().then((json) => {
+            console.log(json.message);
+          });
         });
     } else {
       setHasSelections(false);
