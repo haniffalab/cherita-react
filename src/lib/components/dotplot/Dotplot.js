@@ -216,7 +216,7 @@ export function Dotplot() {
       setHasSelections(true);
       fetchData("dotplot", {
         url: dataset.url,
-        selectedObs: dataset.selectedObs,
+        selectedObs: dataset.selectedObs.name,
         selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
         expressionCutoff: expressionCutoff,
         meanOnlyExpressed: meanOnlyExpressed,
