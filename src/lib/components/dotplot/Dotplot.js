@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { PLOTLY_COLORSCALES } from "../../constants/constants";
+import { fetchData } from "../../utils/requests";
 import {
   Button,
   ButtonGroup,
@@ -213,23 +214,14 @@ export function Dotplot() {
   useEffect(() => {
     if (dataset.selectedObs && dataset.selectedMultiVar.length) {
       setHasSelections(true);
-      fetch(new URL("dotplot", import.meta.env.VITE_API_URL), {
-        method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          url: dataset.url,
-          selectedObs: dataset.selectedObs,
-          selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
-          expressionCutoff: expressionCutoff,
-          meanOnlyExpressed: meanOnlyExpressed,
-          standardScale: standardScale,
-        }),
+      fetchData("dotplot", {
+        url: dataset.url,
+        selectedObs: dataset.selectedObs.name,
+        selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
+        expressionCutoff: expressionCutoff,
+        meanOnlyExpressed: meanOnlyExpressed,
+        standardScale: standardScale,
       })
-        .then((response) => response.json())
         .then((data) => {
           setData(data.data);
           setLayout(data.layout);
@@ -241,6 +233,11 @@ export function Dotplot() {
             };
           });
           updateColorscale(colorscale.current);
+        })
+        .catch((response) => {
+          response.json().then((json) => {
+            console.log(json.message);
+          });
         });
     } else {
       setHasSelections(false);

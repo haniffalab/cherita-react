@@ -18,8 +18,16 @@ export const PLOTLY_COLORSCALES = [
   "YlGnBu",
   "YlOrRd",
 ];
-
 export const EMBEDDINGS = [
   "X_umap",
   "X_tsne"
 ];
+export const SELECTION_MODES = {
+  SINGLE: "single",
+  MULTIPLE: "multiple",
+};
+
+export const VIOLIN_MODES = {
+  MULTIKEY: "multikey",
+  GROUPBY: "groupby",
+};
