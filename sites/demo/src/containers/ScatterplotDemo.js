@@ -11,12 +11,16 @@ import Button from 'react-bootstrap/Button';
 import {
     DatasetProvider,
     ObsColsList,
-    MultiVarNamesList,
     VarNamesList,
     Heatmap,
     Scatterplot,
     ScatterplotControls,
+
     Dotplot,
+    Matrixplot,
+    Violin,
+    SELECTION_MODES,
+    VIOLIN_MODES,
 } from "@haniffalab/cherita-react";
 
 export default function ScatterplotDemo({ dataset_url }) {
@@ -52,7 +56,7 @@ export default function ScatterplotDemo({ dataset_url }) {
                                             <ObsColsList />
                                         </NavDropdown>
                                         <NavDropdown title="Features" id="basic-nav-dropdown" data-bs-theme="dark">
-                                            <MultiVarNamesList />
+                                            <VarNamesList />
                                         </NavDropdown>
                                     </Nav>
                                     <Form className="d-flex">

@@ -107,15 +107,14 @@ export function Scatterplot({
   useEffect(() => {
     const fetchData = async () => {
       const z = await zarrHelper.open(dataset, "X");
-      const firstObs = dataset.selectedMultiVar[0]
-      await z.get([null, firstObs.matrix_index], GET_OPTIONS).then((result) => {
+      await z.get([null, dataset.selectedVar.matrix_index], GET_OPTIONS).then((result) => {
         setValues(result.data)
       })
     }
 
     fetchData()
       .catch(console.error);
-  }, [dataset.url, dataset.selectedObs, dataset.selectedMultiVar]);
+  }, [dataset.url, dataset.selectedObs, dataset.selectedVar]);
 
   const layers = [
     new ScatterplotLayer({
