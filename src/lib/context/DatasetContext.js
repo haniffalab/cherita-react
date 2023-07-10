@@ -62,6 +62,12 @@ function datasetReducer(dataset, action) {
         colorscale: action.colorscale,
       };
     }
+    case "embeddingSelected": {
+      return {
+        ...dataset,
+        embedding: action.embedding,
+      };
+    }
     default: {
       throw Error("Unknown action: " + action.type);
     }
