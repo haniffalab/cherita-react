@@ -272,7 +272,7 @@ export function Dotplot() {
 
   if (hasSelections) {
     return (
-      <div className="container text-center">
+      <div className="position-relative" style={{ height: "500px" }}>
         <h5>{dataset.url}</h5>
         <DotplotControls
           scaleRange={scaleRange}
@@ -294,7 +294,7 @@ export function Dotplot() {
     );
   }
   return (
-    <div className="h-100">
+    <div className="position-relative" style={{ height: "500px" }}>
       <h5>{dataset.url}</h5>
       <p>Select OBS and VAR</p>
     </div>

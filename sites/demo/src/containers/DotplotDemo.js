@@ -7,6 +7,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Form from 'react-bootstrap/Form';
 
+
 import {
     DatasetProvider,
     ObsColsList,
@@ -15,14 +16,14 @@ import {
     Scatterplot,
     ScatterplotControls,
 
-    Dotplot,
+    Dotplot, DotplotControls,
     Matrixplot,
     Violin,
     SELECTION_MODES,
     VIOLIN_MODES,
 } from "@haniffalab/cherita-react";
 
-export default function ScatterplotDemo({ dataset_url }) {
+export default function DotplotDemo({ dataset_url }) {
     const [boundingBox, setBoundingBox] = useState(0)
     const [height, setHeight] = useState(0)
     const ref = useRef(null)
@@ -77,7 +78,7 @@ export default function ScatterplotDemo({ dataset_url }) {
                                         <ObsColsList />
                                     </NavDropdown>
                                     <NavDropdown title="Features" id="basic-nav-dropdown2" onClick={callbackFunc} data-bs-theme="dark" renderMenuOnMount>
-                                        <VarNamesList />
+                                        <VarNamesList mode={SELECTION_MODES.MULTIPLE} />
                                     </NavDropdown>
                                 </Nav>
                                 <Nav
@@ -91,7 +92,9 @@ export default function ScatterplotDemo({ dataset_url }) {
                             </Navbar.Collapse>
                         </Container>
                     </Navbar>
-                    <Scatterplot />
+                    <div className="row h-50">
+                        <Dotplot />
+                    </div>
                 </DatasetProvider>
             </div>
         </Container >
