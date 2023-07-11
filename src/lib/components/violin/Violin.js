@@ -124,7 +124,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
 
   if (hasSelections) {
     return (
-      <div className="container text-center">
+      <div className="cherita-violin">
         <h5>{mode}</h5>
         <ViolinControls setScale={setScale} />
         <Plot
@@ -137,8 +137,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     );
   }
   return (
-    <div className="h-100">
-      <h5>{dataset.url}</h5>
+    <div className="cherita-violin">
       <p>Select variables to plot</p>
     </div>
   );

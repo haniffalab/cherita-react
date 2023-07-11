@@ -272,8 +272,7 @@ export function Dotplot() {
 
   if (hasSelections) {
     return (
-      <div className="position-relative" style={{ height: "500px" }}>
-        <h5>{dataset.url}</h5>
+      <div className="cherita-dotplot">
         <DotplotControls
           scaleRange={scaleRange}
           expressionCutoff={expressionCutoff}
@@ -294,8 +293,7 @@ export function Dotplot() {
     );
   }
   return (
-    <div className="position-relative" style={{ height: "500px" }}>
-      <h5>{dataset.url}</h5>
+    <div className="cherita-dotplot">
       <p>Select OBS and VAR</p>
     </div>
   );

@@ -90,9 +90,7 @@ export function Heatmap() {
 
   if (hasSelections) {
     return (
-      <div className="container text-center">
-        <h5>{dataset.url}</h5>
-        <HeatmapControls />
+      <div className="cherita-heatmap">
         <Plot
           data={data}
           layout={layout}
@@ -103,8 +101,7 @@ export function Heatmap() {
     );
   }
   return (
-    <div className="h-100">
-      <h5>{dataset.url}</h5>
+    <div className="cherita-heatmap">
       <p>Select OBS and VAR</p>
     </div>
   );

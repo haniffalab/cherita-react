@@ -5,25 +5,17 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
-import Form from 'react-bootstrap/Form';
-
 
 import {
     DatasetProvider,
     ObsColsList,
     VarNamesList,
-    Heatmap,
-    Scatterplot,
-    ScatterplotControls,
-
-    Dotplot, DotplotControls,
     Matrixplot,
-    Violin,
+    MatrixplotControls,
     SELECTION_MODES,
-    VIOLIN_MODES,
 } from "@haniffalab/cherita-react";
 
-export default function DotplotDemo({ dataset_url }) {
+export default function MatrixplotDemo({ dataset_url }) {
     const [boundingBox, setBoundingBox] = useState(0)
     const [height, setHeight] = useState(0)
     const ref = useRef(null)
@@ -85,14 +77,14 @@ export default function DotplotDemo({ dataset_url }) {
                                     className="d-flex"
                                 >
                                     <NavDropdown title="Controls" id="basic-nav-dropdown3" onClick={callbackFunc} data-bs-theme="dark" align="end" renderMenuOnMount>
+                                        <MatrixplotControls />
                                     </NavDropdown>
                                 </Nav>
-
                             </Navbar.Collapse>
                         </Container>
                     </Navbar>
                     <div className="cherita-container-plot">
-                        <Dotplot />
+                        <Matrixplot />
                     </div>
                 </DatasetProvider>
             </div>

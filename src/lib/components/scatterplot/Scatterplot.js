@@ -130,7 +130,7 @@ export function Scatterplot({
 
   return (
     <>
-      <div className="position-relative" style={{ height: "500px" }}>
+      <div className="cherita-scatterplot">
         <DeckGL
           layers={layers}
           initialViewState={viewport}

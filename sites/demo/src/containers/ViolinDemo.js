@@ -11,9 +11,10 @@ import {
     DatasetProvider,
     ObsColsList,
     VarNamesList,
-    Heatmap,
-    HeatmapControls,
-    SELECTION_MODES
+    Violin,
+    ViolinControls,
+    SELECTION_MODES,
+    VIOLIN_MODES,
 } from "@haniffalab/cherita-react";
 
 export default function HeatmapDemo({ dataset_url }) {
@@ -40,14 +41,14 @@ export default function HeatmapDemo({ dataset_url }) {
                                     className="d-flex"
                                 >
                                     <NavDropdown title="Controls" id="basic-nav-dropdown3" onClick={setPosition} data-bs-theme="dark" align="end" renderMenuOnMount>
-                                        <HeatmapControls />
+                                        <ViolinControls />
                                     </NavDropdown>
                                 </Nav>
                             </Navbar.Collapse>
                         </Container>
                     </Navbar>
                     <div className="cherita-container-plot">
-                        <Heatmap />
+                        <Violin />
                     </div>
                 </DatasetProvider>
             </div>

@@ -129,8 +129,7 @@ export function Matrixplot() {
 
   if (hasSelections) {
     return (
-      <div className="container text-center">
-        <h5>{dataset.url}</h5>
+      <div className="cherita-matrixplot">
         <MatrixplotControls setStandardScale={setStandardScale} />
         <Plot
           data={data}
@@ -142,8 +141,7 @@ export function Matrixplot() {
     );
   }
   return (
-    <div className="h-100">
-      <h5>{dataset.url}</h5>
+    <div className="cherita-matrixplot">
       <p>Select OBS and VAR</p>
     </div>
   );
