@@ -14,9 +14,21 @@ export default function App({ dataset_url }) {
       <Header />
       <Routes>
         <Route exact path="/" element={<h1>Home Page</h1>} />
-        <Route exact path="/heatmap" element={<HeatmapDemo dataset_url={dataset_url} />} />
-        <Route exact path="/scatterplot" element={<ScatterplotDemo dataset_url={dataset_url} />} />
-        <Route exact path="/dotplot" element={<DotplotDemo dataset_url={dataset_url} />} />
+        <Route
+          exact
+          path="/heatmap"
+          element={<HeatmapDemo dataset_url={dataset_url} />}
+        />
+        <Route
+          exact
+          path="/scatterplot"
+          element={<ScatterplotDemo dataset_url={dataset_url} />}
+        />
+        <Route
+          exact
+          path="/dotplot"
+          element={<DotplotDemo dataset_url={dataset_url} />}
+        />
       </Routes>
       <Footer />
     </div>
