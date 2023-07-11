@@ -48,11 +48,12 @@ export function Heatmap() {
   let [hasSelections, setHasSelections] = useState(false);
 
   const updateColorscale = useCallback((colorscale) => {
-    setData((d) =>
-      d.map((i) => {
-        return { ...i, colorscale: colorscale };
-      })
-    );
+    setLayout((l) => {
+      return {
+        ...l,
+        coloraxis: { ...l.coloraxis, colorscale: colorscale },
+      };
+    });
   }, []);
 
   useEffect(() => {
