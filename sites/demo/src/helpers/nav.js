@@ -13,13 +13,11 @@ export default function setPosition(e) {
 
     dropdown.style.position = "absolute"
     dropdown.style.top = top + "px"
+    dropdown.style.width = (navbarBoundingBox.width / 2) + "px"
 
     if (dropdown.classList.contains("dropdown-menu-end")) {
-        console.log(right)
-
         dropdown.style.right = right * -1 + "px"
-    }
-    else {
+    } else {
         dropdown.style.left = left + "px"
     }
 

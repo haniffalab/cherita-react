@@ -11,7 +11,9 @@ export function DatasetProvider({ dataset_url, children }) {
     selectedVar: null,
     selectedMultiObs: [],
     selectedMultiVar: [],
-    colorscale: "Viridis",
+    controls: {
+      colorscale: "Viridis",
+    }
   });
 
   return (
@@ -56,10 +58,13 @@ function datasetReducer(dataset, action) {
         ),
       };
     }
-    case "colorscaleSelected": {
+    case "set.controls.colorscale": {
       return {
         ...dataset,
-        colorscale: action.colorscale,
+        controls: {
+          ...dataset.controls,
+          colorscale: action.colorscale,
+        }
       };
     }
     case "embeddingSelected": {

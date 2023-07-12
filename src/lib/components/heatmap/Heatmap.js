@@ -9,11 +9,11 @@ import { fetchData } from "../../utils/requests";
 export function HeatmapControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  let [active, setActive] = useState(dataset.colorscale);
+  let [active, setActive] = useState(dataset.controls.colorscale);
 
   useEffect(() => {
-    setActive(dataset.colorscale);
-  }, [dataset.colorscale]);
+    setActive(dataset.controls.colorscale);
+  }, [dataset.controls.colorscale]);
 
   const colormapList = PLOTLY_COLORSCALES.map((item) => (
     <Dropdown.Item
@@ -21,7 +21,7 @@ export function HeatmapControls() {
       active={active === item}
       onClick={() => {
         dispatch({
-          type: "colorscaleSelected",
+          type: "set.controls.colorscale",
           colorscale: item,
         });
       }}
@@ -33,7 +33,7 @@ export function HeatmapControls() {
   return (
     <Dropdown>
       <Dropdown.Toggle id="dropdownColorscale" variant="light">
-        {dataset.colorscale}
+        {dataset.controls.colorscale}
       </Dropdown.Toggle>
       <Dropdown.Menu>{colormapList}</Dropdown.Menu>
     </Dropdown>
@@ -42,7 +42,7 @@ export function HeatmapControls() {
 
 export function Heatmap() {
   const dataset = useDataset();
-  const colorscale = useRef(dataset.colorscale);
+  const colorscale = useRef(dataset.controls.colorscale);
   let [data, setData] = useState([]);
   let [layout, setLayout] = useState({});
   let [hasSelections, setHasSelections] = useState(false);
@@ -85,9 +85,9 @@ export function Heatmap() {
   ]);
 
   useEffect(() => {
-    colorscale.current = dataset.colorscale;
+    colorscale.current = dataset.controls.colorscale;
     updateColorscale(colorscale.current);
-  }, [dataset.colorscale, updateColorscale]);
+  }, [dataset.controls.colorscale, updateColorscale]);
 
   if (hasSelections) {
     return (
