@@ -3,34 +3,25 @@ import Dropdown from "react-bootstrap/Dropdown";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { PLOTLY_COLORSCALES } from "../../constants/constants";
+import {
+  PLOTLY_COLORSCALES,
+  MATRIXPLOT_STANDARDSCALES,
+} from "../../constants/constants";
 import { ButtonGroup, ButtonToolbar, InputGroup } from "react-bootstrap";
 import { fetchData } from "../../utils/requests";
 
-export function MatrixplotControls({ setStandardScale }) {
+export function MatrixplotControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const [activeColorscale, setActiveColorscale] = useState(dataset.colorscale);
-  const [activeStandardScale, setActiveStandardScale] = useState("None");
 
-  const standardScaleOptions = [
-    { value: null, name: "None" },
-    { value: "group", name: "Group" },
-    { value: "var", name: "Var" },
-  ];
-
-  useEffect(() => {
-    setActiveColorscale(dataset.colorscale);
-  }, [dataset.colorscale]);
-
-  const colormapList = PLOTLY_COLORSCALES.map((item) => (
+  const colorScaleList = PLOTLY_COLORSCALES.map((item) => (
     <Dropdown.Item
       key={item}
-      active={activeColorscale === item}
+      active={dataset.controls.colorScale === item}
       onClick={() => {
         dispatch({
-          type: "colorscaleSelected",
-          colorscale: item,
+          type: "set.controls.colorScale",
+          colorScale: item,
         });
       }}
     >
@@ -38,13 +29,15 @@ export function MatrixplotControls({ setStandardScale }) {
     </Dropdown.Item>
   ));
 
-  const standardScaleList = standardScaleOptions.map((item) => (
+  const standardScaleList = MATRIXPLOT_STANDARDSCALES.map((item) => (
     <Dropdown.Item
       key={item.value}
-      active={activeStandardScale === item.name}
+      active={dataset.controls.standardScale === item.name}
       onClick={() => {
-        setActiveStandardScale(item.name);
-        setStandardScale(item.value);
+        dispatch({
+          type: "set.controls.standardScale",
+          standardScale: item.value,
+        });
       }}
     >
       {item.name}
@@ -56,9 +49,9 @@ export function MatrixplotControls({ setStandardScale }) {
       <ButtonGroup>
         <Dropdown>
           <Dropdown.Toggle id="dropdownColorscale" variant="light">
-            {dataset.colorscale}
+            {dataset.controls.colorScale}
           </Dropdown.Toggle>
-          <Dropdown.Menu>{colormapList}</Dropdown.Menu>
+          <Dropdown.Menu>{colorScaleList}</Dropdown.Menu>
         </Dropdown>
       </ButtonGroup>
       <ButtonGroup>
@@ -66,7 +59,7 @@ export function MatrixplotControls({ setStandardScale }) {
           <InputGroup.Text>Standard scale</InputGroup.Text>
           <Dropdown>
             <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {activeStandardScale}
+              {dataset.controls.standardScale}
             </Dropdown.Toggle>
             <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
           </Dropdown>
@@ -78,11 +71,10 @@ export function MatrixplotControls({ setStandardScale }) {
 
 export function Matrixplot() {
   const dataset = useDataset();
-  const colorscale = useRef(dataset.colorscale);
-  const [data, setData] = useState([]);
-  const [layout, setLayout] = useState({});
-  const [hasSelections, setHasSelections] = useState(false);
-  const [standardScale, setStandardScale] = useState(null);
+  const colorscale = useRef(dataset.controls.colorScale);
+  let [data, setData] = useState([]);
+  let [layout, setLayout] = useState({});
+  let [hasSelections, setHasSelections] = useState(false);
 
   const updateColorscale = useCallback((colorscale) => {
     setData((d) =>
@@ -99,7 +91,7 @@ export function Matrixplot() {
         url: dataset.url,
         selectedObs: dataset.selectedObs.name,
         selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
-        standardScale: standardScale,
+        standardScale: dataset.controls.standardScale,
       })
         .then((data) => {
           setData(data.data);
@@ -118,19 +110,18 @@ export function Matrixplot() {
     dataset.url,
     dataset.selectedObs,
     dataset.selectedMultiVar,
-    standardScale,
+    dataset.controls.standardScale,
     updateColorscale,
   ]);
 
   useEffect(() => {
-    colorscale.current = dataset.colorscale;
+    colorscale.current = dataset.controls.colorScale;
     updateColorscale(colorscale.current);
-  }, [dataset.colorscale, updateColorscale]);
+  }, [dataset.controls.colorScale, updateColorscale]);
 
   if (hasSelections) {
     return (
       <div className="cherita-matrixplot">
-        <MatrixplotControls setStandardScale={setStandardScale} />
         <Plot
           data={data}
           layout={layout}
