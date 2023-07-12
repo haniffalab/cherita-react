@@ -22,7 +22,7 @@ export function DatasetProvider({ dataset_url, children }) {
       standardScale: null,
       meanOnlyExpressed: false,
       expressionCutoff: 0.0,
-    }
+    },
   });
 
   return (
@@ -79,7 +79,7 @@ function datasetReducer(dataset, action) {
         controls: {
           ...dataset.controls,
           colorScale: action.colorScale,
-        }
+        },
       };
     }
     case "set.controls.colorAxis": {
@@ -88,7 +88,20 @@ function datasetReducer(dataset, action) {
         controls: {
           ...dataset.controls,
           colorAxis: action.colorAxis,
-        }
+        },
+      };
+    }
+    case "set.controls.colorAxis.crange": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          colorAxis: {
+            ...dataset.controls.colorAxis,
+            cmin: action.cmin,
+            cmax: action.cmax,
+          },
+        },
       };
     }
     case "set.controls.colorAxis.cmin": {
@@ -99,8 +112,8 @@ function datasetReducer(dataset, action) {
           colorAxis: {
             ...dataset.controls.colorAxis,
             cmin: action.cmin,
-          }
-        }
+          },
+        },
       };
     }
     case "set.controls.colorAxis.cmax": {
@@ -111,17 +124,17 @@ function datasetReducer(dataset, action) {
           colorAxis: {
             ...dataset.controls.colorAxis,
             cmax: action.cmax,
-          }
-        }
+          },
+        },
       };
     }
     case "set.controls.standardScale": {
       return {
         ...dataset,
         controls: {
-          ...dataset.controls.colorAxis,
+          ...dataset.controls,
           standardScale: action.standardScale,
-        }
+        },
       };
     }
     case "set.controls.meanOnlyExpressed": {
@@ -130,7 +143,7 @@ function datasetReducer(dataset, action) {
         controls: {
           ...dataset.controls,
           meanOnlyExpressed: action.meanOnlyExpressed,
-        }
+        },
       };
     }
     case "set.controls.expressionCutoff": {
@@ -139,7 +152,7 @@ function datasetReducer(dataset, action) {
         controls: {
           ...dataset.controls,
           expressionCutoff: action.expressionCutoff,
-        }
+        },
       };
     }
     default: {
