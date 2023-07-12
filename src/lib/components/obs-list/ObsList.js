@@ -1,9 +1,25 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import _ from "lodash";
 import React, { useEffect, useState, useMemo } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { fetchData } from "../../utils/requests";
 import { Accordion, ListGroup } from "react-bootstrap";
+
+const N_BINS = 5;
+
+function binContinuous(data, nBins = N_BINS) {
+  const binSize = (data.max - data.min) * (1 / nBins);
+  const thresholds = _.range(1, nBins + 1).map((b) => {
+    return data.min + binSize * b;
+  });
+  data.bins = {
+    nBins: nBins,
+    binSize: binSize,
+    thresholds: thresholds,
+  };
+  return data;
+}
 
 export function ObsColsList() {
   const dataset = useDataset();
@@ -14,7 +30,14 @@ export function ObsColsList() {
   useEffect(() => {
     fetchData("obs/cols", { url: dataset.url })
       .then((data) => {
-        setObsColsList(data);
+        setObsColsList(
+          data.map((d) => {
+            if (d.type === "continuous") {
+              d = binContinuous(d);
+            }
+            return d;
+          })
+        );
       })
       .catch((response) => {
         response.json().then((json) => {
@@ -25,6 +48,7 @@ export function ObsColsList() {
 
   useEffect(() => {
     if (dataset.selectedObs) {
+      console.log(dataset.selectedObs);
       setActive(dataset.selectedObs.name);
     }
   }, [dataset.selectedObs]);
@@ -53,6 +77,7 @@ export function ObsColsList() {
           <p>Max: {item.max}</p>
           <p>Mean: {item.mean}</p>
           <p>Median: {item.median}</p>
+          <p>NBins: {item.bins.nBins}</p>
         </Accordion.Body>
       </Accordion.Item>
     );

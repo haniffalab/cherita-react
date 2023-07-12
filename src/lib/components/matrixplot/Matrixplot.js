@@ -97,7 +97,7 @@ export function Matrixplot() {
       setHasSelections(true);
       fetchData("matrixplot", {
         url: dataset.url,
-        selectedObs: dataset.selectedObs.name,
+        selectedObs: dataset.selectedObs,
         selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
         standardScale: standardScale,
       })
