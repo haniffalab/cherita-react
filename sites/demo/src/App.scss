@@ -43,11 +43,11 @@ $font-family-sans-serif: Poppins, system-ui, -apple-system, "Segoe UI", Roboto, 
     border-radius: 0.25rem;
 }
 
-// .cherita-container .nav-item>.dropdown-menu {
-//     height: var(--dropdown-height);
-//     overflow-x: hidden;
-//     overflow-y: scroll;
-// }
+.cherita-container .cherita-navbar-item>.dropdown-menu {
+    height: var(--dropdown-height);
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
 
 /* Scrollbar styling */
 

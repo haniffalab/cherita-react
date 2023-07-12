@@ -29,17 +29,17 @@ export default function MatrixplotDemo({ dataset_url }) {
                                     className="me-auto my-2 my-lg-0"
                                     navbarScroll
                                 >
-                                    <NavDropdown title="Obs" id="basic-nav-dropdown1" onClick={setPosition} data-bs-theme="dark" renderMenuOnMount>
+                                    <NavDropdown title="Obs" id="basic-nav-dropdown1" onClick={setPosition} data-bs-theme="dark" className="cherita-navbar-item" renderMenuOnMount>
                                         <ObsColsList />
                                     </NavDropdown>
-                                    <NavDropdown title="Features" id="basic-nav-dropdown2" onClick={setPosition} data-bs-theme="dark" renderMenuOnMount>
+                                    <NavDropdown title="Features" id="basic-nav-dropdown2" onClick={setPosition} data-bs-theme="dark" className="cherita-navbar-item" renderMenuOnMount>
                                         <VarNamesList mode={SELECTION_MODES.MULTIPLE} />
                                     </NavDropdown>
                                 </Nav>
                                 <Nav
                                     className="d-flex"
                                 >
-                                    <NavDropdown title="Controls" id="basic-nav-dropdown3" onClick={setPosition} data-bs-theme="dark" align="end" renderMenuOnMount>
+                                    <NavDropdown title="Controls" id="basic-nav-dropdown3" onClick={setPosition} data-bs-theme="dark" align="end" className="cherita-navbar-item" renderMenuOnMount>
                                         <MatrixplotControls />
                                     </NavDropdown>
                                 </Nav>
