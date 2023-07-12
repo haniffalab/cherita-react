@@ -31,3 +31,20 @@ export const VIOLIN_MODES = {
   MULTIKEY: "multikey",
   GROUPBY: "groupby",
 };
+
+export const MATRIXPLOT_STANDARDSCALES = [
+  { value: null, name: "None" },
+  { value: "group", name: "Group" },
+  { value: "var", name: "Var" },
+];
+
+export const DOTPLOT_STANDARDSCALES = [
+  { value: null, name: "None" },
+  { value: "group", name: "Group" },
+  { value: "var", name: "Var" },
+];
+
+export const VIOLINPLOT_STANDARDSCALES = [
+  { value: "width", name: "Width" },
+  { value: "count", name: "Count" },
+];

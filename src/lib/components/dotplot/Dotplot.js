@@ -3,7 +3,7 @@ import Dropdown from "react-bootstrap/Dropdown";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { PLOTLY_COLORSCALES } from "../../constants/constants";
+import { PLOTLY_COLORSCALES, DOTPLOT_STANDARDSCALES } from "../../constants/constants";
 import { fetchData } from "../../utils/requests";
 import {
   Button,
@@ -26,35 +26,40 @@ export function DotplotControls({
 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const [activeColorscale, setActiveColorscale] = useState(dataset.colorscale);
-  const [activeStandardScale, setActiveStandardScale] = useState("None");
+  const [activeColorscale, setActiveColorscale] = useState(dataset.controls.colorScale);
+  const [activeStandardScale, setActiveStandardScale] = useState(dataset.controls.standardScale);
+
+
+
   const [cutoff, setCutoff] = useState(expressionCutoff);
   const scaleMinRef = useRef(null);
   const scaleMaxRef = useRef(null);
 
-  const standardScaleOptions = [
-    { value: null, name: "None" },
-    { value: "group", name: "Group" },
-    { value: "var", name: "Var" },
-  ];
 
   useEffect(() => {
-    setActiveColorscale(dataset.colorscale);
-  }, [dataset.colorscale]);
+    setActiveColorscale(dataset.controls.colorScale);
+  }, [dataset.controls.colorScale]);
+
+  useEffect(() => {
+    setActiveStandardScale(dataset.controls.standardScale);
+  }, [dataset.controls.standardScale]);
+
+
+
 
   useEffect(() => {
     scaleMinRef.current.value = scaleRange.min;
     scaleMaxRef.current.value = scaleRange.max;
   }, [scaleRange]);
 
-  const colormapList = PLOTLY_COLORSCALES.map((item) => (
+  const colorScaleList = PLOTLY_COLORSCALES.map((item) => (
     <Dropdown.Item
       key={item}
       active={activeColorscale === item}
       onClick={() => {
         dispatch({
-          type: "colorscaleSelected",
-          colorscale: item,
+          type: "set.controls.colorScale",
+          colorScale: item,
         });
       }}
     >
@@ -62,13 +67,15 @@ export function DotplotControls({
     </Dropdown.Item>
   ));
 
-  const standardScaleList = standardScaleOptions.map((item) => (
+  const standardScaleList = DOTPLOT_STANDARDSCALES.map((item) => (
     <Dropdown.Item
       key={item.value}
       active={activeStandardScale === item.name}
       onClick={() => {
-        setActiveStandardScale(item.name);
-        setStandardScale(item.value);
+        dispatch({
+          type: "set.controls.standardScale",
+          standardScale: item.value,
+        });
       }}
     >
       {item.name}
@@ -80,9 +87,9 @@ export function DotplotControls({
       <ButtonGroup>
         <Dropdown>
           <Dropdown.Toggle id="dropdownColorscale" variant="light">
-            {dataset.colorscale}
+            {dataset.controls.colorScale}
           </Dropdown.Toggle>
-          <Dropdown.Menu>{colormapList}</Dropdown.Menu>
+          <Dropdown.Menu>{colorScaleList}</Dropdown.Menu>
         </Dropdown>
       </ButtonGroup>
       <ButtonGroup>
@@ -101,9 +108,12 @@ export function DotplotControls({
           id="toggleMeanOnlyExpressed"
           type="checkbox"
           variant="outline-primary"
-          checked={meanOnlyExpressed}
+          checked={dataset.controls.meanOnlyExpressed}
           onChange={() => {
-            setMeanOnlyExpressed((c) => !c);
+            dispatch({
+              type: "set.controls.meanOnlyExpressed",
+              meanOnlyExpressed: !dataset.controls.meanOnlyExpressed,
+            });
           }}
         >
           Average only above cutoff
@@ -192,7 +202,7 @@ export function DotplotControls({
 
 export function Dotplot() {
   const dataset = useDataset();
-  const colorscale = useRef(dataset.colorscale);
+  const colorscale = useRef(dataset.controls.colorScale);
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
@@ -253,9 +263,9 @@ export function Dotplot() {
   ]);
 
   useEffect(() => {
-    colorscale.current = dataset.colorscale;
+    colorscale.current = dataset.controls.colorScale;
     updateColorscale(colorscale.current);
-  }, [dataset.colorscale, updateColorscale]);
+  }, [dataset.controls.colorScale, updateColorscale]);
 
   useEffect(() => {
     setLayout((l) => {

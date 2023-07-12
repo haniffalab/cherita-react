@@ -12,7 +12,12 @@ export function DatasetProvider({ dataset_url, children }) {
     selectedMultiObs: [],
     selectedMultiVar: [],
     controls: {
-      colorscale: "Viridis",
+      colorScale: "Viridis",
+      colorValueMin: null,
+      colorValueMax: null,
+      standardScale: null,
+      meanOnlyExpressed: false,
+      expressionCutoff: 0.0,
     }
   });
 
@@ -58,19 +63,64 @@ function datasetReducer(dataset, action) {
         ),
       };
     }
-    case "set.controls.colorscale": {
-      return {
-        ...dataset,
-        controls: {
-          ...dataset.controls,
-          colorscale: action.colorscale,
-        }
-      };
-    }
     case "embeddingSelected": {
       return {
         ...dataset,
         embedding: action.embedding,
+      };
+    }
+    case "set.controls.colorScale": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          colorScale: action.colorScale,
+        }
+      };
+    }
+    case "set.controls.colorValueMin": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          colorValueMin: action.colorValueMin,
+        }
+      };
+    }
+    case "set.controls.colorValueMax": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          colorValueMax: action.colorValueMax,
+        }
+      };
+    }
+    case "set.controls.standardScale": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          standardScale: action.standardScale,
+        }
+      };
+    }
+    case "set.controls.meanOnlyExpressed": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          meanOnlyExpressed: action.meanOnlyExpressed,
+        }
+      };
+    }
+    case "set.controls.expressionCutoff": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          expressionCutoff: action.expressionCutoff,
+        }
       };
     }
     default: {
