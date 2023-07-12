@@ -69,9 +69,9 @@ export function MatrixplotControls() {
 export function Matrixplot() {
   const dataset = useDataset();
   const colorscale = useRef(dataset.controls.colorScale);
-  const [data, setData] = useState([]);
-  const [layout, setLayout] = useState({});
-  const [hasSelections, setHasSelections] = useState(false);
+  let [data, setData] = useState([]);
+  let [layout, setLayout] = useState({});
+  let [hasSelections, setHasSelections] = useState(false);
 
   const updateColorscale = useCallback((colorscale) => {
     setLayout((l) => {

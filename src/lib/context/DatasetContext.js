@@ -13,8 +13,12 @@ export function DatasetProvider({ dataset_url, children }) {
     selectedMultiVar: [],
     controls: {
       colorScale: "Viridis",
-      colorValueMin: null,
-      colorValueMax: null,
+      colorAxis: {
+        dmin: 0,
+        dmax: 1,
+        cmin: 0,
+        cmax: 1,
+      },
       standardScale: null,
       meanOnlyExpressed: false,
       expressionCutoff: 0.0,
@@ -78,21 +82,36 @@ function datasetReducer(dataset, action) {
         }
       };
     }
-    case "set.controls.colorValueMin": {
+    case "set.controls.colorAxis": {
       return {
         ...dataset,
         controls: {
           ...dataset.controls,
-          colorValueMin: action.colorValueMin,
+          colorAxis: action.colorAxis,
         }
       };
     }
-    case "set.controls.colorValueMax": {
+    case "set.controls.colorAxis.cmin": {
       return {
         ...dataset,
         controls: {
           ...dataset.controls,
-          colorValueMax: action.colorValueMax,
+          colorAxis: {
+            ...dataset.controls.colorAxis,
+            cmin: action.cmin,
+          }
+        }
+      };
+    }
+    case "set.controls.colorAxis.cmax": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          colorAxis: {
+            ...dataset.controls.colorAxis,
+            cmax: action.cmax,
+          }
         }
       };
     }
@@ -100,7 +119,7 @@ function datasetReducer(dataset, action) {
       return {
         ...dataset,
         controls: {
-          ...dataset.controls,
+          ...dataset.controls.colorAxis,
           standardScale: action.standardScale,
         }
       };

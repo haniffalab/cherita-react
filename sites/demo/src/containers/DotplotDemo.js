@@ -40,6 +40,7 @@ export default function DotplotDemo({ dataset_url }) {
                                     className="d-flex"
                                 >
                                     <NavDropdown title="Controls" id="basic-nav-dropdown3" onClick={setPosition} data-bs-theme="dark" align="end" renderMenuOnMount>
+                                        <DotplotControls />
                                     </NavDropdown>
                                 </Nav>
                             </Navbar.Collapse>
