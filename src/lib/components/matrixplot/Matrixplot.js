@@ -3,7 +3,10 @@ import Dropdown from "react-bootstrap/Dropdown";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { PLOTLY_COLORSCALES, MATRIXPLOT_STANDARDSCALES } from "../../constants/constants";
+import {
+  PLOTLY_COLORSCALES,
+  MATRIXPLOT_STANDARDSCALES,
+} from "../../constants/constants";
 import { ButtonGroup, ButtonToolbar, InputGroup } from "react-bootstrap";
 import { fetchData } from "../../utils/requests";
 
@@ -74,12 +77,11 @@ export function Matrixplot() {
   let [hasSelections, setHasSelections] = useState(false);
 
   const updateColorscale = useCallback((colorscale) => {
-    setLayout((l) => {
-      return {
-        ...l,
-        coloraxis: { ...l.coloraxis, colorscale: colorscale },
-      };
-    });
+    setData((d) =>
+      d.map((i) => {
+        return { ...i, colorscale: colorscale };
+      })
+    );
   }, []);
 
   useEffect(() => {
