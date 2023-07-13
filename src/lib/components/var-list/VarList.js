@@ -86,8 +86,7 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
   });
 
   return (
-    <div className="h-100">
-      <h5>{dataset.url}</h5>
+    <div className="">
       <h4>{mode}</h4>
       <div className="list-group overflow-auto mh-100">{varList}</div>
     </div>

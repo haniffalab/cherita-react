@@ -1,48 +1,72 @@
-import React from "react";
+import { React } from "react";
+
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
+import NavDropdown from "react-bootstrap/NavDropdown";
+import setPosition from "../helpers/nav";
 
 import {
   DatasetProvider,
   ObsColsList,
   VarNamesList,
   Heatmap,
-  Dotplot,
-  Matrixplot,
-  Violin,
+  HeatmapControls,
   SELECTION_MODES,
-  VIOLIN_MODES,
 } from "@haniffalab/cherita-react";
 
 export default function HeatmapDemo({ dataset_url }) {
   return (
-    <DatasetProvider dataset_url={dataset_url}>
-      <div className="container-fluid" style={{ height: "100vh" }}>
-        <div className="row h-50" style={{ marginBottom: "150px" }}>
-          <div className="col-4 h-100">
-            <ObsColsList />
+    <Container>
+      <div className="cherita-container">
+        <DatasetProvider dataset_url={dataset_url}>
+          <Navbar expand="lg" bg="primary" className="cherita-navbar">
+            <Container fluid>
+              <Navbar.Toggle aria-controls="navbarScroll" />
+              <Navbar.Collapse id="navbarScroll">
+                <Nav className="me-auto my-2 my-lg-0" navbarScroll>
+                  <NavDropdown
+                    title="Obs"
+                    id="basic-nav-dropdown1"
+                    onClick={setPosition}
+                    data-bs-theme="dark"
+                    className="cherita-navbar-item"
+                    renderMenuOnMount
+                  >
+                    <ObsColsList />
+                  </NavDropdown>
+                  <NavDropdown
+                    title="Features"
+                    id="basic-nav-dropdown2"
+                    onClick={setPosition}
+                    data-bs-theme="dark"
+                    className="cherita-navbar-item"
+                    renderMenuOnMount
+                  >
+                    <VarNamesList mode={SELECTION_MODES.MULTIPLE} />
+                  </NavDropdown>
+                </Nav>
+                <Nav className="d-flex">
+                  <NavDropdown
+                    title="Controls"
+                    id="basic-nav-dropdown3"
+                    onClick={setPosition}
+                    data-bs-theme="dark"
+                    align="end"
+                    className="cherita-navbar-item"
+                    renderMenuOnMount
+                  >
+                    <HeatmapControls />
+                  </NavDropdown>
+                </Nav>
+              </Navbar.Collapse>
+            </Container>
+          </Navbar>
+          <div className="cherita-container-plot">
+            <Heatmap />
           </div>
-          <div className="col-4 h-100">
-            <VarNamesList mode={SELECTION_MODES.MULTIPLE} />
-          </div>
-          <div className="col-4 h-100">
-            <VarNamesList mode={SELECTION_MODES.SINGLE} />
-          </div>
-        </div>
-        <div className="row h-50">
-          <Heatmap />
-        </div>
-        <div className="row h-50">
-          <Dotplot />
-        </div>
-        <div className="row h-50">
-          <Matrixplot />
-        </div>
-        <div className="row h-50">
-          <Violin mode={VIOLIN_MODES.GROUPBY} />
-        </div>
-        <div className="row h-50">
-          <Violin mode={VIOLIN_MODES.MULTIKEY} />
-        </div>
+        </DatasetProvider>
       </div>
-    </DatasetProvider>
+    </Container>
   );
 }

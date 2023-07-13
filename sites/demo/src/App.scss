@@ -43,7 +43,7 @@ $font-family-sans-serif: Poppins, system-ui, -apple-system, "Segoe UI", Roboto, 
     border-radius: 0.25rem;
 }
 
-.cherita-container .dropdown-menu {
+.cherita-container .cherita-navbar-item>.dropdown-menu {
     height: var(--dropdown-height);
     overflow-x: hidden;
     overflow-y: scroll;
@@ -71,3 +71,15 @@ $font-family-sans-serif: Poppins, system-ui, -apple-system, "Segoe UI", Roboto, 
 }
 
 /* End scrollbar styling*/
+
+.cherita-container-plot {
+    margin-top: 76px;
+    padding: 20px;
+    position: relative;
+    min-height: 500px;
+}
+
+.cherita-container-scatterplot {
+    position: relative;
+    min-height: 500px;
+}

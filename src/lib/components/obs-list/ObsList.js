@@ -107,9 +107,8 @@ export function ObsColsList() {
   );
 
   return (
-    <div className="h-100">
-      <h5>{dataset.url}</h5>
-      <div className="list-group overflow-auto mh-100">
+    <div className="">
+      <div className="list-group overflow-auto">
         <Accordion
           activeKey={active}
           onSelect={(key) => {

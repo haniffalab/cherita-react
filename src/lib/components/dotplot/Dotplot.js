@@ -3,7 +3,10 @@ import Dropdown from "react-bootstrap/Dropdown";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { PLOTLY_COLORSCALES } from "../../constants/constants";
+import {
+  PLOTLY_COLORSCALES,
+  DOTPLOT_STANDARDSCALES,
+} from "../../constants/constants";
 import { fetchData } from "../../utils/requests";
 import {
   Button,
@@ -14,47 +17,36 @@ import {
   InputGroup,
 } from "react-bootstrap";
 
-export function DotplotControls({
-  scaleRange,
-  expressionCutoff,
-  meanOnlyExpressed,
-  dataRange,
-  setScaleRange,
-  setExpressionCutoff,
-  setMeanOnlyExpressed,
-  setStandardScale,
-}) {
+export function DotplotControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const [activeColorscale, setActiveColorscale] = useState(dataset.colorscale);
-  const [activeStandardScale, setActiveStandardScale] = useState("None");
-  const [cutoff, setCutoff] = useState(expressionCutoff);
-  const scaleMinRef = useRef(null);
-  const scaleMaxRef = useRef(null);
-
-  const standardScaleOptions = [
-    { value: null, name: "None" },
-    { value: "group", name: "Group" },
-    { value: "var", name: "Var" },
-  ];
+  const [controls, setControls] = useState({
+    standardScale: dataset.controls.standardScale,
+    expressionCutoff: dataset.controls.expressionCutoff,
+    colorAxis: {
+      cmin: dataset.controls.colorAxis.cmin,
+      cmax: dataset.controls.colorAxis.cmax,
+    },
+  });
 
   useEffect(() => {
-    setActiveColorscale(dataset.colorscale);
-  }, [dataset.colorscale]);
+    setControls((c) => ({
+      ...c,
+      colorAxis: {
+        cmin: dataset.controls.colorAxis.cmin,
+        cmax: dataset.controls.colorAxis.cmax,
+      },
+    }));
+  }, [dataset.controls.colorAxis.cmin, dataset.controls.colorAxis.cmax]);
 
-  useEffect(() => {
-    scaleMinRef.current.value = scaleRange.min;
-    scaleMaxRef.current.value = scaleRange.max;
-  }, [scaleRange]);
-
-  const colormapList = PLOTLY_COLORSCALES.map((item) => (
+  const colorScaleList = PLOTLY_COLORSCALES.map((item) => (
     <Dropdown.Item
       key={item}
-      active={activeColorscale === item}
+      active={dataset.controls.colorScale === item}
       onClick={() => {
         dispatch({
-          type: "colorscaleSelected",
-          colorscale: item,
+          type: "set.controls.colorScale",
+          colorScale: item,
         });
       }}
     >
@@ -62,13 +54,15 @@ export function DotplotControls({
     </Dropdown.Item>
   ));
 
-  const standardScaleList = standardScaleOptions.map((item) => (
+  const standardScaleList = DOTPLOT_STANDARDSCALES.map((item) => (
     <Dropdown.Item
       key={item.value}
-      active={activeStandardScale === item.name}
+      active={dataset.controls.standardScale === item.value}
       onClick={() => {
-        setActiveStandardScale(item.name);
-        setStandardScale(item.value);
+        dispatch({
+          type: "set.controls.standardScale",
+          standardScale: item.value,
+        });
       }}
     >
       {item.name}
@@ -80,9 +74,9 @@ export function DotplotControls({
       <ButtonGroup>
         <Dropdown>
           <Dropdown.Toggle id="dropdownColorscale" variant="light">
-            {dataset.colorscale}
+            {dataset.controls.colorScale}
           </Dropdown.Toggle>
-          <Dropdown.Menu>{colormapList}</Dropdown.Menu>
+          <Dropdown.Menu>{colorScaleList}</Dropdown.Menu>
         </Dropdown>
       </ButtonGroup>
       <ButtonGroup>
@@ -90,7 +84,7 @@ export function DotplotControls({
           <InputGroup.Text>Standard scale</InputGroup.Text>
           <Dropdown>
             <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {activeStandardScale}
+              {dataset.controls.standardScale}
             </Dropdown.Toggle>
             <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
           </Dropdown>
@@ -101,9 +95,12 @@ export function DotplotControls({
           id="toggleMeanOnlyExpressed"
           type="checkbox"
           variant="outline-primary"
-          checked={meanOnlyExpressed}
+          checked={dataset.controls.meanOnlyExpressed}
           onChange={() => {
-            setMeanOnlyExpressed((c) => !c);
+            dispatch({
+              type: "set.controls.meanOnlyExpressed",
+              meanOnlyExpressed: !dataset.controls.meanOnlyExpressed,
+            });
           }}
         >
           Average only above cutoff
@@ -112,7 +109,10 @@ export function DotplotControls({
       <Form
         onSubmit={(e) => {
           e.preventDefault();
-          setExpressionCutoff(parseFloat(cutoff));
+          dispatch({
+            type: "set.controls.expressionCutoff",
+            expressionCutoff: parseFloat(controls.expressionCutoff),
+          });
         }}
       >
         <InputGroup>
@@ -122,9 +122,9 @@ export function DotplotControls({
             type="number"
             step={"0.1"}
             min={0.0}
-            value={cutoff}
+            value={controls.expressionCutoff}
             onChange={(e) => {
-              setCutoff(e.target.value);
+              setControls({ ...controls, expressionCutoff: e.target.value });
             }}
           ></Form.Control>
           <Button type="submit" variant="outline-primary">
@@ -135,11 +135,10 @@ export function DotplotControls({
       <Form
         onSubmit={(e) => {
           e.preventDefault();
-          const formData = new FormData(e.target),
-            formDataObj = Object.fromEntries(formData.entries());
-          setScaleRange({
-            min: parseFloat(formDataObj.scaleMin),
-            max: parseFloat(formDataObj.scaleMax),
+          dispatch({
+            type: "set.controls.colorAxis.crange",
+            cmin: controls.colorAxis.cmin,
+            cmax: controls.colorAxis.cmax,
           });
         }}
       >
@@ -147,29 +146,39 @@ export function DotplotControls({
           <InputGroup.Text>Colorscale</InputGroup.Text>
           <InputGroup.Text>min</InputGroup.Text>
           <Form.Control
-            ref={scaleMinRef}
             name="scaleMin"
             size="sm"
             type="number"
-            step={"0.1"}
+            value={controls.colorAxis.cmin}
+            step={0.1}
             min={0.0}
-            max={scaleRange.max}
-            defaultValue={scaleRange.min}
+            max={dataset.controls.colorAxis.dmax}
+            onChange={(e) => {
+              setControls({
+                ...controls,
+                colorAxis: { ...controls.colorAxis, cmin: e.target.value },
+              });
+            }}
           ></Form.Control>
           <InputGroup.Text>max</InputGroup.Text>
           <Form.Control
-            ref={scaleMaxRef}
             name="scaleMax"
             size="sm"
             type="number"
-            step={"0.1"}
-            min={scaleRange.min}
-            max={dataRange.max}
-            defaultValue={scaleRange.max}
+            value={controls.colorAxis.cmax}
+            step={0.1}
+            min={controls.colorAxis.cmin}
+            max={dataset.controls.colorAxis.dmax}
             onChange={(e) => {
-              if (parseFloat(e.target.value) > dataRange.max) {
-                e.target.value = dataRange.max.toFixed(1);
+              if (
+                parseFloat(e.target.value) > dataset.controls.colorAxis.dmax
+              ) {
+                e.target.value = dataset.controls.colorAxis.dmax.toFixed(1);
               }
+              setControls({
+                ...controls,
+                colorAxis: { ...controls.colorAxis, cmax: e.target.value },
+              });
             }}
           ></Form.Control>
           <Button type="submit" variant="outline-primary">
@@ -178,8 +187,11 @@ export function DotplotControls({
           <Button
             variant="outline-primary"
             onClick={() => {
-              const scale = { min: 0.0, max: dataRange.max.toFixed(1) };
-              setScaleRange(scale);
+              dispatch({
+                type: "set.controls.colorAxis.crange",
+                cmin: 0.0,
+                cmax: dataset.controls.colorAxis.dmax,
+              });
             }}
           >
             Autoscale
@@ -192,15 +204,12 @@ export function DotplotControls({
 
 export function Dotplot() {
   const dataset = useDataset();
-  const colorscale = useRef(dataset.colorscale);
+  const dispatch = useDatasetDispatch();
+  const colorscale = useRef(dataset.controls.colorScale);
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
-  const [expressionCutoff, setExpressionCutoff] = useState(0.0);
-  const [meanOnlyExpressed, setMeanOnlyExpressed] = useState(false);
-  const [standardScale, setStandardScale] = useState(null);
-  const [dataRange, setDataRange] = useState({ min: 0.0, max: 0.0 });
-  const [scaleRange, setScaleRange] = useState({ min: null, max: null });
+  // @TODO: set default scale
 
   const updateColorscale = useCallback((colorscale) => {
     setLayout((l) => {
@@ -218,19 +227,21 @@ export function Dotplot() {
         url: dataset.url,
         selectedObs: dataset.selectedObs,
         selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
-        expressionCutoff: expressionCutoff,
-        meanOnlyExpressed: meanOnlyExpressed,
-        standardScale: standardScale,
+        standardScale: dataset.controls.standardScale,
+        meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
+        expressionCutoff: dataset.controls.expressionCutoff,
       })
         .then((data) => {
           setData(data.data);
           setLayout(data.layout);
-          setDataRange(data.range);
-          setScaleRange((s) => {
-            return {
-              min: 0.0,
-              max: data.range.max.toFixed(1),
-            };
+          dispatch({
+            type: "set.controls.colorAxis",
+            colorAxis: {
+              dmin: data.range.min.toFixed(1),
+              dmax: data.range.max.toFixed(1),
+              cmin: 0.0,
+              cmax: data.range.max.toFixed(1),
+            },
           });
           updateColorscale(colorscale.current);
         })
@@ -246,16 +257,17 @@ export function Dotplot() {
     dataset.url,
     dataset.selectedObs,
     dataset.selectedMultiVar,
-    expressionCutoff,
-    meanOnlyExpressed,
-    standardScale,
+    dataset.controls.standardScale,
+    dataset.controls.meanOnlyExpressed,
+    dataset.controls.expressionCutoff,
     updateColorscale,
+    dispatch,
   ]);
 
   useEffect(() => {
-    colorscale.current = dataset.colorscale;
+    colorscale.current = dataset.controls.colorScale;
     updateColorscale(colorscale.current);
-  }, [dataset.colorscale, updateColorscale]);
+  }, [dataset.controls.colorScale, updateColorscale]);
 
   useEffect(() => {
     setLayout((l) => {
@@ -263,27 +275,16 @@ export function Dotplot() {
         ...l,
         coloraxis: {
           ...l.coloraxis,
-          cmin: scaleRange.min,
-          cmax: scaleRange.max,
+          cmin: dataset.controls.colorAxis.cmin,
+          cmax: dataset.controls.colorAxis.cmax,
         },
       };
     });
-  }, [scaleRange]);
+  }, [dataset.controls.colorAxis.cmin, dataset.controls.colorAxis.cmax]);
 
   if (hasSelections) {
     return (
-      <div className="position-relative" style={{ height: "500px" }}>
-        <h5>{dataset.url}</h5>
-        <DotplotControls
-          scaleRange={scaleRange}
-          expressionCutoff={expressionCutoff}
-          meanOnlyExpressed={meanOnlyExpressed}
-          dataRange={dataRange}
-          setScaleRange={setScaleRange}
-          setExpressionCutoff={setExpressionCutoff}
-          setMeanOnlyExpressed={setMeanOnlyExpressed}
-          setStandardScale={setStandardScale}
-        />
+      <div className="cherita-dotplot">
         <Plot
           data={data}
           layout={layout}
@@ -294,8 +295,7 @@ export function Dotplot() {
     );
   }
   return (
-    <div className="position-relative" style={{ height: "500px" }}>
-      <h5>{dataset.url}</h5>
+    <div className="cherita-dotplot">
       <p>Select OBS and VAR</p>
     </div>
   );

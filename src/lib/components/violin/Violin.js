@@ -1,27 +1,41 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Plot from "react-plotly.js";
-import { useDataset } from "../../context/DatasetContext";
-import { VIOLIN_MODES } from "../../constants/constants";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import {
+  VIOLIN_MODES,
+  VIOLINPLOT_STANDARDSCALES,
+} from "../../constants/constants";
 import { ButtonGroup, ButtonToolbar, InputGroup } from "react-bootstrap";
 import { fetchData } from "../../utils/requests";
 
-export function ViolinControls({ setScale }) {
-  const [activeScale, setActiveScale] = useState("width");
+export function ViolinControls() {
+  const dataset = useDataset();
+  const dispatch = useDatasetDispatch();
+  const [activeStandardScale, setActiveStandardScale] = useState(
+    dataset.controls.standardScale
+  );
 
-  const standardScaleOptions = [
-    { value: "width", name: "Width" },
-    { value: "count", name: "Count" },
-  ];
+  useEffect(() => {
+    if (dataset.controls.standardScale) {
+      setActiveStandardScale(
+        VIOLINPLOT_STANDARDSCALES.find(
+          (obs) => obs.value === dataset.controls.standardScale
+        ).name
+      );
+    }
+  }, [dataset.controls.standardScale]);
 
-  const standardScaleList = standardScaleOptions.map((item) => (
+  const standardScaleList = VIOLINPLOT_STANDARDSCALES.map((item) => (
     <Dropdown.Item
       key={item.value}
-      active={activeScale === item.name}
+      active={activeStandardScale === item.value}
       onClick={() => {
-        setActiveScale(item.name);
-        setScale(item.value);
+        dispatch({
+          type: "set.controls.standardScale",
+          standardScale: item.value,
+        });
       }}
     >
       {item.name}
@@ -35,7 +49,7 @@ export function ViolinControls({ setScale }) {
           <InputGroup.Text>Standard scale</InputGroup.Text>
           <Dropdown>
             <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {activeScale}
+              {activeStandardScale}
             </Dropdown.Toggle>
             <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
           </Dropdown>
@@ -47,20 +61,10 @@ export function ViolinControls({ setScale }) {
 
 export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
   const dataset = useDataset();
-  const colorscale = useRef(dataset.colorscale);
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
-  const [scale, setScale] = useState(null);
-
-  const updateColorscale = useCallback((colorscale) => {
-    setLayout((l) => {
-      return {
-        ...l,
-        coloraxis: { ...l.coloraxis, colorscale: colorscale },
-      };
-    });
-  }, []);
+  // @TODO: set default scale
 
   useEffect(() => {
     if (mode === VIOLIN_MODES.MULTIKEY) {
@@ -69,12 +73,11 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
         fetchData("violin", {
           url: dataset.url,
           keys: dataset.selectedMultiVar.map((i) => i.name),
-          scale: scale,
+          scale: dataset.controls.standardScale,
         })
           .then((data) => {
             setData(data.data);
             setLayout(data.layout);
-            updateColorscale(colorscale.current);
           })
           .catch((response) => {
             response.json().then((json) => {
@@ -91,12 +94,11 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
           url: dataset.url,
           keys: dataset.selectedVar.name,
           selectedObs: dataset.selectedObs,
-          scale: scale,
+          scale: dataset.controls.standardScale,
         })
           .then((data) => {
             setData(data.data);
             setLayout(data.layout);
-            updateColorscale(colorscale.current);
           })
           .catch((response) => {
             response.json().then((json) => {
@@ -113,20 +115,13 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     dataset.selectedObs,
     dataset.selectedVar,
     dataset.selectedMultiVar,
-    scale,
-    updateColorscale,
+    dataset.controls.standardScale,
   ]);
-
-  useEffect(() => {
-    colorscale.current = dataset.colorscale;
-    updateColorscale(colorscale.current);
-  }, [dataset.colorscale, updateColorscale]);
 
   if (hasSelections) {
     return (
-      <div className="container text-center">
+      <div className="cherita-violin">
         <h5>{mode}</h5>
-        <ViolinControls setScale={setScale} />
         <Plot
           data={data}
           layout={layout}
@@ -137,8 +132,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     );
   }
   return (
-    <div className="h-100">
-      <h5>{dataset.url}</h5>
+    <div className="cherita-violin">
       <p>Select variables to plot</p>
     </div>
   );

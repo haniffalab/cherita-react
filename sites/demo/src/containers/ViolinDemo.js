@@ -10,12 +10,12 @@ import {
   DatasetProvider,
   ObsColsList,
   VarNamesList,
-  Dotplot,
-  DotplotControls,
+  Violin,
+  ViolinControls,
   SELECTION_MODES,
 } from "@haniffalab/cherita-react";
 
-export default function DotplotDemo({ dataset_url }) {
+export default function HeatmapDemo({ dataset_url }) {
   return (
     <Container>
       <div className="cherita-container">
@@ -56,14 +56,14 @@ export default function DotplotDemo({ dataset_url }) {
                     className="cherita-navbar-item"
                     renderMenuOnMount
                   >
-                    <DotplotControls />
+                    <ViolinControls />
                   </NavDropdown>
                 </Nav>
               </Navbar.Collapse>
             </Container>
           </Navbar>
           <div className="cherita-container-plot">
-            <Dotplot />
+            <Violin />
           </div>
         </DatasetProvider>
       </div>

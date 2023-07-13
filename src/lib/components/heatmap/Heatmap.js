@@ -9,20 +9,15 @@ import { fetchData } from "../../utils/requests";
 export function HeatmapControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  let [active, setActive] = useState(dataset.colorscale);
-
-  useEffect(() => {
-    setActive(dataset.colorscale);
-  }, [dataset.colorscale]);
 
   const colormapList = PLOTLY_COLORSCALES.map((item) => (
     <Dropdown.Item
       key={item}
-      active={active === item}
+      active={dataset.controls.colorScale === item}
       onClick={() => {
         dispatch({
-          type: "colorscaleSelected",
-          colorscale: item,
+          type: "set.controls.colorScale",
+          colorScale: item,
         });
       }}
     >
@@ -33,7 +28,7 @@ export function HeatmapControls() {
   return (
     <Dropdown>
       <Dropdown.Toggle id="dropdownColorscale" variant="light">
-        {dataset.colorscale}
+        {dataset.controls.colorScale}
       </Dropdown.Toggle>
       <Dropdown.Menu>{colormapList}</Dropdown.Menu>
     </Dropdown>
@@ -42,7 +37,7 @@ export function HeatmapControls() {
 
 export function Heatmap() {
   const dataset = useDataset();
-  const colorscale = useRef(dataset.colorscale);
+  const colorscale = useRef(dataset.controls.colorScale);
   let [data, setData] = useState([]);
   let [layout, setLayout] = useState({});
   let [hasSelections, setHasSelections] = useState(false);
@@ -85,15 +80,13 @@ export function Heatmap() {
   ]);
 
   useEffect(() => {
-    colorscale.current = dataset.colorscale;
+    colorscale.current = dataset.controls.colorScale;
     updateColorscale(colorscale.current);
-  }, [dataset.colorscale, updateColorscale]);
+  }, [dataset.controls.colorScale, updateColorscale]);
 
   if (hasSelections) {
     return (
-      <div className="container text-center">
-        <h5>{dataset.url}</h5>
-        <HeatmapControls />
+      <div className="cherita-heatmap">
         <Plot
           data={data}
           layout={layout}
@@ -104,8 +97,7 @@ export function Heatmap() {
     );
   }
   return (
-    <div className="h-100">
-      <h5>{dataset.url}</h5>
+    <div className="cherita-heatmap">
       <p>Select OBS and VAR</p>
     </div>
   );
