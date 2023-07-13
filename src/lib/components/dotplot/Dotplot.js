@@ -151,7 +151,7 @@ export function DotplotControls() {
             type="number"
             value={controls.colorAxis.cmin}
             step={0.1}
-            min={0.0}
+            min={Math.min(dataset.controls.colorAxis.dmin, 0.0)}
             max={dataset.controls.colorAxis.dmax}
             onChange={(e) => {
               setControls({
@@ -189,7 +189,7 @@ export function DotplotControls() {
             onClick={() => {
               dispatch({
                 type: "set.controls.colorAxis.crange",
-                cmin: 0.0,
+                cmin: dataset.controls.colorAxis.dmin,
                 cmax: dataset.controls.colorAxis.dmax,
               });
             }}
@@ -239,7 +239,7 @@ export function Dotplot() {
             colorAxis: {
               dmin: data.range.min.toFixed(1),
               dmax: data.range.max.toFixed(1),
-              cmin: 0.0,
+              cmin: data.range.min.toFixed(1),
               cmax: data.range.max.toFixed(1),
             },
           });
