@@ -4,7 +4,6 @@ export default function setPosition(e) {
     const dropdown = e.target.nextElementSibling;
     const navbar = e.target.closest(".cherita-navbar");
     const container = e.target.closest(".cherita-container");
-    console.log(parent);
 
     const navbarBoundingBox = navbar.getBoundingClientRect();
     const parentBoundingBox = e.target.getBoundingClientRect();
