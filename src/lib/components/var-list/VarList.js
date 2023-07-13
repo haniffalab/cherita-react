@@ -42,8 +42,9 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
         <button
           type="button"
           key={item.matrix_index}
-          className={`list-group-item list-grou-item-action ${active === item.matrix_index && "active"
-            }`}
+          className={`list-group-item list-grou-item-action ${
+            active === item.matrix_index && "active"
+          }`}
           onClick={() => {
             dispatch({
               type: "varSelected",
@@ -59,8 +60,9 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
         <button
           type="button"
           key={item.matrix_index}
-          className={`list-group-item list-grou-item-action ${active.includes(item.matrix_index) && "active"
-            }`}
+          className={`list-group-item list-grou-item-action ${
+            active.includes(item.matrix_index) && "active"
+          }`}
           onClick={() => {
             if (active.includes(item.matrix_index)) {
               dispatch({

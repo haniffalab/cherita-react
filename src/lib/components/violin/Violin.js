@@ -93,7 +93,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
         fetchData("violin", {
           url: dataset.url,
           keys: dataset.selectedVar.name,
-          selectedObs: dataset.selectedObs.name,
+          selectedObs: dataset.selectedObs,
           scale: dataset.controls.standardScale,
         })
           .then((data) => {

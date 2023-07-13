@@ -56,7 +56,7 @@ export function Heatmap() {
       setHasSelections(true);
       fetchData("heatmap", {
         url: dataset.url,
-        selectedObs: dataset.selectedObs.name,
+        selectedObs: dataset.selectedObs,
         selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
       })
         .then((data) => {

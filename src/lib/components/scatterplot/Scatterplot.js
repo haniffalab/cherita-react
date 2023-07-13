@@ -4,14 +4,13 @@ import { React, useEffect, useState } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { EMBEDDINGS } from "../../constants/constants";
 
-import chroma from "chroma-js"
-import DeckGL from '@deck.gl/react';
-import { ScatterplotLayer } from '@deck.gl/layers';
-import { slice, openArray } from "zarr";
+import chroma from "chroma-js";
+import DeckGL from "@deck.gl/react";
+import { ScatterplotLayer } from "@deck.gl/layers";
 import { MapHelper } from "../../helpers/map";
 import { ZarrHelper, GET_OPTIONS } from "../../helpers/zarr";
 
-window.deck.log.level = 1
+window.deck.log.level = 1;
 
 export function ScatterplotControls() {
   const dataset = useDataset();
@@ -48,11 +47,8 @@ export function ScatterplotControls() {
   );
 }
 
-export function Scatterplot({
-  radius = 30 }) {
+export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
-  const helper = new MapHelper();
-  const zarrHelper = new ZarrHelper();
   let [data, setData] = useState([]);
   let [position, setPosition] = useState([]);
   let [values, setValues] = useState([]);
@@ -62,70 +58,79 @@ export function Scatterplot({
     zoom: 0,
     maxZoom: 16,
     pitch: 0,
-    bearing: 0
+    bearing: 0,
   });
-  let [layout, setLayout] = useState({});
-  let [hasSelections, setHasSelections] = useState(false);
 
   useEffect(() => {
     setData(function (prevState, props) {
-      var colorScale = chroma.scale(['yellow', '008ae5']).domain([Math.min(...values), Math.max(...values)])
+      var colorScale = chroma
+        .scale(["yellow", "008ae5"])
+        .domain([Math.min(...values), Math.max(...values)]);
       var data = position.map(function (e, i) {
         return {
           index: i,
           position: [position[i][0], position[i][1]],
           value: values[i],
-          color: colorScale(values[i]).rgb()
+          color: colorScale(values[i]).rgb(),
         };
       });
-      return data
-    })
+      return data;
+    });
   }, [position, values]);
 
-
   useEffect(() => {
-    const fetchObsm = async () => {
-      const z = await zarrHelper.open(dataset, "obsm/" + dataset.embedding);
-      await z.get(null, GET_OPTIONS).then((result) => {
-        const { latitude, longitude, zoom } = helper.fitBounds(result.data);
-        setViewport({
-          longitude: latitude,
-          latitude: longitude,
-          zoom: zoom,
-          maxZoom: 16,
-          pitch: 0,
-          bearing: 0
-        })
-        setPosition(result.data)
-      })
-    }
+    if (dataset.embedding) {
+      const helper = new MapHelper();
+      const zarrHelper = new ZarrHelper();
+      const fetchObsm = async () => {
+        const z = await zarrHelper.open(
+          dataset.url,
+          "obsm/" + dataset.embedding
+        );
+        await z.get(null, GET_OPTIONS).then((result) => {
+          const { latitude, longitude, zoom } = helper.fitBounds(result.data);
+          setViewport({
+            longitude: latitude,
+            latitude: longitude,
+            zoom: zoom,
+            maxZoom: 16,
+            pitch: 0,
+            bearing: 0,
+          });
+          setPosition(result.data);
+        });
+      };
 
-    fetchObsm()
-      .catch(console.error);
+      fetchObsm().catch(console.error);
+    }
   }, [dataset.url, dataset.embedding]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const z = await zarrHelper.open(dataset, "X");
-      await z.get([null, dataset.selectedVar.matrix_index], GET_OPTIONS).then((result) => {
-        setValues(result.data)
-      })
-    }
+    if (dataset.selectedVar) {
+      const zarrHelper = new ZarrHelper();
+      const fetchData = async () => {
+        const z = await zarrHelper.open(dataset.url, "X");
+        await z
+          .get([null, dataset.selectedVar.matrix_index], GET_OPTIONS)
+          .then((result) => {
+            setValues(result.data);
+          });
+      };
 
-    fetchData()
-      .catch(console.error);
+      fetchData().catch(console.error);
+    }
   }, [dataset.url, dataset.selectedObs, dataset.selectedVar]);
 
   const layers = [
     new ScatterplotLayer({
-      id: 'scatter-plot',
+      id: "scatter-plot",
       data,
       radiusScale: radius,
       radiusMinPixels: 1,
-      getPosition: d => d.position,
-      getFillColor: d => d.color,
-      getRadius: 1
-    })
+      getPosition: (d) => d.position,
+      getFillColor: (d) => d.color,
+      getRadius: 1,
+    }),
   ];
 
   return (
@@ -134,8 +139,8 @@ export function Scatterplot({
         <DeckGL
           layers={layers}
           initialViewState={viewport}
-          controller={true}>
-        </DeckGL>
+          controller={true}
+        ></DeckGL>
       </div>
     </>
   );
