@@ -10,7 +10,7 @@ const N_BINS = 5;
 
 function binContinuous(data, nBins = N_BINS) {
   const binSize = (data.max - data.min) * (1 / nBins);
-  const thresholds = _.range(1, nBins + 1).map((b) => {
+  const thresholds = _.range(nBins + 1).map((b) => {
     return data.min + binSize * b;
   });
   data.bins = {
@@ -48,7 +48,6 @@ export function ObsColsList() {
 
   useEffect(() => {
     if (dataset.selectedObs) {
-      console.log(dataset.selectedObs);
       setActive(dataset.selectedObs.name);
     }
   }, [dataset.selectedObs]);
