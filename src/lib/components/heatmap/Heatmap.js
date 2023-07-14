@@ -1,7 +1,14 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Plot from "react-plotly.js";
+import _ from "lodash";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { PLOTLY_COLORSCALES } from "../../constants/constants";
 import { fetchData } from "../../utils/requests";
@@ -51,33 +58,52 @@ export function Heatmap() {
     });
   }, []);
 
-  useEffect(() => {
-    if (dataset.selectedObs && dataset.selectedMultiVar.length) {
-      setHasSelections(true);
-      fetchData("heatmap", {
-        url: dataset.url,
-        selectedObs: dataset.selectedObs,
-        selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
-      })
-        .then((data) => {
-          setData(data.data);
-          setLayout(data.layout);
-          updateColorscale(colorscale.current);
-        })
-        .catch((response) => {
-          response.json().then((json) => {
-            console.log(json.message);
+  const update = useMemo(() => {
+    const func = (abortController) => {
+      if (dataset.selectedObs && dataset.selectedMultiVar.length) {
+        setHasSelections(true);
+        fetchData(
+          "heatmap",
+          {
+            url: dataset.url,
+            selectedObs: dataset.selectedObs,
+            selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
+          },
+          abortController.signal
+        )
+          .then((data) => {
+            setData(data.data);
+            setLayout(data.layout);
+            updateColorscale(colorscale.current);
+          })
+          .catch((response) => {
+            response.json().then((json) => {
+              console.log(json.message);
+            });
           });
-        });
-    } else {
-      setHasSelections(false);
-    }
+      } else {
+        setHasSelections(false);
+      }
+    };
+    // delay invoking the fetch function to avoid firing requests
+    // while dependencies might still be getting updated by the user
+    return _.debounce(func, 500);
   }, [
-    dataset.url,
-    dataset.selectedObs,
     dataset.selectedMultiVar,
+    dataset.selectedObs,
+    dataset.url,
     updateColorscale,
   ]);
+
+  useEffect(() => {
+    // create an abort controller to pass into each fetch function
+    // to abort previous incompleted requests when a new request is fired
+    const abortController = new AbortController();
+    update(abortController);
+    return () => {
+      abortController.abort();
+    };
+  }, [update]);
 
   useEffect(() => {
     colorscale.current = dataset.controls.colorScale;

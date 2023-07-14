@@ -1,4 +1,4 @@
-export async function fetchData(endpoint, params) {
+export async function fetchData(endpoint, params, signal = null) {
   const response = await fetch(
     new URL(endpoint, import.meta.env.VITE_API_URL),
     {
@@ -9,6 +9,7 @@ export async function fetchData(endpoint, params) {
         Accept: "application/json",
       },
       body: JSON.stringify(params),
+      signal: signal,
     }
   );
   if (!response.ok) {

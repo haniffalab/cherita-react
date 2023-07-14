@@ -1,7 +1,8 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Plot from "react-plotly.js";
+import _ from "lodash";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import {
   VIOLIN_MODES,
@@ -66,49 +67,58 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
   const [hasSelections, setHasSelections] = useState(false);
   // @TODO: set default scale
 
-  useEffect(() => {
-    if (mode === VIOLIN_MODES.MULTIKEY) {
-      if (dataset.selectedMultiVar.length) {
-        setHasSelections(true);
-        fetchData("violin", {
-          url: dataset.url,
-          keys: dataset.selectedMultiVar.map((i) => i.name),
-          scale: dataset.controls.standardScale,
-        })
-          .then((data) => {
-            setData(data.data);
-            setLayout(data.layout);
-          })
-          .catch((response) => {
-            response.json().then((json) => {
-              console.log(json.message);
+  const update = useMemo(() => {
+    const func = (abortController) => {
+      if (mode === VIOLIN_MODES.MULTIKEY) {
+        if (dataset.selectedMultiVar.length) {
+          setHasSelections(true);
+          fetchData(
+            "violin",
+            {
+              url: dataset.url,
+              keys: dataset.selectedMultiVar.map((i) => i.name),
+              scale: dataset.controls.standardScale,
+            },
+            abortController.signal
+          )
+            .then((data) => {
+              setData(data.data);
+              setLayout(data.layout);
+            })
+            .catch((response) => {
+              response.json().then((json) => {
+                console.log(json.message);
+              });
             });
-          });
-      } else {
-        setHasSelections(false);
-      }
-    } else if (mode === VIOLIN_MODES.GROUPBY) {
-      if (dataset.selectedObs && dataset.selectedVar) {
-        setHasSelections(true);
-        fetchData("violin", {
-          url: dataset.url,
-          keys: dataset.selectedVar.name,
-          selectedObs: dataset.selectedObs,
-          scale: dataset.controls.standardScale,
-        })
-          .then((data) => {
-            setData(data.data);
-            setLayout(data.layout);
+        } else {
+          setHasSelections(false);
+        }
+      } else if (mode === VIOLIN_MODES.GROUPBY) {
+        if (dataset.selectedObs && dataset.selectedVar) {
+          setHasSelections(true);
+          fetchData("violin", {
+            url: dataset.url,
+            keys: dataset.selectedVar.name,
+            selectedObs: dataset.selectedObs,
+            scale: dataset.controls.standardScale,
           })
-          .catch((response) => {
-            response.json().then((json) => {
-              console.log(json.message);
+            .then((data) => {
+              setData(data.data);
+              setLayout(data.layout);
+            })
+            .catch((response) => {
+              response.json().then((json) => {
+                console.log(json.message);
+              });
             });
-          });
-      } else {
-        setHasSelections(false);
+        } else {
+          setHasSelections(false);
+        }
       }
-    }
+    };
+    // delay invoking the fetch function to avoid firing requests
+    // while dependencies might still be getting updated by the user
+    return _.debounce(func, 500);
   }, [
     mode,
     dataset.url,
@@ -117,6 +127,16 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     dataset.selectedMultiVar,
     dataset.controls.standardScale,
   ]);
+
+  useEffect(() => {
+    // create an abort controller to pass into each fetch function
+    // to abort previous incompleted requests when a new request is fired
+    const abortController = new AbortController();
+    update(abortController);
+    return () => {
+      abortController.abort();
+    };
+  }, [update]);
 
   if (hasSelections) {
     return (

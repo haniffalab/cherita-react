@@ -1,12 +1,12 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
 import { React, useEffect, useState } from "react";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { EMBEDDINGS } from "../../constants/constants";
-
+import _ from "lodash";
 import chroma from "chroma-js";
 import DeckGL from "@deck.gl/react";
 import { ScatterplotLayer } from "@deck.gl/layers";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { EMBEDDINGS } from "../../constants/constants";
 import { MapHelper } from "../../helpers/map";
 import { ZarrHelper, GET_OPTIONS } from "../../helpers/zarr";
 
@@ -65,7 +65,7 @@ export function Scatterplot({ radius = 30 }) {
     setData(function (prevState, props) {
       var colorScale = chroma
         .scale(["yellow", "008ae5"])
-        .domain([Math.min(...values), Math.max(...values)]);
+        .domain([_.min(values), _.max(values)]);
       var data = position.map(function (e, i) {
         return {
           index: i,
