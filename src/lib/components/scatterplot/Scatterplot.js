@@ -15,7 +15,7 @@ window.deck.log.level = 1;
 export function ScatterplotControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  let [active, setActive] = useState(dataset.embedding);
+  const [active, setActive] = useState(dataset.embedding);
 
   useEffect(() => {
     setActive(dataset.embedding);
@@ -49,10 +49,10 @@ export function ScatterplotControls() {
 
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
-  let [data, setData] = useState([]);
-  let [position, setPosition] = useState([]);
-  let [values, setValues] = useState([]);
-  let [viewport, setViewport] = useState({
+  const [data, setData] = useState([]);
+  const [position, setPosition] = useState([]);
+  const [values, setValues] = useState([]);
+  const [viewport, setViewport] = useState({
     longitude: 0,
     latitude: 0,
     zoom: 0,

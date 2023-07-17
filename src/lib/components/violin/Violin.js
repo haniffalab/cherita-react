@@ -86,9 +86,11 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
               setLayout(data.layout);
             })
             .catch((response) => {
-              response.json().then((json) => {
-                console.log(json.message);
-              });
+              if (response.name !== "AbortError") {
+                response.json().then((json) => {
+                  console.log(json.message);
+                });
+              }
             });
         } else {
           setHasSelections(false);
@@ -107,9 +109,11 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
               setLayout(data.layout);
             })
             .catch((response) => {
-              response.json().then((json) => {
-                console.log(json.message);
-              });
+              if (response.name !== "AbortError") {
+                response.json().then((json) => {
+                  console.log(json.message);
+                });
+              }
             });
         } else {
           setHasSelections(false);
