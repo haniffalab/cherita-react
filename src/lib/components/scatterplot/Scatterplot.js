@@ -20,7 +20,7 @@ window.deck.log.level = 1;
 export function ScatterplotControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  let [active, setActive] = useState(dataset.embedding);
+  const [active, setActive] = useState(dataset.embedding);
 
   useEffect(() => {
     setActive(dataset.embedding);

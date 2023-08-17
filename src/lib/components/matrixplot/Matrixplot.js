@@ -79,16 +79,17 @@ export function MatrixplotControls() {
 export function Matrixplot() {
   const dataset = useDataset();
   const colorscale = useRef(dataset.controls.colorScale);
-  let [data, setData] = useState([]);
-  let [layout, setLayout] = useState({});
-  let [hasSelections, setHasSelections] = useState(false);
+  const [data, setData] = useState([]);
+  const [layout, setLayout] = useState({});
+  const [hasSelections, setHasSelections] = useState(false);
 
   const updateColorscale = useCallback((colorscale) => {
-    setData((d) =>
-      d.map((i) => {
-        return { ...i, colorscale: colorscale };
-      })
-    );
+    setLayout((l) => {
+      return {
+        ...l,
+        coloraxis: { ...l.coloraxis, colorscale: colorscale },
+      };
+    });
   }, []);
 
   const update = useMemo(() => {
@@ -111,9 +112,11 @@ export function Matrixplot() {
             updateColorscale(colorscale.current);
           })
           .catch((response) => {
-            response.json().then((json) => {
-              console.log(json.message);
-            });
+            if (response.name !== "AbortError") {
+              response.json().then((json) => {
+                console.log(json.message);
+              });
+            }
           });
       } else {
         setHasSelections(false);

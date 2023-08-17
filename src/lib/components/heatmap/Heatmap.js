@@ -45,9 +45,9 @@ export function HeatmapControls() {
 export function Heatmap() {
   const dataset = useDataset();
   const colorscale = useRef(dataset.controls.colorScale);
-  let [data, setData] = useState([]);
-  let [layout, setLayout] = useState({});
-  let [hasSelections, setHasSelections] = useState(false);
+  const [data, setData] = useState([]);
+  const [layout, setLayout] = useState({});
+  const [hasSelections, setHasSelections] = useState(false);
 
   const updateColorscale = useCallback((colorscale) => {
     setLayout((l) => {
@@ -77,9 +77,11 @@ export function Heatmap() {
             updateColorscale(colorscale.current);
           })
           .catch((response) => {
-            response.json().then((json) => {
-              console.log(json.message);
-            });
+            if (response.name !== "AbortError") {
+              response.json().then((json) => {
+                console.log(json.message);
+              });
+            }
           });
       } else {
         setHasSelections(false);

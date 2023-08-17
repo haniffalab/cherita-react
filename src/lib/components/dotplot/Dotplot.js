@@ -258,9 +258,11 @@ export function Dotplot() {
             updateColorscale(colorscale.current);
           })
           .catch((response) => {
-            response.json().then((json) => {
-              console.log(json.message);
-            });
+            if (response.name !== "AbortError") {
+              response.json().then((json) => {
+                console.log(json.message);
+              });
+            }
           });
       } else {
         setHasSelections(false);

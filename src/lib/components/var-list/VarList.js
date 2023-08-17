@@ -7,8 +7,8 @@ import { SELECTION_MODES } from "../../constants/constants";
 export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  let [varNames, setVarNames] = useState([]);
-  let [active, setActive] = useState(
+  const [varNames, setVarNames] = useState([]);
+  const [active, setActive] = useState(
     mode === SELECTION_MODES.SINGLE ? null : []
   );
 
