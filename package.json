@@ -68,10 +68,10 @@
   "description": "",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/haniffalab/react-wt.js.git"
+    "url": "git+https://github.com/haniffalab/cherita-react.git"
   },
   "bugs": {
-    "url": "https://github.com/haniffalab/react-wt.js/issues"
+    "url": "https://github.com/haniffalab/cherita-react/issues"
   },
-  "homepage": "https://github.com/haniffalab/react-wt.js#readme"
+  "homepage": "https://github.com/haniffalab/cherita-react#readme"
 }
