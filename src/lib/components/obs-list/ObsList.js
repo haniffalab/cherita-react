@@ -21,6 +21,15 @@ function binContinuous(data, nBins = N_BINS) {
   return data;
 }
 
+function binDiscrete(data, nBins = N_BINS){
+  const binSize = _.round((data.n_values) * (1/nBins));
+  data.bins = {
+    nBins: nBins,
+    binSize: binSize
+  };
+  return data;
+}
+
 export function ObsColsList() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
@@ -34,6 +43,9 @@ export function ObsColsList() {
           data.map((d) => {
             if (d.type === "continuous") {
               d = binContinuous(d);
+            }
+            if (d.type === "discrete") {
+              d = binDiscrete(d);
             }
             return d;
           })
