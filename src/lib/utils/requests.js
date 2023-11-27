@@ -1,6 +1,7 @@
 export async function fetchData(endpoint, params, signal = null) {
+  const apiUrl = process.env.REACT_APP_API_URL;
   const response = await fetch(
-    new URL(endpoint, process.env.API_URL),
+    new URL(endpoint, apiUrl),
     {
       method: "POST",
       mode: "cors",
