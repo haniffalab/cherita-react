@@ -11,7 +11,18 @@ export function DatasetProvider({ dataset_url, children }) {
     selectedVar: null,
     selectedMultiObs: [],
     selectedMultiVar: [],
-    colorscale: "Viridis",
+    controls: {
+      colorScale: "Viridis",
+      colorAxis: {
+        dmin: 0,
+        dmax: 1,
+        cmin: 0,
+        cmax: 1,
+      },
+      standardScale: null,
+      meanOnlyExpressed: false,
+      expressionCutoff: 0.0,
+    },
   });
 
   return (
@@ -56,10 +67,92 @@ function datasetReducer(dataset, action) {
         ),
       };
     }
-    case "colorscaleSelected": {
+    case "embeddingSelected": {
       return {
         ...dataset,
-        colorscale: action.colorscale,
+        embedding: action.embedding,
+      };
+    }
+    case "set.controls.colorScale": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          colorScale: action.colorScale,
+        },
+      };
+    }
+    case "set.controls.colorAxis": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          colorAxis: action.colorAxis,
+        },
+      };
+    }
+    case "set.controls.colorAxis.crange": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          colorAxis: {
+            ...dataset.controls.colorAxis,
+            cmin: action.cmin,
+            cmax: action.cmax,
+          },
+        },
+      };
+    }
+    case "set.controls.colorAxis.cmin": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          colorAxis: {
+            ...dataset.controls.colorAxis,
+            cmin: action.cmin,
+          },
+        },
+      };
+    }
+    case "set.controls.colorAxis.cmax": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          colorAxis: {
+            ...dataset.controls.colorAxis,
+            cmax: action.cmax,
+          },
+        },
+      };
+    }
+    case "set.controls.standardScale": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          standardScale: action.standardScale,
+        },
+      };
+    }
+    case "set.controls.meanOnlyExpressed": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          meanOnlyExpressed: action.meanOnlyExpressed,
+        },
+      };
+    }
+    case "set.controls.expressionCutoff": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          expressionCutoff: action.expressionCutoff,
+        },
       };
     }
     default: {

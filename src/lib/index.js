@@ -1,6 +1,19 @@
-export { ObsColsList } from "./components/ObsList";
-export { VarNamesList, MultiVarNamesList } from "./components/VarList";
-export { Heatmap } from "./components/Heatmap";
-export { Dotplot } from "./components/Dotplot";
-export { PLOTLY_COLORSCALES } from "./constants/constants";
+export { ObsColsList } from "./components/obs-list/ObsList";
+export { VarNamesList } from "./components/var-list/VarList";
+export { Heatmap, HeatmapControls } from "./components/heatmap/Heatmap";
+export { Dotplot, DotplotControls } from "./components/dotplot/Dotplot";
+export {
+  Scatterplot,
+  ScatterplotControls,
+} from "./components/scatterplot/Scatterplot";
+export {
+  Matrixplot,
+  MatrixplotControls,
+} from "./components/matrixplot/Matrixplot";
+export { Violin, ViolinControls } from "./components/violin/Violin";
+export {
+  PLOTLY_COLORSCALES,
+  SELECTION_MODES,
+  VIOLIN_MODES,
+} from "./constants/constants";
 export { DatasetProvider } from "./context/DatasetContext";
