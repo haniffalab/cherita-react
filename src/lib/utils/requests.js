@@ -1,6 +1,6 @@
 export async function fetchData(endpoint, params, signal = null) {
   const response = await fetch(
-    new URL(endpoint, import.meta.env.VITE_API_URL),
+    new URL(endpoint, process.env.API_URL),
     {
       method: "POST",
       mode: "cors",
