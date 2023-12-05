@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
-import { React, useCallback, useEffect, useState } from "react";
+import { React, useEffect, useState } from "react";
 import _ from "lodash";
 import chroma from "chroma-js";
 import DeckGL from "@deck.gl/react";
@@ -11,7 +11,7 @@ import { MapHelper } from "../../helpers/map";
 import { ZarrHelper, GET_OPTIONS } from "../../helpers/zarr";
 
 import { EditableGeoJsonLayer } from "@nebula.gl/layers";
-import { ViewMode, DrawPolygonMode, DrawPolygonByDraggingMode, ModifyMode } from "@nebula.gl/edit-modes";
+import { ViewMode, DrawPolygonByDraggingMode } from "@nebula.gl/edit-modes";
 import { Toolbox } from "@nebula.gl/editor";
 import { Toolbox2 } from "./Toolbox";
 
@@ -56,13 +56,11 @@ export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
   const [features, setFeatures] = useState({
     type: "FeatureCollection",
-    features: []
+    features: [],
   });
   const [mode, setMode] = useState(() => DrawPolygonByDraggingMode);
   const [modeConfig, setModeConfig] = useState({});
-  const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState(
-    []
-  );
+  const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
   let [data, setData] = useState([]);
   let [position, setPosition] = useState([]);
   let [values, setValues] = useState([]);
@@ -154,10 +152,9 @@ export function Scatterplot({ radius = 30 }) {
 
       onEdit: ({ updatedData }) => {
         setFeatures(updatedData);
-      }
+      },
     }),
   ];
-
 
   function onLayerClick(info) {
     if (mode !== ViewMode) {

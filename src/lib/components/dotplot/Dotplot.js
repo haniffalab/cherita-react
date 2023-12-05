@@ -1,20 +1,13 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
-import _ from "lodash";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import {
   PLOTLY_COLORSCALES,
   DOTPLOT_STANDARDSCALES,
 } from "../../constants/constants";
-import { fetchData } from "../../utils/requests";
+import { useDebouncedFetch } from "../../utils/requests";
 import {
   Button,
   ButtonGroup,
@@ -210,13 +203,48 @@ export function DotplotControls() {
 }
 
 export function Dotplot() {
+  const ENDPOINT = "dotplot";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const colorscale = useRef(dataset.controls.colorScale);
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
+  const [params, setParams] = useState({
+    url: dataset.url,
+    selectedObs: dataset.selectedObs,
+    selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
+    standardScale: dataset.controls.standardScale,
+    meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
+    expressionCutoff: dataset.controls.expressionCutoff,
+  });
   // @TODO: set default scale
+
+  useEffect(() => {
+    if (dataset.selectedObs && dataset.selectedMultiVar.length) {
+      setHasSelections(true);
+    } else {
+      setHasSelections(false);
+    }
+    setParams((p) => {
+      return {
+        ...p,
+        url: dataset.url,
+        selectedObs: dataset.selectedObs,
+        selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
+        standardScale: dataset.controls.standardScale,
+        meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
+        expressionCutoff: dataset.controls.expressionCutoff,
+      };
+    });
+  }, [
+    dataset.url,
+    dataset.selectedObs,
+    dataset.selectedMultiVar,
+    dataset.controls.standardScale,
+    dataset.controls.meanOnlyExpressed,
+    dataset.controls.expressionCutoff,
+  ]);
 
   const updateColorscale = useCallback((colorscale) => {
     setLayout((l) => {
@@ -227,70 +255,35 @@ export function Dotplot() {
     });
   }, []);
 
-  const update = useMemo(() => {
-    const func = (abortController) => {
-      if (dataset.selectedObs && dataset.selectedMultiVar.length) {
-        setHasSelections(true);
-        fetchData(
-          "dotplot",
-          {
-            url: dataset.url,
-            selectedObs: dataset.selectedObs,
-            selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
-            standardScale: dataset.controls.standardScale,
-            meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
-            expressionCutoff: dataset.controls.expressionCutoff,
-          },
-          abortController.signal
-        )
-          .then((data) => {
-            setData(data.data);
-            setLayout(data.layout);
-            dispatch({
-              type: "set.controls.colorAxis",
-              colorAxis: {
-                dmin: data.range.min.toFixed(1),
-                dmax: data.range.max.toFixed(1),
-                cmin: data.range.min.toFixed(1),
-                cmax: data.range.max.toFixed(1),
-              },
-            });
-            updateColorscale(colorscale.current);
-          })
-          .catch((response) => {
-            if (response.name !== "AbortError") {
-              response.json().then((json) => {
-                console.log(json.message);
-              });
-            }
-          });
-      } else {
-        setHasSelections(false);
-      }
-    };
-    // delay invoking the fetch function to avoid firing requests
-    // while dependencies might still be getting updated by the user
-    return _.debounce(func, 500);
-  }, [
-    dataset.url,
-    dataset.selectedObs,
-    dataset.selectedMultiVar,
-    dataset.controls.standardScale,
-    dataset.controls.meanOnlyExpressed,
-    dataset.controls.expressionCutoff,
-    updateColorscale,
-    dispatch,
-  ]);
+  const { fetchedData, isPending, serverError } = useDebouncedFetch(
+    ENDPOINT,
+    params,
+    500
+  );
 
   useEffect(() => {
-    // create an abort controller to pass into each fetch function
-    // to abort previous incompleted requests when a new request is fired
-    const abortController = new AbortController();
-    update(abortController);
-    return () => {
-      abortController.abort();
-    };
-  }, [update]);
+    if (hasSelections && !isPending && !serverError) {
+      setData(fetchedData.data);
+      setLayout(fetchedData.layout);
+      dispatch({
+        type: "set.controls.colorAxis",
+        colorAxis: {
+          dmin: fetchedData.range.min.toFixed(1),
+          dmax: fetchedData.range.max.toFixed(1),
+          cmin: fetchedData.range.min.toFixed(1),
+          cmax: fetchedData.range.max.toFixed(1),
+        },
+      });
+      updateColorscale(colorscale.current);
+    }
+  }, [
+    fetchedData,
+    isPending,
+    serverError,
+    hasSelections,
+    dispatch,
+    updateColorscale,
+  ]);
 
   useEffect(() => {
     colorscale.current = dataset.controls.colorScale;

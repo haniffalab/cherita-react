@@ -3,7 +3,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import _ from "lodash";
 import React, { useEffect, useState, useMemo } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { fetchData } from "../../utils/requests";
+import { useFetch } from "../../utils/requests";
 import { Accordion, ListGroup } from "react-bootstrap";
 
 const N_BINS = 5;
@@ -21,42 +21,55 @@ function binContinuous(data, nBins = N_BINS) {
   return data;
 }
 
-function binDiscrete(data, nBins = N_BINS){
-  const binSize = _.round((data.n_values) * (1/nBins));
+function binDiscrete(data, nBins = N_BINS) {
+  const binSize = _.round(data.n_values * (1 / nBins));
   data.bins = {
     nBins: nBins,
-    binSize: binSize
+    binSize: binSize,
   };
   return data;
 }
 
 export function ObsColsList() {
+  const ENDPOINT = "obs/cols";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [obsColsList, setObsColsList] = useState([]);
   const [active, setActive] = useState(null);
+  const [params, setParams] = useState({
+    url: dataset.url,
+  });
 
   useEffect(() => {
-    fetchData("obs/cols", { url: dataset.url })
-      .then((data) => {
-        setObsColsList(
-          data.map((d) => {
-            if (d.type === "continuous") {
-              d = binContinuous(d);
-            }
-            if (d.type === "discrete") {
-              d = binDiscrete(d);
-            }
-            return d;
-          })
-        );
-      })
-      .catch((response) => {
-        response.json().then((json) => {
-          console.log(json.message);
-        });
-      });
+    setParams((p) => {
+      return {
+        ...p,
+        url: dataset.url,
+      };
+    });
   }, [dataset.url]);
+
+  const { fetchedData, isPending, serverError } = useFetch(
+    ENDPOINT,
+    params,
+    []
+  );
+
+  useEffect(() => {
+    if (!isPending && !serverError) {
+      setObsColsList(
+        fetchedData.map((d) => {
+          if (d.type === "continuous") {
+            d = binContinuous(d);
+          }
+          if (d.type === "discrete") {
+            d = binDiscrete(d);
+          }
+          return d;
+        })
+      );
+    }
+  }, [fetchedData, isPending, serverError]);
 
   useEffect(() => {
     if (dataset.selectedObs) {
