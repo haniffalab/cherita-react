@@ -1,21 +1,35 @@
-import { React } from "react";
+import { React, useState } from "react";
 
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
-import NavDropdown from "react-bootstrap/NavDropdown";
-import setPosition from "../helpers/nav";
-
 import {
   DatasetProvider,
-  ObsColsList,
-  VarNamesList,
   Matrixplot,
   MatrixplotControls,
-  SELECTION_MODES,
 } from "@haniffalab/cherita-react";
 
+import {
+  OffcanvasObs,
+  OffcanvasVars,
+  OffcanvasControls,
+  OffcanvasInfo,
+} from "../components/Offcanvas";
+
 export default function MatrixplotDemo({ dataset_url }) {
+  const [showObs, setShowObs] = useState(false);
+  const [showVars, setShowVars] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+
+  const handleCloseObs = () => setShowObs(false);
+  const handleShowObs = () => setShowObs(true);
+  const handleCloseVars = () => setShowVars(false);
+  const handleShowVars = () => setShowVars(true);
+  const handleCloseControls = () => setShowControls(false);
+  const handleShowControls = () => setShowControls(true);
+  const handleCloseInfo = () => setShowInfo(false);
+  const handleShowInfo = () => setShowInfo(true);
   return (
     <Container>
       <div className="cherita-container">
@@ -25,39 +39,20 @@ export default function MatrixplotDemo({ dataset_url }) {
               <Navbar.Toggle aria-controls="navbarScroll" />
               <Navbar.Collapse id="navbarScroll">
                 <Nav className="me-auto my-2 my-lg-0" navbarScroll>
-                  <NavDropdown
-                    title="Obs"
-                    id="basic-nav-dropdown1"
-                    onClick={setPosition}
-                    data-bs-theme="dark"
-                    className="cherita-navbar-item"
-                    renderMenuOnMount
-                  >
-                    <ObsColsList />
-                  </NavDropdown>
-                  <NavDropdown
-                    title="Features"
-                    id="basic-nav-dropdown2"
-                    onClick={setPosition}
-                    data-bs-theme="dark"
-                    className="cherita-navbar-item"
-                    renderMenuOnMount
-                  >
-                    <VarNamesList mode={SELECTION_MODES.MULTIPLE} />
-                  </NavDropdown>
+                  <Nav.Item>
+                    <Nav.Link onClick={handleShowObs}>Categories</Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item>
+                    <Nav.Link onClick={handleShowVars}>Features</Nav.Link>
+                  </Nav.Item>
                 </Nav>
                 <Nav className="d-flex">
-                  <NavDropdown
-                    title="Controls"
-                    id="basic-nav-dropdown3"
-                    onClick={setPosition}
-                    data-bs-theme="dark"
-                    align="end"
-                    className="cherita-navbar-item"
-                    renderMenuOnMount
-                  >
-                    <MatrixplotControls />
-                  </NavDropdown>
+                  <Nav.Item>
+                    <Nav.Link onClick={handleShowControls}>Controls</Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item>
+                    <Nav.Link onClick={handleShowInfo}>Info</Nav.Link>
+                  </Nav.Item>
                 </Nav>
               </Navbar.Collapse>
             </Container>
@@ -65,6 +60,14 @@ export default function MatrixplotDemo({ dataset_url }) {
           <div className="cherita-container-plot">
             <Matrixplot />
           </div>
+          <OffcanvasObs show={showObs} handleClose={handleCloseObs} />
+          <OffcanvasVars show={showVars} handleClose={handleCloseVars} />
+          <OffcanvasControls
+            show={showControls}
+            handleClose={handleCloseControls}
+            Controls={MatrixplotControls}
+          />
+          <OffcanvasInfo show={showInfo} handleClose={handleCloseInfo} />
         </DatasetProvider>
       </div>
     </Container>
