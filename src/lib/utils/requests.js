@@ -30,7 +30,7 @@ export const useFetch = (endpoint, params, deps = []) => {
       .then((data) => {
         setIsPending(false);
         setFetchedData(data);
-        setServerError(false);
+        setServerError(null);
       })
       .catch((response) => {
         setIsPending(false);
@@ -61,7 +61,7 @@ export const useDebouncedFetch = (endpoint, params, delay = 500, deps = []) => {
         .then((data) => {
           setIsPending(false);
           setFetchedData(data);
-          setServerError(false);
+          setServerError(null);
         })
         .catch((response) => {
           setIsPending(false);

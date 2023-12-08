@@ -54,10 +54,14 @@ function datasetReducer(dataset, action) {
       return { ...dataset, selectedVar: action.var };
     }
     case "multiVarSelected": {
-      return {
-        ...dataset,
-        selectedMultiVar: [...dataset.selectedMultiVar, action.var],
-      };
+      if (dataset.selectedMultiVar.find((i) => i === action.var)) {
+        return dataset;
+      } else {
+        return {
+          ...dataset,
+          selectedMultiVar: [...dataset.selectedMultiVar, action.var],
+        };
+      }
     }
     case "multiVarDeselected": {
       return {
