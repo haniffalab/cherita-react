@@ -6,12 +6,18 @@ import chroma from "chroma-js";
 import DeckGL from "@deck.gl/react";
 import { ScatterplotLayer } from "@deck.gl/layers";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { EMBEDDINGS } from "../../constants/constants";
 import { MapHelper } from "../../helpers/map";
 import { ZarrHelper, GET_OPTIONS } from "../../helpers/zarr";
+import Button from "react-bootstrap/Button";
 
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
-import { ViewMode, DrawPolygonMode, DrawPolygonByDraggingMode, ModifyMode } from "@nebula.gl/edit-modes";
+import { EditableGeoJsonLayer, DrawPolygonMode } from "@nebula.gl/layers";
+
+import {
+  ViewMode,
+  DrawPolygonByDraggingMode,
+  ModifyMode,
+} from "@nebula.gl/edit-modes";
+
 import { Toolbox } from "@nebula.gl/editor";
 import { Toolbox2 } from "./Toolbox";
 
@@ -20,49 +26,19 @@ window.deck.log.level = 1;
 export function ScatterplotControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const [active, setActive] = useState(dataset.embedding);
 
-  useEffect(() => {
-    setActive(dataset.embedding);
-  }, [dataset.embedding]);
-
-  const colormapList = EMBEDDINGS.map((item) => (
-    <Dropdown.Item
-      key={item}
-      active={active === item}
-      onClick={() => {
-        setActive(item);
-        dispatch({
-          type: "embeddingSelected",
-          embedding: item,
-        });
-      }}
-    >
-      {item}
-    </Dropdown.Item>
-  ));
-
-  return (
-    <Dropdown>
-      <Dropdown.Toggle id="dropdownEmbedding" variant="light">
-        {dataset.embedding}
-      </Dropdown.Toggle>
-      <Dropdown.Menu>{colormapList}</Dropdown.Menu>
-    </Dropdown>
-  );
+  return <></>;
 }
 
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
   const [features, setFeatures] = useState({
     type: "FeatureCollection",
-    features: []
+    features: [],
   });
-  const [mode, setMode] = useState(() => DrawPolygonByDraggingMode);
+  const [mode, setMode] = useState(() => ViewMode);
   const [modeConfig, setModeConfig] = useState({});
-  const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState(
-    []
-  );
+  const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
   let [data, setData] = useState([]);
   let [position, setPosition] = useState([]);
   let [values, setValues] = useState([]);
@@ -93,13 +69,13 @@ export function Scatterplot({ radius = 30 }) {
   }, [position, values]);
 
   useEffect(() => {
-    if (dataset.embedding) {
+    if (dataset.selectedObsm) {
       const helper = new MapHelper();
       const zarrHelper = new ZarrHelper();
       const fetchObsm = async () => {
         const z = await zarrHelper.open(
           dataset.url,
-          "obsm/" + dataset.embedding
+          "obsm/" + dataset.selectedObsm
         );
         await z.get(null, GET_OPTIONS).then((result) => {
           const { latitude, longitude, zoom } = helper.fitBounds(result.data);
@@ -117,7 +93,7 @@ export function Scatterplot({ radius = 30 }) {
 
       fetchObsm().catch(console.error);
     }
-  }, [dataset.url, dataset.embedding]);
+  }, [dataset.url, dataset.selectedObsm]);
 
   useEffect(() => {
     if (dataset.selectedVar) {
@@ -154,10 +130,9 @@ export function Scatterplot({ radius = 30 }) {
 
       onEdit: ({ updatedData }) => {
         setFeatures(updatedData);
-      }
+      },
     }),
   ];
-
 
   function onLayerClick(info) {
     if (mode !== ViewMode) {
@@ -177,7 +152,7 @@ export function Scatterplot({ radius = 30 }) {
           controller={true}
           onClick={onLayerClick}
         ></DeckGL>
-        <Toolbox
+        {/* <Toolbox
           mode={mode}
           onSetMode={(m) => {
             setModeConfig(null);
@@ -188,18 +163,14 @@ export function Scatterplot({ radius = 30 }) {
           geoJson={features}
           onSetGeoJson={setFeatures}
           onImport={setFeatures}
-        />
+        /> */}
         <Toolbox2
           mode={mode}
-          onSetMode={(m) => {
-            setModeConfig(null);
-            setMode(m);
-          }}
+          setMode={setMode}
           modeConfig={modeConfig}
-          onSetModeConfig={setModeConfig}
-          geoJson={features}
-          onSetGeoJson={setFeatures}
-          onImport={setFeatures}
+          setModeConfig={setModeConfig}
+          features={mode}
+          setFeatures={setFeatures}
         />
       </div>
     </>

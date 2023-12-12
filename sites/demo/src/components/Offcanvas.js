@@ -4,6 +4,7 @@ import Offcanvas from "react-bootstrap/Offcanvas";
 
 import {
   ObsColsList,
+  ObsmKeysList,
   VarNamesList,
   SELECTION_MODES,
 } from "@haniffalab/cherita-react";
@@ -27,7 +28,9 @@ export function OffcanvasObsm({ show, handleClose }) {
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Embedding space</Offcanvas.Title>
       </Offcanvas.Header>
-      <Offcanvas.Body>UMAP</Offcanvas.Body>
+      <Offcanvas.Body>
+        <ObsmKeysList />
+      </Offcanvas.Body>
     </Offcanvas>
   );
 }

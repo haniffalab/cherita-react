@@ -21,11 +21,11 @@ function binContinuous(data, nBins = N_BINS) {
   return data;
 }
 
-function binDiscrete(data, nBins = N_BINS){
-  const binSize = _.round((data.n_values) * (1/nBins));
+function binDiscrete(data, nBins = N_BINS) {
+  const binSize = _.round(data.n_values * (1 / nBins));
   data.bins = {
     nBins: nBins,
-    binSize: binSize
+    binSize: binSize,
   };
   return data;
 }

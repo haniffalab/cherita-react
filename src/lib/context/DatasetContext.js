@@ -8,6 +8,7 @@ export function DatasetProvider({ dataset_url, children }) {
   const [dataset, dispatch] = useReducer(datasetReducer, {
     url: dataset_url,
     selectedObs: null,
+    selectedObsm: null,
     selectedVar: null,
     selectedMultiObs: [],
     selectedMultiVar: [],
@@ -50,6 +51,9 @@ function datasetReducer(dataset, action) {
     case "obsSelected": {
       return { ...dataset, selectedObs: action.obs };
     }
+    case "obsmSelected": {
+      return { ...dataset, selectedObsm: action.obsm };
+    }
     case "varSelected": {
       return { ...dataset, selectedVar: action.var };
     }
@@ -65,12 +69,6 @@ function datasetReducer(dataset, action) {
         selectedMultiVar: dataset.selectedMultiVar.filter(
           (a) => a !== action.var
         ),
-      };
-    }
-    case "embeddingSelected": {
-      return {
-        ...dataset,
-        embedding: action.embedding,
       };
     }
     case "set.controls.colorScale": {
