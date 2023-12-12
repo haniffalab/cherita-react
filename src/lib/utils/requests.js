@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { useDebounce } from "@uidotdev/usehooks";
+import { useQuery } from "@tanstack/react-query";
 
 export async function fetchData(endpoint, params, signal = null) {
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -18,75 +19,37 @@ export async function fetchData(endpoint, params, signal = null) {
   return await response.json();
 }
 
-export const useFetch = (endpoint, params, deps = []) => {
-  const [fetchedData, setFetchedData] = useState([]);
-  const [isPending, setIsPending] = useState(false);
-  const [serverError, setServerError] = useState(null);
-
-  useEffect(() => {
-    const abortController = new AbortController();
-    setIsPending(true);
-    fetchData(endpoint, params, abortController.signal)
-      .then((data) => {
-        setIsPending(false);
-        setFetchedData(data);
-        setServerError(null);
-      })
-      .catch((response) => {
-        setIsPending(false);
-        if (response.name !== "AbortError") {
-          response.json().then((json) => {
-            setServerError(json.message);
-            console.log(json.message);
-          });
-        }
-      });
-    return () => {
-      abortController.abort();
-    };
-  }, [endpoint, params, ...deps]);
+export const useFetch = (endpoint, params, opts = null) => {
+  const {
+    data: fetchedData,
+    isPending,
+    error: serverError,
+  } = useQuery({
+    queryKey: [endpoint, params],
+    queryFn: ({ signal }) => fetchData(endpoint, params, signal),
+    ...opts,
+  });
 
   return { fetchedData, isPending, serverError };
 };
 
-export const useDebouncedFetch = (endpoint, params, delay = 500, deps = []) => {
-  const [fetchedData, setFetchedData] = useState([]);
-  const [isPending, setIsPending] = useState(false);
-  const [serverError, setServerError] = useState(null);
+export const useDebouncedFetch = (
+  endpoint,
+  params,
+  delay = 500,
+  opts = null
+) => {
+  const debouncedParams = useDebounce(params, delay);
 
-  const fetch = useCallback(
-    (params, signal) => {
-      setIsPending(true);
-      fetchData(endpoint, params, signal)
-        .then((data) => {
-          setIsPending(false);
-          setFetchedData(data);
-          setServerError(null);
-        })
-        .catch((response) => {
-          setIsPending(false);
-          if (response.name !== "AbortError") {
-            response.json().then((json) => {
-              setServerError(json.message);
-              console.log(json.message);
-            });
-          }
-        });
-    },
-    [endpoint]
-  );
-
-  useEffect(() => {
-    const abortController = new AbortController();
-    const handler = setTimeout(
-      () => fetch(params, abortController.signal),
-      delay
-    );
-    return () => {
-      abortController.abort();
-      clearTimeout(handler);
-    };
-  }, [endpoint, params, delay, fetch, ...deps]);
+  const {
+    data: fetchedData,
+    isPending,
+    error: serverError,
+  } = useQuery({
+    queryKey: [endpoint, debouncedParams],
+    queryFn: ({ signal }) => fetchData(endpoint, debouncedParams, signal),
+    ...opts,
+  });
 
   return { fetchedData, isPending, serverError };
 };

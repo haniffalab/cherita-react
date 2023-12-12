@@ -49,11 +49,9 @@ export function ObsColsList() {
     });
   }, [dataset.url]);
 
-  const { fetchedData, isPending, serverError } = useFetch(
-    ENDPOINT,
-    params,
-    []
-  );
+  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
+    refetchOnMount: false,
+  });
 
   useEffect(() => {
     if (!isPending && !serverError) {

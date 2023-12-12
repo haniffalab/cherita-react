@@ -115,7 +115,14 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
   const { fetchedData, isPending, serverError } = useDebouncedFetch(
     ENDPOINT,
     params,
-    500
+    500,
+    {
+      enabled:
+        (mode === VIOLIN_MODES.MULTIKEY && !!params.keys) ||
+        (mode === VIOLIN_MODES.GROUPBY &&
+          !!params.keys.length &&
+          !!params.selectedObs),
+    }
   );
 
   useEffect(() => {

@@ -76,7 +76,8 @@ export function Heatmap() {
   const { fetchedData, isPending, serverError } = useDebouncedFetch(
     ENDPOINT,
     params,
-    500
+    500,
+    { enabled: !!params.selectedObs && !!params.selectedMultiVar.length }
   );
 
   useEffect(() => {

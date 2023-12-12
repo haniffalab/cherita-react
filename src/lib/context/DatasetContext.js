@@ -1,8 +1,10 @@
 import React from "react";
 import { createContext, useContext, useReducer } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const DatasetContext = createContext(null);
 export const DatasetDispatchContext = createContext(null);
+const queryClient = new QueryClient();
 
 export function DatasetProvider({ dataset_url, children }) {
   const [dataset, dispatch] = useReducer(datasetReducer, {
@@ -28,7 +30,9 @@ export function DatasetProvider({ dataset_url, children }) {
   return (
     <DatasetContext.Provider value={dataset}>
       <DatasetDispatchContext.Provider value={dispatch}>
-        {children}
+        <QueryClientProvider client={queryClient}>
+          {children}
+        </QueryClientProvider>
       </DatasetDispatchContext.Provider>
     </DatasetContext.Provider>
   );
