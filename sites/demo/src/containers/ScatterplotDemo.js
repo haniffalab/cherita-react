@@ -50,7 +50,7 @@ export default function ScatterplotDemo({ dataset_url }) {
                     <Nav.Link onClick={handleShowVars}>Features</Nav.Link>
                   </Nav.Item>
                   <Nav.Item>
-                    <Nav.Link onClick={handleShowObsm}>Space</Nav.Link>
+                    <Nav.Link onClick={handleShowObsm}>Embedding</Nav.Link>
                   </Nav.Item>
                 </Nav>
                 <Nav className="d-flex">
