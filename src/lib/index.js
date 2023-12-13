@@ -1,4 +1,5 @@
 export { ObsColsList } from "./components/obs-list/ObsList";
+export { ObsmKeysList } from "./components/obsm-list/ObsmList";
 export { VarNamesList } from "./components/var-list/VarList";
 export { Heatmap, HeatmapControls } from "./components/heatmap/Heatmap";
 export { Dotplot, DotplotControls } from "./components/dotplot/Dotplot";
