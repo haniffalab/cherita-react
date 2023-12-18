@@ -13,21 +13,21 @@ function binContinuous(data, nBins = N_BINS) {
   const thresholds = _.range(nBins + 1).map((b) => {
     return data.min + binSize * b;
   });
-  data.bins = {
+  const bins = {
     nBins: nBins,
     binSize: binSize,
     thresholds: thresholds,
   };
-  return data;
+  return { ...data, ...bins };
 }
 
 function binDiscrete(data, nBins = N_BINS) {
   const binSize = _.round(data.n_values * (1 / nBins));
-  data.bins = {
+  const bins = {
     nBins: nBins,
     binSize: binSize,
   };
-  return data;
+  return { ...data, ...bins };
 }
 
 export function ObsColsList() {
@@ -99,7 +99,7 @@ export function ObsColsList() {
           <p>Max: {item.max}</p>
           <p>Mean: {item.mean}</p>
           <p>Median: {item.median}</p>
-          <p>NBins: {item.bins.nBins}</p>
+          <p>NBins: {item.nBins}</p>
         </Accordion.Body>
       </Accordion.Item>
     );
