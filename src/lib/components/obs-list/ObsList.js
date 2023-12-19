@@ -3,7 +3,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import _ from "lodash";
 import React, { useEffect, useState, useMemo } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { fetchData } from "../../utils/requests";
+import { useFetch } from "../../utils/requests";
 import { Accordion, ListGroup } from "react-bootstrap";
 
 const N_BINS = 5;
@@ -13,50 +13,61 @@ function binContinuous(data, nBins = N_BINS) {
   const thresholds = _.range(nBins + 1).map((b) => {
     return data.min + binSize * b;
   });
-  data.bins = {
+  const bins = {
     nBins: nBins,
     binSize: binSize,
     thresholds: thresholds,
   };
-  return data;
+  return { ...data, ...bins };
 }
 
 function binDiscrete(data, nBins = N_BINS) {
   const binSize = _.round(data.n_values * (1 / nBins));
-  data.bins = {
+  const bins = {
     nBins: nBins,
     binSize: binSize,
   };
-  return data;
+  return { ...data, ...bins };
 }
 
 export function ObsColsList() {
+  const ENDPOINT = "obs/cols";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [obsColsList, setObsColsList] = useState([]);
   const [active, setActive] = useState(null);
+  const [params, setParams] = useState({
+    url: dataset.url,
+  });
 
   useEffect(() => {
-    fetchData("obs/cols", { url: dataset.url })
-      .then((data) => {
-        setObsColsList(
-          data.map((d) => {
-            if (d.type === "continuous") {
-              d = binContinuous(d);
-            }
-            if (d.type === "discrete") {
-              d = binDiscrete(d);
-            }
-            return d;
-          })
-        );
-      })
-      .catch((response) => {
-        response.json().then((json) => {
-          console.log(json.message);
-        });
-      });
+    setParams((p) => {
+      return {
+        ...p,
+        url: dataset.url,
+      };
+    });
   }, [dataset.url]);
+
+  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
+    refetchOnMount: false,
+  });
+
+  useEffect(() => {
+    if (!isPending && !serverError) {
+      setObsColsList(
+        fetchedData.map((d) => {
+          if (d.type === "continuous") {
+            d = binContinuous(d);
+          }
+          if (d.type === "discrete") {
+            d = binDiscrete(d);
+          }
+          return d;
+        })
+      );
+    }
+  }, [fetchedData, isPending, serverError]);
 
   useEffect(() => {
     if (dataset.selectedObs) {
@@ -88,7 +99,7 @@ export function ObsColsList() {
           <p>Max: {item.max}</p>
           <p>Mean: {item.mean}</p>
           <p>Median: {item.median}</p>
-          <p>NBins: {item.bins.nBins}</p>
+          <p>NBins: {item.nBins}</p>
         </Accordion.Body>
       </Accordion.Item>
     );

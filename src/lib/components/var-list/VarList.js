@@ -1,28 +1,39 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
-import { fetchData } from "../../utils/requests";
+import { useFetch } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { SELECTION_MODES } from "../../constants/constants";
 
 export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
+  const ENDPOINT = "var/names";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [varNames, setVarNames] = useState([]);
   const [active, setActive] = useState(
     mode === SELECTION_MODES.SINGLE ? null : []
   );
+  const [params, setParams] = useState({
+    url: dataset.url,
+  });
 
   useEffect(() => {
-    fetchData("var/names", { url: dataset.url })
-      .then((data) => {
-        setVarNames(data);
-      })
-      .catch((response) => {
-        response.json().then((json) => {
-          console.log(json.message);
-        });
-      });
+    setParams((p) => {
+      return {
+        ...p,
+        url: dataset.url,
+      };
+    });
   }, [dataset.url]);
+
+  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
+    refetchOnMount: false,
+  });
+
+  useEffect(() => {
+    if (!isPending && !serverError) {
+      setVarNames(fetchedData);
+    }
+  }, [fetchedData, isPending, serverError]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.SINGLE && dataset.selectedVar) {

@@ -1,25 +1,36 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
-import { fetchData } from "../../utils/requests";
+import { useFetch } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export function ObsmKeysList() {
+  const ENDPOINT = "obsm/keys";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [obsmKeysList, setObsmKeysList] = useState([]);
   const [active, setActive] = useState(null);
+  const [params, setParams] = useState({
+    url: dataset.url,
+  });
 
   useEffect(() => {
-    fetchData("obsm/keys", { url: dataset.url })
-      .then((data) => {
-        setObsmKeysList(data);
-      })
-      .catch((response) => {
-        response.json().then((json) => {
-          console.log(json.message);
-        });
-      });
+    setParams((p) => {
+      return {
+        ...p,
+        url: dataset.url,
+      };
+    });
   }, [dataset.url]);
+
+  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
+    refetchOnMount: false,
+  });
+
+  useEffect(() => {
+    if (!isPending && !serverError) {
+      setObsmKeysList(fetchedData);
+    }
+  }, [fetchedData, isPending, serverError]);
 
   useEffect(() => {
     if (dataset.selectedObsm) {

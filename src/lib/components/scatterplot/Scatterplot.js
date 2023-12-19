@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
-import { React, useCallback, useEffect, useState } from "react";
+import { React, useEffect, useState } from "react";
 import _ from "lodash";
 import chroma from "chroma-js";
 import DeckGL from "@deck.gl/react";
