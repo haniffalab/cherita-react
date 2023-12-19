@@ -1,4 +1,5 @@
 import React from "react";
+import _ from "lodash";
 import { createContext, useContext, useReducer } from "react";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
@@ -26,29 +27,48 @@ const persistOptions = {
       return false;
     },
   },
+  // @TODO: add maxAge and buster
+};
+
+const initialDataset = {
+  selectedObs: null,
+  selectedObsm: null,
+  selectedVar: null,
+  selectedMultiObs: [],
+  selectedMultiVar: [],
+  controls: {
+    colorScale: "Viridis",
+    colorAxis: {
+      dmin: 0,
+      dmax: 1,
+      cmin: 0,
+      cmax: 1,
+    },
+    standardScale: null,
+    meanOnlyExpressed: false,
+    expressionCutoff: 0.0,
+  },
+};
+
+const initializer = (initialState) => {
+  // @TODO: nest within meaningful key
+  const localObj = JSON.parse(localStorage.getItem(initialState.url)) || {};
+  const keys = _.keys(initialState);
+  const localValues = _.pick(localObj, keys);
+  return _.assign(initialState, localValues);
+  // @TODO: add validation step for each selection (e.g. selectedObs is actually part of dataset obs)
+  // probably in a state initializer
 };
 
 export function DatasetProvider({ dataset_url, children }) {
-  const [dataset, dispatch] = useReducer(datasetReducer, {
-    url: dataset_url,
-    selectedObs: null,
-    selectedObsm: null,
-    selectedVar: null,
-    selectedMultiObs: [],
-    selectedMultiVar: [],
-    controls: {
-      colorScale: "Viridis",
-      colorAxis: {
-        dmin: 0,
-        dmax: 1,
-        cmin: 0,
-        cmax: 1,
-      },
-      standardScale: null,
-      meanOnlyExpressed: false,
-      expressionCutoff: 0.0,
+  const [dataset, dispatch] = useReducer(
+    datasetReducer,
+    {
+      url: dataset_url,
+      ...initialDataset,
     },
-  });
+    initializer
+  );
 
   return (
     <DatasetContext.Provider value={dataset}>

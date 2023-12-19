@@ -91,7 +91,9 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
       : []
   );
   const [active, setActive] = useState(
-    mode === SELECTION_MODES.SINGLE ? null : []
+    mode === SELECTION_MODES.SINGLE
+      ? dataset.selectVar
+      : dataset.selectedMultiVar
   );
   const [params, setParams] = useState({
     url: dataset.url,
