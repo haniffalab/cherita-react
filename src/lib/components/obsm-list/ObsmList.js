@@ -1,6 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
-import { fetchData, useFetch } from "../../utils/requests";
+import { useFetch } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export function ObsmKeysList() {

@@ -1,10 +1,32 @@
 import React from "react";
 import { createContext, useContext, useReducer } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 
 export const DatasetContext = createContext(null);
 export const DatasetDispatchContext = createContext(null);
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24,
+    },
+  },
+});
+const persistKeys = ["obs/cols", "var/names", "obsm/keys"];
+const persistOptions = {
+  persister: createSyncStoragePersister({
+    storage: window.localStorage,
+  }),
+  dehydrateOptions: {
+    shouldDehydrateQuery: ({ queryKey, state }) => {
+      if (state.status === "success") {
+        return persistKeys.includes(queryKey?.[0]);
+      }
+      return false;
+    },
+  },
+};
 
 export function DatasetProvider({ dataset_url, children }) {
   const [dataset, dispatch] = useReducer(datasetReducer, {
@@ -31,9 +53,12 @@ export function DatasetProvider({ dataset_url, children }) {
   return (
     <DatasetContext.Provider value={dataset}>
       <DatasetDispatchContext.Provider value={dispatch}>
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={persistOptions}
+        >
           {children}
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </DatasetDispatchContext.Provider>
     </DatasetContext.Provider>
   );
