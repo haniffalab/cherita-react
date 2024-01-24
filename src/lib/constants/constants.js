@@ -1,3 +1,5 @@
+export const LOCAL_STORAGE_KEY = "CHERITA";
+
 export const PLOTLY_COLORSCALES = [
   "Blackbody",
   "Bluered",

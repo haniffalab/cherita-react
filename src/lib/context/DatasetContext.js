@@ -1,19 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import _ from "lodash";
 import { createContext, useContext, useReducer } from "react";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { LOCAL_STORAGE_KEY } from "../constants/constants";
 
 export const DatasetContext = createContext(null);
 export const DatasetDispatchContext = createContext(null);
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      gcTime: 1000 * 60 * 60 * 24,
+      gcTime: 1000 * 60 * 60 * 24 * 7, // store for a week
     },
   },
 });
+// Type of queries to store responses
 const persistKeys = ["obs/cols", "var/names", "obsm/keys"];
 const persistOptions = {
   persister: createSyncStoragePersister({
@@ -27,7 +29,7 @@ const persistOptions = {
       return false;
     },
   },
-  // @TODO: add maxAge and buster
+  // @TODO: add maxAge and buster (app and api version numbers as busters)
 };
 
 const initialDataset = {
@@ -51,13 +53,13 @@ const initialDataset = {
 };
 
 const initializer = (initialState) => {
-  // @TODO: nest within meaningful key
-  const localObj = JSON.parse(localStorage.getItem(initialState.url)) || {};
+  const localObj =
+    (JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {})[
+      initialState.url
+    ] || {};
   const keys = _.keys(initialState);
   const localValues = _.pick(localObj, keys);
   return _.assign(initialState, localValues);
-  // @TODO: add validation step for each selection (e.g. selectedObs is actually part of dataset obs)
-  // probably in a state initializer
 };
 
 export function DatasetProvider({ dataset_url, children }) {
@@ -69,6 +71,13 @@ export function DatasetProvider({ dataset_url, children }) {
     },
     initializer
   );
+
+  useEffect(() => {
+    localStorage.setItem(
+      LOCAL_STORAGE_KEY,
+      JSON.stringify({ [dataset.url]: dataset })
+    );
+  }, [dataset]);
 
   return (
     <DatasetContext.Provider value={dataset}>
@@ -122,6 +131,12 @@ function datasetReducer(dataset, action) {
         selectedMultiVar: dataset.selectedMultiVar.filter(
           (a) => a !== action.var
         ),
+      };
+    }
+    case "multiVarReset": {
+      return {
+        ...dataset,
+        selectedMultiVar: [],
       };
     }
     case "set.controls.colorScale": {
