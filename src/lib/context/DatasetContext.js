@@ -73,10 +73,23 @@ export function DatasetProvider({ dataset_url, children }) {
   );
 
   useEffect(() => {
-    localStorage.setItem(
-      LOCAL_STORAGE_KEY,
-      JSON.stringify({ [dataset.url]: dataset })
-    );
+    try {
+      localStorage.setItem(
+        LOCAL_STORAGE_KEY,
+        JSON.stringify({ [dataset.url]: dataset })
+      );
+    } catch (err) {
+      if (
+        err.code === 22 ||
+        err.code === 1014 ||
+        err.name === "QuotaExceededError" ||
+        err.name === "NS_ERROR_DOM_QUOTA_REACHED"
+      ) {
+        console.log("Browser storage quota exceeded");
+      } else {
+        console.log(err);
+      }
+    }
   }, [dataset]);
 
   return (
