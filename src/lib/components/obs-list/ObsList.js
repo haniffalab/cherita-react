@@ -80,7 +80,7 @@ export function ObsColsList() {
       <Accordion.Item key={item.name} eventKey={item.name}>
         <Accordion.Header>{item.name}</Accordion.Header>
         <Accordion.Body>
-          <ListGroup>
+          <ListGroup variant="flush">
             {item.values.map((val) => (
               <ListGroup.Item key={val}>{val}</ListGroup.Item>
             ))}
@@ -132,12 +132,15 @@ export function ObsColsList() {
     <div className="">
       <div className="list-group overflow-auto">
         <Accordion
+          flush
           activeKey={active}
           onSelect={(key) => {
-            dispatch({
-              type: "obsSelected",
-              obs: obsColsList.find((obs) => obs.name === key),
-            });
+            if (key != null) {
+              dispatch({
+                type: "obsSelected",
+                obs: obsColsList.find((obs) => obs.name === key),
+              });
+            }
           }}
         >
           {obsList}
