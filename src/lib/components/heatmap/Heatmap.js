@@ -5,6 +5,7 @@ import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { PLOTLY_COLORSCALES } from "../../constants/constants";
 import { useDebouncedFetch } from "../../utils/requests";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 export function HeatmapControls() {
   const dataset = useDataset();
@@ -95,7 +96,8 @@ export function Heatmap() {
 
   if (hasSelections) {
     return (
-      <div className="cherita-heatmap">
+      <div className="cherita-heatmap position-relative">
+        {isPending && <LoadingSpinner />}
         <Plot
           data={data}
           layout={layout}

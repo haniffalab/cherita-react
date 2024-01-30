@@ -16,6 +16,7 @@ import {
   ToggleButton,
   InputGroup,
 } from "react-bootstrap";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 export function DotplotControls() {
   const dataset = useDataset();
@@ -306,7 +307,8 @@ export function Dotplot() {
 
   if (hasSelections) {
     return (
-      <div className="cherita-dotplot">
+      <div className="cherita-dotplot position-relative">
+        {isPending && <LoadingSpinner />}
         <Plot
           data={data}
           layout={layout}

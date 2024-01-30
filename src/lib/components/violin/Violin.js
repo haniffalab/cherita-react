@@ -9,6 +9,7 @@ import {
 } from "../../constants/constants";
 import { ButtonGroup, ButtonToolbar, InputGroup } from "react-bootstrap";
 import { useDebouncedFetch } from "../../utils/requests";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 export function ViolinControls() {
   const dataset = useDataset();
@@ -134,7 +135,8 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
 
   if (hasSelections) {
     return (
-      <div className="cherita-violin">
+      <div className="cherita-violin position-relative">
+        {isPending && <LoadingSpinner />}
         <h5>{mode}</h5>
         <Plot
           data={data}
