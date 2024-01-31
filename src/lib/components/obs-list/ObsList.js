@@ -5,6 +5,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFetch } from "../../utils/requests";
 import { Accordion, ListGroup } from "react-bootstrap";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 const N_BINS = 5;
 
@@ -129,7 +130,8 @@ export function ObsColsList() {
   );
 
   return (
-    <div className="">
+    <div className="position-relative">
+      {isPending && <LoadingSpinner />}
       <div className="list-group overflow-auto">
         <Accordion
           flush
