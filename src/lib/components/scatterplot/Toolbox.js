@@ -1,9 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import Dropdown from "react-bootstrap/Dropdown";
-import { React, useCallback, useEffect, useState } from "react";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
+import { React } from "react";
 
 import {
   DrawPolygonMode,
@@ -21,7 +18,7 @@ import ButtonGroup from "react-bootstrap/ButtonGroup";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowPointer } from "@fortawesome/free-solid-svg-icons";
 
-export function Toolbox2({ mode, setMode, features, setFeatures }) {
+export function Toolbox({ mode, setMode, features, setFeatures }) {
   const onSelect = (eventKey, event) => {
     console.log(eventKey); // selected event will trigger
     switch (eventKey) {
@@ -51,14 +48,6 @@ export function Toolbox2({ mode, setMode, features, setFeatures }) {
       type: "FeatureCollection",
       features: [],
     });
-  };
-
-  const undo = (eventKey, event) => {
-    console.log(features); // selected event will trigger
-    // setFeatures({
-    //   type: "FeatureCollection",
-    //   features: [],
-    // });
   };
 
   return (
@@ -91,9 +80,6 @@ export function Toolbox2({ mode, setMode, features, setFeatures }) {
         </DropdownButton>
         <Button variant="primary" onClick={deleteFeatures}>
           Delete
-        </Button>
-        <Button variant="primary" onClick={undo}>
-          Undo
         </Button>
       </ButtonGroup>
     </div>

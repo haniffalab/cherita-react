@@ -31,11 +31,13 @@ const persistOptions = {
 export function DatasetProvider({ dataset_url, children }) {
   const [dataset, dispatch] = useReducer(datasetReducer, {
     url: dataset_url,
+    obs: {},
     selectedObs: null,
     selectedObsm: null,
     selectedVar: null,
     selectedMultiObs: [],
     selectedMultiVar: [],
+    colorEncoding: null,
     controls: {
       colorScale: "Viridis",
       colorAxis: {
@@ -47,6 +49,9 @@ export function DatasetProvider({ dataset_url, children }) {
       standardScale: null,
       meanOnlyExpressed: false,
       expressionCutoff: 0.0,
+    },
+    state: {
+      obs: {},
     },
   });
 
@@ -77,6 +82,9 @@ function datasetReducer(dataset, action) {
     case "setDataset": {
       return action.dataset;
     }
+    case "set.obs": {
+      return { ...dataset, obs: action.value };
+    }
     case "obsSelected": {
       return { ...dataset, selectedObs: action.obs };
     }
@@ -103,6 +111,9 @@ function datasetReducer(dataset, action) {
           (a) => a !== action.var
         ),
       };
+    }
+    case "set.colorEncoding": {
+      return { ...dataset, colorEncoding: action.value };
     }
     case "set.controls.colorScale": {
       return {
