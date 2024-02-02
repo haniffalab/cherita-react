@@ -4,7 +4,8 @@ import _ from "lodash";
 import { useFetch } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { SELECTION_MODES } from "../../constants/constants";
-import { Form, FormGroup, Dropdown, Button } from "react-bootstrap";
+import { Alert, Form, FormGroup, Dropdown, Button } from "react-bootstrap";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 export function VarSearchBar({ varNames = [], onSelect }) {
   const [suggestions, setSuggestions] = useState([]);
@@ -198,11 +199,20 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
     });
   }, [active, dispatch, mode, varButtons]);
 
-  return (
-    <div className="">
-      <h4>{mode}</h4>
-      <VarSearchBar varNames={varNames} onSelect={selectVar} />
-      <div className="overflow-auto mt-2">{varList}</div>
-    </div>
-  );
+  if (!serverError) {
+    return (
+      <div className="position-relative">
+        <h4>{mode}</h4>
+        {isPending && <LoadingSpinner />}
+        <VarSearchBar varNames={varNames} onSelect={selectVar} />
+        <div className="overflow-auto mt-2">{varList}</div>
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <Alert variant="danger">{serverError.message}</Alert>
+      </div>
+    );
+  }
 }

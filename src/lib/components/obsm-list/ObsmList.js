@@ -2,6 +2,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
 import { useFetch } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
+import { Alert } from "react-bootstrap";
 
 export function ObsmKeysList() {
   const ENDPOINT = "obsm/keys";
@@ -58,9 +60,18 @@ export function ObsmKeysList() {
     );
   });
 
-  return (
-    <div className="">
-      <div className="list-group overflow-auto mh-100">{obsmList}</div>
-    </div>
-  );
+  if (!serverError) {
+    return (
+      <div className="">
+        {isPending && <LoadingSpinner />}
+        <div className="list-group overflow-auto mh-100">{obsmList}</div>
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <Alert variant="danger">{serverError.message}</Alert>
+      </div>
+    );
+  }
 }

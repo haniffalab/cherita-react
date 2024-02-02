@@ -1,5 +1,4 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import Dropdown from "react-bootstrap/Dropdown";
 import React, { useEffect, useState } from "react";
 import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
@@ -7,7 +6,13 @@ import {
   VIOLIN_MODES,
   VIOLINPLOT_STANDARDSCALES,
 } from "../../constants/constants";
-import { ButtonGroup, ButtonToolbar, InputGroup } from "react-bootstrap";
+import {
+  Alert,
+  Dropdown,
+  ButtonGroup,
+  ButtonToolbar,
+  InputGroup,
+} from "react-bootstrap";
 import { useDebouncedFetch } from "../../utils/requests";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
@@ -133,23 +138,36 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     }
   }, [fetchedData, hasSelections, isPending, serverError]);
 
-  if (hasSelections) {
+  if (!serverError) {
+    if (hasSelections) {
+      return (
+        <div className="cherita-violin position-relative">
+          {isPending && <LoadingSpinner />}
+          <h5>{mode}</h5>
+          <Plot
+            data={data}
+            layout={layout}
+            useResizeHandler={true}
+            style={{ maxWidth: "100%", maxHeight: "100%" }}
+          />
+        </div>
+      );
+    }
     return (
-      <div className="cherita-violin position-relative">
-        {isPending && <LoadingSpinner />}
-        <h5>{mode}</h5>
-        <Plot
-          data={data}
-          layout={layout}
-          useResizeHandler={true}
-          style={{ maxWidth: "100%", maxHeight: "100%" }}
-        />
+      <div className="cherita-violin">
+        {mode === VIOLIN_MODES.MULTIKEY && (
+          <Alert variant="light">Select features</Alert>
+        )}
+        {mode === VIOLIN_MODES.GROUPBY && (
+          <Alert variant="light">Select categories and a feature</Alert>
+        )}
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <Alert variant="danger">{serverError.message}</Alert>
       </div>
     );
   }
-  return (
-    <div className="cherita-violin">
-      <p>Select variables to plot</p>
-    </div>
-  );
 }

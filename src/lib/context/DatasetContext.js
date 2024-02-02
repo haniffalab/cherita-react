@@ -1,6 +1,6 @@
 import React from "react";
 import { createContext, useContext, useReducer } from "react";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryCache } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 
@@ -12,6 +12,11 @@ const queryClient = new QueryClient({
       gcTime: 1000 * 60 * 60 * 24,
     },
   },
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      console.error(error);
+    },
+  }),
 });
 const persistKeys = ["obs/cols", "var/names", "obsm/keys"];
 const persistOptions = {
