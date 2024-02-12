@@ -7,6 +7,7 @@ import {
   DatasetProvider,
   Scatterplot,
   ScatterplotControls,
+  SELECTION_MODES,
 } from "@haniffalab/cherita-react";
 
 import {
@@ -69,7 +70,11 @@ export default function ScatterplotDemo({ dataset_url }) {
           </div>
           <OffcanvasObs show={showObs} handleClose={handleCloseObs} />
           <OffcanvasObsm show={showObsm} handleClose={handleCloseObsm} />
-          <OffcanvasVars show={showVars} handleClose={handleCloseVars} />
+          <OffcanvasVars
+            show={showVars}
+            handleClose={handleCloseVars}
+            mode={SELECTION_MODES.SINGLE}
+          />
           <OffcanvasControls
             show={showControls}
             handleClose={handleCloseControls}

@@ -130,7 +130,10 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
 
   const selectVar = (item) => {
     setVarButtons(() => {
-      if (varButtons.find((v) => v.matrix_index === item.matrix_index)) {
+      if (
+        varButtons[0] &&
+        varButtons.find((v) => v.matrix_index === item.matrix_index)
+      ) {
         return varButtons;
       } else {
         return [...varButtons, item];
@@ -151,7 +154,7 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
 
   const varList = useMemo(() => {
     return varButtons.map((item) => {
-      if (mode === SELECTION_MODES.SINGLE) {
+      if (item && mode === SELECTION_MODES.SINGLE) {
         return (
           <Button
             type="button"
