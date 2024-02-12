@@ -7,6 +7,7 @@ import { useFetch } from "../../utils/requests";
 import { Accordion, ListGroup } from "react-bootstrap";
 import chroma from "chroma-js";
 import { ColorHelper } from "../../helpers/color";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 const N_BINS = 5;
 
@@ -112,7 +113,7 @@ export function ObsColsList() {
       <Accordion.Item key={item.name} eventKey={item.name}>
         <Accordion.Header>{item.name}</Accordion.Header>
         <Accordion.Body>
-          <ListGroup>
+          <ListGroup variant="flush">
             {item.values.map((value, index) => (
               <ListGroup.Item key={index}>
                 {value}
@@ -171,15 +172,19 @@ export function ObsColsList() {
   );
 
   return (
-    <div className="">
+    <div className="position-relative">
+      {isPending && <LoadingSpinner />}
       <div className="list-group overflow-auto">
         <Accordion
+          flush
           activeKey={active}
           onSelect={(key) => {
-            dispatch({
-              type: "obsSelected",
-              obs: obsColsList.find((obs) => obs.name === key),
-            });
+            if (key != null) {
+              dispatch({
+                type: "obsSelected",
+                obs: obsColsList.find((obs) => obs.name === key),
+              });
+            }
           }}
         >
           {obsList}

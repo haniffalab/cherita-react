@@ -9,6 +9,7 @@ import {
 } from "../../constants/constants";
 import { ButtonGroup, ButtonToolbar, InputGroup } from "react-bootstrap";
 import { useDebouncedFetch } from "../../utils/requests";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 export function MatrixplotControls() {
   const dataset = useDataset();
@@ -136,7 +137,8 @@ export function Matrixplot() {
 
   if (hasSelections) {
     return (
-      <div className="cherita-matrixplot">
+      <div className="cherita-matrixplot position-relative">
+        {isPending && <LoadingSpinner />}
         <Plot
           data={data}
           layout={layout}
