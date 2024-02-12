@@ -4,10 +4,10 @@ import _ from "lodash";
 import React, { useEffect, useState, useMemo } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFetch } from "../../utils/requests";
-import { Accordion, ListGroup } from "react-bootstrap";
 import chroma from "chroma-js";
 import { ColorHelper } from "../../helpers/color";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
+import { Accordion, ListGroup, Alert } from "react-bootstrap";
 
 const N_BINS = 5;
 
@@ -64,18 +64,20 @@ export function ObsColsList() {
         fetchedData.reduce((result, key) => {
           const colors = chroma.scale("Accent").colors(key.n_values, "rgb");
           result[key.name] = {
-            is_truncated: key.is_truncated,
-            n_values: key.n_values,
             type: key.type,
-            values: key.values,
-            state: key.values.map((value, index) => {
+          };
+          if (key.type === "categorical") {
+            result[key.name]["is_truncated"] = key.is_truncated;
+            result[key.name]["n_values"] = key.n_values;
+            result[key.name]["values"] = key.values;
+            result[key.name]["state"] = key.values.map((value, index) => {
               return {
                 value: value,
                 color: chroma(colors[index]).rgb(),
                 checked: true,
               };
-            }),
-          };
+            });
+          }
           return result;
         }, {})
       );
@@ -171,25 +173,33 @@ export function ObsColsList() {
     [obsColsList]
   );
 
-  return (
-    <div className="position-relative">
-      {isPending && <LoadingSpinner />}
-      <div className="list-group overflow-auto">
-        <Accordion
-          flush
-          activeKey={active}
-          onSelect={(key) => {
-            if (key != null) {
-              dispatch({
-                type: "obsSelected",
-                obs: obsColsList.find((obs) => obs.name === key),
-              });
-            }
-          }}
-        >
-          {obsList}
-        </Accordion>
+  if (!serverError) {
+    return (
+      <div className="position-relative">
+        <div className="list-group overflow-auto">
+          {isPending && <LoadingSpinner />}
+          <Accordion
+            flush
+            activeKey={active}
+            onSelect={(key) => {
+              if (key != null) {
+                dispatch({
+                  type: "obsSelected",
+                  obs: obsColsList.find((obs) => obs.name === key),
+                });
+              }
+            }}
+          >
+            {obsList}
+          </Accordion>
+        </div>
       </div>
-    </div>
-  );
+    );
+  } else {
+    return (
+      <div>
+        <Alert variant="danger">{serverError.message}</Alert>
+      </div>
+    );
+  }
 }
