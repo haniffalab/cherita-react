@@ -9,6 +9,7 @@ import {
 } from "../../constants/constants";
 import { useDebouncedFetch } from "../../utils/requests";
 import {
+  Alert,
   Button,
   ButtonGroup,
   ButtonToolbar,
@@ -16,6 +17,7 @@ import {
   ToggleButton,
   InputGroup,
 } from "react-bootstrap";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 export function DotplotControls() {
   const dataset = useDataset();
@@ -304,21 +306,30 @@ export function Dotplot() {
     });
   }, [dataset.controls.colorAxis.cmin, dataset.controls.colorAxis.cmax]);
 
-  if (hasSelections) {
+  if (!serverError) {
+    if (hasSelections) {
+      return (
+        <div className="cherita-dotplot position-relative">
+          {isPending && <LoadingSpinner />}
+          <Plot
+            data={data}
+            layout={layout}
+            useResizeHandler={true}
+            style={{ maxWidth: "100%", maxHeight: "100%" }}
+          />
+        </div>
+      );
+    }
     return (
       <div className="cherita-dotplot">
-        <Plot
-          data={data}
-          layout={layout}
-          useResizeHandler={true}
-          style={{ maxWidth: "100%", maxHeight: "100%" }}
-        />
+        <Alert variant="light">Select features and a category</Alert>
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <Alert variant="danger">{serverError.message}</Alert>
       </div>
     );
   }
-  return (
-    <div className="cherita-dotplot">
-      <p>Select OBS and VAR</p>
-    </div>
-  );
 }

@@ -11,7 +11,7 @@ import {
 
 export function OffcanvasObs({ show, handleClose }) {
   return (
-    <Offcanvas show={show} onHide={handleClose}>
+    <Offcanvas show={show} onHide={handleClose} scroll={true} backdrop={false}>
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Categories</Offcanvas.Title>
       </Offcanvas.Header>
@@ -35,14 +35,18 @@ export function OffcanvasObsm({ show, handleClose }) {
   );
 }
 
-export function OffcanvasVars({ show, handleClose }) {
+export function OffcanvasVars({
+  show,
+  handleClose,
+  mode = SELECTION_MODES.MULTIPLE,
+}) {
   return (
     <Offcanvas show={show} onHide={handleClose}>
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Features</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
-        <VarNamesList mode={SELECTION_MODES.MULTIPLE} />
+        <VarNamesList mode={mode} />
       </Offcanvas.Body>
     </Offcanvas>
   );

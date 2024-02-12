@@ -1,10 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import Dropdown from "react-bootstrap/Dropdown";
+import { Alert, Dropdown } from "react-bootstrap";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { PLOTLY_COLORSCALES } from "../../constants/constants";
 import { useDebouncedFetch } from "../../utils/requests";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 export function HeatmapControls() {
   const dataset = useDataset();
@@ -93,21 +94,30 @@ export function Heatmap() {
     updateColorscale(colorscale.current);
   }, [dataset.controls.colorScale, updateColorscale]);
 
-  if (hasSelections) {
+  if (!serverError) {
+    if (hasSelections) {
+      return (
+        <div className="cherita-heatmap position-relative">
+          {isPending && <LoadingSpinner />}
+          <Plot
+            data={data}
+            layout={layout}
+            useResizeHandler={true}
+            style={{ maxWidth: "100%", maxHeight: "100%" }}
+          />
+        </div>
+      );
+    }
     return (
       <div className="cherita-heatmap">
-        <Plot
-          data={data}
-          layout={layout}
-          useResizeHandler={true}
-          style={{ maxWidth: "100%", maxHeight: "100%" }}
-        />
+        <Alert variant="light">Select features and a category</Alert>
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <Alert variant="danger">{serverError.message}</Alert>
       </div>
     );
   }
-  return (
-    <div className="cherita-heatmap">
-      <p>Select OBS and VAR</p>
-    </div>
-  );
 }

@@ -1,5 +1,4 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import Dropdown from "react-bootstrap/Dropdown";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
@@ -7,8 +6,15 @@ import {
   PLOTLY_COLORSCALES,
   MATRIXPLOT_STANDARDSCALES,
 } from "../../constants/constants";
-import { ButtonGroup, ButtonToolbar, InputGroup } from "react-bootstrap";
+import {
+  Alert,
+  Dropdown,
+  ButtonGroup,
+  ButtonToolbar,
+  InputGroup,
+} from "react-bootstrap";
 import { useDebouncedFetch } from "../../utils/requests";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 export function MatrixplotControls() {
   const dataset = useDataset();
@@ -134,21 +140,30 @@ export function Matrixplot() {
     updateColorscale(colorscale.current);
   }, [dataset.controls.colorScale, updateColorscale]);
 
-  if (hasSelections) {
+  if (!serverError) {
+    if (hasSelections) {
+      return (
+        <div className="cherita-matrixplot position-relative">
+          {isPending && <LoadingSpinner />}
+          <Plot
+            data={data}
+            layout={layout}
+            useResizeHandler={true}
+            style={{ maxWidth: "100%", maxHeight: "100%" }}
+          />
+        </div>
+      );
+    }
     return (
       <div className="cherita-matrixplot">
-        <Plot
-          data={data}
-          layout={layout}
-          useResizeHandler={true}
-          style={{ maxWidth: "100%", maxHeight: "100%" }}
-        />
+        <Alert variant="light">Select features and a category</Alert>
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <Alert variant="danger">{serverError.message}</Alert>
       </div>
     );
   }
-  return (
-    <div className="cherita-matrixplot">
-      <p>Select OBS and VAR</p>
-    </div>
-  );
 }

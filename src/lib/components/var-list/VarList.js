@@ -4,7 +4,8 @@ import _ from "lodash";
 import { useFetch } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { SELECTION_MODES } from "../../constants/constants";
-import { Form, FormGroup, Dropdown, Button } from "react-bootstrap";
+import { Alert, Form, FormGroup, Dropdown, Button } from "react-bootstrap";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 export function VarSearchBar({ varNames = [], onSelect }) {
   const [suggestions, setSuggestions] = useState([]);
@@ -164,7 +165,10 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
 
   const selectVar = (item) => {
     setVarButtons(() => {
-      if (varButtons.find((v) => v.matrix_index === item.matrix_index)) {
+      if (
+        varButtons[0] &&
+        varButtons.find((v) => v.matrix_index === item.matrix_index)
+      ) {
         return varButtons;
       } else {
         return [...varButtons, item];
@@ -185,7 +189,7 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
 
   const varList = useMemo(() => {
     return varButtons.map((item) => {
-      if (mode === SELECTION_MODES.SINGLE) {
+      if (item && mode === SELECTION_MODES.SINGLE) {
         return (
           <Button
             type="button"
@@ -232,11 +236,20 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
     });
   }, [active, dispatch, mode, varButtons]);
 
-  return (
-    <div className="">
-      <h4>{mode}</h4>
-      <VarSearchBar varNames={varNames} onSelect={selectVar} />
-      <div className="overflow-auto mt-2">{varList}</div>
-    </div>
-  );
+  if (!serverError) {
+    return (
+      <div className="position-relative">
+        <h4>{mode}</h4>
+        {isPending && <LoadingSpinner />}
+        <VarSearchBar varNames={varNames} onSelect={selectVar} />
+        <div className="overflow-auto mt-2">{varList}</div>
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <Alert variant="danger">{serverError.message}</Alert>
+      </div>
+    );
+  }
 }

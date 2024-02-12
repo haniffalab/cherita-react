@@ -1,8 +1,16 @@
 import { useDebounce } from "@uidotdev/usehooks";
 import { useQuery } from "@tanstack/react-query";
+import { parseError } from "./errors";
 
-export async function fetchData(endpoint, params, signal = null) {
+export async function fetchData(endpoint, params, signal = null, ms = 300000) {
   const apiUrl = process.env.REACT_APP_API_URL;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => {
+    controller.abort(DOMException.TIMEOUT_ERR);
+  }, ms || 300000);
+  if (signal) signal.addEventListener("abort", () => controller.abort());
+
   const response = await fetch(new URL(endpoint, apiUrl), {
     method: "POST",
     mode: "cors",
@@ -11,11 +19,24 @@ export async function fetchData(endpoint, params, signal = null) {
       Accept: "application/json",
     },
     body: JSON.stringify(params),
-    signal: signal,
-  });
+    signal: controller.signal,
+  })
+    .catch((err) => {
+      // Manual check as fetch returns an AbortError regardless of the reason set to the signal
+      if (
+        controller.signal.aborted &&
+        controller.signal.reason === DOMException.TIMEOUT_ERR
+      ) {
+        throw DOMException.TIMEOUT_ERR;
+      }
+      throw err;
+    })
+    .finally(() => clearTimeout(timeout));
+
   if (!response.ok) {
-    throw response;
+    throw await response.json();
   }
+
   return await response.json();
 }
 
@@ -30,7 +51,7 @@ export const useFetch = (endpoint, params, opts = null) => {
     ...opts,
   });
 
-  return { fetchedData, isPending, serverError };
+  return { fetchedData, isPending, serverError: parseError(serverError) };
 };
 
 export const useDebouncedFetch = (
@@ -51,5 +72,5 @@ export const useDebouncedFetch = (
     ...opts,
   });
 
-  return { fetchedData, isPending, serverError };
+  return { fetchedData, isPending, serverError: parseError(serverError) };
 };

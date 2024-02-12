@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import _ from "lodash";
 import { createContext, useContext, useReducer } from "react";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryCache } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { LOCAL_STORAGE_KEY } from "../constants/constants";
@@ -14,6 +14,11 @@ const queryClient = new QueryClient({
       gcTime: 1000 * 60 * 60 * 24 * 7, // store for a week
     },
   },
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      console.error(error);
+    },
+  }),
 });
 // Type of queries to store responses
 const persistKeys = ["obs/cols", "var/names", "obsm/keys"];
@@ -33,11 +38,13 @@ const persistOptions = {
 };
 
 const initialDataset = {
+  obs: {},
   selectedObs: null,
   selectedObsm: null,
   selectedVar: null,
   selectedMultiObs: [],
   selectedMultiVar: [],
+  colorEncoding: null,
   controls: {
     colorScale: "Viridis",
     colorAxis: {
@@ -49,6 +56,9 @@ const initialDataset = {
     standardScale: null,
     meanOnlyExpressed: false,
     expressionCutoff: 0.0,
+  },
+  state: {
+    obs: {},
   },
 };
 
@@ -119,6 +129,9 @@ function datasetReducer(dataset, action) {
     case "setDataset": {
       return action.dataset;
     }
+    case "set.obs": {
+      return { ...dataset, obs: action.value };
+    }
     case "obsSelected": {
       return { ...dataset, selectedObs: action.obs };
     }
@@ -145,6 +158,9 @@ function datasetReducer(dataset, action) {
           (a) => a !== action.var
         ),
       };
+    }
+    case "set.colorEncoding": {
+      return { ...dataset, colorEncoding: action.value };
     }
     case "multiVarReset": {
       return {
