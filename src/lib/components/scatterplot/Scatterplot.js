@@ -1,25 +1,23 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import Dropdown from "react-bootstrap/Dropdown";
-import { React, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import _ from "lodash";
 import chroma from "chroma-js";
 import DeckGL from "@deck.gl/react";
 import { ScatterplotLayer } from "@deck.gl/layers";
+import { EditableGeoJsonLayer } from "@nebula.gl/layers";
+import { ViewMode } from "@nebula.gl/edit-modes";
+import Dropdown from "react-bootstrap/Dropdown";
+
+import { Toolbox } from "./Toolbox";
+import { Legend } from "./Legend";
+import {
+  PLOTLY_COLORSCALES,
+  CHROMA_COLORSCALES,
+} from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { MapHelper } from "../../helpers/map";
 import { ZarrHelper, GET_OPTIONS } from "../../helpers/zarr";
-import Button from "react-bootstrap/Button";
-
-import { EditableGeoJsonLayer, DrawPolygonMode } from "@nebula.gl/layers";
-
-import {
-  ViewMode,
-  DrawPolygonByDraggingMode,
-  ModifyMode,
-} from "@nebula.gl/edit-modes";
-
-import { Toolbox } from "@nebula.gl/editor";
-import { Toolbox2 } from "./Toolbox";
+import { ColorHelper } from "../../helpers/color";
 
 window.deck.log.level = 1;
 
@@ -27,18 +25,41 @@ export function ScatterplotControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
 
-  return <></>;
+  const colormapList = PLOTLY_COLORSCALES.map((item) => (
+    <Dropdown.Item
+      key={item}
+      active={dataset.controls.colorScale === item}
+      onClick={() => {
+        dispatch({
+          type: "set.controls.colorScale",
+          colorScale: item,
+        });
+      }}
+    >
+      {item}
+    </Dropdown.Item>
+  ));
+
+  return (
+    <Dropdown>
+      <Dropdown.Toggle id="dropdownColorscale" variant="light">
+        {dataset.controls.colorScale}
+      </Dropdown.Toggle>
+      <Dropdown.Menu>{colormapList}</Dropdown.Menu>
+    </Dropdown>
+  );
 }
 
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
+  const dispatch = useDatasetDispatch();
   const [features, setFeatures] = useState({
     type: "FeatureCollection",
     features: [],
   });
   const [mode, setMode] = useState(() => ViewMode);
-  const [modeConfig, setModeConfig] = useState({});
   const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
+  let [featureState, setFeatureState] = useState([]);
   let [data, setData] = useState([]);
   let [position, setPosition] = useState([]);
   let [values, setValues] = useState([]);
@@ -53,20 +74,23 @@ export function Scatterplot({ radius = 30 }) {
 
   useEffect(() => {
     setData(function (prevState, props) {
-      var colorScale = chroma
-        .scale(["yellow", "008ae5"])
-        .domain([_.min(values), _.max(values)]);
+      const colorHelper = new ColorHelper();
+      let scale =
+        dataset.colorEncoding === "var"
+          ? colorHelper.getScale(dataset, values)
+          : null;
+
       var data = position.map(function (e, i) {
         return {
           index: i,
           position: [position[i][0], position[i][1]],
           value: values[i],
-          color: colorScale(values[i]).rgb(),
+          color: colorHelper.getColor(dataset, values[i], scale),
         };
       });
       return data;
     });
-  }, [position, values]);
+  }, [position, values, dataset.controls.colorScale]);
 
   useEffect(() => {
     if (dataset.selectedObsm) {
@@ -104,16 +128,43 @@ export function Scatterplot({ radius = 30 }) {
           .get([null, dataset.selectedVar.matrix_index], GET_OPTIONS)
           .then((result) => {
             setValues(result.data);
+
+            dispatch({
+              type: "set.colorEncoding",
+              value: "var",
+            });
           });
       };
 
       fetchData().catch(console.error);
     }
-  }, [dataset.url, dataset.selectedObs, dataset.selectedVar]);
+  }, [dataset.url, dataset.selectedVar]);
+
+  useEffect(() => {
+    if (dataset.selectedObs) {
+      const zarrHelper = new ZarrHelper();
+      const fetchData = async () => {
+        const z = await zarrHelper.open(
+          dataset.url,
+          "obs/" + dataset.selectedObs.name + "/codes"
+        );
+
+        await z.get().then((result) => {
+          setValues(result.data);
+          dispatch({
+            type: "set.colorEncoding",
+            value: "obs",
+          });
+        });
+      };
+
+      fetchData().catch(console.error);
+    }
+  }, [dataset.url, dataset.selectedObs]);
 
   const layers = [
     new ScatterplotLayer({
-      id: "scatter-plot",
+      id: "cherita-layer-scatterplot",
       data,
       radiusScale: radius,
       radiusMinPixels: 1,
@@ -122,14 +173,25 @@ export function Scatterplot({ radius = 30 }) {
       getRadius: 1,
     }),
     new EditableGeoJsonLayer({
-      // id: "geojson-layer",
+      id: "cherita-layer-draw",
       data: features,
       mode,
-      modeConfig,
       selectedFeatureIndexes,
-
-      onEdit: ({ updatedData }) => {
+      onEdit: ({ updatedData, editType, editContext }) => {
         setFeatures(updatedData);
+        let updatedSelectedFeatureIndexes = selectedFeatureIndexes;
+        setFeatureState({
+          data: updatedData,
+        });
+        if (editType === "addFeature") {
+          // when a drawing is complete, the value of editType becomes addFeature
+          const { featureIndexes } = editContext; //extracting indexes of current features selected
+          updatedSelectedFeatureIndexes = [
+            ...selectedFeatureIndexes,
+            ...featureIndexes,
+          ];
+        }
+        setSelectedFeatureIndexes(updatedSelectedFeatureIndexes); //now update your state
       },
     }),
   ];
@@ -152,26 +214,13 @@ export function Scatterplot({ radius = 30 }) {
           controller={true}
           onClick={onLayerClick}
         ></DeckGL>
-        {/* <Toolbox
-          mode={mode}
-          onSetMode={(m) => {
-            setModeConfig(null);
-            setMode(m);
-          }}
-          modeConfig={modeConfig}
-          onSetModeConfig={setModeConfig}
-          geoJson={features}
-          onSetGeoJson={setFeatures}
-          onImport={setFeatures}
-        /> */}
-        <Toolbox2
+        <Toolbox
           mode={mode}
           setMode={setMode}
-          modeConfig={modeConfig}
-          setModeConfig={setModeConfig}
           features={mode}
           setFeatures={setFeatures}
         />
+        <Legend values={values} />
       </div>
     </>
   );

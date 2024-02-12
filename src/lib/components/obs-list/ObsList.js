@@ -4,6 +4,8 @@ import _ from "lodash";
 import React, { useEffect, useState, useMemo } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFetch } from "../../utils/requests";
+import chroma from "chroma-js";
+import { ColorHelper } from "../../helpers/color";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
 import { Accordion, ListGroup, Alert } from "react-bootstrap";
 
@@ -36,10 +38,12 @@ export function ObsColsList() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [obsColsList, setObsColsList] = useState([]);
+  const [obs, setObs] = useState([]);
   const [active, setActive] = useState(null);
   const [params, setParams] = useState({
     url: dataset.url,
   });
+  const colorHelper = new ColorHelper();
 
   useEffect(() => {
     setParams((p) => {
@@ -56,6 +60,27 @@ export function ObsColsList() {
 
   useEffect(() => {
     if (!isPending && !serverError) {
+      setObs(
+        fetchedData.reduce((result, key) => {
+          const colors = chroma.scale("Accent").colors(key.n_values, "rgb");
+          result[key.name] = {
+            type: key.type,
+          };
+          if (key.type === "categorical") {
+            result[key.name]["is_truncated"] = key.is_truncated;
+            result[key.name]["n_values"] = key.n_values;
+            result[key.name]["values"] = key.values;
+            result[key.name]["state"] = key.values.map((value, index) => {
+              return {
+                value: value,
+                color: chroma(colors[index]).rgb(),
+                checked: true,
+              };
+            });
+          }
+          return result;
+        }, {})
+      );
       setObsColsList(
         fetchedData.map((d) => {
           if (d.type === "continuous") {
@@ -76,14 +101,33 @@ export function ObsColsList() {
     }
   }, [dataset.selectedObs]);
 
+  useEffect(() => {
+    dispatch({
+      type: "set.obs",
+      value: obs,
+    });
+  }, [obs, dispatch]);
+
   function categoricalList(item) {
+    console.log(obs);
+
     return (
       <Accordion.Item key={item.name} eventKey={item.name}>
         <Accordion.Header>{item.name}</Accordion.Header>
         <Accordion.Body>
           <ListGroup variant="flush">
-            {item.values.map((val) => (
-              <ListGroup.Item key={val}>{val}</ListGroup.Item>
+            {item.values.map((value, index) => (
+              <ListGroup.Item key={index}>
+                {value}
+                <span
+                  className="cm-string cm-color"
+                  style={{
+                    backgroundColor: `rgb(${
+                      obs[item.name]["state"][index]["color"]
+                    })`,
+                  }}
+                ></span>
+              </ListGroup.Item>
             ))}
           </ListGroup>
         </Accordion.Body>
