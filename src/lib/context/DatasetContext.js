@@ -1,15 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
+import _ from "lodash";
 import { createContext, useContext, useReducer } from "react";
 import { QueryClient, QueryCache } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { LOCAL_STORAGE_KEY } from "../constants/constants";
 
 export const DatasetContext = createContext(null);
 export const DatasetDispatchContext = createContext(null);
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      gcTime: 1000 * 60 * 60 * 24,
+      gcTime: 1000 * 60 * 60 * 24 * 7, // store for a week
     },
   },
   queryCache: new QueryCache({
@@ -18,6 +20,7 @@ const queryClient = new QueryClient({
     },
   }),
 });
+// Type of queries to store responses
 const persistKeys = ["obs/cols", "var/names", "obsm/keys"];
 const persistOptions = {
   persister: createSyncStoragePersister({
@@ -31,34 +34,73 @@ const persistOptions = {
       return false;
     },
   },
+  // @TODO: add maxAge and buster (app and api version numbers as busters)
+};
+
+const initialDataset = {
+  obs: {},
+  selectedObs: null,
+  selectedObsm: null,
+  selectedVar: null,
+  selectedMultiObs: [],
+  selectedMultiVar: [],
+  colorEncoding: null,
+  controls: {
+    colorScale: "Viridis",
+    colorAxis: {
+      dmin: 0,
+      dmax: 1,
+      cmin: 0,
+      cmax: 1,
+    },
+    standardScale: null,
+    meanOnlyExpressed: false,
+    expressionCutoff: 0.0,
+  },
+  state: {
+    obs: {},
+  },
+};
+
+const initializer = (initialState) => {
+  const localObj =
+    (JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {})[
+      initialState.url
+    ] || {};
+  const keys = _.keys(initialState);
+  const localValues = _.pick(localObj, keys);
+  return _.assign(initialState, localValues);
 };
 
 export function DatasetProvider({ dataset_url, children }) {
-  const [dataset, dispatch] = useReducer(datasetReducer, {
-    url: dataset_url,
-    obs: {},
-    selectedObs: null,
-    selectedObsm: null,
-    selectedVar: null,
-    selectedMultiObs: [],
-    selectedMultiVar: [],
-    colorEncoding: null,
-    controls: {
-      colorScale: "Viridis",
-      colorAxis: {
-        dmin: 0,
-        dmax: 1,
-        cmin: 0,
-        cmax: 1,
-      },
-      standardScale: null,
-      meanOnlyExpressed: false,
-      expressionCutoff: 0.0,
+  const [dataset, dispatch] = useReducer(
+    datasetReducer,
+    {
+      url: dataset_url,
+      ...initialDataset,
     },
-    state: {
-      obs: {},
-    },
-  });
+    initializer
+  );
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        LOCAL_STORAGE_KEY,
+        JSON.stringify({ [dataset.url]: dataset })
+      );
+    } catch (err) {
+      if (
+        err.code === 22 ||
+        err.code === 1014 ||
+        err.name === "QuotaExceededError" ||
+        err.name === "NS_ERROR_DOM_QUOTA_REACHED"
+      ) {
+        console.log("Browser storage quota exceeded");
+      } else {
+        console.log(err);
+      }
+    }
+  }, [dataset]);
 
   return (
     <DatasetContext.Provider value={dataset}>
@@ -119,6 +161,12 @@ function datasetReducer(dataset, action) {
     }
     case "set.colorEncoding": {
       return { ...dataset, colorEncoding: action.value };
+    }
+    case "multiVarReset": {
+      return {
+        ...dataset,
+        selectedMultiVar: [],
+      };
     }
     case "set.controls.colorScale": {
       return {

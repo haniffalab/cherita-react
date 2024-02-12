@@ -1,5 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import _ from "lodash";
 import { useFetch } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
@@ -84,6 +84,7 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [varNames, setVarNames] = useState([]);
+  const [updatedVarNames, setUpdatedVarNames] = useState(false);
   const [varButtons, setVarButtons] = useState(
     mode
       ? mode === SELECTION_MODES.SINGLE
@@ -92,7 +93,9 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
       : []
   );
   const [active, setActive] = useState(
-    mode === SELECTION_MODES.SINGLE ? null : []
+    mode === SELECTION_MODES.SINGLE
+      ? dataset.selectVar
+      : dataset.selectedMultiVar
   );
   const [params, setParams] = useState({
     url: dataset.url,
@@ -111,23 +114,54 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
     refetchOnMount: false,
   });
 
+  const validateSelection = useCallback(
+    (selectedVar, mode) => {
+      if (updatedVarNames) {
+        if (mode === SELECTION_MODES.SINGLE) {
+          if (selectedVar && !_.some(varNames, selectedVar)) {
+            setActive(null);
+            dispatch({
+              type: "varSelected",
+              var: null,
+            });
+          }
+        } else {
+          if (
+            selectedVar.length &&
+            !_.every(selectedVar, (v) => _.some(varNames, v))
+          ) {
+            setActive([]);
+            dispatch({
+              type: "multiVarReset",
+              var: [],
+            });
+          }
+        }
+      }
+    },
+    [dispatch, varNames, updatedVarNames]
+  );
+
   useEffect(() => {
     if (!isPending && !serverError) {
       setVarNames(fetchedData);
+      setUpdatedVarNames(true);
     }
   }, [fetchedData, isPending, serverError]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.SINGLE && dataset.selectedVar) {
+      validateSelection(dataset.selectVar, mode);
       setActive(dataset.selectedVar.matrix_index);
     }
-  }, [mode, dataset.selectedVar]);
+  }, [mode, dataset.selectedVar, dataset.selectVar, validateSelection]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.MULTIPLE) {
+      validateSelection(dataset.selectedMultiVar, mode);
       setActive(dataset.selectedMultiVar.map((i) => i.matrix_index));
     }
-  }, [mode, dataset.selectedMultiVar]);
+  }, [mode, dataset.selectedMultiVar, validateSelection]);
 
   const selectVar = (item) => {
     setVarButtons(() => {

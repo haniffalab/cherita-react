@@ -1,7 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import _ from "lodash";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFetch } from "../../utils/requests";
 import chroma from "chroma-js";
@@ -39,6 +39,7 @@ export function ObsColsList() {
   const dispatch = useDatasetDispatch();
   const [obsColsList, setObsColsList] = useState([]);
   const [obs, setObs] = useState([]);
+  const [updatedObsColsList, setUpdatedObsColsList] = useState(false);
   const [active, setActive] = useState(null);
   const [params, setParams] = useState({
     url: dataset.url,
@@ -57,6 +58,21 @@ export function ObsColsList() {
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
     refetchOnMount: false,
   });
+
+  const validateSelection = useCallback(
+    (selectedObs) => {
+      if (updatedObsColsList) {
+        if (!_.some(obsColsList, selectedObs)) {
+          setActive(null);
+          dispatch({
+            type: "obsSelected",
+            obs: null,
+          });
+        }
+      }
+    },
+    [dispatch, obsColsList, updatedObsColsList]
+  );
 
   useEffect(() => {
     if (!isPending && !serverError) {
@@ -92,14 +108,16 @@ export function ObsColsList() {
           return d;
         })
       );
+      setUpdatedObsColsList(true);
     }
   }, [fetchedData, isPending, serverError]);
 
   useEffect(() => {
     if (dataset.selectedObs) {
+      validateSelection(dataset.selectedObs);
       setActive(dataset.selectedObs.name);
     }
-  }, [dataset.selectedObs]);
+  }, [dataset.selectedObs, validateSelection]);
 
   useEffect(() => {
     dispatch({
