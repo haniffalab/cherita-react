@@ -1,20 +1,20 @@
 import React, { useEffect } from "react";
 import _ from "lodash";
 import { createContext, useContext, useReducer } from "react";
-import * as ReactQuery from "@tanstack/react-query";
+import { QueryClient, QueryCache } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { LOCAL_STORAGE_KEY } from "../constants/constants";
 
 export const DatasetContext = createContext(null);
 export const DatasetDispatchContext = createContext(null);
-const queryClient = new ReactQuery.QueryClient({
+const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       gcTime: 1000 * 60 * 60 * 24 * 7, // store for a week
     },
   },
-  queryCache: new ReactQuery.QueryCache({
+  queryCache: new QueryCache({
     onError: (error, query) => {
       console.error(error);
     },

@@ -127,8 +127,6 @@ export function ObsColsList() {
   }, [obs, dispatch]);
 
   function categoricalList(item) {
-    console.log(obs);
-
     return (
       <Accordion.Item key={item.name} eventKey={item.name}>
         <Accordion.Header>{item.name}</Accordion.Header>
