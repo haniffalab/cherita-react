@@ -4,7 +4,6 @@ import { parseError } from "./errors";
 
 export async function fetchData(endpoint, params, signal = null, ms = 300000) {
   const apiUrl = process.env.REACT_APP_API_URL;
-
   const controller = new AbortController();
   const timeout = setTimeout(() => {
     controller.abort(DOMException.TIMEOUT_ERR);
@@ -43,7 +42,7 @@ export async function fetchData(endpoint, params, signal = null, ms = 300000) {
 export const useFetch = (endpoint, params, opts = null) => {
   const {
     data: fetchedData,
-    isPending,
+    isLoading: isPending,
     error: serverError,
   } = useQuery({
     queryKey: [endpoint, params],
@@ -64,7 +63,7 @@ export const useDebouncedFetch = (
 
   const {
     data: fetchedData,
-    isPending,
+    isLoading: isPending,
     error: serverError,
   } = useQuery({
     queryKey: [endpoint, debouncedParams],
