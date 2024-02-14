@@ -18,3 +18,10 @@ export {
   VIOLIN_MODES,
 } from "./constants/constants";
 export { DatasetProvider } from "./context/DatasetContext";
+export {
+  OffcanvasObs,
+  OffcanvasObsm,
+  OffcanvasVars,
+  OffcanvasControls,
+  OffcanvasInfo,
+} from "./components/Offcanvas";

@@ -7,14 +7,11 @@ import {
   DatasetProvider,
   Matrixplot,
   MatrixplotControls,
-} from "@haniffalab/cherita-react";
-
-import {
   OffcanvasObs,
   OffcanvasVars,
   OffcanvasControls,
   OffcanvasInfo,
-} from "../components/Offcanvas";
+} from "@haniffalab/cherita-react";
 
 export default function MatrixplotDemo({ dataset_url }) {
   const [showObs, setShowObs] = useState(false);

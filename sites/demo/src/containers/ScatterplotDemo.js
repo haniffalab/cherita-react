@@ -8,15 +8,12 @@ import {
   Scatterplot,
   ScatterplotControls,
   SELECTION_MODES,
-} from "@haniffalab/cherita-react";
-
-import {
   OffcanvasObs,
   OffcanvasObsm,
   OffcanvasVars,
   OffcanvasControls,
   OffcanvasInfo,
-} from "../components/Offcanvas";
+} from "@haniffalab/cherita-react";
 
 export default function ScatterplotDemo({ dataset_url }) {
   const [showObs, setShowObs] = useState(false);

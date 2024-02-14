@@ -7,14 +7,11 @@ import {
   DatasetProvider,
   Dotplot,
   DotplotControls,
-} from "@haniffalab/cherita-react";
-
-import {
   OffcanvasObs,
   OffcanvasVars,
   OffcanvasControls,
   OffcanvasInfo,
-} from "../components/Offcanvas";
+} from "@haniffalab/cherita-react";
 
 export default function DotplotDemo({ dataset_url }) {
   const [showObs, setShowObs] = useState(false);
