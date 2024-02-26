@@ -13,7 +13,7 @@ import {
   OffcanvasInfo,
 } from "@haniffalab/cherita-react";
 
-export default function HeatmapDemo({ dataset_url }) {
+export default function HeatmapDemo(props) {
   const [showObs, setShowObs] = useState(false);
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);
@@ -30,7 +30,7 @@ export default function HeatmapDemo({ dataset_url }) {
   return (
     <Container>
       <div className="cherita-container">
-        <DatasetProvider dataset_url={dataset_url}>
+        <DatasetProvider {...props}>
           <Navbar expand="lg" bg="primary" className="cherita-navbar">
             <Container fluid>
               <Navbar.Toggle aria-controls="navbarScroll" />
