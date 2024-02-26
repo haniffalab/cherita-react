@@ -99,6 +99,7 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
   );
   const [params, setParams] = useState({
     url: dataset.url,
+    col: dataset.varNamesCol,
   });
 
   useEffect(() => {
@@ -106,9 +107,10 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
       return {
         ...p,
         url: dataset.url,
+        col: dataset.varNamesCol,
       };
     });
-  }, [dataset.url]);
+  }, [dataset.url, dataset.varNamesCol]);
 
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
     refetchOnMount: false,
