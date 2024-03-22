@@ -1,7 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import _ from "lodash";
-import chroma from "chroma-js";
+import React, { useEffect, useState } from "react";
 import DeckGL from "@deck.gl/react";
 import { ScatterplotLayer } from "@deck.gl/layers";
 import { EditableGeoJsonLayer } from "@nebula.gl/layers";
@@ -10,10 +8,7 @@ import Dropdown from "react-bootstrap/Dropdown";
 
 import { Toolbox } from "./Toolbox";
 import { Legend } from "./Legend";
-import {
-  PLOTLY_COLORSCALES,
-  CHROMA_COLORSCALES,
-} from "../../constants/constants";
+import { PLOTLY_COLORSCALES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { MapHelper } from "../../helpers/map-helper";
 import { ZarrHelper, GET_OPTIONS } from "../../helpers/zarr-helper";
@@ -77,7 +72,7 @@ export function Scatterplot({ radius = 30 }) {
       const colorHelper = new ColorHelper();
       let scale =
         dataset.colorEncoding === "var"
-          ? colorHelper.getScale(dataset, values)
+          ? colorHelper.getScale(dataset.controls.colorScale, values)
           : null;
 
       var data = position.map(function (e, i) {
@@ -85,12 +80,24 @@ export function Scatterplot({ radius = 30 }) {
           index: i,
           position: [position[i][0], position[i][1]],
           value: values[i],
-          color: colorHelper.getColor(dataset, values[i], scale),
+          color: colorHelper.getColor(
+            dataset.colorEncoding,
+            dataset.obs[dataset.selectedObs?.name]?.state,
+            values[i],
+            scale
+          ),
         };
       });
       return data;
     });
-  }, [position, values, dataset.controls.colorScale]);
+  }, [
+    position,
+    values,
+    dataset.controls.colorScale,
+    dataset.colorEncoding,
+    dataset.obs,
+    dataset.selectedObs,
+  ]);
 
   useEffect(() => {
     if (dataset.selectedObsm) {
@@ -138,7 +145,7 @@ export function Scatterplot({ radius = 30 }) {
 
       fetchData().catch(console.error);
     }
-  }, [dataset.url, dataset.selectedVar]);
+  }, [dataset.url, dataset.selectedVar, dispatch]);
 
   useEffect(() => {
     if (dataset.selectedObs) {
@@ -160,7 +167,7 @@ export function Scatterplot({ radius = 30 }) {
 
       fetchData().catch(console.error);
     }
-  }, [dataset.url, dataset.selectedObs]);
+  }, [dataset.url, dataset.selectedObs, dispatch]);
 
   const layers = [
     new ScatterplotLayer({
