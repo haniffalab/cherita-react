@@ -46,6 +46,7 @@ export function Legend({ values }) {
       //console.log(color.hex());
       legendList.push(
         <span
+          key={i}
           className="grad-step"
           style={{ backgroundColor: color.hex() }}
         ></span>
@@ -56,9 +57,9 @@ export function Legend({ values }) {
       <div className="cherita-legend">
         <div className="gradient">
           {legendList}
-          <span className="domain-min">{dmin}</span>
-          <span className="domain-med">{(dmin + dmax) * 0.5}</span>
-          <span className="domain-max">{dmax}</span>
+          <span className="domain-min">{dmin.toString()}</span>
+          <span className="domain-med">{((dmin + dmax) * 0.5).toString()}</span>
+          <span className="domain-max">{dmax.toString()}</span>
         </div>
       </div>
     );

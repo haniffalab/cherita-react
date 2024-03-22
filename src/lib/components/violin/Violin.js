@@ -75,6 +75,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     url: dataset.url,
     keys: [],
     scale: dataset.controls.standardScale,
+    varNamesCol: dataset.varNamesCol,
   });
   // @TODO: set default scale
 
@@ -89,8 +90,9 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
         return {
           ...p,
           url: dataset.url,
-          keys: dataset.selectedMultiVar.map((i) => i.name),
+          keys: dataset.selectedMultiVar.map((i) => i.index),
           scale: dataset.controls.standardScale,
+          varNamesCol: dataset.varNamesCol,
         };
       });
     } else if (mode === VIOLIN_MODES.GROUPBY) {
@@ -103,9 +105,10 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
         return {
           ...p,
           url: dataset.url,
-          keys: dataset.selectedVar.name,
+          keys: dataset.selectedVar.index,
           selectedObs: dataset.selectedObs,
           scale: dataset.controls.standardScale,
+          varNamesCol: dataset.varNamesCol,
         };
       });
     }
@@ -115,6 +118,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     dataset.selectedObs,
     dataset.selectedVar,
     dataset.url,
+    dataset.varNamesCol,
     mode,
   ]);
 
