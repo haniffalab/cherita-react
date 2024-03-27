@@ -5,13 +5,13 @@ import { CHROMA_COLORSCALES } from "../constants/constants";
 import { useDataset } from "../context/DatasetContext";
 
 export class ColorHelper {
-  getScale = (dataset, values) => {
+  getScale(dataset, values) {
     return chroma
       .scale(CHROMA_COLORSCALES[dataset.controls.colorScale])
       .domain([_.min(values), _.max(values)]);
-  };
+  }
 
-  getColor = (dataset, value, scale = chroma.scale()) => {
+  getColor(dataset, value, scale = chroma.scale()) {
     if (dataset.colorEncoding === "var") {
       return scale(value).rgb();
     } else if (dataset.colorEncoding === "obs") {
@@ -20,5 +20,5 @@ export class ColorHelper {
         ? dataset.obs[dataset.selectedObs.name].state[value]["color"]
         : null;
     }
-  };
+  }
 }

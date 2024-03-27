@@ -1,7 +1,7 @@
 import { WebMercatorViewport } from "@deck.gl/core";
 
 export class MapHelper {
-  fitBounds = (coords) => {
+  fitBounds(coords) {
     let view = new WebMercatorViewport({
       width: 600,
       height: 400,
@@ -33,5 +33,5 @@ export class MapHelper {
     });
 
     return { longitude, latitude, zoom };
-  };
+  }
 }

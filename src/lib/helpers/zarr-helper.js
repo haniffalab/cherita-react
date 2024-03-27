@@ -8,12 +8,12 @@ export const GET_OPTIONS = {
 };
 
 export class ZarrHelper {
-  open = async (url, path) => {
+  async open(url, path) {
     const z = await openArray({
       store: url,
       path: path,
       mode: "r",
     });
     return z;
-  };
+  }
 }
