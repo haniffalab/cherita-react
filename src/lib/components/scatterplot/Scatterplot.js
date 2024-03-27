@@ -15,9 +15,9 @@ import {
   CHROMA_COLORSCALES,
 } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { MapHelper } from "../../helpers/map";
-import { ZarrHelper, GET_OPTIONS } from "../../helpers/zarr";
-import { ColorHelper } from "../../helpers/color";
+import { MapHelper } from "../../helpers/map-helper";
+import { ZarrHelper, GET_OPTIONS } from "../../helpers/zarr-helper";
+import { ColorHelper } from "../../helpers/color-helper";
 
 window.deck.log.level = 1;
 

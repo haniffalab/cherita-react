@@ -3,7 +3,7 @@ import Dropdown from "react-bootstrap/Dropdown";
 import { React, useCallback, useEffect, useState } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import _ from "lodash";
-import { ColorHelper } from "../../helpers/color";
+import { ColorHelper } from "../../helpers/color-helper";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import { EditableGeoJsonLayer } from "@nebula.gl/layers";
 import chroma from "chroma-js";
