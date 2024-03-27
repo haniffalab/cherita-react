@@ -28,7 +28,7 @@
     "react-bootstrap": "^2.7.4",
     "react-plotly.js": "^2.6.0",
     "react-scripts": "^5.0.1",
-    "zarr": "^0.6.1"
+    "zarr": "^0.6.3"
   },
   "peerDependencies": {
     "react": "^18.2.0",
