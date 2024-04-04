@@ -4,80 +4,9 @@ import _ from "lodash";
 import { useFetch } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { SELECTION_MODES } from "../../constants/constants";
-import { Alert, Form, FormGroup, Dropdown, Button } from "react-bootstrap";
+import { Alert, Button } from "react-bootstrap";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
-
-export function VarSearchBar({ varNames = [], onSelect }) {
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [text, setText] = useState("");
-
-  const getSuggestions = useMemo(() => {
-    const filter = (text) => {
-      if (text.length > 0) {
-        const regex = new RegExp(`^${text}`, `i`);
-        const filter = varNames.sort().filter((v) => regex.test(v.name));
-        setSuggestions(filter);
-        setShowSuggestions(true);
-      } else {
-        setShowSuggestions(false);
-      }
-    };
-    return _.debounce(filter, 300);
-  }, [varNames]);
-
-  useEffect(() => {
-    getSuggestions(text);
-  }, [getSuggestions, text]);
-
-  const suggestionsList = suggestions.map((item) => (
-    <Dropdown.Item
-      key={item.name}
-      as="button"
-      onClick={() => {
-        onSelect(item);
-      }}
-    >
-      {item.name}
-    </Dropdown.Item>
-  ));
-
-  return (
-    <div>
-      <Form
-        onSubmit={(e) => {
-          e.preventDefault();
-        }}
-      >
-        <FormGroup>
-          <Form.Label>Feature:</Form.Label>
-          <Form.Control
-            onFocus={() => {
-              setShowSuggestions(text.length > 0);
-            }}
-            onBlur={() => {
-              _.delay(() => {
-                setShowSuggestions(false);
-              }, 150);
-            }}
-            type="text"
-            placeholder="Search for a feature"
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-            }}
-          />
-          <Dropdown.Menu
-            style={{ width: "90%", maxHeight: "25vh", overflowY: "scroll" }}
-            show={showSuggestions}
-          >
-            {suggestionsList}
-          </Dropdown.Menu>
-        </FormGroup>
-      </Form>
-    </div>
-  );
-}
+import { SearchBar } from "../search-bar/SearchBar";
 
 export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
   const ENDPOINT = "var/names";
@@ -241,7 +170,11 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
       <div className="position-relative">
         <h4>{mode}</h4>
         {isPending && <LoadingSpinner />}
-        <VarSearchBar varNames={varNames} onSelect={selectVar} />
+        <SearchBar
+          data={varNames}
+          displayName="features"
+          onSelect={selectVar}
+        />
         <div className="overflow-auto mt-2">{varList}</div>
       </div>
     );
