@@ -1,5 +1,7 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import {
@@ -12,6 +14,8 @@ import {
   ButtonGroup,
   ButtonToolbar,
   InputGroup,
+  OverlayTrigger,
+  Tooltip,
 } from "react-bootstrap";
 import { useDebouncedFetch } from "../../utils/requests";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
@@ -154,6 +158,25 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
             useResizeHandler={true}
             style={{ maxWidth: "100%", maxHeight: "100%" }}
           />
+          {fetchedData?.resampled && (
+            <Alert variant="warning">
+              <b>Warning:</b> For performance reasons this plot was generated
+              with resampled data. It will not be exactly the same as one
+              produced with the entire dataset. &nbsp;
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip>
+                    Resampled to 100K values following a Monte Carlo style
+                    approach to help ensure resampled data is a good
+                    representation of the original dataset's distribution.
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faCircleInfo}></FontAwesomeIcon>
+              </OverlayTrigger>
+            </Alert>
+          )}
         </div>
       );
     }
