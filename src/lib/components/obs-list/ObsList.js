@@ -40,7 +40,7 @@ export function ObsColsList() {
   const [obsColsList, setObsColsList] = useState([]);
   const [obs, setObs] = useState([]);
   const [updatedObsColsList, setUpdatedObsColsList] = useState(false);
-  const [active, setActive] = useState(null);
+  const [active, setActive] = useState(dataset.selectedObs?.name);
   const [params, setParams] = useState({
     url: dataset.url,
   });
@@ -116,6 +116,8 @@ export function ObsColsList() {
     if (dataset.selectedObs) {
       validateSelection(dataset.selectedObs);
       setActive(dataset.selectedObs.name);
+    } else {
+      setActive(null);
     }
   }, [dataset.selectedObs, validateSelection]);
 
@@ -126,9 +128,13 @@ export function ObsColsList() {
     });
   }, [obs, dispatch]);
 
-  function categoricalList(item) {
+  function categoricalList(item, active = null) {
     return (
-      <Accordion.Item key={item.name} eventKey={item.name}>
+      <Accordion.Item
+        key={item.name}
+        eventKey={item.name}
+        className={item.name === active ? "cherita-accordion-active" : ""}
+      >
         <Accordion.Header>{item.name}</Accordion.Header>
         <Accordion.Body>
           <ListGroup variant="flush">
@@ -151,9 +157,13 @@ export function ObsColsList() {
     );
   }
 
-  function continuousList(item) {
+  function continuousList(item, active = null) {
     return (
-      <Accordion.Item key={item.name} eventKey={item.name}>
+      <Accordion.Item
+        key={item.name}
+        eventKey={item.name}
+        className={item.name === active ? "cherita-accordion-active" : ""}
+      >
         <Accordion.Header>{item.name}</Accordion.Header>
         <Accordion.Body>
           <p>Min: {item.min}</p>
@@ -166,9 +176,13 @@ export function ObsColsList() {
     );
   }
 
-  function otherList(item) {
+  function otherList(item, active = null) {
     return (
-      <Accordion.Item key={item.name} eventKey={item.name}>
+      <Accordion.Item
+        key={item.name}
+        eventKey={item.name}
+        className={item.name === active ? "cherita-accordion-active" : ""}
+      >
         <Accordion.Header>{item.name}</Accordion.Header>
         <Accordion.Body>{item.type}</Accordion.Body>
       </Accordion.Item>
@@ -179,14 +193,14 @@ export function ObsColsList() {
     () =>
       obsColsList.map((item) => {
         if (item.type === "categorical") {
-          return categoricalList(item);
+          return categoricalList(item, active);
         } else if (item.type === "continuous") {
-          return continuousList(item);
+          return continuousList(item, active);
         } else {
-          return otherList(item);
+          return otherList(item, active);
         }
       }),
-    [obsColsList]
+    [obsColsList, active]
   );
 
   if (!serverError) {
@@ -196,7 +210,7 @@ export function ObsColsList() {
           {isPending && <LoadingSpinner />}
           <Accordion
             flush
-            activeKey={active}
+            defaultActiveKey={active}
             onSelect={(key) => {
               if (key != null) {
                 dispatch({

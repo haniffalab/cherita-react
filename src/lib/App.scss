@@ -1,3 +1,5 @@
+@import "bootstrap/scss/bootstrap";
+
 // Theme CSS
 .cherita-container {
     margin: 40px auto;
@@ -73,6 +75,11 @@
     left: 20px;
     width: 200px;
 }
+
+.cherita-accordion-active .accordion-button {
+    background-color: $accordion-button-active-bg
+}
+
 .grad-step {
     display: inline-block;
     height: 20px;
