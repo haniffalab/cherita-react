@@ -142,7 +142,7 @@ function datasetReducer(dataset, action) {
       return { ...dataset, selectedVar: action.var };
     }
     case "multiVarSelected": {
-      if (dataset.selectedMultiVar.find((i) => i === action.var)) {
+      if (dataset.selectedMultiVar.find((i) => _.isEqual(i, action.var))) {
         return dataset;
       } else {
         return {

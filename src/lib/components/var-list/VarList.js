@@ -1,120 +1,59 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import _ from "lodash";
-import { useFetch } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { SELECTION_MODES } from "../../constants/constants";
-import { Alert, Button } from "react-bootstrap";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
-import { SearchBar } from "../search-bar/SearchBar";
+import { Button } from "react-bootstrap";
+import { useCallback } from "react";
 
 export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
-  const ENDPOINT = "var/names";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const [varNames, setVarNames] = useState([]);
-  const [updatedVarNames, setUpdatedVarNames] = useState(false);
   const [varButtons, setVarButtons] = useState(
-    mode
-      ? mode === SELECTION_MODES.SINGLE
-        ? [dataset.selectVar]
-        : dataset.selectedMultiVar
-      : []
+    mode === SELECTION_MODES.SINGLE
+      ? [dataset.selectedVar]
+      : dataset.selectedMultiVar
   );
   const [active, setActive] = useState(
     mode === SELECTION_MODES.SINGLE
-      ? dataset.selectVar
-      : dataset.selectedMultiVar
+      ? dataset.selectedVar?.matrix_index
+      : dataset.selectedMultiVar.map((i) => i.matrix_index)
   );
-  const [params, setParams] = useState({
-    url: dataset.url,
-  });
-
-  useEffect(() => {
-    setParams((p) => {
-      return {
-        ...p,
-        url: dataset.url,
-      };
-    });
-  }, [dataset.url]);
-
-  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
-    refetchOnMount: false,
-  });
-
-  const validateSelection = useCallback(
-    (selectedVar, mode) => {
-      if (updatedVarNames) {
-        if (mode === SELECTION_MODES.SINGLE) {
-          if (selectedVar && !_.some(varNames, selectedVar)) {
-            setActive(null);
-            dispatch({
-              type: "varSelected",
-              var: null,
-            });
-          }
-        } else {
-          if (
-            selectedVar.length &&
-            !_.every(selectedVar, (v) => _.some(varNames, v))
-          ) {
-            setActive([]);
-            dispatch({
-              type: "multiVarReset",
-              var: [],
-            });
-          }
-        }
-      }
-    },
-    [dispatch, varNames, updatedVarNames]
-  );
-
-  useEffect(() => {
-    if (!isPending && !serverError) {
-      setVarNames(fetchedData);
-      setUpdatedVarNames(true);
-    }
-  }, [fetchedData, isPending, serverError]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.SINGLE && dataset.selectedVar) {
-      validateSelection(dataset.selectVar, mode);
+      setVarButtons((v) => {
+        return _.unionWith(v, [dataset.selectedVar], _.isEqual);
+      });
       setActive(dataset.selectedVar.matrix_index);
     }
-  }, [mode, dataset.selectedVar, dataset.selectVar, validateSelection]);
+  }, [mode, dataset.selectedVar]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.MULTIPLE) {
-      validateSelection(dataset.selectedMultiVar, mode);
+      setVarButtons((v) => {
+        return _.unionWith(v, dataset.selectedMultiVar, _.isEqual);
+      });
       setActive(dataset.selectedMultiVar.map((i) => i.matrix_index));
     }
-  }, [mode, dataset.selectedMultiVar, validateSelection]);
+  }, [mode, dataset.selectedMultiVar]);
 
-  const selectVar = (item) => {
-    setVarButtons(() => {
-      if (
-        varButtons[0] &&
-        varButtons.find((v) => v.matrix_index === item.matrix_index)
-      ) {
-        return varButtons;
-      } else {
-        return [...varButtons, item];
+  const selectVar = useCallback(
+    (item) => {
+      if (mode === SELECTION_MODES.SINGLE) {
+        dispatch({
+          type: "varSelected",
+          var: item,
+        });
+      } else if (mode === SELECTION_MODES.MULTIPLE) {
+        dispatch({
+          type: "multiVarSelected",
+          var: item,
+        });
       }
-    });
-    if (mode === SELECTION_MODES.SINGLE) {
-      dispatch({
-        type: "varSelected",
-        var: item,
-      });
-    } else if (mode === SELECTION_MODES.MULTIPLE) {
-      dispatch({
-        type: "multiVarSelected",
-        var: item,
-      });
-    }
-  };
+    },
+    [dispatch, mode]
+  );
 
   const varList = useMemo(() => {
     return varButtons.map((item) => {
@@ -126,10 +65,7 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
             variant="outline-primary"
             className={`${active === item.matrix_index && "active"} m-1`}
             onClick={() => {
-              dispatch({
-                type: "varSelected",
-                var: item,
-              });
+              selectVar(item);
             }}
           >
             {item.name}
@@ -149,10 +85,7 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
                   var: item,
                 });
               } else {
-                dispatch({
-                  type: "multiVarSelected",
-                  var: item,
-                });
+                selectVar(item);
               }
             }}
           >
@@ -163,26 +96,12 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
         return null;
       }
     });
-  }, [active, dispatch, mode, varButtons]);
+  }, [active, dispatch, mode, selectVar, varButtons]);
 
-  if (!serverError) {
-    return (
-      <div className="position-relative">
-        <h4>{mode}</h4>
-        {isPending && <LoadingSpinner />}
-        <SearchBar
-          data={varNames}
-          displayName="features"
-          onSelect={selectVar}
-        />
-        <div className="overflow-auto mt-2">{varList}</div>
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        <Alert variant="danger">{serverError.message}</Alert>
-      </div>
-    );
-  }
+  return (
+    <div className="position-relative">
+      {mode}
+      <div className="overflow-auto mt-2">{varList}</div>
+    </div>
+  );
 }

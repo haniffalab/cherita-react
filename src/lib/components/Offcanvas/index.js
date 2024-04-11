@@ -8,6 +8,7 @@ import {
   VarNamesList,
   SELECTION_MODES,
 } from "@haniffalab/cherita-react";
+import { SearchBar } from "../search-bar/SearchBar";
 
 export function OffcanvasObs({ show, handleClose }) {
   return (
@@ -46,6 +47,7 @@ export function OffcanvasVars({
         <Offcanvas.Title>Features</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
+        <SearchBar />
         <VarNamesList mode={mode} />
       </Offcanvas.Body>
     </Offcanvas>

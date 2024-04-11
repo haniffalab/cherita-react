@@ -40,13 +40,20 @@ export async function fetchData(endpoint, params, signal = null, ms = 300000) {
 }
 
 export const useFetch = (endpoint, params, opts = null) => {
+  const { enabled = true } = opts;
   const {
     data: fetchedData,
     isLoading: isPending,
     error: serverError,
   } = useQuery({
     queryKey: [endpoint, params],
-    queryFn: ({ signal }) => fetchData(endpoint, params, signal),
+    queryFn: ({ signal }) => {
+      if (enabled) {
+        return fetchData(endpoint, params, signal);
+      } else {
+        return;
+      }
+    },
     ...opts,
   });
 
@@ -59,6 +66,7 @@ export const useDebouncedFetch = (
   delay = 500,
   opts = null
 ) => {
+  const { enabled = true } = opts;
   const debouncedParams = useDebounce(params, delay);
 
   const {
@@ -67,7 +75,13 @@ export const useDebouncedFetch = (
     error: serverError,
   } = useQuery({
     queryKey: [endpoint, debouncedParams],
-    queryFn: ({ signal }) => fetchData(endpoint, debouncedParams, signal),
+    queryFn: ({ signal }) => {
+      if (enabled) {
+        return fetchData(endpoint, debouncedParams, signal);
+      } else {
+        return;
+      }
+    },
     ...opts,
   });
 
