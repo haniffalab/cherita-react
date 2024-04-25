@@ -60,6 +60,7 @@ const initialDataset = {
   state: {
     obs: {},
   },
+  diseaseDatasets: [],
 };
 
 const initializer = (initialState) => {

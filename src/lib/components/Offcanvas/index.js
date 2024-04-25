@@ -47,7 +47,7 @@ export function OffcanvasVars({
         <Offcanvas.Title>Features</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
-        <SearchBar />
+        <SearchBar searchDiseases={true} />
         <VarNamesList mode={mode} />
       </Offcanvas.Body>
     </Offcanvas>

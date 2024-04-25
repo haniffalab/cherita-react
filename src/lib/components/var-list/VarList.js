@@ -100,7 +100,6 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
 
   return (
     <div className="position-relative">
-      {mode}
       <div className="overflow-auto mt-2">{varList}</div>
     </div>
   );

@@ -2,8 +2,14 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { useQuery } from "@tanstack/react-query";
 import { parseError } from "./errors";
 
-export async function fetchData(endpoint, params, signal = null, ms = 300000) {
-  const apiUrl = process.env.REACT_APP_API_URL;
+export async function fetchData(
+  endpoint,
+  params,
+  signal = null,
+  ms = 300000,
+  apiUrl = null
+) {
+  apiUrl = apiUrl || process.env.REACT_APP_API_URL;
   const controller = new AbortController();
   const timeout = setTimeout(() => {
     controller.abort(DOMException.TIMEOUT_ERR);
@@ -39,7 +45,7 @@ export async function fetchData(endpoint, params, signal = null, ms = 300000) {
   return await response.json();
 }
 
-export const useFetch = (endpoint, params, opts = null) => {
+export const useFetch = (endpoint, params, opts = null, apiUrl = null) => {
   const { enabled = true } = opts;
   const {
     data: fetchedData,
@@ -49,7 +55,7 @@ export const useFetch = (endpoint, params, opts = null) => {
     queryKey: [endpoint, params],
     queryFn: ({ signal }) => {
       if (enabled) {
-        return fetchData(endpoint, params, signal);
+        return fetchData(endpoint, params, signal, apiUrl);
       } else {
         return;
       }
@@ -64,7 +70,8 @@ export const useDebouncedFetch = (
   endpoint,
   params,
   delay = 500,
-  opts = null
+  opts = null,
+  apiUrl = null
 ) => {
   const { enabled = true } = opts;
   const debouncedParams = useDebounce(params, delay);
@@ -77,7 +84,7 @@ export const useDebouncedFetch = (
     queryKey: [endpoint, debouncedParams],
     queryFn: ({ signal }) => {
       if (enabled) {
-        return fetchData(endpoint, debouncedParams, signal);
+        return fetchData(endpoint, debouncedParams, signal, apiUrl);
       } else {
         return;
       }
