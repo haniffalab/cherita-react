@@ -4,11 +4,7 @@ import { Dropdown } from "react-bootstrap";
 import { useDiseaseSearch, useVarSearch } from "../../utils/search";
 import { useDeferredValue } from "react";
 
-export function VarSearchResults({
-  text,
-  showSuggestions,
-  setShowSuggestions,
-}) {
+export function VarSearchResults({ text, setShowSuggestions }) {
   const [suggestions, setSuggestions] = useState([]);
 
   const {
@@ -54,35 +50,34 @@ export function VarSearchResults({
           disabled={isStale}
           onClick={() => {
             onSelect(item);
+            _.delay(() => {
+              setShowSuggestions(false);
+            }, 150);
           }}
         >
           {item.name}
         </Dropdown.Item>
       );
     });
-  }, [deferredData, isStale, onSelect]);
+  }, [deferredData, isStale, onSelect, setShowSuggestions]);
 
   return (
-    <Dropdown.Menu
-      style={{ width: "90%", maxHeight: "25vh", overflowY: "scroll" }}
-      show={showSuggestions}
-    >
-      {deferredData?.length ? (
-        suggestionsList
-      ) : (
-        <Dropdown.Item key="not-found" as="button" disabled>
-          {isStale || isPending ? "Loading..." : "No items found"}
-        </Dropdown.Item>
-      )}
-    </Dropdown.Menu>
+    <div>
+      <Dropdown.Header>Features</Dropdown.Header>
+      <div style={{ maxHeight: "25vh", overflowY: "scroll" }}>
+        {deferredData?.length ? (
+          suggestionsList
+        ) : (
+          <Dropdown.Item key="not-found" as="button" disabled>
+            {isStale || isPending ? "Loading..." : "No items found"}
+          </Dropdown.Item>
+        )}
+      </div>
+    </div>
   );
 }
 
-export function DiseasesSearchResults({
-  text,
-  showSuggestions,
-  setShowSuggestions,
-}) {
+export function DiseasesSearchResults({ text, setShowSuggestions }) {
   const [suggestions, setSuggestions] = useState([]);
 
   const {
@@ -102,11 +97,10 @@ export function DiseasesSearchResults({
         });
       } else {
         setSuggestions([]);
-        setShowSuggestions(false);
       }
     };
     return _.debounce(setData, 300);
-  }, [setParams, setShowSuggestions]);
+  }, [setParams]);
 
   useEffect(() => {
     updateParams(text);
@@ -128,26 +122,29 @@ export function DiseasesSearchResults({
           disabled={isStale}
           onClick={() => {
             onSelect(item);
+            _.delay(() => {
+              setShowSuggestions(false);
+            }, 150);
           }}
         >
           {item.disease_name}
         </Dropdown.Item>
       );
     });
-  }, [deferredData, isStale, onSelect]);
+  }, [deferredData, isStale, onSelect, setShowSuggestions]);
 
   return (
-    <Dropdown.Menu
-      style={{ width: "90%", maxHeight: "25vh", overflowY: "scroll" }}
-      show={showSuggestions}
-    >
-      {deferredData?.length ? (
-        suggestionsList
-      ) : (
-        <Dropdown.Item key="not-found" as="button" disabled>
-          {isStale || isPending ? "Loading..." : "No items found"}
-        </Dropdown.Item>
-      )}
-    </Dropdown.Menu>
+    <div>
+      <Dropdown.Header>Diseases</Dropdown.Header>
+      <div style={{ maxHeight: "25vh", overflowY: "scroll" }}>
+        {deferredData?.length ? (
+          suggestionsList
+        ) : (
+          <Dropdown.Item key="not-found" as="button" disabled>
+            {isStale || isPending ? "Loading..." : "No items found"}
+          </Dropdown.Item>
+        )}
+      </div>
+    </div>
   );
 }
