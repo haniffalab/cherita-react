@@ -85,8 +85,9 @@ export function Matrixplot() {
   const [params, setParams] = useState({
     url: dataset.url,
     selectedObs: dataset.selectedObs,
-    selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
+    selectedMultiVar: dataset.selectedMultiVar.map((i) => i.index),
     standardScale: dataset.controls.standardScale,
+    varNamesCol: dataset.varNamesCol,
   });
 
   useEffect(() => {
@@ -100,8 +101,9 @@ export function Matrixplot() {
         ...p,
         url: dataset.url,
         selectedObs: dataset.selectedObs,
-        selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
+        selectedMultiVar: dataset.selectedMultiVar.map((i) => i.index),
         standardScale: dataset.controls.standardScale,
+        varNamesCol: dataset.varNamesCol,
       };
     });
   }, [
@@ -109,6 +111,7 @@ export function Matrixplot() {
     dataset.selectedMultiVar,
     dataset.selectedObs,
     dataset.url,
+    dataset.varNamesCol,
   ]);
 
   const updateColorscale = useCallback((colorscale) => {
