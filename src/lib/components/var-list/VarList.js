@@ -6,7 +6,10 @@ import { SELECTION_MODES } from "../../constants/constants";
 import { Button } from "react-bootstrap";
 import { useCallback } from "react";
 
-export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
+export function VarNamesList({
+  mode = SELECTION_MODES.SINGLE,
+  displayName = "genes",
+}) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [varButtons, setVarButtons] = useState(
@@ -55,52 +58,92 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
     [dispatch, mode]
   );
 
-  const varList = useMemo(() => {
-    return varButtons.map((item) => {
-      if (item && mode === SELECTION_MODES.SINGLE) {
-        return (
-          <Button
-            type="button"
-            key={item.matrix_index}
-            variant="outline-primary"
-            className={`${active === item.matrix_index && "active"} m-1`}
-            onClick={() => {
-              selectVar(item);
-            }}
-          >
-            {item.name}
-          </Button>
-        );
-      } else if (mode === SELECTION_MODES.MULTIPLE) {
-        return (
-          <Button
-            type="button"
-            key={item.matrix_index}
-            variant="outline-primary"
-            className={`${active.includes(item.matrix_index) && "active"} m-1`}
-            onClick={() => {
-              if (active.includes(item.matrix_index)) {
-                dispatch({
-                  type: "multiVarDeselected",
-                  var: item,
-                });
-              } else {
-                selectVar(item);
+  const makeList = useCallback(
+    (vars) => {
+      return vars.map((item) => {
+        if (item && mode === SELECTION_MODES.SINGLE) {
+          return (
+            <Button
+              type="button"
+              key={item.matrix_index}
+              variant={
+                item.matrix_index !== -1
+                  ? "outline-primary"
+                  : "outline-secondary"
               }
-            }}
-          >
-            {item.name}
-          </Button>
-        );
-      } else {
-        return null;
-      }
-    });
-  }, [active, dispatch, mode, selectVar, varButtons]);
+              className={`${active === item.matrix_index && "active"} m-1`}
+              onClick={() => {
+                selectVar(item);
+              }}
+              disabled={item.matrix_index === -1}
+              title={item.matrix_index === -1 ? "Not present in data" : ""}
+            >
+              {item.name}
+            </Button>
+          );
+        } else if (mode === SELECTION_MODES.MULTIPLE) {
+          return (
+            <Button
+              type="button"
+              key={item.matrix_index}
+              variant={
+                item.matrix_index !== -1
+                  ? "outline-primary"
+                  : "outline-secondary"
+              }
+              className={`${
+                active.includes(item.matrix_index) && "active"
+              } m-1`}
+              onClick={() => {
+                if (active.includes(item.matrix_index)) {
+                  dispatch({
+                    type: "multiVarDeselected",
+                    var: item,
+                  });
+                } else {
+                  selectVar(item);
+                }
+              }}
+              disabled={item.matrix_index === -1}
+              title={item.matrix_index === -1 ? "Not present in data" : ""}
+            >
+              {item.name}
+            </Button>
+          );
+        } else {
+          return null;
+        }
+      });
+    },
+    [active, dispatch, mode, selectVar]
+  );
+
+  const varList = useMemo(() => {
+    return makeList(varButtons);
+  }, [makeList, varButtons]);
+
+  const diseaseVarList = useMemo(() => {
+    return makeList(dataset.selectedDisease.genes);
+  }, [makeList, dataset.selectedDisease.genes]);
 
   return (
     <div className="position-relative">
-      <div className="overflow-auto mt-2">{varList}</div>
+      <div className="overflow-auto mt-2">
+        <div>
+          <h5>{_.capitalize(displayName)}</h5>
+          {varList}
+        </div>
+        <div>
+          {dataset.selectedDisease?.id &&
+            dataset.selectedDisease?.genes?.length > 0 && (
+              <div>
+                <h5>Disease genes</h5>
+                <p>{dataset.selectedDisease?.name}</p>
+                {diseaseVarList}
+              </div>
+            )}
+        </div>
+      </div>
     </div>
   );
 }

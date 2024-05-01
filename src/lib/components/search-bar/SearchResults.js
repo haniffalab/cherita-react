@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
 import _ from "lodash";
 import { Dropdown } from "react-bootstrap";
-import { useDiseaseSearch, useVarSearch } from "../../utils/search";
+import { useDatasetDispatch } from "../../context/DatasetContext";
+import {
+  useGetDisease,
+  useDiseaseSearch,
+  useVarSearch,
+} from "../../utils/search";
 import { useDeferredValue } from "react";
 
 export function VarSearchResults({ text, setShowSuggestions }) {
@@ -79,12 +84,14 @@ export function VarSearchResults({ text, setShowSuggestions }) {
 
 export function DiseasesSearchResults({ text, setShowSuggestions }) {
   const [suggestions, setSuggestions] = useState([]);
+  const dispatch = useDatasetDispatch();
 
   const {
     setParams,
     data: { fetchedData = [], isPending, serverError },
-    onSelect,
   } = useDiseaseSearch();
+
+  useGetDisease();
 
   const deferredData = useDeferredValue(suggestions);
   const isStale = deferredData !== fetchedData;
@@ -121,7 +128,11 @@ export function DiseasesSearchResults({ text, setShowSuggestions }) {
           as="button"
           disabled={isStale}
           onClick={() => {
-            onSelect(item);
+            dispatch({
+              type: "select.disease",
+              id: item?.disease_id,
+              name: item?.disease_name,
+            });
             _.delay(() => {
               setShowSuggestions(false);
             }, 150);
@@ -131,7 +142,7 @@ export function DiseasesSearchResults({ text, setShowSuggestions }) {
         </Dropdown.Item>
       );
     });
-  }, [deferredData, isStale, onSelect, setShowSuggestions]);
+  }, [deferredData, dispatch, isStale, setShowSuggestions]);
 
   return (
     <div>

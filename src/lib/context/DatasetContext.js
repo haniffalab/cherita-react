@@ -62,6 +62,11 @@ const initialDataset = {
     obs: {},
   },
   diseaseDatasets: [],
+  selectedDisease: {
+    id: null,
+    name: null,
+    genes: [],
+  },
 };
 
 const initializer = (initialState) => {
@@ -131,9 +136,6 @@ export function useDatasetDispatch() {
 
 function datasetReducer(dataset, action) {
   switch (action.type) {
-    case "setDataset": {
-      return action.dataset;
-    }
     case "set.obs": {
       return { ...dataset, obs: action.value };
     }
@@ -160,7 +162,7 @@ function datasetReducer(dataset, action) {
       return {
         ...dataset,
         selectedMultiVar: dataset.selectedMultiVar.filter(
-          (a) => a !== action.var
+          (a) => a.matrix_index !== action.var.matrix_index
         ),
       };
     }
@@ -171,6 +173,25 @@ function datasetReducer(dataset, action) {
       return {
         ...dataset,
         selectedMultiVar: [],
+      };
+    }
+    case "select.disease": {
+      return {
+        ...dataset,
+        selectedDisease: {
+          id: action.id,
+          name: action.name,
+          genes: [],
+        },
+      };
+    }
+    case "set.disease.genes": {
+      return {
+        ...dataset,
+        selectedDisease: {
+          ...dataset.selectedDisease,
+          genes: action.genes,
+        },
       };
     }
     case "set.controls.colorScale": {

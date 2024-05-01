@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDataset, useDatasetDispatch } from "../context/DatasetContext";
 import { useFetch } from "./requests";
 
@@ -15,15 +15,10 @@ export const useDiseaseSearch = () => {
     enabled: !!params.text.length,
   });
 
-  const onSelect = (item) => {
-    console.log("! selected " + item);
-  };
-
   return {
     params,
     setParams,
     data,
-    onSelect,
   };
 };
 
@@ -57,4 +52,37 @@ export const useVarSearch = () => {
     data,
     onSelect,
   };
+};
+
+export const useGetDisease = () => {
+  const ENDPOINT = "disease/genes";
+  const dataset = useDataset();
+  const dispatch = useDatasetDispatch();
+  const [params, setParams] = useState({
+    url: dataset.url,
+    col: dataset.varNamesCol,
+    diseaseName: dataset.selectedDisease?.name,
+    diseaseDatasets: dataset.diseaseDatasets,
+  });
+
+  useEffect(() => {
+    setParams((p) => {
+      return { ...p, diseaseName: dataset.selectedDisease.name };
+    });
+  }, [dataset.selectedDisease?.name]);
+
+  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
+    enabled: !!params.diseaseName?.length,
+  });
+
+  useEffect(() => {
+    if (!isPending && !serverError) {
+      dispatch({
+        type: "set.disease.genes",
+        genes: fetchedData,
+      });
+    }
+  }, [dispatch, fetchedData, isPending, serverError]);
+
+  return;
 };
