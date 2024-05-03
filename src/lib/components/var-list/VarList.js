@@ -39,7 +39,11 @@ export function VarNamesList({
   useEffect(() => {
     if (mode === SELECTION_MODES.MULTIPLE) {
       setVarButtons((v) => {
-        return _.unionWith(v, dataset.selectedMultiVar, _.isEqual);
+        if (dataset.selectedMultiVar.length) {
+          return _.unionWith(v, dataset.selectedMultiVar, _.isEqual);
+        } else {
+          return [];
+        }
       });
       setActive(dataset.selectedMultiVar.map((i) => i.matrix_index));
     }
