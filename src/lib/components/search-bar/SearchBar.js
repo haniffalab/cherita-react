@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import _ from "lodash";
 import { Form, FormGroup, Dropdown } from "react-bootstrap";
 import { DiseasesSearchResults, VarSearchResults } from "./SearchResults";
@@ -6,6 +6,11 @@ import { DiseasesSearchResults, VarSearchResults } from "./SearchResults";
 export function SearchBar({ searchVar = true, searchDiseases = false }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [text, setText] = useState("");
+  const inputRef = useRef(null);
+  const displayText = [
+    ...(searchVar ? ["features"] : []),
+    ...(searchDiseases ? ["diseases"] : []),
+  ].join(" and ");
 
   useEffect(() => {
     if (text.length > 0) {
@@ -21,8 +26,8 @@ export function SearchBar({ searchVar = true, searchDiseases = false }) {
         }}
       >
         <FormGroup>
-          <Form.Label>{"Search "}</Form.Label>
           <Form.Control
+            ref={inputRef}
             onFocus={() => {
               setShowSuggestions(text.length > 0);
             }}
@@ -32,7 +37,7 @@ export function SearchBar({ searchVar = true, searchDiseases = false }) {
               }, 150);
             }}
             type="text"
-            placeholder={"Search "}
+            placeholder={"Search " + displayText}
             value={text}
             onChange={(e) => {
               setText(e.target.value);
@@ -42,6 +47,9 @@ export function SearchBar({ searchVar = true, searchDiseases = false }) {
             show={showSuggestions}
             onMouseDown={(e) => {
               e.preventDefault();
+            }}
+            onSelect={() => {
+              inputRef.current.blur();
             }}
           >
             <Dropdown.Menu style={{ width: "90%" }}>

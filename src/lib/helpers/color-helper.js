@@ -14,7 +14,7 @@ export class ColorHelper {
     if (colorEncoding === "var") {
       return scale(value).rgb();
     } else if (colorEncoding === "obs") {
-      return state.hasOwnProperty(value) ? state[value]["color"] : null;
+      return state?.hasOwnProperty(value) ? state[value]["color"] : null;
     }
   };
 }

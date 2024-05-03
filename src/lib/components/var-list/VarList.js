@@ -24,11 +24,15 @@ export function VarNamesList({
   );
 
   useEffect(() => {
-    if (mode === SELECTION_MODES.SINGLE && dataset.selectedVar) {
+    if (mode === SELECTION_MODES.SINGLE) {
       setVarButtons((v) => {
-        return _.unionWith(v, [dataset.selectedVar], _.isEqual);
+        if (dataset.selectedVar) {
+          return _.unionWith(v, [dataset.selectedVar], _.isEqual);
+        } else {
+          return [];
+        }
       });
-      setActive(dataset.selectedVar.matrix_index);
+      setActive(dataset.selectedVar?.matrix_index);
     }
   }, [mode, dataset.selectedVar]);
 
@@ -130,14 +134,41 @@ export function VarNamesList({
     <div className="position-relative">
       <div className="overflow-auto mt-2">
         <div>
-          <h5>{_.capitalize(displayName)}</h5>
+          <div className="d-flex justify-content-between">
+            <h5>{_.capitalize(displayName)}</h5>
+            <Button
+              variant="link"
+              onClick={() => {
+                dispatch({
+                  type:
+                    mode === SELECTION_MODES.SINGLE
+                      ? "reset.var"
+                      : "reset.multiVar",
+                });
+              }}
+            >
+              clear
+            </Button>
+          </div>
           {varList}
         </div>
         <div>
           {dataset.selectedDisease?.id &&
             dataset.selectedDisease?.genes?.length > 0 && (
               <div>
-                <h5>Disease genes</h5>
+                <div className="d-flex justify-content-between">
+                  <h5>Disease genes</h5>
+                  <Button
+                    variant="link"
+                    onClick={() => {
+                      dispatch({
+                        type: "reset.disease",
+                      });
+                    }}
+                  >
+                    clear
+                  </Button>
+                </div>
                 <p>{dataset.selectedDisease?.name}</p>
                 {diseaseVarList}
               </div>

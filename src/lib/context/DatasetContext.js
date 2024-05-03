@@ -169,10 +169,16 @@ function datasetReducer(dataset, action) {
     case "set.colorEncoding": {
       return { ...dataset, colorEncoding: action.value };
     }
-    case "multiVarReset": {
+    case "reset.multiVar": {
       return {
         ...dataset,
         selectedMultiVar: [],
+      };
+    }
+    case "reset.var": {
+      return {
+        ...dataset,
+        selectedVar: null,
       };
     }
     case "select.disease": {
@@ -191,6 +197,16 @@ function datasetReducer(dataset, action) {
         selectedDisease: {
           ...dataset.selectedDisease,
           genes: action.genes,
+        },
+      };
+    }
+    case "reset.disease": {
+      return {
+        ...dataset,
+        selectedDisease: {
+          id: null,
+          name: null,
+          genes: [],
         },
       };
     }
