@@ -73,8 +73,12 @@ export function VarSearchResults({ text, setShowSuggestions }) {
         {deferredData?.length ? (
           suggestionsList
         ) : (
-          <Dropdown.Item key="not-found" as="button" disabled>
-            {isStale || isPending ? "Loading..." : "No items found"}
+          <Dropdown.Item key="empty" as="button" disabled>
+            {!serverError
+              ? isStale || isPending
+                ? "Loading..."
+                : "No items found"
+              : "Failed to fetch data"}
           </Dropdown.Item>
         )}
       </div>
@@ -151,8 +155,12 @@ export function DiseasesSearchResults({ text, setShowSuggestions }) {
         {deferredData?.length ? (
           suggestionsList
         ) : (
-          <Dropdown.Item key="not-found" as="button" disabled>
-            {isStale || isPending ? "Loading..." : "No items found"}
+          <Dropdown.Item key="empty" as="button" disabled>
+            {!serverError
+              ? isStale || isPending
+                ? "Loading..."
+                : "No items found"
+              : "Failed to fetch data"}
           </Dropdown.Item>
         )}
       </div>
