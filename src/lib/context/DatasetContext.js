@@ -39,6 +39,7 @@ const persistOptions = {
 
 const initialDataset = {
   obs: {},
+  varNamesCol: null,
   selectedObs: null,
   selectedObsm: null,
   selectedVar: null,
@@ -72,14 +73,17 @@ const initializer = (initialState) => {
   return _.assign(initialState, localValues);
 };
 
-export function DatasetProvider({ dataset_url, children }) {
+export function DatasetProvider({
+  dataset_url,
+  dataset_params = null,
+  children,
+}) {
   const [dataset, dispatch] = useReducer(
     datasetReducer,
-    {
-      url: dataset_url,
-      ...initialDataset,
-    },
-    initializer
+    _.assign(
+      initializer({ url: dataset_url, ...initialDataset }),
+      dataset_params
+    )
   );
 
   useEffect(() => {

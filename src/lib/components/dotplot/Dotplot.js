@@ -215,10 +215,11 @@ export function Dotplot() {
   const [params, setParams] = useState({
     url: dataset.url,
     selectedObs: dataset.selectedObs,
-    selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
+    selectedMultiVar: dataset.selectedMultiVar.map((i) => i.index),
     standardScale: dataset.controls.standardScale,
     meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
     expressionCutoff: dataset.controls.expressionCutoff,
+    varNamesCol: dataset.varNamesCol,
   });
   // @TODO: set default scale
 
@@ -233,10 +234,11 @@ export function Dotplot() {
         ...p,
         url: dataset.url,
         selectedObs: dataset.selectedObs,
-        selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
+        selectedMultiVar: dataset.selectedMultiVar.map((i) => i.index),
         standardScale: dataset.controls.standardScale,
         meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
         expressionCutoff: dataset.controls.expressionCutoff,
+        varNamesCol: dataset.varNamesCol,
       };
     });
   }, [
@@ -246,6 +248,7 @@ export function Dotplot() {
     dataset.controls.standardScale,
     dataset.controls.meanOnlyExpressed,
     dataset.controls.expressionCutoff,
+    dataset.varNamesCol,
   ]);
 
   const updateColorscale = useCallback((colorscale) => {

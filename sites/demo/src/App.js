@@ -10,37 +10,25 @@ import MatrixplotDemo from "./containers/MatrixplotDemo";
 import ScatterplotDemo from "./containers/ScatterplotDemo";
 import ViolinDemo from "./containers/ViolinDemo";
 
-export default function App({ dataset_url }) {
+export default function App(props) {
   return (
     <div className="App">
       <Header />
       <Routes>
         <Route exact path="/" element={<h1>Home Page</h1>} />
-        <Route
-          exact
-          path="/dotplot"
-          element={<DotplotDemo dataset_url={dataset_url} />}
-        />
-        <Route
-          exact
-          path="/heatmap"
-          element={<HeatmapDemo dataset_url={dataset_url} />}
-        />
+        <Route exact path="/dotplot" element={<DotplotDemo {...props} />} />
+        <Route exact path="/heatmap" element={<HeatmapDemo {...props} />} />
         <Route
           exact
           path="/matrixplot"
-          element={<MatrixplotDemo dataset_url={dataset_url} />}
+          element={<MatrixplotDemo {...props} />}
         />
         <Route
           exact
           path="/scatterplot"
-          element={<ScatterplotDemo dataset_url={dataset_url} />}
+          element={<ScatterplotDemo {...props} />}
         />
-        <Route
-          exact
-          path="/violin"
-          element={<ViolinDemo dataset_url={dataset_url} />}
-        />
+        <Route exact path="/violin" element={<ViolinDemo {...props} />} />
       </Routes>
       <Footer />
     </div>

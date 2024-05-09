@@ -46,7 +46,8 @@ export function Heatmap() {
   const [params, setParams] = useState({
     url: dataset.url,
     selectedObs: dataset.selectedObs,
-    selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
+    selectedMultiVar: dataset.selectedMultiVar.map((i) => i.index),
+    varNamesCol: dataset.varNamesCol,
   });
 
   useEffect(() => {
@@ -60,10 +61,16 @@ export function Heatmap() {
         ...p,
         url: dataset.url,
         selectedObs: dataset.selectedObs,
-        selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
+        selectedMultiVar: dataset.selectedMultiVar.map((i) => i.index),
+        varNamesCol: dataset.varNamesCol,
       };
     });
-  }, [dataset.selectedMultiVar, dataset.selectedObs, dataset.url]);
+  }, [
+    dataset.selectedMultiVar,
+    dataset.selectedObs,
+    dataset.url,
+    dataset.varNamesCol,
+  ]);
 
   const updateColorscale = useCallback((colorscale) => {
     setLayout((l) => {
