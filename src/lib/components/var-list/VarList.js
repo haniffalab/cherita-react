@@ -1,257 +1,184 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import _ from "lodash";
-import { useFetch } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { SELECTION_MODES } from "../../constants/constants";
-import { Alert, Form, FormGroup, Dropdown, Button } from "react-bootstrap";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
+import { Button } from "react-bootstrap";
+import { useCallback } from "react";
 
-export function VarSearchBar({ varNames = [], onSelect }) {
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [text, setText] = useState("");
-
-  const getSuggestions = useMemo(() => {
-    const filter = (text) => {
-      if (text.length > 0) {
-        const regex = new RegExp(`^${text}`, `i`);
-        const filter = varNames.sort().filter((v) => regex.test(v.name));
-        setSuggestions(filter);
-        setShowSuggestions(true);
-      } else {
-        setShowSuggestions(false);
-      }
-    };
-    return _.debounce(filter, 300);
-  }, [varNames]);
-
-  useEffect(() => {
-    getSuggestions(text);
-  }, [getSuggestions, text]);
-
-  const suggestionsList = suggestions.map((item) => (
-    <Dropdown.Item
-      key={item.name}
-      as="button"
-      onClick={() => {
-        onSelect(item);
-      }}
-    >
-      {item.name}
-    </Dropdown.Item>
-  ));
-
-  return (
-    <div>
-      <Form
-        onSubmit={(e) => {
-          e.preventDefault();
-        }}
-      >
-        <FormGroup>
-          <Form.Label>Feature:</Form.Label>
-          <Form.Control
-            onFocus={() => {
-              setShowSuggestions(text.length > 0);
-            }}
-            onBlur={() => {
-              _.delay(() => {
-                setShowSuggestions(false);
-              }, 150);
-            }}
-            type="text"
-            placeholder="Search for a feature"
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-            }}
-          />
-          <Dropdown.Menu
-            style={{ width: "90%", maxHeight: "25vh", overflowY: "scroll" }}
-            show={showSuggestions}
-          >
-            {suggestionsList}
-          </Dropdown.Menu>
-        </FormGroup>
-      </Form>
-    </div>
-  );
-}
-
-export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
-  const ENDPOINT = "var/names";
+export function VarNamesList({
+  mode = SELECTION_MODES.SINGLE,
+  displayName = "genes",
+}) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const [varNames, setVarNames] = useState([]);
-  const [updatedVarNames, setUpdatedVarNames] = useState(false);
   const [varButtons, setVarButtons] = useState(
-    mode
-      ? mode === SELECTION_MODES.SINGLE
-        ? [dataset.selectVar]
-        : dataset.selectedMultiVar
-      : []
+    mode === SELECTION_MODES.SINGLE
+      ? [dataset.selectedVar]
+      : dataset.selectedMultiVar
   );
   const [active, setActive] = useState(
     mode === SELECTION_MODES.SINGLE
-      ? dataset.selectVar
-      : dataset.selectedMultiVar
+      ? dataset.selectedVar?.matrix_index
+      : dataset.selectedMultiVar.map((i) => i.matrix_index)
   );
-  const [params, setParams] = useState({
-    url: dataset.url,
-    col: dataset.varNamesCol,
-  });
 
   useEffect(() => {
-    setParams((p) => {
-      return {
-        ...p,
-        url: dataset.url,
-        col: dataset.varNamesCol,
-      };
-    });
-  }, [dataset.url, dataset.varNamesCol]);
-
-  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
-    refetchOnMount: false,
-  });
-
-  const validateSelection = useCallback(
-    (selectedVar, mode) => {
-      if (updatedVarNames) {
-        if (mode === SELECTION_MODES.SINGLE) {
-          if (selectedVar && !_.some(varNames, selectedVar)) {
-            setActive(null);
-            dispatch({
-              type: "varSelected",
-              var: null,
-            });
-          }
+    if (mode === SELECTION_MODES.SINGLE) {
+      setVarButtons((v) => {
+        if (dataset.selectedVar) {
+          return _.unionWith(v, [dataset.selectedVar], _.isEqual);
         } else {
-          if (
-            selectedVar.length &&
-            !_.every(selectedVar, (v) => _.some(varNames, v))
-          ) {
-            setActive([]);
-            dispatch({
-              type: "multiVarReset",
-              var: [],
-            });
-          }
+          return [];
         }
-      }
-    },
-    [dispatch, varNames, updatedVarNames]
-  );
-
-  useEffect(() => {
-    if (!isPending && !serverError) {
-      setVarNames(fetchedData);
-      setUpdatedVarNames(true);
+      });
+      setActive(dataset.selectedVar?.matrix_index);
     }
-  }, [fetchedData, isPending, serverError]);
-
-  useEffect(() => {
-    if (mode === SELECTION_MODES.SINGLE && dataset.selectedVar) {
-      validateSelection(dataset.selectVar, mode);
-      setActive(dataset.selectedVar.matrix_index);
-    }
-  }, [mode, dataset.selectedVar, dataset.selectVar, validateSelection]);
+  }, [mode, dataset.selectedVar]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.MULTIPLE) {
-      validateSelection(dataset.selectedMultiVar, mode);
+      setVarButtons((v) => {
+        if (dataset.selectedMultiVar.length) {
+          return _.unionWith(v, dataset.selectedMultiVar, _.isEqual);
+        } else {
+          return [];
+        }
+      });
       setActive(dataset.selectedMultiVar.map((i) => i.matrix_index));
     }
-  }, [mode, dataset.selectedMultiVar, validateSelection]);
+  }, [mode, dataset.selectedMultiVar]);
 
-  const selectVar = (item) => {
-    setVarButtons(() => {
-      if (
-        varButtons[0] &&
-        varButtons.find((v) => v.matrix_index === item.matrix_index)
-      ) {
-        return varButtons;
-      } else {
-        return [...varButtons, item];
+  const selectVar = useCallback(
+    (item) => {
+      if (mode === SELECTION_MODES.SINGLE) {
+        dispatch({
+          type: "varSelected",
+          var: item,
+        });
+      } else if (mode === SELECTION_MODES.MULTIPLE) {
+        dispatch({
+          type: "multiVarSelected",
+          var: item,
+        });
       }
-    });
-    if (mode === SELECTION_MODES.SINGLE) {
-      dispatch({
-        type: "varSelected",
-        var: item,
+    },
+    [dispatch, mode]
+  );
+
+  const makeList = useCallback(
+    (vars) => {
+      return vars.map((item) => {
+        if (item && mode === SELECTION_MODES.SINGLE) {
+          return (
+            <Button
+              type="button"
+              key={item.matrix_index}
+              variant={
+                item.matrix_index !== -1
+                  ? "outline-primary"
+                  : "outline-secondary"
+              }
+              className={`${active === item.matrix_index && "active"} m-1`}
+              onClick={() => {
+                selectVar(item);
+              }}
+              disabled={item.matrix_index === -1}
+              title={item.matrix_index === -1 ? "Not present in data" : ""}
+            >
+              {item.name}
+            </Button>
+          );
+        } else if (mode === SELECTION_MODES.MULTIPLE) {
+          return (
+            <Button
+              type="button"
+              key={item.matrix_index}
+              variant={
+                item.matrix_index !== -1
+                  ? "outline-primary"
+                  : "outline-secondary"
+              }
+              className={`${
+                active.includes(item.matrix_index) && "active"
+              } m-1`}
+              onClick={() => {
+                if (active.includes(item.matrix_index)) {
+                  dispatch({
+                    type: "multiVarDeselected",
+                    var: item,
+                  });
+                } else {
+                  selectVar(item);
+                }
+              }}
+              disabled={item.matrix_index === -1}
+              title={item.matrix_index === -1 ? "Not present in data" : ""}
+            >
+              {item.name}
+            </Button>
+          );
+        } else {
+          return null;
+        }
       });
-    } else if (mode === SELECTION_MODES.MULTIPLE) {
-      dispatch({
-        type: "multiVarSelected",
-        var: item,
-      });
-    }
-  };
+    },
+    [active, dispatch, mode, selectVar]
+  );
 
   const varList = useMemo(() => {
-    return varButtons.map((item) => {
-      if (item && mode === SELECTION_MODES.SINGLE) {
-        return (
-          <Button
-            type="button"
-            key={item.matrix_index}
-            variant="outline-primary"
-            className={`${active === item.matrix_index && "active"} m-1`}
-            onClick={() => {
-              dispatch({
-                type: "varSelected",
-                var: item,
-              });
-            }}
-          >
-            {item.name}
-          </Button>
-        );
-      } else if (mode === SELECTION_MODES.MULTIPLE) {
-        return (
-          <Button
-            type="button"
-            key={item.matrix_index}
-            variant="outline-primary"
-            className={`${active.includes(item.matrix_index) && "active"} m-1`}
-            onClick={() => {
-              if (active.includes(item.matrix_index)) {
-                dispatch({
-                  type: "multiVarDeselected",
-                  var: item,
-                });
-              } else {
-                dispatch({
-                  type: "multiVarSelected",
-                  var: item,
-                });
-              }
-            }}
-          >
-            {item.name}
-          </Button>
-        );
-      } else {
-        return null;
-      }
-    });
-  }, [active, dispatch, mode, varButtons]);
+    return makeList(varButtons);
+  }, [makeList, varButtons]);
 
-  if (!serverError) {
-    return (
-      <div className="position-relative">
-        <h4>{mode}</h4>
-        {isPending && <LoadingSpinner />}
-        <VarSearchBar varNames={varNames} onSelect={selectVar} />
-        <div className="overflow-auto mt-2">{varList}</div>
+  const diseaseVarList = useMemo(() => {
+    return makeList(dataset.selectedDisease.genes);
+  }, [makeList, dataset.selectedDisease.genes]);
+
+  return (
+    <div className="position-relative">
+      <div className="overflow-auto mt-2">
+        <div>
+          <div className="d-flex justify-content-between">
+            <h5>{_.capitalize(displayName)}</h5>
+            <Button
+              variant="link"
+              onClick={() => {
+                dispatch({
+                  type:
+                    mode === SELECTION_MODES.SINGLE
+                      ? "reset.var"
+                      : "reset.multiVar",
+                });
+              }}
+            >
+              clear
+            </Button>
+          </div>
+          {varList}
+        </div>
+        <div>
+          {dataset.selectedDisease?.id &&
+            dataset.selectedDisease?.genes?.length > 0 && (
+              <div>
+                <div className="d-flex justify-content-between">
+                  <h5>Disease genes</h5>
+                  <Button
+                    variant="link"
+                    onClick={() => {
+                      dispatch({
+                        type: "reset.disease",
+                      });
+                    }}
+                  >
+                    clear
+                  </Button>
+                </div>
+                <p>{dataset.selectedDisease?.name}</p>
+                {diseaseVarList}
+              </div>
+            )}
+        </div>
       </div>
-    );
-  } else {
-    return (
-      <div>
-        <Alert variant="danger">{serverError.message}</Alert>
-      </div>
-    );
-  }
+    </div>
+  );
 }

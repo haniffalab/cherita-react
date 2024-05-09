@@ -61,6 +61,12 @@ const initialDataset = {
   state: {
     obs: {},
   },
+  diseaseDatasets: [],
+  selectedDisease: {
+    id: null,
+    name: null,
+    genes: [],
+  },
 };
 
 const initializer = (initialState) => {
@@ -130,9 +136,6 @@ export function useDatasetDispatch() {
 
 function datasetReducer(dataset, action) {
   switch (action.type) {
-    case "setDataset": {
-      return action.dataset;
-    }
     case "set.obs": {
       return { ...dataset, obs: action.value };
     }
@@ -146,7 +149,7 @@ function datasetReducer(dataset, action) {
       return { ...dataset, selectedVar: action.var };
     }
     case "multiVarSelected": {
-      if (dataset.selectedMultiVar.find((i) => i === action.var)) {
+      if (dataset.selectedMultiVar.find((i) => _.isEqual(i, action.var))) {
         return dataset;
       } else {
         return {
@@ -159,17 +162,52 @@ function datasetReducer(dataset, action) {
       return {
         ...dataset,
         selectedMultiVar: dataset.selectedMultiVar.filter(
-          (a) => a !== action.var
+          (a) => a.matrix_index !== action.var.matrix_index
         ),
       };
     }
     case "set.colorEncoding": {
       return { ...dataset, colorEncoding: action.value };
     }
-    case "multiVarReset": {
+    case "reset.multiVar": {
       return {
         ...dataset,
         selectedMultiVar: [],
+      };
+    }
+    case "reset.var": {
+      return {
+        ...dataset,
+        selectedVar: null,
+      };
+    }
+    case "select.disease": {
+      return {
+        ...dataset,
+        selectedDisease: {
+          id: action.id,
+          name: action.name,
+          genes: [],
+        },
+      };
+    }
+    case "set.disease.genes": {
+      return {
+        ...dataset,
+        selectedDisease: {
+          ...dataset.selectedDisease,
+          genes: action.genes,
+        },
+      };
+    }
+    case "reset.disease": {
+      return {
+        ...dataset,
+        selectedDisease: {
+          id: null,
+          name: null,
+          genes: [],
+        },
       };
     }
     case "set.controls.colorScale": {
