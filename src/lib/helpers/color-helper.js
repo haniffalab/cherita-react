@@ -4,10 +4,11 @@ import _ from "lodash";
 import { CHROMA_COLORSCALES } from "../constants/constants";
 
 export class ColorHelper {
-  getScale = (colorScale, values) => {
-    return chroma
-      .scale(CHROMA_COLORSCALES[colorScale])
-      .domain([_.min(values), _.max(values)]);
+  getScale = (colorScale = null, values = null) => {
+    const c = chroma
+      .scale(colorScale ? CHROMA_COLORSCALES[colorScale] : null)
+      .domain(values ? [_.min(values), _.max(values)] : [0, 1]);
+    return c;
   };
 
   getColor = (colorEncoding, state, value, scale = chroma.scale()) => {

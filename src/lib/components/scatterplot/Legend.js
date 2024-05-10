@@ -1,69 +1,66 @@
+import { React, useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
-import Dropdown from "react-bootstrap/Dropdown";
-import { React, useCallback, useEffect, useState } from "react";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import _ from "lodash";
-import { ColorHelper } from "../../helpers/color-helper";
-import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
-import chroma from "chroma-js";
-import Tooltip from "react-bootstrap/Tooltip";
-import {
-  PLOTLY_COLORSCALES,
-  CHROMA_COLORSCALES,
-} from "../../constants/constants";
+import { useDataset } from "../../context/DatasetContext";
 
-import {
-  DrawPolygonMode,
-  DrawLineStringMode,
-  DrawPolygonByDraggingMode,
-  DrawRectangleMode,
-  ViewMode,
-  ModifyMode,
-} from "@nebula.gl/edit-modes";
-
-import Button from "react-bootstrap/Button";
-import DropdownButton from "react-bootstrap/DropdownButton";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
-
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowPointer } from "@fortawesome/free-solid-svg-icons";
-
-export function Legend({ values }) {
+export function Legend({ scale }) {
   const dataset = useDataset();
-  const colorHelper = new ColorHelper();
+  const [legendData, setLegendData] = useState({
+    dmin: 0,
+    dmax: 1,
+    list: [],
+  });
 
-  if (dataset.colorEncoding === "var") {
-    let c = colorHelper.getScale(dataset, values);
-    var dom = c.domain ? c.domain() : [0, 1],
-      dmin = Math.min(dom[0], dom[dom.length - 1]),
-      dmax = Math.max(dom[dom.length - 1], dom[0]);
+  useEffect(() => {
+    if (scale) {
+      const dom = scale.domain ? scale.domain() : [0, 1];
+      const dmin = Math.min(dom[0], dom[dom.length - 1]);
+      const dmax = Math.max(dom[dom.length - 1], dom[0]);
 
-    let legendList = [];
+      const spanList = _.range(100).map((i) => {
+        var color = scale(dmin + (i / 100) * (dmax - dmin)).hex();
+        return (
+          <span
+            key={i}
+            className="grad-step"
+            style={{ backgroundColor: color }}
+          ></span>
+        );
+      });
 
-    for (var i = 0; i <= 100; i++) {
-      var color = c(dmin + (i / 100) * (dmax - dmin));
-      //console.log(color.hex());
-      legendList.push(
-        <span
-          key={i}
-          className="grad-step"
-          style={{ backgroundColor: color.hex() }}
-        ></span>
-      );
+      setLegendData({
+        dmin: dmin,
+        dmax: dmax,
+        list: spanList,
+      });
     }
+  }, [scale]);
 
+  if (dataset.colorEncoding === "var" && scale) {
     return (
       <div className="cherita-legend">
         <div className="gradient">
-          {legendList}
-          <span className="domain-min">{dmin.toString()}</span>
-          <span className="domain-med">{((dmin + dmax) * 0.5).toString()}</span>
-          <span className="domain-max">{dmax.toString()}</span>
+          <p className="small m-0 p-0">
+            {dataset.selectedVar ? dataset.selectedVar.name : ""}
+          </p>
+          {legendData.list}
+          <span className="domain-min">{legendData.dmin.toFixed(1)}</span>
+          <span className="domain-med">
+            {((legendData.dmin + legendData.dmax) * 0.5).toFixed(1)}
+          </span>
+          <span className="domain-max">{legendData.dmax.toFixed(1)}</span>
+        </div>
+      </div>
+    );
+  } else {
+    return (
+      <div className="cherita-legend">
+        <div className="gradient">
+          <p className="small m-0 p-0">
+            {dataset.selectedObs ? dataset.selectedObs.name : ""}
+          </p>
         </div>
       </div>
     );
   }
-
-  return <></>;
 }

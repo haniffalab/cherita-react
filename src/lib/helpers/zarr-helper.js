@@ -1,3 +1,4 @@
+import { useEffect, useState, useMemo } from "react";
 import { openArray } from "zarr";
 
 export const GET_OPTIONS = {
@@ -17,3 +18,29 @@ export class ZarrHelper {
     return z;
   }
 }
+
+export const useZarr = ({ url, path }, s = null, opts = {}) => {
+  const [data, setData] = useState(null);
+  const [isPending, setIsPending] = useState(true);
+  const [serverError, setServerError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsPending(true);
+        const zarrHelper = new ZarrHelper();
+        const z = await zarrHelper.open(url, path);
+        const result = await z.get(s, opts);
+        setData(result.data);
+      } catch (error) {
+        setServerError(error.message);
+      } finally {
+        setIsPending(false);
+      }
+    };
+
+    fetchData();
+  }, [opts, path, s, url]);
+
+  return { data, isPending, serverError };
+};

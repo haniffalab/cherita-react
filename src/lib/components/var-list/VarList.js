@@ -56,6 +56,10 @@ export function VarNamesList({
           type: "varSelected",
           var: item,
         });
+        dispatch({
+          type: "set.colorEncoding",
+          value: "var",
+        });
       } else if (mode === SELECTION_MODES.MULTIPLE) {
         dispatch({
           type: "multiVarSelected",

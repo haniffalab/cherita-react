@@ -1,5 +1,6 @@
+import React, { useEffect, useState, useMemo } from "react";
+import _ from "lodash";
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useEffect, useState } from "react";
 import DeckGL from "@deck.gl/react";
 import { ScatterplotLayer } from "@deck.gl/layers";
 import { EditableGeoJsonLayer } from "@nebula.gl/layers";
@@ -11,8 +12,9 @@ import { Legend } from "./Legend";
 import { PLOTLY_COLORSCALES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { MapHelper } from "../../helpers/map-helper";
-import { ZarrHelper, GET_OPTIONS } from "../../helpers/zarr-helper";
+import { GET_OPTIONS, useZarr } from "../../helpers/zarr-helper";
 import { ColorHelper } from "../../helpers/color-helper";
+import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 window.deck.log.level = 1;
 
@@ -45,134 +47,205 @@ export function ScatterplotControls() {
   );
 }
 
+const INITIAL_VIEW_STATE = {
+  longitude: 0,
+  latitude: 0,
+  zoom: 0,
+  maxZoom: 16,
+  pitch: 0,
+  bearing: 0,
+};
+
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [features, setFeatures] = useState({
     type: "FeatureCollection",
     features: [],
   });
   const [mode, setMode] = useState(() => ViewMode);
   const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
-  let [featureState, setFeatureState] = useState([]);
-  let [data, setData] = useState([]);
-  let [position, setPosition] = useState([]);
-  let [values, setValues] = useState([]);
-  let [viewport, setViewport] = useState({
-    longitude: 0,
-    latitude: 0,
-    zoom: 0,
-    maxZoom: 16,
-    pitch: 0,
-    bearing: 0,
+  const [featureState, setFeatureState] = useState([]);
+  const [scale, setScale] = useState(() =>
+    new ColorHelper().getScale(dataset.controls.colorScale)
+  );
+  const [data, setData] = useState([]);
+
+  const [obsmParams, setObsmParams] = useState({
+    url: dataset.url,
+    path: "obsm/" + dataset.selectedObsm,
+  });
+  const [xParams, setXParams] = useState({
+    url: dataset.url,
+    path: "X",
+  });
+  const [obsParams, setObsParams] = useState({
+    url: dataset.url,
+    path: "obs/" + dataset.selectedObs?.name + "/codes",
   });
 
-  useEffect(() => {
-    setData(function (prevState, props) {
-      const colorHelper = new ColorHelper();
-      let scale =
-        dataset.colorEncoding === "var"
-          ? colorHelper.getScale(dataset.controls.colorScale, values)
-          : null;
+  const xSelection = useMemo(
+    () => [null, dataset.selectedVar?.matrix_index],
+    [dataset.selectedVar]
+  );
 
-      var data = position.map(function (e, i) {
+  const obsmData = useZarr(obsmParams, null, GET_OPTIONS);
+  const xData = useZarr(xParams, xSelection, GET_OPTIONS);
+  const obsData = useZarr(obsParams, null, GET_OPTIONS);
+
+  useEffect(() => {
+    setObsmParams((p) => {
+      return {
+        ...p,
+        path: "obsm/" + dataset.selectedObsm,
+      };
+    });
+  }, [dataset.selectedObsm]);
+
+  useEffect(() => {
+    setXParams((p) => {
+      return {
+        ...p,
+        s: [null, dataset.selectedVar?.matrix_index],
+      };
+    });
+  }, [dataset.selectedVar]);
+
+  useEffect(() => {
+    setObsParams((p) => {
+      return {
+        ...p,
+        path: "obs/" + dataset.selectedObs?.name + "/codes",
+      };
+    });
+  }, [dataset.selectedObs]);
+
+  useEffect(() => {
+    setObsmParams((p) => {
+      return {
+        ...p,
+        url: dataset.url,
+      };
+    });
+    setXParams((p) => {
+      return {
+        ...p,
+        url: dataset.url,
+      };
+    });
+    setObsParams((p) => {
+      return {
+        ...p,
+        url: dataset.url,
+      };
+    });
+  }, [dataset.url]);
+
+  useEffect(() => {
+    if (!obsmData.isPending && !obsmData.serverError) {
+      setData((d) => {
+        return _.zipWith(d, obsmData.data, (o, p) => {
+          return _.defaults({ position: p }, o);
+        });
+      });
+      const mapHelper = new MapHelper();
+      const { latitude, longitude, zoom } = mapHelper.fitBounds(obsmData.data);
+      setViewState((v) => {
         return {
-          index: i,
-          position: [position[i][0], position[i][1]],
-          value: values[i],
-          color: colorHelper.getColor(
-            dataset.colorEncoding,
-            dataset.obs[dataset.selectedObs?.name]?.state,
-            values[i],
-            scale
-          ),
+          ...v,
+          longitude: longitude,
+          latitude: latitude,
+          zoom: zoom,
         };
       });
-      return data;
-    });
+    }
   }, [
-    position,
-    values,
-    dataset.controls.colorScale,
-    dataset.colorEncoding,
-    dataset.obs,
-    dataset.selectedObs,
+    dataset.selectedObsm,
+    obsmData.data,
+    obsmData.isPending,
+    obsmData.serverError,
   ]);
 
   useEffect(() => {
-    if (dataset.selectedObsm) {
-      const helper = new MapHelper();
-      const zarrHelper = new ZarrHelper();
-      const fetchObsm = async () => {
-        const z = await zarrHelper.open(
-          dataset.url,
-          "obsm/" + dataset.selectedObsm
-        );
-        await z.get(null, GET_OPTIONS).then((result) => {
-          const { latitude, longitude, zoom } = helper.fitBounds(result.data);
-          setViewport({
-            longitude: latitude,
-            latitude: longitude,
-            zoom: zoom,
-            maxZoom: 16,
-            pitch: 0,
-            bearing: 0,
-          });
-          setPosition(result.data);
+    if (
+      dataset.colorEncoding === "var" &&
+      !xData.isPending &&
+      !xData.serverError
+    ) {
+      const s = new ColorHelper().getScale(
+        dataset.controls.colorScale,
+        xData.data
+      );
+      setScale(() => s);
+      setData((d) => {
+        return _.zipWith(d, xData.data, (o, v) => {
+          return _.defaults(
+            {
+              value: v,
+              color: new ColorHelper().getColor(
+                dataset.colorEncoding,
+                dataset.obs[dataset.obs[dataset.selectedObs?.name]?.state],
+                v,
+                s
+              ),
+            },
+            o
+          );
         });
-      };
-
-      fetchObsm().catch(console.error);
+      });
     }
-  }, [dataset.url, dataset.selectedObsm]);
+  }, [
+    dataset.colorEncoding,
+    xData.data,
+    xData.isPending,
+    xData.serverError,
+    dataset.controls.colorScale,
+    dataset.obs,
+    dataset.selectedObs?.name,
+  ]);
 
   useEffect(() => {
-    if (dataset.selectedVar) {
-      const zarrHelper = new ZarrHelper();
-      const fetchData = async () => {
-        const z = await zarrHelper.open(dataset.url, "X");
-        await z
-          .get([null, dataset.selectedVar.matrix_index], GET_OPTIONS)
-          .then((result) => {
-            setValues(result.data);
-
-            dispatch({
-              type: "set.colorEncoding",
-              value: "var",
-            });
-          });
-      };
-
-      fetchData().catch(console.error);
-    }
-  }, [dataset.url, dataset.selectedVar, dispatch]);
-
-  useEffect(() => {
-    if (dataset.selectedObs) {
-      const zarrHelper = new ZarrHelper();
-      const fetchData = async () => {
-        const z = await zarrHelper.open(
-          dataset.url,
-          "obs/" + dataset.selectedObs.name + "/codes"
-        );
-
-        await z.get().then((result) => {
-          setValues(result.data);
-          dispatch({
-            type: "set.colorEncoding",
-            value: "obs",
-          });
+    if (
+      dataset.colorEncoding === "obs" &&
+      !obsData.isPending &&
+      !obsData.serverError
+    ) {
+      const s = new ColorHelper().getScale(
+        dataset.controls.colorScale,
+        obsData.data
+      );
+      setScale(() => s);
+      setData((d) => {
+        return _.zipWith(d, obsData.data, (o, v) => {
+          return _.defaults(
+            {
+              value: v,
+              color: new ColorHelper().getColor(
+                dataset.colorEncoding,
+                dataset.obs[dataset.obs[dataset.selectedObs?.name]?.state],
+                v,
+                s
+              ),
+            },
+            o
+          );
         });
-      };
-
-      fetchData().catch(console.error);
+      });
     }
-  }, [dataset.url, dataset.selectedObs, dispatch]);
+  }, [
+    dataset.colorEncoding,
+    obsData.data,
+    obsData.isPending,
+    obsData.serverError,
+    dataset.controls.colorScale,
+    dataset.obs,
+    dataset.selectedObs?.name,
+  ]);
 
   const layers = [
     new ScatterplotLayer({
       id: "cherita-layer-scatterplot",
-      data,
+      data: data,
       radiusScale: radius,
       radiusMinPixels: 1,
       getPosition: (d) => d.position,
@@ -182,7 +255,7 @@ export function Scatterplot({ radius = 30 }) {
     new EditableGeoJsonLayer({
       id: "cherita-layer-draw",
       data: features,
-      mode,
+      mode: mode,
       selectedFeatureIndexes,
       onEdit: ({ updatedData, editType, editContext }) => {
         setFeatures(updatedData);
@@ -213,22 +286,24 @@ export function Scatterplot({ radius = 30 }) {
   }
 
   return (
-    <>
-      <div className="cherita-scatterplot">
-        <DeckGL
-          layers={layers}
-          initialViewState={viewport}
-          controller={true}
-          onClick={onLayerClick}
-        ></DeckGL>
-        <Toolbox
-          mode={mode}
-          setMode={setMode}
-          features={mode}
-          setFeatures={setFeatures}
-        />
-        <Legend values={values} />
-      </div>
-    </>
+    <div className="cherita-scatterplot">
+      {(obsmData.isPending || xData.isPending || obsmData.isPending) && (
+        <LoadingSpinner />
+      )}
+      <DeckGL
+        viewState={viewState}
+        onViewStateChange={(e) => setViewState(e.viewState)}
+        controller
+        layers={layers}
+        onClick={onLayerClick}
+      ></DeckGL>
+      <Toolbox
+        mode={mode}
+        setMode={setMode}
+        features={mode}
+        setFeatures={setFeatures}
+      />
+      <Legend scale={scale} />
+    </div>
   );
 }
