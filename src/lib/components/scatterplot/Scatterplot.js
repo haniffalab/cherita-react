@@ -13,7 +13,7 @@ import { PLOTLY_COLORSCALES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { MapHelper } from "../../helpers/map-helper";
 import { GET_OPTIONS, useZarr } from "../../helpers/zarr-helper";
-import { ColorHelper } from "../../helpers/color-helper";
+import { useColor } from "../../helpers/color-helper";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
 
 window.deck.log.level = 1;
@@ -64,6 +64,7 @@ const DEFAULT_DATA_POINT = {
 
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
+  const { getScale, getColor } = useColor();
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [features, setFeatures] = useState({
     type: "FeatureCollection",
@@ -72,9 +73,7 @@ export function Scatterplot({ radius = 30 }) {
   const [mode, setMode] = useState(() => ViewMode);
   const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
   const [featureState, setFeatureState] = useState([]);
-  const [scale, setScale] = useState(() =>
-    new ColorHelper().getScale(dataset.controls.colorScale)
-  );
+  const [scale, setScale] = useState(() => getScale());
   const [data, setData] = useState([]);
 
   const [obsmParams, setObsmParams] = useState({
@@ -90,6 +89,7 @@ export function Scatterplot({ radius = 30 }) {
     path: "obs/" + dataset.selectedObs?.name + "/codes",
   });
 
+  // needs to be wrapped in useMemo as it is an array an could cause an infinite loop otherwise
   const xSelection = useMemo(
     () => [null, dataset.selectedVar?.matrix_index],
     [dataset.selectedVar]
@@ -147,6 +147,8 @@ export function Scatterplot({ radius = 30 }) {
     });
   }, [dataset.url]);
 
+  // @TODO: assert length of obsmData, xData, obsData is equal
+
   useEffect(() => {
     if (!obsmData.isPending && !obsmData.serverError) {
       setData((d) => {
@@ -164,6 +166,12 @@ export function Scatterplot({ radius = 30 }) {
           zoom: zoom,
         };
       });
+    } else if (!obsmData.isPending && obsmData.serverError) {
+      setData((d) => {
+        return _.map(d, (e) => {
+          return _.defaults({ position: null }, e, DEFAULT_DATA_POINT);
+        });
+      });
     }
   }, [
     dataset.selectedObsm,
@@ -173,81 +181,83 @@ export function Scatterplot({ radius = 30 }) {
   ]);
 
   useEffect(() => {
-    if (
-      dataset.colorEncoding === "var" &&
-      !xData.isPending &&
-      !xData.serverError
-    ) {
-      const s = new ColorHelper().getScale(
-        dataset.controls.colorScale,
-        xData.data
-      );
-      setScale(() => s);
-      setData((d) => {
-        return _.map(xData.data, (v, index) => {
-          return _.defaults(
-            {
-              value: v,
-              color: new ColorHelper().getColor(
-                dataset.colorEncoding,
-                dataset.obs[dataset.selectedObs?.name]?.state,
-                v,
-                s
-              ),
-            },
-            d?.[index],
-            DEFAULT_DATA_POINT
-          );
+    if (dataset.colorEncoding === "var") {
+      if (!xData.isPending && !xData.serverError) {
+        const s = getScale(xData.data);
+        setScale(() => s);
+        setData((d) => {
+          return _.map(xData.data, (v, index) => {
+            return _.defaults(
+              {
+                value: v,
+                color: getColor(s, v),
+              },
+              d?.[index],
+              DEFAULT_DATA_POINT
+            );
+          });
         });
-      });
+      } else if (!xData.isPending && xData.serverError) {
+        const s = getScale();
+        setScale(() => s);
+        setData((d) => {
+          return _.map(d, (e) => {
+            return _.defaults(
+              { value: null, color: null },
+              e,
+              DEFAULT_DATA_POINT
+            );
+          });
+        });
+      }
     }
   }, [
     dataset.colorEncoding,
     xData.data,
     xData.isPending,
     xData.serverError,
-    dataset.controls.colorScale,
-    dataset.obs,
-    dataset.selectedObs,
+    getScale,
+    getColor,
   ]);
 
   useEffect(() => {
-    if (
-      dataset.colorEncoding === "obs" &&
-      !obsData.isPending &&
-      !obsData.serverError
-    ) {
-      const s = new ColorHelper().getScale(
-        dataset.controls.colorScale,
-        obsData.data
-      );
-      setScale(() => s);
-      setData((d) => {
-        return _.map(obsData.data, (v, index) => {
-          return _.defaults(
-            {
-              value: v,
-              color: new ColorHelper().getColor(
-                dataset.colorEncoding,
-                dataset.obs[dataset.selectedObs?.name]?.state,
-                v,
-                s
-              ),
-            },
-            d?.[index],
-            DEFAULT_DATA_POINT
-          );
+    if (dataset.colorEncoding === "obs") {
+      if (!obsData.isPending && !obsData.serverError) {
+        const s = getScale(obsData.data);
+        setScale(() => s);
+        setData((d) => {
+          return _.map(obsData.data, (v, index) => {
+            return _.defaults(
+              {
+                value: v,
+                color: getColor(s, v),
+              },
+              d?.[index],
+              DEFAULT_DATA_POINT
+            );
+          });
         });
-      });
+      } else if (!obsData.isPending && obsData.serverError) {
+        const s = getScale();
+        setScale(() => s);
+        setData((d) => {
+          return _.map(d, (e) => {
+            return _.defaults(
+              { value: null, color: null },
+              e,
+              DEFAULT_DATA_POINT
+            );
+          });
+        });
+      }
     }
   }, [
     dataset.colorEncoding,
     obsData.data,
     obsData.isPending,
     obsData.serverError,
-    dataset.controls.colorScale,
-    dataset.obs,
-    dataset.selectedObs,
+    getScale,
+    getColor,
   ]);
 
   const layers = useMemo(() => {
@@ -295,6 +305,7 @@ export function Scatterplot({ radius = 30 }) {
     setSelectedFeatureIndexes(info.object ? [info.index] : []);
   }
 
+  // @TODO: add error message
   return (
     <div className="cherita-scatterplot">
       {(obsmData.isPending || xData.isPending || obsmData.isPending) && (
