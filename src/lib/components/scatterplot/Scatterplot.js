@@ -7,6 +7,7 @@ import { ViewMode } from "@nebula.gl/edit-modes";
 import Dropdown from "react-bootstrap/Dropdown";
 
 import { Toolbox } from "./Toolbox";
+import { SpatialControls } from "./SpatialControls";
 import { Legend } from "./Legend";
 import { PLOTLY_COLORSCALES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
@@ -222,6 +223,12 @@ export function Scatterplot({ radius = 30 }) {
           onClick={onLayerClick}
         ></DeckGL>
         <Toolbox
+          mode={mode}
+          setMode={setMode}
+          features={mode}
+          setFeatures={setFeatures}
+        />
+        <SpatialControls
           mode={mode}
           setMode={setMode}
           features={mode}

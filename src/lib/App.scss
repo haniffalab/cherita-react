@@ -14,7 +14,7 @@
 
 .cherita-navbar {
     position: absolute;
-    z-index: 10;
+    z-index: 11;
     top: 20px;
     right: 20px;
     left: 20px;
@@ -59,15 +59,32 @@
 
 .cherita-container-scatterplot {
     position: relative;
-    min-height: 500px;
+    min-height: 300px;
+    height: 100%;
 }
 
 .cherita-toolbox {
     position: absolute;
     z-index: 10;
     bottom: 20px;
-    right: 20px;
+    left: 20px;
 }
+.cherita-spatial-controls {
+    position: absolute;
+    z-index: 10;
+    top: 20px;
+    left: 20px;
+}
+
+@include media-breakpoint-down(xl) {
+    .cherita-spatial-controls {
+        top: 100px;
+    }
+  }
+
+
+
+
 .cherita-legend {
     position: absolute;
     z-index: 10;
