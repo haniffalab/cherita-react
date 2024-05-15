@@ -28,6 +28,7 @@ export const useZarr = ({ url, path }, s = null, opts = {}) => {
     const fetchData = async () => {
       try {
         setIsPending(true);
+        setServerError(null);
         const zarrHelper = new ZarrHelper();
         const z = await zarrHelper.open(url, path);
         const result = await z.get(s, opts);

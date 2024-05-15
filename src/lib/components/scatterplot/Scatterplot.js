@@ -56,6 +56,12 @@ const INITIAL_VIEW_STATE = {
   bearing: 0,
 };
 
+const DEFAULT_DATA_POINT = {
+  value: null,
+  position: null,
+  color: null,
+};
+
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
@@ -144,8 +150,8 @@ export function Scatterplot({ radius = 30 }) {
   useEffect(() => {
     if (!obsmData.isPending && !obsmData.serverError) {
       setData((d) => {
-        return _.zipWith(d, obsmData.data, (o, p) => {
-          return _.defaults({ position: p }, o);
+        return _.map(obsmData.data, (p, index) => {
+          return _.defaults({ position: p }, d?.[index], DEFAULT_DATA_POINT);
         });
       });
       const mapHelper = new MapHelper();
@@ -178,18 +184,19 @@ export function Scatterplot({ radius = 30 }) {
       );
       setScale(() => s);
       setData((d) => {
-        return _.zipWith(d, xData.data, (o, v) => {
+        return _.map(xData.data, (v, index) => {
           return _.defaults(
             {
               value: v,
               color: new ColorHelper().getColor(
                 dataset.colorEncoding,
-                dataset.obs[dataset.obs[dataset.selectedObs?.name]?.state],
+                dataset.obs[dataset.selectedObs?.name]?.state,
                 v,
                 s
               ),
             },
-            o
+            d?.[index],
+            DEFAULT_DATA_POINT
           );
         });
       });
@@ -201,7 +208,7 @@ export function Scatterplot({ radius = 30 }) {
     xData.serverError,
     dataset.controls.colorScale,
     dataset.obs,
-    dataset.selectedObs?.name,
+    dataset.selectedObs,
   ]);
 
   useEffect(() => {
@@ -216,18 +223,19 @@ export function Scatterplot({ radius = 30 }) {
       );
       setScale(() => s);
       setData((d) => {
-        return _.zipWith(d, obsData.data, (o, v) => {
+        return _.map(obsData.data, (v, index) => {
           return _.defaults(
             {
               value: v,
               color: new ColorHelper().getColor(
                 dataset.colorEncoding,
-                dataset.obs[dataset.obs[dataset.selectedObs?.name]?.state],
+                dataset.obs[dataset.selectedObs?.name]?.state,
                 v,
                 s
               ),
             },
-            o
+            d?.[index],
+            DEFAULT_DATA_POINT
           );
         });
       });
@@ -239,42 +247,44 @@ export function Scatterplot({ radius = 30 }) {
     obsData.serverError,
     dataset.controls.colorScale,
     dataset.obs,
-    dataset.selectedObs?.name,
+    dataset.selectedObs,
   ]);
 
-  const layers = [
-    new ScatterplotLayer({
-      id: "cherita-layer-scatterplot",
-      data: data,
-      radiusScale: radius,
-      radiusMinPixels: 1,
-      getPosition: (d) => d.position,
-      getFillColor: (d) => d.color,
-      getRadius: 1,
-    }),
-    new EditableGeoJsonLayer({
-      id: "cherita-layer-draw",
-      data: features,
-      mode: mode,
-      selectedFeatureIndexes,
-      onEdit: ({ updatedData, editType, editContext }) => {
-        setFeatures(updatedData);
-        let updatedSelectedFeatureIndexes = selectedFeatureIndexes;
-        setFeatureState({
-          data: updatedData,
-        });
-        if (editType === "addFeature") {
-          // when a drawing is complete, the value of editType becomes addFeature
-          const { featureIndexes } = editContext; //extracting indexes of current features selected
-          updatedSelectedFeatureIndexes = [
-            ...selectedFeatureIndexes,
-            ...featureIndexes,
-          ];
-        }
-        setSelectedFeatureIndexes(updatedSelectedFeatureIndexes); //now update your state
-      },
-    }),
-  ];
+  const layers = useMemo(() => {
+    return [
+      new ScatterplotLayer({
+        id: "cherita-layer-scatterplot",
+        data: data,
+        radiusScale: radius,
+        radiusMinPixels: 1,
+        getPosition: (d) => d.position,
+        getFillColor: (d) => d.color,
+        getRadius: 1,
+      }),
+      new EditableGeoJsonLayer({
+        id: "cherita-layer-draw",
+        data: features,
+        mode: mode,
+        selectedFeatureIndexes,
+        onEdit: ({ updatedData, editType, editContext }) => {
+          setFeatures(updatedData);
+          let updatedSelectedFeatureIndexes = selectedFeatureIndexes;
+          setFeatureState({
+            data: updatedData,
+          });
+          if (editType === "addFeature") {
+            // when a drawing is complete, the value of editType becomes addFeature
+            const { featureIndexes } = editContext; //extracting indexes of current features selected
+            updatedSelectedFeatureIndexes = [
+              ...selectedFeatureIndexes,
+              ...featureIndexes,
+            ];
+          }
+          setSelectedFeatureIndexes(updatedSelectedFeatureIndexes); //now update your state
+        },
+      }),
+    ];
+  }, [data, features, mode, radius, selectedFeatureIndexes]);
 
   function onLayerClick(info) {
     if (mode !== ViewMode) {
