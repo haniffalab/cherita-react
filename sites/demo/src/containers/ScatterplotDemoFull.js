@@ -108,7 +108,7 @@ export default function ScatterplotDemo(props) {
             <Card className="cherita-app-features d-none d-xl-block">
               <Card.Body>
                 <SearchBar />
-                <VarNamesList mode={SELECTION_MODES.MULTIPLE} />
+                <VarNamesList mode={SELECTION_MODES.SINGLE} />
               </Card.Body>
             </Card>
             <OffcanvasObs show={showObs} handleClose={handleCloseObs} />
