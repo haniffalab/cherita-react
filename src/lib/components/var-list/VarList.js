@@ -1,20 +1,16 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import _ from "lodash";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { SELECTION_MODES } from "../../constants/constants";
 import { Button } from "react-bootstrap";
-import { useCallback } from "react";
-import { Accordion, ListGroup, Alert } from "react-bootstrap";
-
-import { Form } from "react-bootstrap";
-import { ButtonGroup } from "react-bootstrap";
-
+import { ListGroup } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDroplet } from "@fortawesome/free-solid-svg-icons";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
+
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { SELECTION_MODES } from "../../constants/constants";
 
 export function VarNamesList({
   mode = SELECTION_MODES.SINGLE,
