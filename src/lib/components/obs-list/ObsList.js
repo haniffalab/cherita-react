@@ -5,7 +5,6 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFetch } from "../../utils/requests";
 import chroma from "chroma-js";
-import { ColorHelper } from "../../helpers/color-helper";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
 import { Accordion, ListGroup, Alert } from "react-bootstrap";
 
@@ -44,7 +43,6 @@ export function ObsColsList() {
   const [params, setParams] = useState({
     url: dataset.url,
   });
-  const colorHelper = new ColorHelper();
 
   useEffect(() => {
     setParams((p) => {
@@ -128,36 +126,41 @@ export function ObsColsList() {
     });
   }, [obs, dispatch]);
 
-  function categoricalList(item, active = null) {
-    return (
-      <Accordion.Item
-        key={item.name}
-        eventKey={item.name}
-        className={item.name === active ? "cherita-accordion-active" : ""}
-      >
-        <Accordion.Header>{item.name}</Accordion.Header>
-        <Accordion.Body>
-          <ListGroup variant="flush">
-            {item.values.map((value, index) => (
-              <ListGroup.Item key={index}>
-                {value}
-                <span
-                  className="cm-string cm-color"
-                  style={{
-                    backgroundColor: `rgb(${
-                      obs[item.name]["state"][index]["color"]
-                    })`,
-                  }}
-                ></span>
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-        </Accordion.Body>
-      </Accordion.Item>
-    );
-  }
+  const categoricalList = useCallback(
+    (item, active = null) => {
+      return (
+        <Accordion.Item
+          key={item.name}
+          eventKey={item.name}
+          className={item.name === active ? "cherita-accordion-active" : ""}
+        >
+          <Accordion.Header>{item.name}</Accordion.Header>
+          <Accordion.Body>
+            <ListGroup variant="flush">
+              {item.values.map((value, index) => (
+                <ListGroup.Item key={index}>
+                  <div className="d-flex justify-content-between">
+                    <div className="text-wrap text-break">{value}</div>
+                    <span
+                      className="cm-string cm-color"
+                      style={{
+                        backgroundColor: `rgb(${
+                          obs[item.name]["state"][index]["color"]
+                        })`,
+                      }}
+                    ></span>
+                  </div>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          </Accordion.Body>
+        </Accordion.Item>
+      );
+    },
+    [obs]
+  );
 
-  function continuousList(item, active = null) {
+  const continuousList = useCallback((item, active = null) => {
     return (
       <Accordion.Item
         key={item.name}
@@ -174,9 +177,9 @@ export function ObsColsList() {
         </Accordion.Body>
       </Accordion.Item>
     );
-  }
+  }, []);
 
-  function otherList(item, active = null) {
+  const otherList = useCallback((item, active = null) => {
     return (
       <Accordion.Item
         key={item.name}
@@ -187,7 +190,7 @@ export function ObsColsList() {
         <Accordion.Body>{item.type}</Accordion.Body>
       </Accordion.Item>
     );
-  }
+  }, []);
 
   const obsList = useMemo(
     () =>
@@ -200,7 +203,7 @@ export function ObsColsList() {
           return otherList(item, active);
         }
       }),
-    [obsColsList, active]
+    [obsColsList, categoricalList, active, continuousList, otherList]
   );
 
   if (!serverError) {
@@ -216,6 +219,10 @@ export function ObsColsList() {
                 dispatch({
                   type: "obsSelected",
                   obs: obsColsList.find((obs) => obs.name === key),
+                });
+                dispatch({
+                  type: "set.colorEncoding",
+                  value: "obs",
                 });
               }
             }}
