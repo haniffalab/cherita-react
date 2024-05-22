@@ -22,6 +22,8 @@ import {
 import Button from "react-bootstrap/Button";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDroplet } from "@fortawesome/free-solid-svg-icons";
 
 export function Toolbox({ mode, setMode, features, setFeatures }) {
   const dataset = useDataset();
@@ -29,7 +31,10 @@ export function Toolbox({ mode, setMode, features, setFeatures }) {
     <div className="cherita-toolbox">
       <ButtonGroup>
         <ObsmKeysList />
-        <Button>Cells XXXX</Button>
+        <Button size="sm">
+          <FontAwesomeIcon icon={faDroplet} /> CD14
+        </Button>
+        <Button size="sm">Cells XXXX</Button>
       </ButtonGroup>
     </div>
   );

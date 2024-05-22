@@ -72,6 +72,7 @@ export function ObsmKeysList() {
           as={ButtonGroup}
           title={dataset.selectedObsm}
           id="bg-nested-dropdown"
+          size="sm"
         >
           {obsmList}
         </DropdownButton>

@@ -44,6 +44,10 @@ export const useVarSearch = () => {
       type: "multiVarSelected",
       var: item,
     });
+    dispatch({
+      type: "set.colorEncoding",
+      value: "var",
+    });
   };
 
   return {

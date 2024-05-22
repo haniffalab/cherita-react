@@ -5,7 +5,6 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFetch } from "../../utils/requests";
 import chroma from "chroma-js";
-import { ColorHelper } from "../../helpers/color-helper";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
 import { Accordion, ListGroup, Alert } from "react-bootstrap";
 
@@ -50,7 +49,6 @@ export function ObsColsList() {
   const [params, setParams] = useState({
     url: dataset.url,
   });
-  const colorHelper = new ColorHelper();
 
   useEffect(() => {
     setParams((p) => {
@@ -134,84 +132,93 @@ export function ObsColsList() {
     });
   }, [obs, dispatch]);
 
-  function categoricalList(item, active = null) {
-    return (
-      <Accordion.Item
-        key={item.name}
-        eventKey={item.name}
-        className={item.name === active ? "cherita-accordion-active" : ""}
-      >
-        <Accordion.Header>{item.name}</Accordion.Header>
-        <Accordion.Body>
-          <ListGroup>
-            <ListGroup.Item>
-              <div class="d-flex">
-                <div class="flex-grow-1">
-                  <Form.Check // prettier-ignore
-                    type="switch"
-                    id="custom-switch"
-                    label="Toggle all"
-                  />
-                </div>
-                <div>
-                  <ButtonGroup>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={(key) => {
-                        if (key != null) {
-                          dispatch({
-                            type: "obsSelected",
-                            obs: obsColsList.find(
-                              (obs) => obs.name === item.name
-                            ),
-                          });
-                        }
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faDroplet} />
-                    </Button>
-                  </ButtonGroup>
-                </div>
-              </div>
-            </ListGroup.Item>
-            {item.values.map((value, index) => (
-              <ListGroup.Item key={value}>
+  const categoricalList = useCallback(
+    (item, active = null) => {
+      return (
+        <Accordion.Item
+          key={item.name}
+          eventKey={item.name}
+          className={item.name === active ? "cherita-accordion-active" : ""}
+        >
+          <Accordion.Header>{item.name}</Accordion.Header>
+          <Accordion.Body>
+            <ListGroup>
+              <ListGroup.Item>
                 <div class="d-flex">
                   <div class="flex-grow-1">
                     <Form.Check // prettier-ignore
                       type="switch"
                       id="custom-switch"
-                      label={value}
+                      label="Toggle all"
                     />
                   </div>
                   <div>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      fill="currentColor"
-                      viewBox="0 0 10 10"
-                    >
-                      <rect
-                        x="0"
-                        y="0"
-                        width="10"
-                        height="10"
-                        fill={`rgb(${obs[item.name]["state"][index]["color"]})`}
-                      />
-                    </svg>
+                    <ButtonGroup>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={(key) => {
+                          if (key != null) {
+                            dispatch({
+                              type: "obsSelected",
+                              obs: obsColsList.find(
+                                (obs) => obs.name === item.name
+                              ),
+                            });
+                            dispatch({
+                              type: "set.colorEncoding",
+                              value: "obs",
+                            });
+                          }
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faDroplet} />
+                      </Button>
+                    </ButtonGroup>
                   </div>
                 </div>
               </ListGroup.Item>
-            ))}
-          </ListGroup>
-        </Accordion.Body>
-      </Accordion.Item>
-    );
-  }
+              {item.values.map((value, index) => (
+                <ListGroup.Item key={value}>
+                  <div class="d-flex">
+                    <div class="flex-grow-1">
+                      <Form.Check // prettier-ignore
+                        type="switch"
+                        id="custom-switch"
+                        label={value}
+                      />
+                    </div>
+                    <div>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        fill="currentColor"
+                        viewBox="0 0 10 10"
+                      >
+                        <rect
+                          x="0"
+                          y="0"
+                          width="10"
+                          height="10"
+                          fill={`rgb(${
+                            obs[item.name]["state"][index]["color"]
+                          })`}
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          </Accordion.Body>
+        </Accordion.Item>
+      );
+    },
+    [obs]
+  );
 
-  function continuousList(item, active = null) {
+  const continuousList = useCallback((item, active = null) => {
     return (
       <Accordion.Item
         key={item.name}
@@ -228,9 +235,9 @@ export function ObsColsList() {
         </Accordion.Body>
       </Accordion.Item>
     );
-  }
+  }, []);
 
-  function otherList(item, active = null) {
+  const otherList = useCallback((item, active = null) => {
     return (
       <Accordion.Item
         key={item.name}
@@ -241,7 +248,7 @@ export function ObsColsList() {
         <Accordion.Body>{item.type}</Accordion.Body>
       </Accordion.Item>
     );
-  }
+  }, []);
 
   const obsList = useMemo(
     () =>
@@ -254,7 +261,7 @@ export function ObsColsList() {
           return otherList(item, active);
         }
       }),
-    [obsColsList, active]
+    [obsColsList, categoricalList, active, continuousList, otherList]
   );
 
   if (!serverError) {
