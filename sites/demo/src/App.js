@@ -8,6 +8,7 @@ import DotplotDemo from "./containers/DotplotDemo";
 import HeatmapDemo from "./containers/HeatmapDemo";
 import MatrixplotDemo from "./containers/MatrixplotDemo";
 import ScatterplotDemo from "./containers/ScatterplotDemo";
+import ScatterplotDemoFull from "./containers/ScatterplotDemoFull";
 import ViolinDemo from "./containers/ViolinDemo";
 
 export default function App(props) {
@@ -27,6 +28,11 @@ export default function App(props) {
           exact
           path="/scatterplot"
           element={<ScatterplotDemo {...props} />}
+        />
+        <Route
+          exact
+          path="/scatterplot-full"
+          element={<ScatterplotDemoFull {...props} />}
         />
         <Route exact path="/violin" element={<ViolinDemo {...props} />} />
       </Routes>

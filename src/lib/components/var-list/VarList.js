@@ -1,10 +1,16 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import _ from "lodash";
+import { Button } from "react-bootstrap";
+import { ListGroup } from "react-bootstrap";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDroplet } from "@fortawesome/free-solid-svg-icons";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
+
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { SELECTION_MODES } from "../../constants/constants";
-import { Button } from "react-bootstrap";
-import { useCallback } from "react";
 
 export function VarNamesList({
   mode = SELECTION_MODES.SINGLE,
@@ -75,52 +81,77 @@ export function VarNamesList({
       return vars.map((item) => {
         if (item && mode === SELECTION_MODES.SINGLE) {
           return (
-            <Button
-              type="button"
-              key={item.matrix_index}
-              variant={
-                item.matrix_index !== -1
-                  ? "outline-primary"
-                  : "outline-secondary"
-              }
-              className={`${active === item.matrix_index && "active"} m-1`}
-              onClick={() => {
-                selectVar(item);
-              }}
-              disabled={item.matrix_index === -1}
-              title={item.matrix_index === -1 ? "Not present in data" : ""}
-            >
-              {item.name}
-            </Button>
+            <ListGroup.Item key={item}>
+              <div class="d-flex gap-1">
+                <div class="flex-grow-1">{item.name}</div>
+
+                <div>
+                  <FontAwesomeIcon icon={faCircleInfo} />
+                </div>
+                <div>
+                  <Button
+                    type="button"
+                    key={item.matrix_index}
+                    className={`m-0 p-0 px-1 btn-link ${
+                      active === item.matrix_index && "active"
+                    }`}
+                    onClick={() => {
+                      selectVar(item);
+                    }}
+                    disabled={item.matrix_index === -1}
+                    title={
+                      item.matrix_index === -1 ? "Not present in data" : ""
+                    }
+                  >
+                    <FontAwesomeIcon icon={faDroplet} />
+                  </Button>
+                </div>
+                <div>
+                  <FontAwesomeIcon icon={faTrash} />
+                </div>
+              </div>
+            </ListGroup.Item>
           );
         } else if (mode === SELECTION_MODES.MULTIPLE) {
           return (
-            <Button
-              type="button"
-              key={item.matrix_index}
-              variant={
-                item.matrix_index !== -1
-                  ? "outline-primary"
-                  : "outline-secondary"
-              }
-              className={`${
-                active.includes(item.matrix_index) && "active"
-              } m-1`}
-              onClick={() => {
-                if (active.includes(item.matrix_index)) {
-                  dispatch({
-                    type: "multiVarDeselected",
-                    var: item,
-                  });
-                } else {
-                  selectVar(item);
-                }
-              }}
-              disabled={item.matrix_index === -1}
-              title={item.matrix_index === -1 ? "Not present in data" : ""}
-            >
-              {item.name}
-            </Button>
+            <ListGroup.Item key={item}>
+              <div class="d-flex">
+                <div class="flex-grow-1">
+                  <Button
+                    type="button"
+                    key={item.matrix_index}
+                    variant={
+                      item.matrix_index !== -1
+                        ? "outline-primary"
+                        : "outline-secondary"
+                    }
+                    className={`${
+                      active.includes(item.matrix_index) && "active"
+                    } m-1`}
+                    onClick={() => {
+                      if (active.includes(item.matrix_index)) {
+                        dispatch({
+                          type: "multiVarDeselected",
+                          var: item,
+                        });
+                      } else {
+                        selectVar(item);
+                      }
+                    }}
+                    disabled={item.matrix_index === -1}
+                    title={
+                      item.matrix_index === -1 ? "Not present in data" : ""
+                    }
+                  >
+                    {item.name}
+                  </Button>
+                </div>
+                <div>
+                  {" "}
+                  <FontAwesomeIcon icon={faPlus} />
+                </div>
+              </div>
+            </ListGroup.Item>
           );
         } else {
           return null;
@@ -158,7 +189,7 @@ export function VarNamesList({
               clear
             </Button>
           </div>
-          {varList}
+          <ListGroup>{varList}</ListGroup>
         </div>
         <div>
           {dataset.selectedDisease?.id &&

@@ -5,6 +5,13 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
 import { Alert } from "react-bootstrap";
 
+import Dropdown from "react-bootstrap/Dropdown";
+import Button from "react-bootstrap/Button";
+import DropdownButton from "react-bootstrap/DropdownButton";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
+import Tooltip from "react-bootstrap/Tooltip";
+
 export function ObsmKeysList() {
   const ENDPOINT = "obsm/keys";
   const dataset = useDataset();
@@ -42,12 +49,9 @@ export function ObsmKeysList() {
 
   const obsmList = obsmKeysList.map((item) => {
     return (
-      <button
-        type="button"
+      <Dropdown.Item
         key={item}
-        className={`list-group-item list-grou-item-action ${
-          active === item && "active"
-        }`}
+        className={`custom ${active === item && "active"}`}
         onClick={() => {
           dispatch({
             type: "obsmSelected",
@@ -56,22 +60,33 @@ export function ObsmKeysList() {
         }}
       >
         {item}
-      </button>
+      </Dropdown.Item>
     );
   });
 
   if (!serverError) {
     return (
-      <div className="">
+      <>
         {isPending && <LoadingSpinner />}
-        <div className="list-group overflow-auto mh-100">{obsmList}</div>
-      </div>
+        <DropdownButton
+          as={ButtonGroup}
+          title={dataset.selectedObsm}
+          id="bg-nested-dropdown"
+          size="sm"
+        >
+          {obsmList}
+        </DropdownButton>
+      </>
     );
   } else {
     return (
-      <div>
-        <Alert variant="danger">{serverError.message}</Alert>
-      </div>
+      <OverlayTrigger
+        placement="top"
+        delay={{ show: 100, hide: 200 }}
+        overlay={<Tooltip>{serverError.message}</Tooltip>}
+      >
+        <Button variant="danger">Error</Button>
+      </OverlayTrigger>
     );
   }
 }
