@@ -87,7 +87,10 @@ export function Scatterplot({ radius = 30 }) {
   });
   const [obsParams, setObsParams] = useState({
     url: dataset.url,
-    path: "obs/" + dataset.selectedObs?.name + "/codes",
+    path:
+      "obs/" +
+      dataset.selectedObs?.name +
+      (dataset.selectedObs?.type === "continuous" ? "" : "/codes"),
   });
 
   // needs to be wrapped in useMemo as it is an array an could cause an infinite loop otherwise
@@ -122,7 +125,10 @@ export function Scatterplot({ radius = 30 }) {
     setObsParams((p) => {
       return {
         ...p,
-        path: "obs/" + dataset.selectedObs?.name + "/codes",
+        path:
+          "obs/" +
+          dataset.selectedObs?.name +
+          (dataset.selectedObs?.type === "continuous" ? "" : "/codes"),
       };
     });
   }, [dataset.selectedObs]);

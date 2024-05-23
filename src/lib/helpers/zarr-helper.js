@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { openArray } from "zarr";
 
 export const GET_OPTIONS = {

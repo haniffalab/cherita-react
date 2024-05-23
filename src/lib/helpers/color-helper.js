@@ -9,10 +9,16 @@ export const useColor = () => {
   const dataset = useDataset();
 
   const getScale = useCallback(
-    (values = null) => {
+    (values = null, min = null, max = null) => {
       const c = chroma
         .scale(CHROMA_COLORSCALES[dataset.controls.colorScale])
-        .domain(values ? [_.min(values), _.max(values)] : [0, 1]);
+        .domain(
+          min && max
+            ? [min, max]
+            : values
+            ? [_.min(values), _.max(values)]
+            : [0, 1]
+        );
       return c;
     },
     [dataset.controls.colorScale]
@@ -23,9 +29,13 @@ export const useColor = () => {
       if (colorEncoding === "var") {
         return scale(value).rgb();
       } else if (colorEncoding === "obs") {
-        return dataset.obs[dataset.selectedObs?.name]?.state?.[value]?.[
-          "color"
-        ];
+        if (dataset.obs[dataset.selectedObs?.name]?.type === "continuous") {
+          return scale(value).rgb();
+        } else {
+          return dataset.obs[dataset.selectedObs?.name]?.state?.[value]?.[
+            "color"
+          ];
+        }
       } else {
         return null;
       }

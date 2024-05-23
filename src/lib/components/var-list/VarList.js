@@ -82,8 +82,8 @@ export function VarNamesList({
         if (item && mode === SELECTION_MODES.SINGLE) {
           return (
             <ListGroup.Item key={item}>
-              <div class="d-flex gap-1">
-                <div class="flex-grow-1">{item.name}</div>
+              <div className="d-flex gap-1">
+                <div className="flex-grow-1">{item.name}</div>
 
                 <div>
                   <FontAwesomeIcon icon={faCircleInfo} />
@@ -115,8 +115,8 @@ export function VarNamesList({
         } else if (mode === SELECTION_MODES.MULTIPLE) {
           return (
             <ListGroup.Item key={item}>
-              <div class="d-flex">
-                <div class="flex-grow-1">
+              <div className="d-flex">
+                <div className="flex-grow-1">
                   <Button
                     type="button"
                     key={item.matrix_index}

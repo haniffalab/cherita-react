@@ -36,12 +36,19 @@ export function Legend({ scale }) {
     }
   }, [scale]);
 
-  if (dataset.colorEncoding === "var" && scale) {
+  if (
+    (dataset.colorEncoding === "var" && scale) ||
+    (dataset.colorEncoding === "obs" &&
+      dataset.selectedObs?.type === "continuous" &&
+      scale)
+  ) {
     return (
       <div className="cherita-legend">
         <div className="gradient">
           <p className="small m-0 p-0">
-            {dataset.selectedVar ? dataset.selectedVar.name : ""}
+            {dataset.colorEncoding === "var"
+              ? dataset.selectedVar?.name
+              : dataset.selectedObs?.name}
           </p>
           {legendData.list}
           <span className="domain-min">{legendData.dmin.toFixed(1)}</span>

@@ -7,6 +7,7 @@ import { useFetch } from "../../utils/requests";
 import chroma from "chroma-js";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
 import { Accordion, ListGroup, Alert } from "react-bootstrap";
+import { useColor } from "../../helpers/color-helper";
 
 import { Form } from "react-bootstrap";
 import { ButtonGroup } from "react-bootstrap";
@@ -98,6 +99,15 @@ export function ObsColsList() {
               };
             });
           }
+          if (key.type === "continuous") {
+            result[key.name] = {
+              type: key.type,
+              min: key.min,
+              max: key.max,
+              mean: key.mean,
+              median: key.median,
+            };
+          }
           return result;
         }, {})
       );
@@ -144,8 +154,8 @@ export function ObsColsList() {
           <Accordion.Body>
             <ListGroup>
               <ListGroup.Item>
-                <div class="d-flex">
-                  <div class="flex-grow-1">
+                <div className="d-flex">
+                  <div className="flex-grow-1">
                     <Form.Check // prettier-ignore
                       type="switch"
                       id="custom-switch"
@@ -180,8 +190,8 @@ export function ObsColsList() {
               </ListGroup.Item>
               {item.values.map((value, index) => (
                 <ListGroup.Item key={value}>
-                  <div class="d-flex">
-                    <div class="flex-grow-1">
+                  <div className="d-flex">
+                    <div className="flex-grow-1">
                       <Form.Check // prettier-ignore
                         type="switch"
                         id="custom-switch"
@@ -215,27 +225,60 @@ export function ObsColsList() {
         </Accordion.Item>
       );
     },
-    [obs]
+    [dispatch, obs, obsColsList]
   );
 
-  const continuousList = useCallback((item, active = null) => {
-    return (
-      <Accordion.Item
-        key={item.name}
-        eventKey={item.name}
-        className={item.name === active ? "cherita-accordion-active" : ""}
-      >
-        <Accordion.Header>{item.name}</Accordion.Header>
-        <Accordion.Body>
-          <p>Min: {item.min}</p>
-          <p>Max: {item.max}</p>
-          <p>Mean: {item.mean}</p>
-          <p>Median: {item.median}</p>
-          <p>NBins: {item.nBins}</p>
-        </Accordion.Body>
-      </Accordion.Item>
-    );
-  }, []);
+  const continuousList = useCallback(
+    (item, active = null) => {
+      return (
+        <Accordion.Item
+          key={item.name}
+          eventKey={item.name}
+          className={item.name === active ? "cherita-accordion-active" : ""}
+        >
+          <Accordion.Header>{item.name}</Accordion.Header>
+          <Accordion.Body>
+            <ListGroup>
+              <ListGroup.Item>
+                <div className="d-flex">
+                  <div>
+                    <ButtonGroup>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={(key) => {
+                          if (key != null) {
+                            dispatch({
+                              type: "obsSelected",
+                              obs: obsColsList.find(
+                                (obs) => obs.name === item.name
+                              ),
+                            });
+                            dispatch({
+                              type: "set.colorEncoding",
+                              value: "obs",
+                            });
+                          }
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faDroplet} />
+                      </Button>
+                    </ButtonGroup>
+                  </div>
+                </div>
+              </ListGroup.Item>
+            </ListGroup>
+            <p>Min: {item.min}</p>
+            <p>Max: {item.max}</p>
+            <p>Mean: {item.mean}</p>
+            <p>Median: {item.median}</p>
+            <p>NBins: {item.nBins}</p>
+          </Accordion.Body>
+        </Accordion.Item>
+      );
+    },
+    [dispatch, obsColsList]
+  );
 
   const otherList = useCallback((item, active = null) => {
     return (
