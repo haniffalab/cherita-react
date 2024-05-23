@@ -230,7 +230,10 @@ export function Scatterplot({ radius = 30 }) {
   useEffect(() => {
     if (dataset.colorEncoding === "obs") {
       if (!obsData.isPending && !obsData.serverError) {
-        const s = getScale(obsData.data);
+        const s = getScale(
+          obsData.data,
+          dataset.selectedObs?.type === "categorical"
+        );
         setScale(() => s);
         setData((d) => {
           return _.map(obsData.data, (v, index) => {
@@ -265,6 +268,7 @@ export function Scatterplot({ radius = 30 }) {
     obsData.serverError,
     getScale,
     getColor,
+    dataset.selectedObs,
   ]);
 
   const layers = useMemo(() => {

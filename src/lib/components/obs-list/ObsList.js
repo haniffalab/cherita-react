@@ -4,7 +4,6 @@ import _ from "lodash";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFetch } from "../../utils/requests";
-import chroma from "chroma-js";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
 import { Accordion, ListGroup, Alert } from "react-bootstrap";
 import { useColor } from "../../helpers/color-helper";
@@ -51,6 +50,8 @@ export function ObsColsList() {
     url: dataset.url,
   });
 
+  const { getScale, getColor } = useColor();
+
   useEffect(() => {
     setParams((p) => {
       return {
@@ -79,38 +80,31 @@ export function ObsColsList() {
     [dispatch, obsColsList, updatedObsColsList]
   );
 
+  const getObs = (data) => {
+    data.reduce((result, key) => {
+      if (key.type === "categorical") {
+        result[key.name] = {
+          type: key.type,
+          is_truncated: key.is_truncated,
+          values: key.values,
+          n_values: key.n_values,
+          codes: key.codes,
+        };
+      } else if (key.type === "continuous") {
+        result[key.name] = {
+          type: key.type,
+          min: key.min,
+          max: key.max,
+          mean: key.mean,
+          median: key.median,
+        };
+      }
+      return result;
+    }, {});
+  };
+
   useEffect(() => {
     if (!isPending && !serverError) {
-      setObs(
-        fetchedData.reduce((result, key) => {
-          const colors = chroma.scale("Accent").colors(key.n_values, "rgb");
-          result[key.name] = {
-            type: key.type,
-          };
-          if (key.type === "categorical") {
-            result[key.name]["is_truncated"] = key.is_truncated;
-            result[key.name]["n_values"] = key.n_values;
-            result[key.name]["values"] = key.values;
-            result[key.name]["state"] = key.values.map((value, index) => {
-              return {
-                value: value,
-                color: chroma(colors[index]).rgb(),
-                checked: true,
-              };
-            });
-          }
-          if (key.type === "continuous") {
-            result[key.name] = {
-              type: key.type,
-              min: key.min,
-              max: key.max,
-              mean: key.mean,
-              median: key.median,
-            };
-          }
-          return result;
-        }, {})
-      );
       setObsColsList(
         fetchedData.map((d) => {
           if (d.type === "continuous") {
@@ -123,8 +117,12 @@ export function ObsColsList() {
         })
       );
       setUpdatedObsColsList(true);
+      dispatch({
+        type: "set.obs",
+        value: getObs(fetchedData),
+      });
     }
-  }, [fetchedData, isPending, serverError]);
+  }, [dispatch, fetchedData, isPending, serverError]);
 
   useEffect(() => {
     if (dataset.selectedObs) {
@@ -135,15 +133,9 @@ export function ObsColsList() {
     }
   }, [dataset.selectedObs, validateSelection]);
 
-  useEffect(() => {
-    dispatch({
-      type: "set.obs",
-      value: obs,
-    });
-  }, [obs, dispatch]);
-
   const categoricalList = useCallback(
     (item, active = null) => {
+      const scale = getScale(_.values(item.codes), true, item.n_values);
       return (
         <Accordion.Item
           key={item.name}
@@ -188,7 +180,7 @@ export function ObsColsList() {
                   </div>
                 </div>
               </ListGroup.Item>
-              {item.values.map((value, index) => (
+              {_.map(item.values, (value) => (
                 <ListGroup.Item key={value}>
                   <div className="d-flex">
                     <div className="flex-grow-1">
@@ -211,9 +203,7 @@ export function ObsColsList() {
                           y="0"
                           width="10"
                           height="10"
-                          fill={`rgb(${
-                            obs[item.name]["state"][index]["color"]
-                          })`}
+                          fill={`rgb(${getColor(scale, item.codes[value])})`}
                         />
                       </svg>
                     </div>
@@ -225,7 +215,7 @@ export function ObsColsList() {
         </Accordion.Item>
       );
     },
-    [dispatch, obs, obsColsList]
+    [getScale, dispatch, obsColsList, getColor]
   );
 
   const continuousList = useCallback(

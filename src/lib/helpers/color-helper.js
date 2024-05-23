@@ -9,16 +9,18 @@ export const useColor = () => {
   const dataset = useDataset();
 
   const getScale = useCallback(
-    (values = null, min = null, max = null) => {
-      const c = chroma
-        .scale(CHROMA_COLORSCALES[dataset.controls.colorScale])
-        .domain(
-          min && max
-            ? [min, max]
-            : values
-            ? [_.min(values), _.max(values)]
-            : [0, 1]
-        );
+    (values = null, categorical = false, n_values = null) => {
+      let c;
+      if (categorical) {
+        c = chroma
+          .scale("Accent")
+          .domain(values ? [_.min(values), _.max(values)] : [0, 1])
+          .classes(values ? _.uniq(values).length : n_values);
+      } else {
+        c = chroma
+          .scale(CHROMA_COLORSCALES[dataset.controls.colorScale])
+          .domain(values ? [_.min(values), _.max(values)] : [0, 1]);
+      }
       return c;
     },
     [dataset.controls.colorScale]
@@ -26,21 +28,13 @@ export const useColor = () => {
 
   const getColor = useCallback(
     (scale, value, colorEncoding = dataset.colorEncoding) => {
-      if (colorEncoding === "var") {
+      if (colorEncoding) {
         return scale(value).rgb();
-      } else if (colorEncoding === "obs") {
-        if (dataset.obs[dataset.selectedObs?.name]?.type === "continuous") {
-          return scale(value).rgb();
-        } else {
-          return dataset.obs[dataset.selectedObs?.name]?.state?.[value]?.[
-            "color"
-          ];
-        }
       } else {
         return null;
       }
     },
-    [dataset.colorEncoding, dataset.obs, dataset.selectedObs?.name]
+    [dataset.colorEncoding]
   );
 
   return { getScale, getColor };
