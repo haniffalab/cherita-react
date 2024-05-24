@@ -13,11 +13,13 @@
 }
 
 .cherita-navbar {
+    @extend .mx-1;
+    @extend .my-2;
     position: absolute;
     z-index: 11;
-    top: 20px;
-    right: 20px;
-    left: 20px;
+    top: 0;
+    left: 0;
+    right: 0;
     border-radius: 0.25rem;
 }
 
@@ -59,7 +61,7 @@
 
 .cherita-container-scatterplot {
     position: relative;
-    min-height: 300px;
+    min-height: 500px;
     height: 100%;
 }
 
