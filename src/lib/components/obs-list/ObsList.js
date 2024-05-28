@@ -43,14 +43,13 @@ export function ObsColsList() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [obsColsList, setObsColsList] = useState([]);
-  const [obs, setObs] = useState([]);
   const [updatedObsColsList, setUpdatedObsColsList] = useState(false);
   const [active, setActive] = useState(dataset.selectedObs?.name);
   const [params, setParams] = useState({
     url: dataset.url,
   });
 
-  const { getScale, getColor } = useColor();
+  const { getScaleParams, getScale, getColor } = useColor();
 
   useEffect(() => {
     setParams((p) => {
@@ -68,7 +67,13 @@ export function ObsColsList() {
   const validateSelection = useCallback(
     (selectedObs) => {
       if (updatedObsColsList) {
-        if (!_.some(obsColsList, selectedObs)) {
+        const selection = _.find(obsColsList, (item) =>
+          _.isEqual(
+            _.omit(item, "scaleParams"),
+            _.omit(selectedObs, "scaleParams")
+          )
+        );
+        if (!selection) {
           setActive(null);
           dispatch({
             type: "obsSelected",
@@ -80,49 +85,37 @@ export function ObsColsList() {
     [dispatch, obsColsList, updatedObsColsList]
   );
 
-  const getObs = (data) => {
-    data.reduce((result, key) => {
-      if (key.type === "categorical") {
-        result[key.name] = {
-          type: key.type,
-          is_truncated: key.is_truncated,
-          values: key.values,
-          n_values: key.n_values,
-          codes: key.codes,
-        };
-      } else if (key.type === "continuous") {
-        result[key.name] = {
-          type: key.type,
-          min: key.min,
-          max: key.max,
-          mean: key.mean,
-          median: key.median,
-        };
-      }
-      return result;
-    }, {});
-  };
-
   useEffect(() => {
     if (!isPending && !serverError) {
       setObsColsList(
-        fetchedData.map((d) => {
+        _.map(fetchedData, (d) => {
           if (d.type === "continuous") {
             d = binContinuous(d);
-          }
-          if (d.type === "discrete") {
+            d = { ...d, scaleParams: getScaleParams(d) };
+          } else if (d.type === "discrete") {
             d = binDiscrete(d);
+            d = { ...d, scaleParams: getScaleParams(d) };
+          } else if (d.type === "categorical") {
+            d = {
+              ...d,
+              scaleParams: getScaleParams(
+                { ...d, values: _.values(d.codes) },
+                true
+              ),
+            };
           }
           return d;
         })
       );
       setUpdatedObsColsList(true);
-      dispatch({
-        type: "set.obs",
-        value: getObs(fetchedData),
-      });
     }
-  }, [dispatch, fetchedData, isPending, serverError]);
+  }, [
+    fetchedData,
+    getScaleParams,
+    isPending,
+    serverError,
+    dataset.controls.colorScale,
+  ]);
 
   useEffect(() => {
     if (dataset.selectedObs) {
@@ -135,7 +128,6 @@ export function ObsColsList() {
 
   const categoricalList = useCallback(
     (item, active = null) => {
-      const scale = getScale(_.values(item.codes), true, item.n_values);
       return (
         <Accordion.Item
           key={item.name}
@@ -203,7 +195,10 @@ export function ObsColsList() {
                           y="0"
                           width="10"
                           height="10"
-                          fill={`rgb(${getColor(scale, item.codes[value])})`}
+                          fill={`rgb(${getColor(
+                            getScale(item.scaleParams),
+                            item.codes[value]
+                          )})`}
                         />
                       </svg>
                     </div>
@@ -215,7 +210,7 @@ export function ObsColsList() {
         </Accordion.Item>
       );
     },
-    [getScale, dispatch, obsColsList, getColor]
+    [dispatch, obsColsList, getColor, getScale]
   );
 
   const continuousList = useCallback(

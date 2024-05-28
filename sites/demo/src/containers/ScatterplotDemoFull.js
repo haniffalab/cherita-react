@@ -75,7 +75,7 @@ export default function ScatterplotDemo(props) {
           >
             <ObsColsList />
           </Col>
-          <Col xs={12} lg={8} xl={6} xxl={6} class="cherita-app-plot">
+          <Col xs={12} lg={8} xl={6} xxl={6} className="cherita-app-plot">
             <div className="position-relative">
               <Navbar
                 expand="sm"

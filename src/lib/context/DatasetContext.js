@@ -38,7 +38,6 @@ const persistOptions = {
 };
 
 const initialDataset = {
-  obs: {},
   varNamesCol: null,
   selectedObs: null,
   selectedObsm: null,
@@ -57,9 +56,6 @@ const initialDataset = {
     standardScale: null,
     meanOnlyExpressed: false,
     expressionCutoff: 0.0,
-  },
-  state: {
-    obs: {},
   },
   diseaseDatasets: [],
   selectedDisease: {
@@ -136,9 +132,6 @@ export function useDatasetDispatch() {
 
 function datasetReducer(dataset, action) {
   switch (action.type) {
-    case "set.obs": {
-      return { ...dataset, obs: action.value };
-    }
     case "obsSelected": {
       return { ...dataset, selectedObs: action.obs };
     }
@@ -216,6 +209,15 @@ function datasetReducer(dataset, action) {
         controls: {
           ...dataset.controls,
           colorScale: action.colorScale,
+        },
+        selectedObs: {
+          ...dataset.selectedObs,
+          scaleParams: {
+            ...dataset.selectedObs?.scaleParams,
+            scale: dataset.selectedObs?.scaleParams?.isCategorical
+              ? dataset.selectedObs?.scaleParams?.scale
+              : action.colorScale,
+          },
         },
       };
     }

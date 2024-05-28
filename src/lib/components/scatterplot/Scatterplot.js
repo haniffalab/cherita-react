@@ -65,7 +65,7 @@ const DEFAULT_DATA_POINT = {
 
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
-  const { getScale, getColor } = useColor();
+  const { getScale, getScaleParams, getColor } = useColor();
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [features, setFeatures] = useState({
     type: "FeatureCollection",
@@ -190,7 +190,7 @@ export function Scatterplot({ radius = 30 }) {
   useEffect(() => {
     if (dataset.colorEncoding === "var") {
       if (!xData.isPending && !xData.serverError) {
-        const s = getScale(xData.data);
+        const s = getScale(getScaleParams({ values: xData.data }));
         setScale(() => s);
         setData((d) => {
           return _.map(xData.data, (v, index) => {
@@ -223,6 +223,7 @@ export function Scatterplot({ radius = 30 }) {
     xData.data,
     xData.isPending,
     xData.serverError,
+    getScaleParams,
     getScale,
     getColor,
   ]);
@@ -230,10 +231,7 @@ export function Scatterplot({ radius = 30 }) {
   useEffect(() => {
     if (dataset.colorEncoding === "obs") {
       if (!obsData.isPending && !obsData.serverError) {
-        const s = getScale(
-          obsData.data,
-          dataset.selectedObs?.type === "categorical"
-        );
+        const s = getScale(dataset.selectedObs?.scaleParams);
         setScale(() => s);
         setData((d) => {
           return _.map(obsData.data, (v, index) => {
@@ -266,9 +264,10 @@ export function Scatterplot({ radius = 30 }) {
     obsData.data,
     obsData.isPending,
     obsData.serverError,
+    getScaleParams,
     getScale,
     getColor,
-    dataset.selectedObs,
+    dataset.selectedObs?.scaleParams,
   ]);
 
   const layers = useMemo(() => {

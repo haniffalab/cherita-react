@@ -8,18 +8,42 @@ import { useCallback } from "react";
 export const useColor = () => {
   const dataset = useDataset();
 
+  const getScaleParams = useCallback(
+    (
+      { values = null, n_values = null, min = null, max = null } = {},
+      isCategorical = false
+    ) => {
+      return {
+        scale: isCategorical ? "Accent" : dataset.controls.colorScale,
+        domain:
+          min && max
+            ? [min, max]
+            : values
+            ? [_.min(values), _.max(values)]
+            : [0, 1],
+        classes: isCategorical
+          ? values
+            ? _.uniq(values).length
+            : n_values
+          : null,
+        isCategorical: isCategorical,
+      };
+    },
+    [dataset.controls.colorScale]
+  );
+
   const getScale = useCallback(
-    (values = null, categorical = false, n_values = null) => {
-      let c;
-      if (categorical) {
-        c = chroma
-          .scale("Accent")
-          .domain(values ? [_.min(values), _.max(values)] : [0, 1])
-          .classes(values ? _.uniq(values).length : n_values);
-      } else {
-        c = chroma
-          .scale(CHROMA_COLORSCALES[dataset.controls.colorScale])
-          .domain(values ? [_.min(values), _.max(values)] : [0, 1]);
+    (params) => {
+      if (!params) {
+        return chroma.scale(
+          CHROMA_COLORSCALES[dataset.controls.colorScale],
+          [0, 1]
+        );
+      }
+      const { scale, domain, classes = null } = params;
+      let c = chroma.scale(CHROMA_COLORSCALES[scale]).domain(domain);
+      if (classes) {
+        c.classes(classes);
       }
       return c;
     },
@@ -37,5 +61,5 @@ export const useColor = () => {
     [dataset.colorEncoding]
   );
 
-  return { getScale, getColor };
+  return { getScale, getScaleParams, getColor };
 };
