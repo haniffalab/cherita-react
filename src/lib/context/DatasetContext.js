@@ -210,15 +210,6 @@ function datasetReducer(dataset, action) {
           ...dataset.controls,
           colorScale: action.colorScale,
         },
-        selectedObs: {
-          ...dataset.selectedObs,
-          scaleParams: {
-            ...dataset.selectedObs?.scaleParams,
-            scale: dataset.selectedObs?.scaleParams?.isCategorical
-              ? dataset.selectedObs?.scaleParams?.scale
-              : action.colorScale,
-          },
-        },
       };
     }
     case "set.controls.colorAxis": {

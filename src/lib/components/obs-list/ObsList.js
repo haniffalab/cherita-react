@@ -109,13 +109,7 @@ export function ObsColsList() {
       );
       setUpdatedObsColsList(true);
     }
-  }, [
-    fetchedData,
-    getScaleParams,
-    isPending,
-    serverError,
-    dataset.controls.colorScale,
-  ]);
+  }, [fetchedData, getScaleParams, isPending, serverError]);
 
   useEffect(() => {
     if (dataset.selectedObs) {

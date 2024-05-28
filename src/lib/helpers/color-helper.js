@@ -14,7 +14,6 @@ export const useColor = () => {
       isCategorical = false
     ) => {
       return {
-        scale: isCategorical ? "Accent" : dataset.controls.colorScale,
         domain:
           min && max
             ? [min, max]
@@ -29,7 +28,7 @@ export const useColor = () => {
         isCategorical: isCategorical,
       };
     },
-    [dataset.controls.colorScale]
+    []
   );
 
   const getScale = useCallback(
@@ -40,8 +39,14 @@ export const useColor = () => {
           [0, 1]
         );
       }
-      const { scale, domain, classes = null } = params;
-      let c = chroma.scale(CHROMA_COLORSCALES[scale]).domain(domain);
+      const { isCategorical, domain, classes = null } = params;
+      let c = chroma
+        .scale(
+          CHROMA_COLORSCALES[
+            isCategorical ? "Accent" : dataset.controls.colorScale
+          ]
+        )
+        .domain(domain);
       if (classes) {
         c.classes(classes);
       }

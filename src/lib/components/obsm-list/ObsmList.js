@@ -70,7 +70,8 @@ export function ObsmKeysList() {
         {isPending && <LoadingSpinner />}
         <DropdownButton
           as={ButtonGroup}
-          title={dataset.selectedObsm}
+          title={dataset.selectedObsm || "Select an embedding"}
+          variant={dataset.selectedObsm ? "primary" : "outline-primary"}
           id="bg-nested-dropdown"
           size="sm"
         >
