@@ -5,12 +5,15 @@ import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFetch } from "../../utils/requests";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
-import { Accordion, ListGroup, Alert } from "react-bootstrap";
+import {
+  Accordion,
+  ListGroup,
+  Alert,
+  Form,
+  ButtonGroup,
+  Button,
+} from "react-bootstrap";
 import { useColor } from "../../helpers/color-helper";
-
-import { Form } from "react-bootstrap";
-import { ButtonGroup } from "react-bootstrap";
-import { Button } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDroplet } from "@fortawesome/free-solid-svg-icons";
 
@@ -69,8 +72,8 @@ export function ObsColsList() {
       if (updatedObsColsList) {
         const selection = _.find(obsColsList, (item) =>
           _.isEqual(
-            _.omit(item, "scaleParams"),
-            _.omit(selectedObs, "scaleParams")
+            _.omit(item, ["scaleParams", "omit"]),
+            _.omit(selectedObs, ["scaleParams", "omit"])
           )
         );
         if (!selection) {
@@ -80,21 +83,31 @@ export function ObsColsList() {
             obs: null,
           });
         }
+        if (
+          !_.isEqual(selectedObs.scaleParams, selection.scaleParams) ||
+          !_.isEqual(selectedObs.omit, selection.omit)
+        ) {
+          dispatch({
+            type: "obsSelected",
+            obs: selection,
+          });
+        }
       }
     },
     [dispatch, obsColsList, updatedObsColsList]
   );
 
+  // @TODO: change api to return all obs and truncate here
   useEffect(() => {
     if (!isPending && !serverError) {
       setObsColsList(
         _.map(fetchedData, (d) => {
           if (d.type === "continuous") {
             d = binContinuous(d);
-            d = { ...d, scaleParams: getScaleParams(d) };
+            d = { ...d, scaleParams: getScaleParams(d), omit: [] };
           } else if (d.type === "discrete") {
             d = binDiscrete(d);
-            d = { ...d, scaleParams: getScaleParams(d) };
+            d = { ...d, scaleParams: getScaleParams(d), omit: [] };
           } else if (d.type === "categorical") {
             d = {
               ...d,
@@ -102,6 +115,7 @@ export function ObsColsList() {
                 { ...d, values: _.values(d.codes) },
                 true
               ),
+              omit: [],
             };
           }
           return d;
@@ -119,6 +133,16 @@ export function ObsColsList() {
       setActive(null);
     }
   }, [dataset.selectedObs, validateSelection]);
+
+  const toggleAll = (name, checked) => {
+    setObsColsList((l) => {
+      return _.map(l, (i) => {
+        return i.name === name
+          ? { ...i, omit: checked ? [] : _.map(i.values, (v) => i.codes[v]) }
+          : i;
+      });
+    });
+  };
 
   const categoricalList = useCallback(
     (item, active = null) => {
@@ -138,6 +162,10 @@ export function ObsColsList() {
                       type="switch"
                       id="custom-switch"
                       label="Toggle all"
+                      checked={!item.omit.length}
+                      onChange={() => {
+                        toggleAll(item.name, !!item.omit.length);
+                      }}
                     />
                   </div>
                   <div>
@@ -174,6 +202,27 @@ export function ObsColsList() {
                         type="switch"
                         id="custom-switch"
                         label={value}
+                        checked={!_.includes(item.omit, item.codes[value])}
+                        onChange={() => {
+                          setObsColsList((l) => {
+                            return _.map(l, (i) => {
+                              return i.name === item.name
+                                ? {
+                                    ...i,
+                                    omit: !_.includes(
+                                      item.omit,
+                                      item.codes[value]
+                                    )
+                                      ? [...i.omit, item.codes[value]]
+                                      : _.filter(
+                                          i.omit,
+                                          (o) => o !== item.codes[value]
+                                        ),
+                                  }
+                                : i;
+                            });
+                          });
+                        }}
                       />
                     </div>
                     <div>
@@ -191,7 +240,10 @@ export function ObsColsList() {
                           height="10"
                           fill={`rgb(${getColor(
                             getScale(item.scaleParams),
-                            item.codes[value]
+                            item.codes[value],
+                            {
+                              gray: _.includes(item.omit, item.codes[value]),
+                            }
                           )})`}
                         />
                       </svg>

@@ -5,6 +5,8 @@ import { CHROMA_COLORSCALES } from "../constants/constants";
 import { useDataset } from "../context/DatasetContext";
 import { useCallback } from "react";
 
+const GRAY = [214, 212, 212];
+
 export const useColor = () => {
   const dataset = useDataset();
 
@@ -56,9 +58,17 @@ export const useColor = () => {
   );
 
   const getColor = useCallback(
-    (scale, value, colorEncoding = dataset.colorEncoding) => {
+    (
+      scale,
+      value,
+      { alpha = false, gray = false } = {},
+      colorEncoding = dataset.colorEncoding
+    ) => {
       if (colorEncoding) {
-        return scale(value).rgb();
+        return [
+          ...chroma.mix(scale(value).rgb(), GRAY, gray * 0.9, "rgb").rgb(),
+          255 * (alpha ? 0.2 : 1),
+        ]; // not using chroma's .alpha as deckgl expects alpha in 0-255 range
       } else {
         return null;
       }

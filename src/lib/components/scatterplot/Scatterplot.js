@@ -238,7 +238,10 @@ export function Scatterplot({ radius = 30 }) {
             return _.defaults(
               {
                 value: v,
-                color: getColor(s, v),
+                color: getColor(s, v, {
+                  alpha: _.includes(dataset.selectedObs?.omit, v),
+                  gray: _.includes(dataset.selectedObs?.omit, v),
+                }),
               },
               d?.[index],
               DEFAULT_DATA_POINT
@@ -268,6 +271,7 @@ export function Scatterplot({ radius = 30 }) {
     getScale,
     getColor,
     dataset.selectedObs?.scaleParams,
+    dataset.selectedObs?.omit,
   ]);
 
   const layers = useMemo(() => {
