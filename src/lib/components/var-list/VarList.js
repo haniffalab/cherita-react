@@ -81,7 +81,7 @@ export function VarNamesList({
       return vars.map((item) => {
         if (item && mode === SELECTION_MODES.SINGLE) {
           return (
-            <ListGroup.Item key={item}>
+            <ListGroup.Item key={item.name}>
               <div className="d-flex gap-1">
                 <div className="flex-grow-1">{item.name}</div>
 
@@ -114,7 +114,7 @@ export function VarNamesList({
           );
         } else if (mode === SELECTION_MODES.MULTIPLE) {
           return (
-            <ListGroup.Item key={item}>
+            <ListGroup.Item key={item.name}>
               <div className="d-flex">
                 <div className="flex-grow-1">
                   <Button

@@ -75,6 +75,7 @@ export function Scatterplot({ radius = 30 }) {
   const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
   const [featureState, setFeatureState] = useState([]);
   const [scale, setScale] = useState(() => getScale());
+  const [isRendering, setIsRendering] = useState(true);
   const [data, setData] = useState([]);
 
   const [obsmParams, setObsmParams] = useState({
@@ -158,6 +159,7 @@ export function Scatterplot({ radius = 30 }) {
 
   useEffect(() => {
     if (!obsmData.isPending && !obsmData.serverError) {
+      setIsRendering(true);
       setData((d) => {
         return _.map(obsmData.data, (p, index) => {
           return _.defaults({ position: p }, d?.[index], DEFAULT_DATA_POINT);
@@ -174,6 +176,7 @@ export function Scatterplot({ radius = 30 }) {
         };
       });
     } else if (!obsmData.isPending && obsmData.serverError) {
+      setIsRendering(true);
       setData((d) => {
         return _.map(d, (e) => {
           return _.defaults({ position: null }, e, DEFAULT_DATA_POINT);
@@ -189,15 +192,15 @@ export function Scatterplot({ radius = 30 }) {
 
   useEffect(() => {
     if (dataset.colorEncoding === "var") {
+      setIsRendering(true);
       if (!xData.isPending && !xData.serverError) {
-        const s = getScale(getScaleParams({ values: xData.data }));
-        setScale(() => s);
+        // @TODO: add condition to check obs slicing
+        setScale(() => getScale(getScaleParams({ values: xData.data })));
         setData((d) => {
           return _.map(xData.data, (v, index) => {
             return _.defaults(
               {
                 value: v,
-                color: getColor(s, v),
               },
               d?.[index],
               DEFAULT_DATA_POINT
@@ -205,15 +208,10 @@ export function Scatterplot({ radius = 30 }) {
           });
         });
       } else if (!xData.isPending && xData.serverError) {
-        const s = getScale();
-        setScale(() => s);
+        setScale(() => getScale());
         setData((d) => {
           return _.map(d, (e) => {
-            return _.defaults(
-              { value: null, color: null },
-              e,
-              DEFAULT_DATA_POINT
-            );
+            return _.defaults({ value: null }, e, DEFAULT_DATA_POINT);
           });
         });
       }
@@ -230,18 +228,14 @@ export function Scatterplot({ radius = 30 }) {
 
   useEffect(() => {
     if (dataset.colorEncoding === "obs") {
+      setIsRendering(true);
       if (!obsData.isPending && !obsData.serverError) {
-        const s = getScale(dataset.selectedObs?.scaleParams);
-        setScale(() => s);
+        setScale(() => getScale(dataset.selectedObs?.scaleParams));
         setData((d) => {
           return _.map(obsData.data, (v, index) => {
             return _.defaults(
               {
                 value: v,
-                color: getColor(s, v, {
-                  alpha: _.includes(dataset.selectedObs?.omit, v),
-                  gray: _.includes(dataset.selectedObs?.omit, v),
-                }),
               },
               d?.[index],
               DEFAULT_DATA_POINT
@@ -249,8 +243,7 @@ export function Scatterplot({ radius = 30 }) {
           });
         });
       } else if (!obsData.isPending && obsData.serverError) {
-        const s = getScale();
-        setScale(() => s);
+        setScale(() => getScale());
         setData((d) => {
           return _.map(d, (e) => {
             return _.defaults(
@@ -269,9 +262,8 @@ export function Scatterplot({ radius = 30 }) {
     obsData.serverError,
     getScaleParams,
     getScale,
-    getColor,
     dataset.selectedObs?.scaleParams,
-    dataset.selectedObs?.omit,
+    // dataset.selectedObs?.omit,
   ]);
 
   const layers = useMemo(() => {
@@ -282,8 +274,19 @@ export function Scatterplot({ radius = 30 }) {
         radiusScale: radius,
         radiusMinPixels: 1,
         getPosition: (d) => d.position,
-        getFillColor: (d) => d.color,
+        getFillColor: (d) =>
+          getColor(
+            scale,
+            d.value,
+            dataset.colorEncoding === "obs" && {
+              alpha: _.includes(dataset.selectedObs?.omit, d.value),
+              gray: _.includes(dataset.selectedObs?.omit, d.value),
+            }
+          ),
         getRadius: 1,
+        updateTriggers: {
+          getFillColor: [dataset.colorEncoding, dataset.selectedObs?.omit],
+        },
       }),
       new EditableGeoJsonLayer({
         id: "cherita-layer-draw",
@@ -308,7 +311,17 @@ export function Scatterplot({ radius = 30 }) {
         },
       }),
     ];
-  }, [data, features, mode, radius, selectedFeatureIndexes]);
+  }, [
+    data,
+    dataset.colorEncoding,
+    dataset.selectedObs?.omit,
+    features,
+    getColor,
+    mode,
+    radius,
+    scale,
+    selectedFeatureIndexes,
+  ]);
 
   function onLayerClick(info) {
     if (mode !== ViewMode) {
@@ -322,15 +335,21 @@ export function Scatterplot({ radius = 30 }) {
   // @TODO: add error message
   return (
     <div className="cherita-scatterplot">
-      {(obsmData.isPending || xData.isPending || obsmData.isPending) && (
-        <LoadingSpinner />
-      )}
+      {(isRendering ||
+        obsmData.isPending ||
+        xData.isPending ||
+        obsmData.isPending) && <LoadingSpinner />}
       <DeckGL
         viewState={viewState}
         onViewStateChange={(e) => setViewState(e.viewState)}
         controller
         layers={layers}
         onClick={onLayerClick}
+        onAfterRender={() => {
+          if (isRendering) {
+            setIsRendering(false);
+          }
+        }}
       ></DeckGL>
       <SpatialControls
         mode={mode}

@@ -66,7 +66,7 @@ export const useColor = () => {
     ) => {
       if (colorEncoding) {
         return [
-          ...chroma.mix(scale(value).rgb(), GRAY, gray * 0.9, "rgb").rgb(),
+          ...chroma.mix(scale(value).rgb(), GRAY, gray * 0.95, "rgb").rgb(),
           255 * (alpha ? 0.2 : 1),
         ]; // not using chroma's .alpha as deckgl expects alpha in 0-255 range
       } else {
