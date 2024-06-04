@@ -16,6 +16,7 @@ import { MapHelper } from "../../helpers/map-helper";
 import { GET_OPTIONS, useZarr } from "../../helpers/zarr-helper";
 import { useColor } from "../../helpers/color-helper";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
+import { useCallback } from "react";
 
 window.deck.log.level = 1;
 
@@ -75,6 +76,7 @@ export function Scatterplot({ radius = 30 }) {
     positions: [],
     values: [],
     info: [],
+    sliceValues: [],
   });
 
   const [obsmParams, setObsmParams] = useState({
@@ -190,7 +192,6 @@ export function Scatterplot({ radius = 30 }) {
       setIsRendering(true);
       if (!xData.isPending && !xData.serverError) {
         // @TODO: add condition to check obs slicing
-        setScale(() => getScale(getScaleParams({ values: xData.data })));
         setData((d) => {
           return { ...d, values: xData.data };
         });
@@ -215,7 +216,6 @@ export function Scatterplot({ radius = 30 }) {
     if (dataset.colorEncoding === "obs") {
       setIsRendering(true);
       if (!obsData.isPending && !obsData.serverError) {
-        setScale(() => getScale(dataset.selectedObs?.scaleParams));
         setData((d) => {
           return { ...d, values: obsData.data };
         });
@@ -223,6 +223,13 @@ export function Scatterplot({ radius = 30 }) {
         setScale(() => getScale());
         setData((d) => {
           return { ...d, values: [] };
+        });
+      }
+    } else if (dataset.sliceByObs) {
+      setIsRendering(true);
+      if (!obsData.isPending && !obsData.serverError) {
+        setData((d) => {
+          return { ...d, sliceValues: obsData.data };
         });
       }
     }
@@ -234,7 +241,71 @@ export function Scatterplot({ radius = 30 }) {
     getScaleParams,
     getScale,
     dataset.selectedObs?.scaleParams,
+    dataset.sliceByObs,
   ]);
+
+  useEffect(() => {
+    if (dataset.colorEncoding === "var") {
+      if (!!dataset.sliceByObs) {
+        const indices = _.chain(data.sliceValues)
+          .map((value, index) =>
+            !_.includes(dataset.selectedObs?.omit, value) ? index : -1
+          )
+          .filter((index) => index !== -1)
+          .value();
+        setScale(() =>
+          getScale(
+            getScaleParams({ values: _.map(indices, (i) => data.values[i]) })
+          )
+        );
+      } else {
+        setScale(() => getScale(getScaleParams({ values: data.values })));
+      }
+    } else {
+      setScale(() => getScale(dataset.selectedObs?.scaleParams));
+    }
+  }, [
+    data.values,
+    data.sliceValues,
+    dataset.sliceByObs,
+    dataset.colorEncoding,
+    dataset.selectedObs?.omit,
+    getScale,
+    getScaleParams,
+    dataset.selectedObs?.scaleParams,
+  ]);
+
+  const getFillColor = useCallback(
+    (d) => {
+      return getColor(
+        scale,
+        data.values?.[d.index],
+        (dataset.colorEncoding === "obs" && {
+          alpha: _.includes(dataset.selectedObs?.omit, data.values?.[d.index]),
+          gray: _.includes(dataset.selectedObs?.omit, data.values?.[d.index]),
+        }) ||
+          (!!dataset.sliceByObs && {
+            alpha: _.includes(
+              dataset.selectedObs?.omit,
+              data.sliceValues?.[d.index]
+            ),
+            gray: _.includes(
+              dataset.selectedObs?.omit,
+              data.sliceValues?.[d.index]
+            ),
+          })
+      );
+    },
+    [
+      data.sliceValues,
+      data.values,
+      dataset.colorEncoding,
+      dataset.selectedObs?.omit,
+      dataset.sliceByObs,
+      getColor,
+      scale,
+    ]
+  );
 
   const layers = useMemo(() => {
     return [
@@ -245,30 +316,10 @@ export function Scatterplot({ radius = 30 }) {
         radiusScale: radius,
         radiusMinPixels: 1,
         getPosition: (d) => d,
-        getFillColor: (_i, d) => {
-          return getColor(
-            scale,
-            data.values?.[d.index],
-            dataset.colorEncoding === "obs" && {
-              alpha: _.includes(
-                dataset.selectedObs?.omit,
-                data.values?.[d.index]
-              ),
-              gray: _.includes(
-                dataset.selectedObs?.omit,
-                data.values?.[d.index]
-              ),
-            }
-          );
-        },
+        getFillColor: (_i, d) => getFillColor(d),
         getRadius: 1,
         updateTriggers: {
-          getFillColor: [
-            data.values,
-            scale,
-            dataset.colorEncoding,
-            dataset.selectedObs?.omit,
-          ],
+          getFillColor: [getFillColor],
         },
       }),
       new EditableGeoJsonLayer({
@@ -296,14 +347,10 @@ export function Scatterplot({ radius = 30 }) {
     ];
   }, [
     data.positions,
-    data.values,
-    dataset.colorEncoding,
-    dataset.selectedObs?.omit,
     features,
-    getColor,
+    getFillColor,
     mode,
     radius,
-    scale,
     selectedFeatureIndexes,
   ]);
 
