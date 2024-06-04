@@ -15,7 +15,7 @@ import {
 } from "react-bootstrap";
 import { useColor } from "../../helpers/color-helper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDroplet } from "@fortawesome/free-solid-svg-icons";
+import { faDroplet, faEye, faFont } from "@fortawesome/free-solid-svg-icons";
 
 const N_BINS = 5;
 
@@ -172,21 +172,63 @@ export function ObsColsList() {
                   <div>
                     <ButtonGroup>
                       <Button
-                        variant="secondary"
+                        variant={
+                          _.includes(dataset.labelObs, item.name)
+                            ? "primary"
+                            : "outline-primary"
+                        }
                         size="sm"
-                        onClick={(key) => {
-                          if (key != null) {
+                        onClick={() => {
+                          if (_.includes(dataset.labelObs, item.name)) {
                             dispatch({
-                              type: "obsSelected",
-                              obs: obsColsList.find(
-                                (obs) => obs.name === item.name
-                              ),
+                              type: "remove.label.obs",
+                              obs: item.name,
                             });
+                          } else {
                             dispatch({
-                              type: "set.colorEncoding",
-                              value: "obs",
+                              type: "add.label.obs",
+                              obs: item.name,
                             });
                           }
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faFont} />
+                      </Button>
+                      <Button
+                        variant={
+                          dataset.sliceByObs &&
+                          dataset.selectedObs?.name === item.name
+                            ? "primary"
+                            : "outline-primary"
+                        }
+                        size="sm"
+                        onClick={() => {
+                          dispatch({
+                            type: "toggle.slice.obs",
+                          });
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faEye} />
+                      </Button>
+                      <Button
+                        variant={
+                          dataset.colorEncoding === "obs" &&
+                          dataset.selectedObs?.name === item.name
+                            ? "primary"
+                            : "outline-primary"
+                        }
+                        size="sm"
+                        onClick={() => {
+                          dispatch({
+                            type: "obsSelected",
+                            obs: obsColsList.find(
+                              (obs) => obs.name === item.name
+                            ),
+                          });
+                          dispatch({
+                            type: "set.colorEncoding",
+                            value: "obs",
+                          });
                         }}
                       >
                         <FontAwesomeIcon icon={faDroplet} />
@@ -257,7 +299,16 @@ export function ObsColsList() {
         </Accordion.Item>
       );
     },
-    [dispatch, obsColsList, getColor, getScale]
+    [
+      dataset.labelObs,
+      dataset.sliceByObs,
+      dataset.selectedObs?.name,
+      dataset.colorEncoding,
+      dispatch,
+      obsColsList,
+      getColor,
+      getScale,
+    ]
   );
 
   const continuousList = useCallback(

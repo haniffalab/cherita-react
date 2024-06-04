@@ -45,6 +45,8 @@ const initialDataset = {
   selectedMultiObs: [],
   selectedMultiVar: [],
   colorEncoding: null,
+  labelObs: [],
+  sliceByObs: false,
   controls: {
     colorScale: "Viridis",
     colorAxis: {
@@ -283,6 +285,34 @@ function datasetReducer(dataset, action) {
           ...dataset.controls,
           expressionCutoff: action.expressionCutoff,
         },
+      };
+    }
+    case "toggle.slice.obs": {
+      return {
+        ...dataset,
+        sliceByObs: !dataset.sliceByObs,
+      };
+    }
+    case "add.label.obs": {
+      if (dataset.labelObs.find((i) => i === action.obs)) {
+        return dataset;
+      } else {
+        return {
+          ...dataset,
+          labelObs: [...dataset.labelObs, action.obs],
+        };
+      }
+    }
+    case "remove.label.obs": {
+      return {
+        ...dataset,
+        labelObs: dataset.labelObs.filter((a) => a !== action.obs),
+      };
+    }
+    case "reset.label.obs": {
+      return {
+        ...dataset,
+        labelObs: [],
       };
     }
     default: {

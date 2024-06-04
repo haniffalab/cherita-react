@@ -57,12 +57,6 @@ const INITIAL_VIEW_STATE = {
   bearing: 0,
 };
 
-const DEFAULT_DATA_POINT = {
-  value: null,
-  position: null,
-  color: null,
-};
-
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
   const { getScale, getScaleParams, getColor } = useColor();
@@ -76,7 +70,12 @@ export function Scatterplot({ radius = 30 }) {
   const [featureState, setFeatureState] = useState([]);
   const [scale, setScale] = useState(() => getScale());
   const [isRendering, setIsRendering] = useState(true);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState({
+    ids: [],
+    positions: [],
+    values: [],
+    info: [],
+  });
 
   const [obsmParams, setObsmParams] = useState({
     url: dataset.url,
@@ -161,9 +160,7 @@ export function Scatterplot({ radius = 30 }) {
     if (!obsmData.isPending && !obsmData.serverError) {
       setIsRendering(true);
       setData((d) => {
-        return _.map(obsmData.data, (p, index) => {
-          return _.defaults({ position: p }, d?.[index], DEFAULT_DATA_POINT);
-        });
+        return { ...d, positions: obsmData.data };
       });
       const mapHelper = new MapHelper();
       const { latitude, longitude, zoom } = mapHelper.fitBounds(obsmData.data);
@@ -178,9 +175,7 @@ export function Scatterplot({ radius = 30 }) {
     } else if (!obsmData.isPending && obsmData.serverError) {
       setIsRendering(true);
       setData((d) => {
-        return _.map(d, (e) => {
-          return _.defaults({ position: null }, e, DEFAULT_DATA_POINT);
-        });
+        return { ...d, positions: [] };
       });
     }
   }, [
@@ -197,22 +192,12 @@ export function Scatterplot({ radius = 30 }) {
         // @TODO: add condition to check obs slicing
         setScale(() => getScale(getScaleParams({ values: xData.data })));
         setData((d) => {
-          return _.map(xData.data, (v, index) => {
-            return _.defaults(
-              {
-                value: v,
-              },
-              d?.[index],
-              DEFAULT_DATA_POINT
-            );
-          });
+          return { ...d, values: xData.data };
         });
       } else if (!xData.isPending && xData.serverError) {
         setScale(() => getScale());
         setData((d) => {
-          return _.map(d, (e) => {
-            return _.defaults({ value: null }, e, DEFAULT_DATA_POINT);
-          });
+          return { ...d, values: [] };
         });
       }
     }
@@ -232,26 +217,12 @@ export function Scatterplot({ radius = 30 }) {
       if (!obsData.isPending && !obsData.serverError) {
         setScale(() => getScale(dataset.selectedObs?.scaleParams));
         setData((d) => {
-          return _.map(obsData.data, (v, index) => {
-            return _.defaults(
-              {
-                value: v,
-              },
-              d?.[index],
-              DEFAULT_DATA_POINT
-            );
-          });
+          return { ...d, values: obsData.data };
         });
       } else if (!obsData.isPending && obsData.serverError) {
         setScale(() => getScale());
         setData((d) => {
-          return _.map(d, (e) => {
-            return _.defaults(
-              { value: null, color: null },
-              e,
-              DEFAULT_DATA_POINT
-            );
-          });
+          return { ...d, values: [] };
         });
       }
     }
@@ -263,29 +234,41 @@ export function Scatterplot({ radius = 30 }) {
     getScaleParams,
     getScale,
     dataset.selectedObs?.scaleParams,
-    // dataset.selectedObs?.omit,
   ]);
 
   const layers = useMemo(() => {
     return [
       new ScatterplotLayer({
         id: "cherita-layer-scatterplot",
-        data: data,
+        pickable: true,
+        data: data.positions,
         radiusScale: radius,
         radiusMinPixels: 1,
-        getPosition: (d) => d.position,
-        getFillColor: (d) =>
-          getColor(
+        getPosition: (d) => d,
+        getFillColor: (_i, d) => {
+          return getColor(
             scale,
-            d.value,
+            data.values?.[d.index],
             dataset.colorEncoding === "obs" && {
-              alpha: _.includes(dataset.selectedObs?.omit, d.value),
-              gray: _.includes(dataset.selectedObs?.omit, d.value),
+              alpha: _.includes(
+                dataset.selectedObs?.omit,
+                data.values?.[d.index]
+              ),
+              gray: _.includes(
+                dataset.selectedObs?.omit,
+                data.values?.[d.index]
+              ),
             }
-          ),
+          );
+        },
         getRadius: 1,
         updateTriggers: {
-          getFillColor: [dataset.colorEncoding, dataset.selectedObs?.omit],
+          getFillColor: [
+            data.values,
+            scale,
+            dataset.colorEncoding,
+            dataset.selectedObs?.omit,
+          ],
         },
       }),
       new EditableGeoJsonLayer({
@@ -312,7 +295,8 @@ export function Scatterplot({ radius = 30 }) {
       }),
     ];
   }, [
-    data,
+    data.positions,
+    data.values,
     dataset.colorEncoding,
     dataset.selectedObs?.omit,
     features,
@@ -345,11 +329,17 @@ export function Scatterplot({ radius = 30 }) {
         controller
         layers={layers}
         onClick={onLayerClick}
+        getTooltip={({ object, index }) =>
+          object && {
+            text: data.values?.[index],
+          }
+        }
         onAfterRender={() => {
           if (isRendering) {
             setIsRendering(false);
           }
         }}
+        useDevicePixels={false}
       ></DeckGL>
       <SpatialControls
         mode={mode}
