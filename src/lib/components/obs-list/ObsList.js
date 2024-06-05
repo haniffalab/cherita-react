@@ -212,6 +212,12 @@ export function ObsColsList() {
                         size="sm"
                         onClick={() => {
                           dispatch({
+                            type: "obsSelected",
+                            obs: obsColsList.find(
+                              (obs) => obs.name === item.name
+                            ),
+                          });
+                          dispatch({
                             type: "toggle.slice.obs",
                           });
                         }}
@@ -321,6 +327,12 @@ export function ObsColsList() {
 
   const continuousList = useCallback(
     (item, active = null) => {
+      const inLabelObs = _.some(dataset.labelObs, (i) =>
+        _.isEqual(i, {
+          name: item.name,
+          type: item.type,
+        })
+      );
       return (
         <Accordion.Item
           key={item.name}
@@ -331,11 +343,38 @@ export function ObsColsList() {
           <Accordion.Body>
             <ListGroup>
               <ListGroup.Item>
-                <div className="d-flex">
+                <div className="d-flex justify-content-end">
                   <div>
                     <ButtonGroup>
                       <Button
-                        variant="secondary"
+                        variant={inLabelObs ? "primary" : "outline-primary"}
+                        size="sm"
+                        onClick={() => {
+                          if (inLabelObs) {
+                            dispatch({
+                              type: "remove.label.obs",
+                              obsName: item.name,
+                            });
+                          } else {
+                            dispatch({
+                              type: "add.label.obs",
+                              obs: {
+                                name: item.name,
+                                type: item.type,
+                              },
+                            });
+                          }
+                        }}
+                      >
+                        <FontAwesomeIcon icon={faFont} />
+                      </Button>
+                      <Button
+                        variant={
+                          dataset.colorEncoding === "obs" &&
+                          dataset.selectedObs?.name === item.name
+                            ? "primary"
+                            : "outline-primary"
+                        }
                         size="sm"
                         onClick={(key) => {
                           if (key != null) {
@@ -368,7 +407,13 @@ export function ObsColsList() {
         </Accordion.Item>
       );
     },
-    [dispatch, obsColsList]
+    [
+      dataset.colorEncoding,
+      dataset.labelObs,
+      dataset.selectedObs?.name,
+      dispatch,
+      obsColsList,
+    ]
   );
 
   const otherList = useCallback((item, active = null) => {

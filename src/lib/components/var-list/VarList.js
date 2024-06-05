@@ -92,9 +92,13 @@ export function VarNamesList({
                   <Button
                     type="button"
                     key={item.matrix_index}
-                    className={`m-0 p-0 px-1 btn-link ${
-                      active === item.matrix_index && "active"
-                    }`}
+                    variant={
+                      dataset.colorEncoding === "var" &&
+                      active === item.matrix_index
+                        ? "primary"
+                        : "outline-primary"
+                    }
+                    className="m-0 p-0 px-1"
                     onClick={() => {
                       selectVar(item);
                     }}
@@ -121,13 +125,12 @@ export function VarNamesList({
                     type="button"
                     key={item.matrix_index}
                     variant={
-                      item.matrix_index !== -1
-                        ? "outline-primary"
-                        : "outline-secondary"
+                      item.matrix_index !== -1 &&
+                      _.includes(active, item.matrix_index)
+                        ? "primary"
+                        : "outline-primary"
                     }
-                    className={`${
-                      active.includes(item.matrix_index) && "active"
-                    } m-1`}
+                    className="m-0 p-0 px-1"
                     onClick={() => {
                       if (active.includes(item.matrix_index)) {
                         dispatch({
@@ -158,7 +161,7 @@ export function VarNamesList({
         }
       });
     },
-    [active, dispatch, mode, selectVar]
+    [active, dataset.colorEncoding, dispatch, mode, selectVar]
   );
 
   const varList = useMemo(() => {
