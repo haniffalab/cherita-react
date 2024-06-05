@@ -147,6 +147,14 @@ export function ObsColsList() {
 
   const categoricalList = useCallback(
     (item, active = null) => {
+      const codesMap = _.invert(item.codes);
+      const inLabelObs = _.some(dataset.labelObs, (i) =>
+        _.isEqual(i, {
+          name: item.name,
+          type: item.type,
+          codesMap: codesMap,
+        })
+      );
       return (
         <Accordion.Item
           key={item.name}
@@ -172,22 +180,22 @@ export function ObsColsList() {
                   <div>
                     <ButtonGroup>
                       <Button
-                        variant={
-                          _.includes(dataset.labelObs, item.name)
-                            ? "primary"
-                            : "outline-primary"
-                        }
+                        variant={inLabelObs ? "primary" : "outline-primary"}
                         size="sm"
                         onClick={() => {
-                          if (_.includes(dataset.labelObs, item.name)) {
+                          if (inLabelObs) {
                             dispatch({
                               type: "remove.label.obs",
-                              obs: item.name,
+                              obsName: item.name,
                             });
                           } else {
                             dispatch({
                               type: "add.label.obs",
-                              obs: item.name,
+                              obs: {
+                                name: item.name,
+                                type: item.type,
+                                codesMap: codesMap,
+                              },
                             });
                           }
                         }}

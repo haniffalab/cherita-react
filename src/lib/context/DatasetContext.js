@@ -294,7 +294,7 @@ function datasetReducer(dataset, action) {
       };
     }
     case "add.label.obs": {
-      if (dataset.labelObs.find((i) => i === action.obs)) {
+      if (dataset.labelObs.find((i) => _.isEqual(i, action.obs))) {
         return dataset;
       } else {
         return {
@@ -306,7 +306,7 @@ function datasetReducer(dataset, action) {
     case "remove.label.obs": {
       return {
         ...dataset,
-        labelObs: dataset.labelObs.filter((a) => a !== action.obs),
+        labelObs: dataset.labelObs.filter((a) => a.name !== action.obsName),
       };
     }
     case "reset.label.obs": {

@@ -13,7 +13,11 @@ import { Legend } from "./Legend";
 import { PLOTLY_COLORSCALES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { MapHelper } from "../../helpers/map-helper";
-import { GET_OPTIONS, useZarr } from "../../helpers/zarr-helper";
+import {
+  GET_OPTIONS,
+  useMultipleZarr,
+  useZarr,
+} from "../../helpers/zarr-helper";
 import { useColor } from "../../helpers/color-helper";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
 import { useCallback } from "react";
@@ -75,7 +79,6 @@ export function Scatterplot({ radius = 30 }) {
     ids: [],
     positions: [],
     values: [],
-    info: [],
     sliceValues: [],
   });
 
@@ -95,6 +98,8 @@ export function Scatterplot({ radius = 30 }) {
       (dataset.selectedObs?.type === "continuous" ? "" : "/codes"),
   });
 
+  const [labelObsParams, setLabelObsParams] = useState([]);
+
   // needs to be wrapped in useMemo as it is an array an could cause an infinite loop otherwise
   const xSelection = useMemo(
     () => [null, dataset.selectedVar?.matrix_index],
@@ -104,6 +109,7 @@ export function Scatterplot({ radius = 30 }) {
   const obsmData = useZarr(obsmParams, null, GET_OPTIONS);
   const xData = useZarr(xParams, xSelection, GET_OPTIONS);
   const obsData = useZarr(obsParams, null, GET_OPTIONS);
+  const labelObsData = useMultipleZarr(labelObsParams, GET_OPTIONS);
 
   useEffect(() => {
     setObsmParams((p) => {
@@ -134,6 +140,18 @@ export function Scatterplot({ radius = 30 }) {
       };
     });
   }, [dataset.selectedObs]);
+
+  useEffect(() => {
+    setLabelObsParams(
+      _.map(dataset.labelObs, (obs) => {
+        return {
+          url: dataset.url,
+          path: "obs/" + obs.name + (obs.type === "continuous" ? "" : "/codes"),
+          key: obs.name,
+        };
+      })
+    );
+  }, [dataset.labelObs, dataset.url]);
 
   useEffect(() => {
     setObsmParams((p) => {
@@ -363,6 +381,18 @@ export function Scatterplot({ radius = 30 }) {
     setSelectedFeatureIndexes(info.object ? [info.index] : []);
   }
 
+  const getTooltip = ({ object, index }) =>
+    object && {
+      text: _.map(labelObsData, (v, k) => {
+        const labelObs = _.find(dataset.labelObs, (o) => o.name === k);
+        if (labelObs.type === "continuous") {
+          return `${k}: ${v?.[index]}`;
+        } else {
+          return `${k}: ${labelObs.codesMap[v?.[index]]}`;
+        }
+      }).join("\n"),
+    };
+
   // @TODO: add error message
   return (
     <div className="cherita-scatterplot">
@@ -376,11 +406,7 @@ export function Scatterplot({ radius = 30 }) {
         controller
         layers={layers}
         onClick={onLayerClick}
-        getTooltip={({ object, index }) =>
-          object && {
-            text: data.values?.[index],
-          }
-        }
+        getTooltip={getTooltip}
         onAfterRender={() => {
           if (isRendering) {
             setIsRendering(false);
