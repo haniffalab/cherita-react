@@ -3,7 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import _ from "lodash";
 import { useDataset } from "../../context/DatasetContext";
 
-export function Legend({ scale }) {
+export function Legend({ scale, min = 0, max = 1 }) {
   const dataset = useDataset();
   const [legendData, setLegendData] = useState({
     dmin: 0,
@@ -13,12 +13,8 @@ export function Legend({ scale }) {
 
   useEffect(() => {
     if (scale) {
-      const dom = scale.domain ? scale.domain() : [0, 1];
-      const dmin = Math.min(dom[0], dom[dom.length - 1]);
-      const dmax = Math.max(dom[dom.length - 1], dom[0]);
-
       const spanList = _.range(100).map((i) => {
-        var color = scale(dmin + (i / 100) * (dmax - dmin)).hex();
+        var color = scale(i / 100).hex();
         return (
           <span
             key={i}
@@ -28,13 +24,20 @@ export function Legend({ scale }) {
         );
       });
 
-      setLegendData({
-        dmin: dmin,
-        dmax: dmax,
-        list: spanList,
+      setLegendData((d) => {
+        return {
+          ...d,
+          list: spanList,
+        };
       });
     }
-  }, [scale]);
+  }, [max, min, scale]);
+
+  useEffect(() => {
+    setLegendData((d) => {
+      return { ...d, dmin: min, dmax: max };
+    });
+  }, [min, max]);
 
   if (
     (dataset.colorEncoding === "var" && scale) ||

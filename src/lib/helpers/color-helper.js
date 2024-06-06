@@ -41,7 +41,7 @@ export const useColor = () => {
           [0, 1]
         );
       }
-      const { isCategorical, domain, classes = null } = params;
+      const { isCategorical, domain = [0, 1], classes = null } = params;
       let c = chroma
         .scale(
           CHROMA_COLORSCALES[

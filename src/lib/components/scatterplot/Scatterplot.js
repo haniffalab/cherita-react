@@ -73,14 +73,12 @@ export function Scatterplot({ radius = 30 }) {
   const [mode, setMode] = useState(() => ViewMode);
   const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
   const [featureState, setFeatureState] = useState([]);
-  const [scale, setScale] = useState(() => getScale());
   const [isRendering, setIsRendering] = useState(true);
   const [data, setData] = useState({
     ids: [],
     positions: [],
     values: [],
     sliceValues: [],
-    inSlice: [],
   });
 
   const [obsmParams, setObsmParams] = useState({
@@ -215,7 +213,6 @@ export function Scatterplot({ radius = 30 }) {
           return { ...d, values: xData.data };
         });
       } else if (!xData.isPending && xData.serverError) {
-        setScale(() => getScale());
         setData((d) => {
           return { ...d, values: [] };
         });
@@ -239,16 +236,19 @@ export function Scatterplot({ radius = 30 }) {
           return { ...d, values: obsData.data };
         });
       } else if (!obsData.isPending && obsData.serverError) {
-        setScale(() => getScale());
         setData((d) => {
           return { ...d, values: [] };
         });
       }
-    } else if (dataset.sliceByObs) {
+    } else if (dataset.colorEncoding === "var" && dataset.sliceByObs) {
       setIsRendering(true);
       if (!obsData.isPending && !obsData.serverError) {
         setData((d) => {
           return { ...d, sliceValues: obsData.data };
+        });
+      } else if (!obsData.isPending && obsData.serverError) {
+        setData((d) => {
+          return { ...d, sliceValues: [] };
         });
       }
     }
@@ -263,67 +263,79 @@ export function Scatterplot({ radius = 30 }) {
     dataset.sliceByObs,
   ]);
 
-  useEffect(() => {
-    setIsRendering(true);
-    if (dataset.colorEncoding === "var") {
-      if (!!dataset.sliceByObs && dataset.selectedObs?.omit?.length) {
-        const filtered = _.filter(
-          data.values,
-          (v, i) => !_.includes(dataset.selectedObs?.omit, data.sliceValues[i])
-        );
-        setScale(() => getScale(getScaleParams({ values: filtered })));
-        setData((d) => {
-          return {
-            ...d,
-            inSlice: data.values.map((_v, i) => {
-              return !_.includes(
-                dataset.selectedObs?.omit,
-                data.sliceValues[i]
-              );
-            }),
-          };
-        });
-      } else {
-        setScale(() => getScale(getScaleParams({ values: data.values })));
-        setData((d) => {
-          return {
-            ...d,
-            inSlice: data.values.map((_v, i) => {
-              return true;
-            }),
-          };
-        });
-      }
-    } else {
-      setScale(() => getScale(dataset.selectedObs?.scaleParams));
-      setData((d) => {
-        return {
-          ...d,
-          inSlice: data.values.map((_v, i) => {
-            return !_.includes(dataset.selectedObs?.omit, data.values[i]);
-          }),
-        };
+  const scale = useMemo(() => {
+    if (dataset.colorEncoding === "obs") {
+      return getScale({
+        isCategorical: dataset.selectedObs?.type === "categorical",
       });
+    } else {
+      return getScale();
     }
+  }, [dataset.colorEncoding, dataset.selectedObs?.type, getScale]);
+
+  const min = useMemo(() => {
+    return _.minBy(data.values, (v, i) => {
+      if (dataset.colorEncoding === "var" && !!dataset.sliceByObs) {
+        return !_.includes(dataset.selectedObs?.omit, data.sliceValues[i])
+          ? v
+          : Infinity;
+      } else {
+        return v;
+      }
+    });
   }, [
-    data.values,
     data.sliceValues,
-    dataset.sliceByObs,
+    data.values,
     dataset.colorEncoding,
     dataset.selectedObs?.omit,
-    getScale,
-    getScaleParams,
-    dataset.selectedObs?.scaleParams,
+    dataset.sliceByObs,
+  ]);
+
+  const max = useMemo(() => {
+    return _.maxBy(data.values, (v, i) => {
+      if (dataset.colorEncoding === "var" && !!dataset.sliceByObs) {
+        return !_.includes(dataset.selectedObs?.omit, data.sliceValues[i])
+          ? v
+          : -Infinity;
+      } else {
+        return v;
+      }
+    });
+  }, [
+    data.sliceValues,
+    data.values,
+    dataset.colorEncoding,
+    dataset.selectedObs?.omit,
+    dataset.sliceByObs,
   ]);
 
   const getFillColor = useCallback(
-    (_i, d) => {
-      return getColor(scale, data.values?.[d.index], {
-        alpha: !data.inSlice[d.index],
-        gray: !data.inSlice[d.index],
-      });
+    (_d, { index }) => {
+      const alpha =
+        dataset.colorEncoding === "obs"
+          ? _.includes(dataset.selectedObs?.omit, data.values[index])
+            ? 0.2
+            : 1
+          : dataset.colorEncoding === "var" && !!dataset.sliceByObs
+          ? _.includes(dataset.selectedObs?.omit, data.sliceValues[index])
+            ? 0.2
+            : 1
+          : 1;
+      return [
+        ...scale((data.values[index] - min) / (max - min)).rgb(),
+        255 * alpha,
+      ];
     },
-    [data.inSlice, data.values, getColor, scale]
+    [
+      data.sliceValues,
+      data.values,
+      dataset.colorEncoding,
+      dataset.selectedObs?.omit,
+      dataset.sliceByObs,
+      max,
+      min,
+      scale,
+    ]
   );
 
   const layers = useMemo(() => {
@@ -433,7 +445,7 @@ export function Scatterplot({ radius = 30 }) {
         }
         obsLength={parseInt(obsmData.data?.length)}
       />
-      <Legend scale={scale} />
+      <Legend scale={scale} min={min} max={max} />
     </div>
   );
 }
