@@ -287,36 +287,34 @@ export function Scatterplot({ radius = 30 }) {
     dataset.selectedObs?.scaleParams,
   ]);
 
-  const getFillColor = useCallback(
-    (d) => {
-      if (dataset.colorEncoding === "obs") {
-        const notInSlice = _.includes(
-          dataset.selectedObs?.omit,
-          data.values?.[d.index]
-        );
-        return getColor(scale, data.values?.[d.index], {
-          alpha: notInSlice,
-          gray: notInSlice,
-        });
-      } else if (dataset.colorEncoding === "var") {
-        const notInSlice =
-          !!dataset.sliceByObs &&
-          _.includes(dataset.selectedObs?.omit, data.sliceValues?.[d.index]);
-        return getColor(scale, data.values?.[d.index], {
-          alpha: notInSlice,
-          gray: notInSlice,
-        });
-      }
-    },
+  const inSlice = useMemo(
+    () =>
+      data.values.map((_v, i) => {
+        if (dataset.colorEncoding === "obs") {
+          return !_.includes(dataset.selectedObs?.omit, data.values[i]);
+        } else if (dataset.colorEncoding === "var" && !!dataset.sliceByObs) {
+          return !_.includes(dataset.selectedObs?.omit, data.sliceValues[i]);
+        } else {
+          return true;
+        }
+      }),
     [
       data.sliceValues,
       data.values,
       dataset.colorEncoding,
       dataset.selectedObs?.omit,
       dataset.sliceByObs,
-      getColor,
-      scale,
     ]
+  );
+
+  const getFillColor = useCallback(
+    (i, d) => {
+      return getColor(scale, data.values?.[d.index], {
+        alpha: !inSlice[d.index],
+        gray: !inSlice[d.index],
+      });
+    },
+    [data.values, getColor, inSlice, scale]
   );
 
   const layers = useMemo(() => {
@@ -328,7 +326,7 @@ export function Scatterplot({ radius = 30 }) {
         radiusScale: radius,
         radiusMinPixels: 1,
         getPosition: (d) => d,
-        getFillColor: (_i, d) => getFillColor(d),
+        getFillColor: getFillColor,
         getRadius: 1,
         updateTriggers: {
           getFillColor: getFillColor,
