@@ -17,7 +17,7 @@ export const useColor = () => {
     ) => {
       return {
         domain:
-          min && max
+          min !== null && min !== undefined && max !== null && max !== undefined
             ? [min, max]
             : values
             ? [_.min(values), _.max(values)]

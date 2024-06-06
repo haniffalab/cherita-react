@@ -264,18 +264,12 @@ export function Scatterplot({ radius = 30 }) {
 
   useEffect(() => {
     if (dataset.colorEncoding === "var") {
-      if (!!dataset.sliceByObs) {
-        const indices = _.chain(data.sliceValues)
-          .map((value, index) =>
-            !_.includes(dataset.selectedObs?.omit, value) ? index : -1
-          )
-          .filter((index) => index !== -1)
-          .value();
-        setScale(() =>
-          getScale(
-            getScaleParams({ values: _.map(indices, (i) => data.values[i]) })
-          )
+      if (!!dataset.sliceByObs && dataset.selectedObs?.omit?.length) {
+        const filtered = _.filter(
+          data.values,
+          (v, i) => !_.includes(dataset.selectedObs?.omit, data.sliceValues[i])
         );
+        setScale(() => getScale(getScaleParams({ values: filtered })));
       } else {
         setScale(() => getScale(getScaleParams({ values: data.values })));
       }
@@ -295,24 +289,24 @@ export function Scatterplot({ radius = 30 }) {
 
   const getFillColor = useCallback(
     (d) => {
-      return getColor(
-        scale,
-        data.values?.[d.index],
-        (dataset.colorEncoding === "obs" && {
-          alpha: _.includes(dataset.selectedObs?.omit, data.values?.[d.index]),
-          gray: _.includes(dataset.selectedObs?.omit, data.values?.[d.index]),
-        }) ||
-          (!!dataset.sliceByObs && {
-            alpha: _.includes(
-              dataset.selectedObs?.omit,
-              data.sliceValues?.[d.index]
-            ),
-            gray: _.includes(
-              dataset.selectedObs?.omit,
-              data.sliceValues?.[d.index]
-            ),
-          })
-      );
+      if (dataset.colorEncoding === "obs") {
+        const notInSlice = _.includes(
+          dataset.selectedObs?.omit,
+          data.values?.[d.index]
+        );
+        return getColor(scale, data.values?.[d.index], {
+          alpha: notInSlice,
+          gray: notInSlice,
+        });
+      } else if (dataset.colorEncoding === "var") {
+        const notInSlice =
+          !!dataset.sliceByObs &&
+          _.includes(dataset.selectedObs?.omit, data.sliceValues?.[d.index]);
+        return getColor(scale, data.values?.[d.index], {
+          alpha: notInSlice,
+          gray: notInSlice,
+        });
+      }
     },
     [
       data.sliceValues,
@@ -337,7 +331,7 @@ export function Scatterplot({ radius = 30 }) {
         getFillColor: (_i, d) => getFillColor(d),
         getRadius: 1,
         updateTriggers: {
-          getFillColor: [getFillColor],
+          getFillColor: getFillColor,
         },
       }),
       new EditableGeoJsonLayer({
@@ -382,7 +376,8 @@ export function Scatterplot({ radius = 30 }) {
   }
 
   const getTooltip = ({ object, index }) =>
-    object && {
+    object &&
+    dataset.labelObs.length && {
       text: _.map(labelObsData, (v, k) => {
         const labelObs = _.find(dataset.labelObs, (o) => o.name === k);
         if (labelObs.type === "continuous") {
@@ -420,11 +415,16 @@ export function Scatterplot({ radius = 30 }) {
         features={mode}
         setFeatures={setFeatures}
       />
+      {/* @TODO: add length of sliced to be displayed in Toolbox */}
       <Toolbox
-        mode={mode}
-        setMode={setMode}
-        features={mode}
-        setFeatures={setFeatures}
+        mode={
+          dataset.colorEncoding === "var"
+            ? dataset.selectedVar.name
+            : dataset.colorEncoding === "obs"
+            ? dataset.selectedObs.name
+            : null
+        }
+        obsLength={parseInt(obsmData.data?.length)}
       />
       <Legend scale={scale} />
     </div>
