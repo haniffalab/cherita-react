@@ -28,6 +28,7 @@ export const useVarSearch = () => {
   const dispatch = useDatasetDispatch();
   const [params, setParams] = useState({
     url: dataset.url,
+    col: dataset.varNamesCol,
     text: "",
   });
 

@@ -317,7 +317,7 @@ export function Scatterplot({ radius = 30 }) {
   ]);
 
   const getFillColor = useCallback(
-    (i, d) => {
+    (_i, d) => {
       return getColor(scale, data.values?.[d.index], {
         alpha: !data.inSlice[d.index],
         gray: !data.inSlice[d.index],
