@@ -80,6 +80,7 @@ export function Scatterplot({ radius = 30 }) {
     positions: [],
     values: [],
     sliceValues: [],
+    inSlice: [],
   });
 
   const [obsmParams, setObsmParams] = useState({
@@ -263,6 +264,7 @@ export function Scatterplot({ radius = 30 }) {
   ]);
 
   useEffect(() => {
+    setIsRendering(true);
     if (dataset.colorEncoding === "var") {
       if (!!dataset.sliceByObs && dataset.selectedObs?.omit?.length) {
         const filtered = _.filter(
@@ -270,11 +272,38 @@ export function Scatterplot({ radius = 30 }) {
           (v, i) => !_.includes(dataset.selectedObs?.omit, data.sliceValues[i])
         );
         setScale(() => getScale(getScaleParams({ values: filtered })));
+        setData((d) => {
+          return {
+            ...d,
+            inSlice: data.values.map((_v, i) => {
+              return !_.includes(
+                dataset.selectedObs?.omit,
+                data.sliceValues[i]
+              );
+            }),
+          };
+        });
       } else {
         setScale(() => getScale(getScaleParams({ values: data.values })));
+        setData((d) => {
+          return {
+            ...d,
+            inSlice: data.values.map((_v, i) => {
+              return true;
+            }),
+          };
+        });
       }
     } else {
       setScale(() => getScale(dataset.selectedObs?.scaleParams));
+      setData((d) => {
+        return {
+          ...d,
+          inSlice: data.values.map((_v, i) => {
+            return !_.includes(dataset.selectedObs?.omit, data.values[i]);
+          }),
+        };
+      });
     }
   }, [
     data.values,
@@ -287,34 +316,14 @@ export function Scatterplot({ radius = 30 }) {
     dataset.selectedObs?.scaleParams,
   ]);
 
-  const inSlice = useMemo(
-    () =>
-      data.values.map((_v, i) => {
-        if (dataset.colorEncoding === "obs") {
-          return !_.includes(dataset.selectedObs?.omit, data.values[i]);
-        } else if (dataset.colorEncoding === "var" && !!dataset.sliceByObs) {
-          return !_.includes(dataset.selectedObs?.omit, data.sliceValues[i]);
-        } else {
-          return true;
-        }
-      }),
-    [
-      data.sliceValues,
-      data.values,
-      dataset.colorEncoding,
-      dataset.selectedObs?.omit,
-      dataset.sliceByObs,
-    ]
-  );
-
   const getFillColor = useCallback(
     (i, d) => {
       return getColor(scale, data.values?.[d.index], {
-        alpha: !inSlice[d.index],
-        gray: !inSlice[d.index],
+        alpha: !data.inSlice[d.index],
+        gray: !data.inSlice[d.index],
       });
     },
-    [data.values, getColor, inSlice, scale]
+    [data.inSlice, data.values, getColor, scale]
   );
 
   const layers = useMemo(() => {
