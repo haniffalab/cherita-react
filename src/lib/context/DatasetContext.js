@@ -288,10 +288,18 @@ function datasetReducer(dataset, action) {
       };
     }
     case "toggle.slice.obs": {
-      return {
-        ...dataset,
-        sliceByObs: !dataset.sliceByObs,
-      };
+      if (_.isEqual(dataset.selectedObs, action.obs)) {
+        return {
+          ...dataset,
+          sliceByObs: !dataset.sliceByObs,
+        };
+      } else {
+        return {
+          ...dataset,
+          selectedObs: action.obs,
+          sliceByObs: true,
+        };
+      }
     }
     case "add.label.obs": {
       if (dataset.labelObs.find((i) => _.isEqual(i, action.obs))) {

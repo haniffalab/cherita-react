@@ -212,13 +212,10 @@ export function ObsColsList() {
                         size="sm"
                         onClick={() => {
                           dispatch({
-                            type: "obsSelected",
+                            type: "toggle.slice.obs",
                             obs: obsColsList.find(
                               (obs) => obs.name === item.name
                             ),
-                          });
-                          dispatch({
-                            type: "toggle.slice.obs",
                           });
                         }}
                       >
