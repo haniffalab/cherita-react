@@ -298,8 +298,9 @@ export function ObsColsList() {
                           fill={`rgb(${getColor(
                             getScale(item.scaleParams),
                             item.codes[value],
+                            _.includes(item.omit, item.codes[value]),
                             {
-                              gray: _.includes(item.omit, item.codes[value]),
+                              alpha: 1,
                             }
                           )})`}
                         />

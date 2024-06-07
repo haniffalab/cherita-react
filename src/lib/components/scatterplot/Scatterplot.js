@@ -273,34 +273,15 @@ export function Scatterplot({ radius = 30 }) {
     }
   }, [dataset.colorEncoding, dataset.selectedObs?.type, getScale]);
 
-  const min = useMemo(() => {
-    return _.minBy(data.values, (v, i) => {
-      if (dataset.colorEncoding === "var" && !!dataset.sliceByObs) {
-        return !_.includes(dataset.selectedObs?.omit, data.sliceValues[i])
-          ? v
-          : Infinity;
-      } else {
-        return v;
-      }
-    });
-  }, [
-    data.sliceValues,
-    data.values,
-    dataset.colorEncoding,
-    dataset.selectedObs?.omit,
-    dataset.sliceByObs,
-  ]);
-
-  const max = useMemo(() => {
-    return _.maxBy(data.values, (v, i) => {
-      if (dataset.colorEncoding === "var" && !!dataset.sliceByObs) {
-        return !_.includes(dataset.selectedObs?.omit, data.sliceValues[i])
-          ? v
-          : -Infinity;
-      } else {
-        return v;
-      }
-    });
+  const { min, max } = useMemo(() => {
+    if (dataset.colorEncoding === "var" && !!dataset.sliceByObs) {
+      const filtered = _.filter(data.values, (v, i) => {
+        return !_.includes(dataset.selectedObs?.omit, data.sliceValues[i]);
+      });
+      return { min: _.min(filtered), max: _.max(filtered) };
+    } else {
+      return { min: _.min(data.values), max: _.max(data.values) };
+    }
   }, [
     data.sliceValues,
     data.values,
@@ -311,20 +292,13 @@ export function Scatterplot({ radius = 30 }) {
 
   const getFillColor = useCallback(
     (_d, { index }) => {
-      const alpha =
+      const grayOut =
         dataset.colorEncoding === "obs"
           ? _.includes(dataset.selectedObs?.omit, data.values[index])
-            ? 0.2
-            : 1
           : dataset.colorEncoding === "var" && !!dataset.sliceByObs
           ? _.includes(dataset.selectedObs?.omit, data.sliceValues[index])
-            ? 0.2
-            : 1
-          : 1;
-      return [
-        ...scale((data.values[index] - min) / (max - min)).rgb(),
-        255 * alpha,
-      ];
+          : false;
+      return getColor(scale, (data.values[index] - min) / (max - min), grayOut);
     },
     [
       data.sliceValues,
@@ -332,6 +306,7 @@ export function Scatterplot({ radius = 30 }) {
       dataset.colorEncoding,
       dataset.selectedObs?.omit,
       dataset.sliceByObs,
+      getColor,
       max,
       min,
       scale,
@@ -400,7 +375,7 @@ export function Scatterplot({ radius = 30 }) {
       text: _.map(labelObsData, (v, k) => {
         const labelObs = _.find(dataset.labelObs, (o) => o.name === k);
         if (labelObs.type === "continuous") {
-          return `${k}: ${v?.[index]}`;
+          return `${k}: ${parseFloat(v?.[index]).toLocaleString()}`;
         } else {
           return `${k}: ${labelObs.codesMap[v?.[index]]}`;
         }
@@ -422,9 +397,7 @@ export function Scatterplot({ radius = 30 }) {
         onClick={onLayerClick}
         getTooltip={getTooltip}
         onAfterRender={() => {
-          if (isRendering) {
-            setIsRendering(false);
-          }
+          setIsRendering(false);
         }}
         useDevicePixels={false}
       ></DeckGL>

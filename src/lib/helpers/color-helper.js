@@ -61,14 +61,23 @@ export const useColor = () => {
     (
       scale,
       value,
-      { alpha = false, gray = false } = {},
+      grayOut = false,
+      { alpha = 0.2, gray = 0.95 } = {},
       colorEncoding = dataset.colorEncoding
     ) => {
       if (colorEncoding) {
-        return [
-          ...chroma.mix(scale(value).rgb(), GRAY, gray * 0.95, "rgb").rgb(),
-          255 * (alpha ? 0.2 : 1),
-        ]; // not using chroma's .alpha as deckgl expects alpha in 0-255 range
+        if (grayOut) {
+          // Mix color with gray manually instead of chroma.mix to get better performance with deck.gl
+          const rgb = scale(value).rgb();
+          return [
+            rgb[0] * (1 - gray) + GRAY[0] * gray,
+            rgb[1] * (1 - gray) + GRAY[1] * gray,
+            rgb[2] * (1 - gray) + GRAY[2] * gray,
+            255 * alpha,
+          ];
+        } else {
+          return [...scale(value).rgb(), 255];
+        }
       } else {
         return null;
       }
