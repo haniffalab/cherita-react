@@ -230,7 +230,6 @@ export function Scatterplot({ radius = 30 }) {
 
   useEffect(() => {
     if (dataset.colorEncoding === "obs") {
-      setIsRendering(true);
       if (!obsData.isPending && !obsData.serverError) {
         setData((d) => {
           return { ...d, values: obsData.data };
@@ -241,7 +240,6 @@ export function Scatterplot({ radius = 30 }) {
         });
       }
     } else if (dataset.colorEncoding === "var" && dataset.sliceByObs) {
-      setIsRendering(true);
       if (!obsData.isPending && !obsData.serverError) {
         setData((d) => {
           return { ...d, sliceValues: obsData.data };
@@ -273,14 +271,31 @@ export function Scatterplot({ radius = 30 }) {
     }
   }, [dataset.colorEncoding, dataset.selectedObs?.type, getScale]);
 
-  const { min, max } = useMemo(() => {
+  const { min, max, slicedLength } = useMemo(() => {
     if (dataset.colorEncoding === "var" && !!dataset.sliceByObs) {
       const filtered = _.filter(data.values, (v, i) => {
         return !_.includes(dataset.selectedObs?.omit, data.sliceValues[i]);
       });
-      return { min: _.min(filtered), max: _.max(filtered) };
+      return {
+        min: _.min(filtered),
+        max: _.max(filtered),
+        slicedLength: filtered.length,
+      };
+    } else if (dataset.colorEncoding === "obs") {
+      const filtered = _.filter(data.values, (v, i) => {
+        return !_.includes(dataset.selectedObs?.omit, data.values[i]);
+      });
+      return {
+        min: _.min(data.values),
+        max: _.max(data.values),
+        slicedLength: filtered.length,
+      };
     } else {
-      return { min: _.min(data.values), max: _.max(data.values) };
+      return {
+        min: _.min(data.values),
+        max: _.max(data.values),
+        slicedLength: data.values.length,
+      };
     }
   }, [
     data.sliceValues,
@@ -417,6 +432,7 @@ export function Scatterplot({ radius = 30 }) {
             : null
         }
         obsLength={parseInt(obsmData.data?.length)}
+        slicedLength={parseInt(slicedLength)}
       />
       <Legend scale={scale} min={min} max={max} />
     </div>
