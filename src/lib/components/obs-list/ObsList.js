@@ -298,7 +298,8 @@ export function ObsColsList() {
                             _.includes(item.omit, item.codes[value]),
                             {
                               alpha: 1,
-                            }
+                            },
+                            "obs"
                           )})`}
                         />
                       </svg>

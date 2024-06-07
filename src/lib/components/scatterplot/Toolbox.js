@@ -16,14 +16,17 @@ export function Toolbox({ mode, obsLength, slicedLength }) {
         <Button size="sm">
           <FontAwesomeIcon icon={faDroplet} /> {mode}
         </Button>
-        {slicedLength === obsLength ? (
-          <Button size="sm">{obsLength.toLocaleString()} cells</Button>
-        ) : (
-          <Button size="sm">
-            {slicedLength.toLocaleString()} out of {obsLength.toLocaleString()}{" "}
-            cells
-          </Button>
-        )}
+        {(mode || !Number.isNaN(obsLength)) &&
+          (mode !== null &&
+          !Number.isNaN(slicedLength) &&
+          slicedLength !== obsLength ? (
+            <Button size="sm">
+              {slicedLength.toLocaleString()} out of{" "}
+              {obsLength.toLocaleString()} cells
+            </Button>
+          ) : (
+            <Button size="sm">{obsLength.toLocaleString()} cells</Button>
+          ))}
       </ButtonGroup>
     </div>
   );
