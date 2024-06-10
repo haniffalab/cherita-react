@@ -1,74 +1,66 @@
-import chroma from "chroma-js";
-import _ from "lodash";
-
 import { CHROMA_COLORSCALES } from "../constants/constants";
 import { useDataset } from "../context/DatasetContext";
 import { useCallback } from "react";
 
 const GRAY = [214, 212, 212];
 
+const parseHexColor = (color) => {
+  const r = parseInt(color?.substring(1, 3), 16);
+  const g = parseInt(color?.substring(3, 5), 16);
+  const b = parseInt(color?.substring(5, 7), 16);
+
+  return [r, g, b];
+};
+
+const interpolateColor = (color1, color2, factor) => {
+  const [r1, g1, b1] = parseHexColor(color1);
+  const [r2, g2, b2] = parseHexColor(color2);
+
+  const r = Math.round(r1 + factor * (r2 - r1));
+  const g = Math.round(g1 + factor * (g2 - g1));
+  const b = Math.round(b1 + factor * (b2 - b1));
+
+  return [r, g, b];
+};
+
+const computeColor = (colormap, value) => {
+  if (Number.isNaN(value)) {
+    return [0, 0, 0, 0];
+  } else if (value <= 0) {
+    return parseHexColor(colormap[0]);
+  } else if (value >= 1) {
+    return parseHexColor(colormap[colormap.length - 1]);
+  }
+  const index1 = Math.floor(value * (colormap.length - 1));
+  const index2 = Math.ceil(value * (colormap.length - 1));
+  const factor = (value * (colormap.length - 1)) % 1;
+  return interpolateColor(colormap[index1], colormap[index2], factor);
+};
+
+export const rgbToHex = (color) => {
+  const [r, g, b] = color;
+  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+};
+
 export const useColor = () => {
   const dataset = useDataset();
 
-  const getScaleParams = useCallback(
-    (
-      { values = null, n_values = null, min = null, max = null } = {},
-      isCategorical = false
-    ) => {
-      return {
-        domain:
-          min !== null && min !== undefined && max !== null && max !== undefined
-            ? [min, max]
-            : values
-            ? [_.min(values), _.max(values)]
-            : [0, 1],
-        classes: isCategorical
-          ? values
-            ? _.uniq(values).length
-            : n_values
-          : null,
-        isCategorical: isCategorical,
-      };
-    },
-    []
-  );
-
-  const getScale = useCallback(
-    (params) => {
-      if (!params) {
-        return chroma.scale(
-          CHROMA_COLORSCALES[dataset.controls.colorScale],
-          [0, 1]
-        );
-      }
-      const { isCategorical, domain = [0, 1], classes = null } = params;
-      let c = chroma
-        .scale(
-          CHROMA_COLORSCALES[
-            isCategorical ? "Accent" : dataset.controls.colorScale
-          ]
-        )
-        .domain(domain);
-      if (classes) {
-        c.classes(classes);
-      }
-      return c;
-    },
-    [dataset.controls.colorScale]
-  );
-
   const getColor = useCallback(
     (
-      scale,
       value,
+      categorical = false,
       grayOut = false,
       { alpha = 0.2, gray = 0.95 } = {},
       colorEncoding = dataset.colorEncoding
     ) => {
+      const colormap =
+        CHROMA_COLORSCALES[
+          categorical ? "Accent" : dataset.controls.colorScale
+        ];
       if (colorEncoding) {
         if (grayOut) {
           // Mix color with gray manually instead of chroma.mix to get better performance with deck.gl
-          const rgb = scale(value).rgb();
+          const rgb = computeColor(colormap, value);
           return [
             rgb[0] * (1 - gray) + GRAY[0] * gray,
             rgb[1] * (1 - gray) + GRAY[1] * gray,
@@ -76,14 +68,14 @@ export const useColor = () => {
             255 * alpha,
           ];
         } else {
-          return [...scale(value).rgb(), 255];
+          return [...computeColor(colormap, value), 255];
         }
       } else {
         return null;
       }
     },
-    [dataset.colorEncoding]
+    [dataset.colorEncoding, dataset.controls.colorScale]
   );
 
-  return { getScale, getScaleParams, getColor };
+  return { getColor };
 };

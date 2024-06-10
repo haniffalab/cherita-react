@@ -64,7 +64,7 @@ const INITIAL_VIEW_STATE = {
 
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
-  const { getScale, getScaleParams, getColor } = useColor();
+  const { getColor } = useColor();
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [features, setFeatures] = useState({
     type: "FeatureCollection",
@@ -223,8 +223,6 @@ export function Scatterplot({ radius = 30 }) {
     xData.data,
     xData.isPending,
     xData.serverError,
-    getScaleParams,
-    getScale,
     getColor,
   ]);
 
@@ -255,25 +253,20 @@ export function Scatterplot({ radius = 30 }) {
     obsData.data,
     obsData.isPending,
     obsData.serverError,
-    getScaleParams,
-    getScale,
-    dataset.selectedObs?.scaleParams,
     dataset.sliceByObs,
   ]);
 
-  const scale = useMemo(() => {
+  const isCategorical = useMemo(() => {
     if (dataset.colorEncoding === "obs") {
-      return getScale({
-        isCategorical: dataset.selectedObs?.type === "categorical",
-      });
+      return dataset.selectedObs?.type === "categorical";
     } else {
-      return getScale();
+      return false;
     }
-  }, [dataset.colorEncoding, dataset.selectedObs?.type, getScale]);
+  }, [dataset.colorEncoding, dataset.selectedObs?.type]);
 
   const { min, max, slicedLength } = useMemo(() => {
     if (dataset.colorEncoding === "var" && !!dataset.sliceByObs) {
-      const filtered = _.filter(data.values, (v, i) => {
+      const filtered = _.filter(data.values, (_v, i) => {
         return !_.includes(dataset.selectedObs?.omit, data.sliceValues[i]);
       });
       return {
@@ -282,7 +275,7 @@ export function Scatterplot({ radius = 30 }) {
         slicedLength: filtered.length,
       };
     } else if (dataset.colorEncoding === "obs") {
-      const filtered = _.filter(data.values, (v, i) => {
+      const filtered = _.filter(data.values, (_v, i) => {
         return !_.includes(dataset.selectedObs?.omit, data.values[i]);
       });
       return {
@@ -313,7 +306,11 @@ export function Scatterplot({ radius = 30 }) {
           : dataset.colorEncoding === "var" && !!dataset.sliceByObs
           ? _.includes(dataset.selectedObs?.omit, data.sliceValues[index])
           : false;
-      return getColor(scale, (data.values[index] - min) / (max - min), grayOut);
+      return getColor(
+        (data.values[index] - min) / (max - min),
+        isCategorical,
+        grayOut
+      );
     },
     [
       data.sliceValues,
@@ -322,9 +319,9 @@ export function Scatterplot({ radius = 30 }) {
       dataset.selectedObs?.omit,
       dataset.sliceByObs,
       getColor,
+      isCategorical,
       max,
       min,
-      scale,
     ]
   );
 
@@ -434,7 +431,7 @@ export function Scatterplot({ radius = 30 }) {
         obsLength={parseInt(obsmData.data?.length)}
         slicedLength={parseInt(slicedLength)}
       />
-      <Legend scale={scale} min={min} max={max} />
+      <Legend isCategorical={isCategorical} min={min} max={max} />
     </div>
   );
 }

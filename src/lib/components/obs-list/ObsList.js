@@ -53,7 +53,7 @@ export function ObsColsList() {
     url: dataset.url,
   });
 
-  const { getScaleParams, getScale, getColor } = useColor();
+  const { getColor } = useColor();
 
   useEffect(() => {
     setParams((p) => {
@@ -72,10 +72,7 @@ export function ObsColsList() {
     (selectedObs) => {
       if (updatedObsColsList) {
         const selection = _.find(obsColsList, (item) =>
-          _.isEqual(
-            _.omit(item, ["scaleParams", "omit"]),
-            _.omit(selectedObs, ["scaleParams", "omit"])
-          )
+          _.isEqual(_.omit(item, ["omit"]), _.omit(selectedObs, ["omit"]))
         );
         if (!selection) {
           setActive(null);
@@ -83,11 +80,7 @@ export function ObsColsList() {
             type: "obsSelected",
             obs: null,
           });
-        }
-        if (
-          !_.isEqual(selectedObs.scaleParams, selection.scaleParams) ||
-          !_.isEqual(selectedObs.omit, selection.omit)
-        ) {
+        } else if (!_.isEqual(selectedObs.omit, selection.omit)) {
           dispatch({
             type: "obsSelected",
             obs: selection,
@@ -105,26 +98,15 @@ export function ObsColsList() {
         _.map(fetchedData, (d) => {
           if (d.type === "continuous") {
             d = binContinuous(d);
-            d = { ...d, scaleParams: getScaleParams(d), omit: [] };
           } else if (d.type === "discrete") {
             d = binDiscrete(d);
-            d = { ...d, scaleParams: getScaleParams(d), omit: [] };
-          } else if (d.type === "categorical") {
-            d = {
-              ...d,
-              scaleParams: getScaleParams(
-                { ...d, values: _.values(d.codes) },
-                true
-              ),
-              omit: [],
-            };
           }
-          return d;
+          return { ...d, omit: [] };
         })
       );
       setUpdatedObsColsList(true);
     }
-  }, [fetchedData, getScaleParams, isPending, serverError]);
+  }, [fetchedData, isPending, serverError]);
 
   useEffect(() => {
     if (dataset.selectedObs) {
@@ -293,8 +275,8 @@ export function ObsColsList() {
                           width="10"
                           height="10"
                           fill={`rgb(${getColor(
-                            getScale(item.scaleParams),
-                            item.codes[value],
+                            item.codes[value] / (_.size(item.codes) - 1),
+                            true,
                             _.includes(item.omit, item.codes[value]),
                             {
                               alpha: 1,
@@ -320,7 +302,6 @@ export function ObsColsList() {
       dispatch,
       obsColsList,
       getColor,
-      getScale,
     ]
   );
 

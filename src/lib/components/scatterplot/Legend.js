@@ -1,50 +1,27 @@
-import { React, useEffect, useState } from "react";
+import { React, useMemo } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import _ from "lodash";
 import { useDataset } from "../../context/DatasetContext";
+import { rgbToHex, useColor } from "../../helpers/color-helper";
 
-export function Legend({ scale, min = 0, max = 1 }) {
+export function Legend({ isCategorical = false, min = 0, max = 1 }) {
   const dataset = useDataset();
-  const [legendData, setLegendData] = useState({
-    dmin: 0,
-    dmax: 1,
-    list: [],
-  });
+  const { getColor } = useColor();
 
-  useEffect(() => {
-    if (scale) {
-      const spanList = _.range(100).map((i) => {
-        var color = scale(i / 100).hex();
-        return (
-          <span
-            key={i}
-            className="grad-step"
-            style={{ backgroundColor: color }}
-          ></span>
-        );
-      });
-
-      setLegendData((d) => {
-        return {
-          ...d,
-          list: spanList,
-        };
-      });
-    }
-  }, [max, min, scale]);
-
-  useEffect(() => {
-    setLegendData((d) => {
-      return { ...d, dmin: min, dmax: max };
+  const spanList = useMemo(() => {
+    return _.range(100).map((i) => {
+      var color = rgbToHex(getColor(i / 100, isCategorical));
+      return (
+        <span
+          key={i}
+          className="grad-step"
+          style={{ backgroundColor: color }}
+        ></span>
+      );
     });
-  }, [min, max]);
+  }, [getColor, isCategorical]);
 
-  if (
-    (dataset.colorEncoding === "var" && scale) ||
-    (dataset.colorEncoding === "obs" &&
-      dataset.selectedObs?.type === "continuous" &&
-      scale)
-  ) {
+  if (dataset.colorEncoding && !isCategorical) {
     return (
       <div className="cherita-legend">
         <div className="gradient">
@@ -53,12 +30,10 @@ export function Legend({ scale, min = 0, max = 1 }) {
               ? dataset.selectedVar?.name
               : dataset.selectedObs?.name}
           </p>
-          {legendData.list}
-          <span className="domain-min">{legendData.dmin.toFixed(1)}</span>
-          <span className="domain-med">
-            {((legendData.dmin + legendData.dmax) * 0.5).toFixed(1)}
-          </span>
-          <span className="domain-max">{legendData.dmax.toFixed(1)}</span>
+          {spanList}
+          <span className="domain-min">{min.toFixed(1)}</span>
+          <span className="domain-med">{((min + max) * 0.5).toFixed(1)}</span>
+          <span className="domain-max">{max.toFixed(1)}</span>
         </div>
       </div>
     );
