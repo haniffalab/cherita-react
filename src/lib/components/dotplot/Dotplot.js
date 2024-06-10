@@ -1,12 +1,11 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import _ from "lodash";
 import Dropdown from "react-bootstrap/Dropdown";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import {
-  PLOTLY_COLORSCALES,
-  DOTPLOT_STANDARDSCALES,
-} from "../../constants/constants";
+import { DOTPLOT_STANDARDSCALES } from "../../constants/constants";
+import { COLORSCALES } from "../../constants/colorscales";
 import { useDebouncedFetch } from "../../utils/requests";
 import {
   Alert,
@@ -41,18 +40,18 @@ export function DotplotControls() {
     }));
   }, [dataset.controls.colorAxis.cmin, dataset.controls.colorAxis.cmax]);
 
-  const colorScaleList = PLOTLY_COLORSCALES.map((item) => (
+  const colorScaleList = _.keys(COLORSCALES).map((key) => (
     <Dropdown.Item
-      key={item}
-      active={dataset.controls.colorScale === item}
+      key={key}
+      active={dataset.controls.colorScale === key}
       onClick={() => {
         dispatch({
           type: "set.controls.colorScale",
-          colorScale: item,
+          colorScale: key,
         });
       }}
     >
-      {item}
+      {key}
     </Dropdown.Item>
   ));
 

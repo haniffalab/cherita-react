@@ -1,11 +1,10 @@
 import "bootstrap/dist/css/bootstrap.min.css";
+import _ from "lodash";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import {
-  PLOTLY_COLORSCALES,
-  MATRIXPLOT_STANDARDSCALES,
-} from "../../constants/constants";
+import { MATRIXPLOT_STANDARDSCALES } from "../../constants/constants";
+import { COLORSCALES } from "../../constants/colorscales";
 import {
   Alert,
   Dropdown,
@@ -20,18 +19,18 @@ export function MatrixplotControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
 
-  const colorScaleList = PLOTLY_COLORSCALES.map((item) => (
+  const colorScaleList = _.keys(COLORSCALES).map((key) => (
     <Dropdown.Item
-      key={item}
-      active={dataset.controls.colorScale === item}
+      key={key}
+      active={dataset.controls.colorScale === key}
       onClick={() => {
         dispatch({
           type: "set.controls.colorScale",
-          colorScale: item,
+          colorScale: key,
         });
       }}
     >
-      {item}
+      {key}
     </Dropdown.Item>
   ));
 

@@ -1,4 +1,4 @@
-import { CHROMA_COLORSCALES } from "../constants/constants";
+import { COLORSCALES } from "../constants/colorscales";
 import { useDataset } from "../context/DatasetContext";
 import { useCallback } from "react";
 
@@ -24,7 +24,7 @@ const interpolateColor = (color1, color2, factor) => {
 };
 
 const computeColor = (colormap, value) => {
-  if (Number.isNaN(value)) {
+  if (!colormap || Number.isNaN(value)) {
     return [0, 0, 0, 255];
   } else if (value <= 0) {
     return parseHexColor(colormap[0]);
@@ -54,9 +54,7 @@ export const useColor = () => {
       colorEncoding = dataset.colorEncoding
     ) => {
       const colormap =
-        CHROMA_COLORSCALES[
-          categorical ? "Accent" : dataset.controls.colorScale
-        ];
+        COLORSCALES[categorical ? "Accent" : dataset.controls.colorScale];
       if (colorEncoding) {
         if (grayOut) {
           // Mix color with gray manually instead of chroma.mix to get better performance with deck.gl

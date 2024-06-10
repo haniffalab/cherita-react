@@ -10,7 +10,7 @@ import { Alert, Dropdown } from "react-bootstrap";
 import { Toolbox } from "./Toolbox";
 import { SpatialControls } from "./SpatialControls";
 import { Legend } from "./Legend";
-import { PLOTLY_COLORSCALES } from "../../constants/constants";
+import { COLORSCALES } from "../../constants/colorscales";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { MapHelper } from "../../helpers/map-helper";
 import {
@@ -29,18 +29,18 @@ export function ScatterplotControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
 
-  const colormapList = PLOTLY_COLORSCALES.map((item) => (
+  const colormapList = _.keys(COLORSCALES).map((key) => (
     <Dropdown.Item
-      key={item}
-      active={dataset.controls.colorScale === item}
+      key={key}
+      active={dataset.controls.colorScale === key}
       onClick={() => {
         dispatch({
           type: "set.controls.colorScale",
-          colorScale: item,
+          colorScale: key,
         });
       }}
     >
-      {item}
+      {key}
     </Dropdown.Item>
   ));
 
