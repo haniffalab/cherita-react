@@ -13,11 +13,8 @@ export {
   MatrixplotControls,
 } from "./components/matrixplot/Matrixplot";
 export { Violin, ViolinControls } from "./components/violin/Violin";
-export {
-  PLOTLY_COLORSCALES,
-  SELECTION_MODES,
-  VIOLIN_MODES,
-} from "./constants/constants";
+export { SELECTION_MODES, VIOLIN_MODES } from "./constants/constants";
+export { COLORSCALES } from "./constants/colorscales";
 export { DatasetProvider } from "./context/DatasetContext";
 export {
   OffcanvasObs,
