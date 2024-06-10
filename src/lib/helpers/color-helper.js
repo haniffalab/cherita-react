@@ -25,7 +25,7 @@ const interpolateColor = (color1, color2, factor) => {
 
 const computeColor = (colormap, value) => {
   if (Number.isNaN(value)) {
-    return [0, 0, 0, 0];
+    return [0, 0, 0, 255];
   } else if (value <= 0) {
     return parseHexColor(colormap[0]);
   } else if (value >= 1) {
@@ -38,7 +38,7 @@ const computeColor = (colormap, value) => {
 };
 
 export const rgbToHex = (color) => {
-  const [r, g, b] = color;
+  const [r, g, b] = color || [0, 0, 0, 0];
   return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 };
 
@@ -50,7 +50,7 @@ export const useColor = () => {
       value,
       categorical = false,
       grayOut = false,
-      { alpha = 0.2, gray = 0.95 } = {},
+      { alpha = 0.75, gray = 0.95 } = {},
       colorEncoding = dataset.colorEncoding
     ) => {
       const colormap =

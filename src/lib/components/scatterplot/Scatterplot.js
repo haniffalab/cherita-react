@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import _ from "lodash";
 import "bootstrap/dist/css/bootstrap.min.css";
 import DeckGL from "@deck.gl/react";
 import { ScatterplotLayer } from "@deck.gl/layers";
 import { EditableGeoJsonLayer } from "@nebula.gl/layers";
 import { ViewMode } from "@nebula.gl/edit-modes";
-import Dropdown from "react-bootstrap/Dropdown";
+import { Alert, Dropdown } from "react-bootstrap";
 
 import { Toolbox } from "./Toolbox";
 import { SpatialControls } from "./SpatialControls";
@@ -20,7 +20,8 @@ import {
 } from "../../helpers/zarr-helper";
 import { useColor } from "../../helpers/color-helper";
 import { LoadingSpinner } from "../../utils/LoadingSpinner";
-import { useCallback } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 
 window.deck.log.level = 1;
 
@@ -394,13 +395,18 @@ export function Scatterplot({ radius = 30 }) {
       }).join("\n"),
     };
 
-  // @TODO: add error message
+  const isPending =
+    isRendering || obsmData.isPending || xData.isPending || obsmData.isPending;
+
+  const error =
+    (dataset.selectedObsm && obsmData.serverError?.length) ||
+    (dataset.colorEncoding === "var" && xData.serverError?.length) ||
+    (dataset.colorEncoding === "obs" && obsData.serverError?.length) ||
+    (dataset.labelObs.lengh && labelObsData.serverError?.length);
+
   return (
     <div className="cherita-scatterplot">
-      {(isRendering ||
-        obsmData.isPending ||
-        xData.isPending ||
-        obsmData.isPending) && <LoadingSpinner />}
+      {isPending && <LoadingSpinner />}
       <DeckGL
         viewState={viewState}
         onViewStateChange={(e) => setViewState(e.viewState)}
@@ -419,7 +425,14 @@ export function Scatterplot({ radius = 30 }) {
         features={mode}
         setFeatures={setFeatures}
       />
-      {/* @TODO: add length of sliced to be displayed in Toolbox */}
+      {error && (
+        <div className="cherita-alert">
+          <Alert variant="danger">
+            <FontAwesomeIcon icon={faTriangleExclamation} />
+            Error loading data
+          </Alert>
+        </div>
+      )}
       <Toolbox
         mode={
           dataset.colorEncoding === "var"
