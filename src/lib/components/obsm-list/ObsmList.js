@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
 import { useFetch } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { Alert } from "react-bootstrap";
 
 import Dropdown from "react-bootstrap/Dropdown";

@@ -16,7 +16,7 @@ import {
   ToggleButton,
   InputGroup,
 } from "react-bootstrap";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
 
 export function DotplotControls() {
   const dataset = useDataset();

@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useDeferredValue,
+} from "react";
 import _ from "lodash";
 import "bootstrap/dist/css/bootstrap.min.css";
 import DeckGL from "@deck.gl/react";
@@ -19,7 +25,7 @@ import {
   useZarr,
 } from "../../helpers/zarr-helper";
 import { useColor } from "../../helpers/color-helper";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
+import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 
@@ -229,6 +235,7 @@ export function Scatterplot({ radius = 30 }) {
 
   useEffect(() => {
     if (dataset.colorEncoding === "obs") {
+      setIsRendering(true);
       if (!obsData.isPending && !obsData.serverError) {
         setData((d) => {
           return { ...d, values: obsData.data };
@@ -326,7 +333,7 @@ export function Scatterplot({ radius = 30 }) {
     ]
   );
 
-  const layers = useMemo(() => {
+  const memoizedLayers = useMemo(() => {
     return [
       new ScatterplotLayer({
         id: "cherita-layer-scatterplot",
@@ -373,6 +380,8 @@ export function Scatterplot({ radius = 30 }) {
     selectedFeatureIndexes,
   ]);
 
+  const layers = useDeferredValue(memoizedLayers);
+
   function onLayerClick(info) {
     if (mode !== ViewMode) {
       // don't change selection while editing
@@ -396,7 +405,8 @@ export function Scatterplot({ radius = 30 }) {
     };
 
   const isPending =
-    isRendering || obsmData.isPending || xData.isPending || obsmData.isPending;
+    (isRendering || xData.isPending || obsmData.isPending) &&
+    !obsmData.isPending;
 
   const error =
     (dataset.selectedObsm && obsmData.serverError?.length) ||
@@ -406,7 +416,8 @@ export function Scatterplot({ radius = 30 }) {
 
   return (
     <div className="cherita-scatterplot">
-      {isPending && <LoadingSpinner />}
+      {obsmData.isPending && <LoadingSpinner disableShrink={true} />}
+      {isPending && <LoadingLinear />}
       <DeckGL
         viewState={viewState}
         onViewStateChange={(e) => setViewState(e.viewState)}
@@ -425,7 +436,7 @@ export function Scatterplot({ radius = 30 }) {
         features={mode}
         setFeatures={setFeatures}
       />
-      {error && (
+      {error && !isPending && (
         <div className="cherita-alert">
           <Alert variant="danger">
             <FontAwesomeIcon icon={faTriangleExclamation} />

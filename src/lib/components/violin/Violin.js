@@ -18,7 +18,7 @@ import {
   Tooltip,
 } from "react-bootstrap";
 import { useDebouncedFetch } from "../../utils/requests";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
 
 export function ViolinControls() {
   const dataset = useDataset();

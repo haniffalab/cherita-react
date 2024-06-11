@@ -4,7 +4,7 @@ import _ from "lodash";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFetch } from "../../utils/requests";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import {
   Accordion,
   ListGroup,
@@ -425,8 +425,8 @@ export function ObsColsList() {
 
   if (!serverError) {
     return (
-      <div className="position-relative">
-        <div className="list-group overflow-auto">
+      <div className="position-relative h-100">
+        <div className="list-group overflow-auto h-100">
           {isPending && <LoadingSpinner />}
           <Accordion flush defaultActiveKey={active} alwaysOpen>
             {obsList}

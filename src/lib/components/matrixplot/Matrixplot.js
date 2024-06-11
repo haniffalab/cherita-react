@@ -13,7 +13,7 @@ import {
   InputGroup,
 } from "react-bootstrap";
 import { useDebouncedFetch } from "../../utils/requests";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
 
 export function MatrixplotControls() {
   const dataset = useDataset();

@@ -6,7 +6,7 @@ import Plot from "react-plotly.js";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { COLORSCALES } from "../../constants/colorscales";
 import { useDebouncedFetch } from "../../utils/requests";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
 
 export function HeatmapControls() {
   const dataset = useDataset();

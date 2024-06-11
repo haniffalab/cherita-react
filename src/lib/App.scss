@@ -1,6 +1,19 @@
 @import "bootstrap/scss/bootstrap";
 
 // Theme CSS
+
+.loading-spinner {
+    @extend .bg-light;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    z-index: 1;
+    opacity: 75%;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+}
+
 .cherita-container {
     margin: 40px auto;
     background-color: #fff;
