@@ -38,11 +38,11 @@ export const useVarSearch = () => {
 
   const onSelect = (item) => {
     dispatch({
-      type: "varSelected",
+      type: "select.var",
       var: item,
     });
     dispatch({
-      type: "multiVarSelected",
+      type: "select.multivar",
       var: item,
     });
     dispatch({

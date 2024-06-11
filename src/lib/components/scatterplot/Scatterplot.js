@@ -211,6 +211,13 @@ export function Scatterplot({ radius = 30 }) {
     obsmData.serverError,
   ]);
 
+  const bounds = useMemo(() => {
+    const { latitude, longitude, zoom } = new MapHelper().fitBounds(
+      data.positions
+    );
+    return { latitude, longitude, zoom };
+  }, [data.positions]);
+
   useEffect(() => {
     if (dataset.colorEncoding === "var") {
       setIsRendering(true);
@@ -435,6 +442,9 @@ export function Scatterplot({ radius = 30 }) {
         setMode={setMode}
         features={mode}
         setFeatures={setFeatures}
+        resetBounds={() => setViewState(bounds)}
+        increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
+        decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
       />
       {error && !isPending && (
         <div className="cherita-alert">

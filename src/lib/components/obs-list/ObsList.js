@@ -77,12 +77,12 @@ export function ObsColsList() {
         if (!selection) {
           setActive(null);
           dispatch({
-            type: "obsSelected",
+            type: "select.obs",
             obs: null,
           });
         } else if (!_.isEqual(selectedObs.omit, selection.omit)) {
           dispatch({
-            type: "obsSelected",
+            type: "select.obs",
             obs: selection,
           });
         }
@@ -181,6 +181,7 @@ export function ObsColsList() {
                             });
                           }
                         }}
+                        title="Add to tooltip"
                       >
                         <FontAwesomeIcon icon={faFont} />
                       </Button>
@@ -200,6 +201,7 @@ export function ObsColsList() {
                             ),
                           });
                         }}
+                        title="Slice to selected"
                       >
                         <FontAwesomeIcon icon={faEye} />
                       </Button>
@@ -213,7 +215,7 @@ export function ObsColsList() {
                         size="sm"
                         onClick={() => {
                           dispatch({
-                            type: "obsSelected",
+                            type: "select.obs",
                             obs: obsColsList.find(
                               (obs) => obs.name === item.name
                             ),
@@ -223,6 +225,7 @@ export function ObsColsList() {
                             value: "obs",
                           });
                         }}
+                        title="Set as color encoding"
                       >
                         <FontAwesomeIcon icon={faDroplet} />
                       </Button>
@@ -345,6 +348,7 @@ export function ObsColsList() {
                             });
                           }
                         }}
+                        title="Add to tooltip"
                       >
                         <FontAwesomeIcon icon={faFont} />
                       </Button>
@@ -359,7 +363,7 @@ export function ObsColsList() {
                         onClick={(key) => {
                           if (key != null) {
                             dispatch({
-                              type: "obsSelected",
+                              type: "select.obs",
                               obs: obsColsList.find(
                                 (obs) => obs.name === item.name
                               ),
@@ -370,6 +374,7 @@ export function ObsColsList() {
                             });
                           }
                         }}
+                        title="Set as color encoding"
                       >
                         <FontAwesomeIcon icon={faDroplet} />
                       </Button>

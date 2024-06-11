@@ -134,16 +134,16 @@ export function useDatasetDispatch() {
 
 function datasetReducer(dataset, action) {
   switch (action.type) {
-    case "obsSelected": {
+    case "select.obs": {
       return { ...dataset, selectedObs: action.obs };
     }
-    case "obsmSelected": {
+    case "select.obsm": {
       return { ...dataset, selectedObsm: action.obsm };
     }
-    case "varSelected": {
+    case "select.var": {
       return { ...dataset, selectedVar: action.var };
     }
-    case "multiVarSelected": {
+    case "select.multivar": {
       if (dataset.selectedMultiVar.find((i) => _.isEqual(i, action.var))) {
         return dataset;
       } else {
@@ -153,7 +153,15 @@ function datasetReducer(dataset, action) {
         };
       }
     }
-    case "multiVarDeselected": {
+    case "deselect.var": {
+      return {
+        ...dataset,
+        selectedVar: null,
+        colorEncoding:
+          dataset.colorEncoding === "var" ? null : dataset.colorEncoding,
+      };
+    }
+    case "deselect.multivar": {
       return {
         ...dataset,
         selectedMultiVar: dataset.selectedMultiVar.filter(
@@ -168,12 +176,16 @@ function datasetReducer(dataset, action) {
       return {
         ...dataset,
         selectedMultiVar: [],
+        colorEncoding:
+          dataset.colorEncoding === "var" ? null : dataset.colorEncoding,
       };
     }
     case "reset.var": {
       return {
         ...dataset,
         selectedVar: null,
+        colorEncoding:
+          dataset.colorEncoding === "var" ? null : dataset.colorEncoding,
       };
     }
     case "select.disease": {

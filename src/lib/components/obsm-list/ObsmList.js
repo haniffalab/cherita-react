@@ -54,7 +54,7 @@ export function ObsmKeysList() {
         className={`custom ${active === item && "active"}`}
         onClick={() => {
           dispatch({
-            type: "obsmSelected",
+            type: "select.obsm",
             obsm: item,
           });
         }}
