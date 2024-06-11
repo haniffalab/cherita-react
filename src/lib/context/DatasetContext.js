@@ -49,6 +49,8 @@ const initialDataset = {
   sliceByObs: false,
   controls: {
     colorScale: "Viridis",
+    valueRange: [0, 1],
+    range: [0, 1],
     colorAxis: {
       dmin: 0,
       dmax: 1,
@@ -135,7 +137,15 @@ export function useDatasetDispatch() {
 function datasetReducer(dataset, action) {
   switch (action.type) {
     case "select.obs": {
-      return { ...dataset, selectedObs: action.obs };
+      return {
+        ...dataset,
+        selectedObs: action.obs,
+        controls: {
+          ...dataset.controls,
+          range:
+            action.obs.type === "categorical" ? [0, 1] : dataset.controls.range,
+        },
+      };
     }
     case "select.obsm": {
       return { ...dataset, selectedObsm: action.obsm };
@@ -223,6 +233,24 @@ function datasetReducer(dataset, action) {
         controls: {
           ...dataset.controls,
           colorScale: action.colorScale,
+        },
+      };
+    }
+    case "set.controls.valueRange": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          valueRange: action.valueRange,
+        },
+      };
+    }
+    case "set.controls.range": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          range: action.range,
         },
       };
     }

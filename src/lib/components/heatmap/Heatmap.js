@@ -1,41 +1,10 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import _ from "lodash";
-import { Alert, Dropdown } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import Plot from "react-plotly.js";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { COLORSCALES } from "../../constants/colorscales";
+import { useDataset } from "../../context/DatasetContext";
 import { useDebouncedFetch } from "../../utils/requests";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
-
-export function HeatmapControls() {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
-
-  const colormapList = _.keys(COLORSCALES).map((key) => (
-    <Dropdown.Item
-      key={key}
-      active={dataset.controls.colorScale === key}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.colorScale",
-          colorScale: key,
-        });
-      }}
-    >
-      {key}
-    </Dropdown.Item>
-  ));
-
-  return (
-    <Dropdown>
-      <Dropdown.Toggle id="dropdownColorscale" variant="light">
-        {dataset.controls.colorScale}
-      </Dropdown.Toggle>
-      <Dropdown.Menu>{colormapList}</Dropdown.Menu>
-    </Dropdown>
-  );
-}
 
 export function Heatmap() {
   const ENDPOINT = "heatmap";
