@@ -137,6 +137,8 @@ export function ObsColsList() {
           codesMap: codesMap,
         })
       );
+      const min = _.min(_.values(item.codes));
+      const max = _.max(_.values(item.codes));
       return (
         <Accordion.Item
           key={item.name}
@@ -278,7 +280,7 @@ export function ObsColsList() {
                           width="10"
                           height="10"
                           fill={`rgb(${getColor(
-                            item.codes[value] / (_.size(item.codes) - 1),
+                            (item.codes[value] - min) / (max - min),
                             true,
                             _.includes(item.omit, item.codes[value]),
                             {
