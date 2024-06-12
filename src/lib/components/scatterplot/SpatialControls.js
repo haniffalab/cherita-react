@@ -1,7 +1,5 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import Dropdown from "react-bootstrap/Dropdown";
-import { React, useState } from "react";
-
+import React, { useState } from "react";
 import {
   DrawPolygonMode,
   DrawLineStringMode,
@@ -10,27 +8,35 @@ import {
   ViewMode,
   ModifyMode,
 } from "@nebula.gl/edit-modes";
-
+import Dropdown from "react-bootstrap/Dropdown";
 import Button from "react-bootstrap/Button";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowPointer } from "@fortawesome/free-solid-svg-icons";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { faMinus } from "@fortawesome/free-solid-svg-icons";
-import { faCrosshairs } from "@fortawesome/free-solid-svg-icons";
-import { faHand } from "@fortawesome/free-solid-svg-icons";
-import { faDrawPolygon } from "@fortawesome/free-solid-svg-icons";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import { faSliders } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPlus,
+  faMinus,
+  faCrosshairs,
+  faHand,
+  faDrawPolygon,
+  faTrash,
+  faSliders,
+} from "@fortawesome/free-solid-svg-icons";
 
 import {
   ScatterplotControls,
   OffcanvasControls,
 } from "@haniffalab/cherita-react";
 
-export function SpatialControls({ mode, setMode, features, setFeatures }) {
+export function SpatialControls({
+  mode,
+  setMode,
+  features,
+  setFeatures,
+  resetBounds,
+  increaseZoom,
+  decreaseZoom,
+}) {
   const [showControls, setShowControls] = useState(false);
 
   const handleCloseControls = () => setShowControls(false);
@@ -70,16 +76,16 @@ export function SpatialControls({ mode, setMode, features, setFeatures }) {
   return (
     <div className="cherita-spatial-controls">
       <ButtonGroup vertical>
-        <Button>
+        <Button onClick={increaseZoom} title="Increase zoom">
           <FontAwesomeIcon icon={faPlus} />
         </Button>
-        <Button>
+        <Button onClick={decreaseZoom} title="Decrease zoom">
           <FontAwesomeIcon icon={faMinus} />
         </Button>
-        <Button>
+        <Button onClick={resetBounds} title="Reset zoom and center">
           <FontAwesomeIcon icon={faCrosshairs} />
         </Button>
-        <Button>
+        <Button title="Set dragging mode">
           <FontAwesomeIcon icon={faHand} />
         </Button>
         <DropdownButton

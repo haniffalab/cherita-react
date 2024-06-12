@@ -11,12 +11,10 @@ import DeckGL from "@deck.gl/react";
 import { ScatterplotLayer } from "@deck.gl/layers";
 import { EditableGeoJsonLayer } from "@nebula.gl/layers";
 import { ViewMode } from "@nebula.gl/edit-modes";
-import { Alert, Dropdown } from "react-bootstrap";
-
+import { Alert } from "react-bootstrap";
 import { Toolbox } from "./Toolbox";
 import { SpatialControls } from "./SpatialControls";
 import { Legend } from "./Legend";
-import { COLORSCALES } from "../../constants/colorscales";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { MapHelper } from "../../helpers/map-helper";
 import {
@@ -31,35 +29,6 @@ import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 
 window.deck.log.level = 1;
 
-export function ScatterplotControls() {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
-
-  const colormapList = _.keys(COLORSCALES).map((key) => (
-    <Dropdown.Item
-      key={key}
-      active={dataset.controls.colorScale === key}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.colorScale",
-          colorScale: key,
-        });
-      }}
-    >
-      {key}
-    </Dropdown.Item>
-  ));
-
-  return (
-    <Dropdown>
-      <Dropdown.Toggle id="dropdownColorscale" variant="light">
-        {dataset.controls.colorScale}
-      </Dropdown.Toggle>
-      <Dropdown.Menu>{colormapList}</Dropdown.Menu>
-    </Dropdown>
-  );
-}
-
 const INITIAL_VIEW_STATE = {
   longitude: 0,
   latitude: 0,
@@ -71,6 +40,7 @@ const INITIAL_VIEW_STATE = {
 
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
+  const dispatch = useDatasetDispatch();
   const { getColor } = useColor();
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [features, setFeatures] = useState({
@@ -211,6 +181,13 @@ export function Scatterplot({ radius = 30 }) {
     obsmData.serverError,
   ]);
 
+  const bounds = useMemo(() => {
+    const { latitude, longitude, zoom } = new MapHelper().fitBounds(
+      data.positions
+    );
+    return { latitude, longitude, zoom };
+  }, [data.positions]);
+
   useEffect(() => {
     if (dataset.colorEncoding === "var") {
       setIsRendering(true);
@@ -272,14 +249,14 @@ export function Scatterplot({ radius = 30 }) {
     }
   }, [dataset.colorEncoding, dataset.selectedObs?.type]);
 
-  const { min, max, slicedLength } = useMemo(() => {
+  const { valueMin, valueMax, slicedLength } = useMemo(() => {
     if (dataset.colorEncoding === "var" && !!dataset.sliceByObs) {
       const filtered = _.filter(data.values, (_v, i) => {
         return !_.includes(dataset.selectedObs?.omit, data.sliceValues[i]);
       });
       return {
-        min: _.min(filtered),
-        max: _.max(filtered),
+        valueMin: _.min(filtered),
+        valueMax: _.max(filtered),
         slicedLength: filtered.length,
       };
     } else if (dataset.colorEncoding === "obs") {
@@ -287,14 +264,14 @@ export function Scatterplot({ radius = 30 }) {
         return !_.includes(dataset.selectedObs?.omit, data.values[i]);
       });
       return {
-        min: _.min(data.values),
-        max: _.max(data.values),
+        valueMin: _.min(data.values),
+        valueMax: _.max(data.values),
         slicedLength: filtered.length,
       };
     } else {
       return {
-        min: _.min(data.values),
-        max: _.max(data.values),
+        valueMin: _.min(data.values),
+        valueMax: _.max(data.values),
         slicedLength: data.values.length,
       };
     }
@@ -305,6 +282,18 @@ export function Scatterplot({ radius = 30 }) {
     dataset.selectedObs?.omit,
     dataset.sliceByObs,
   ]);
+
+  useEffect(() => {
+    dispatch({
+      type: "set.controls.valueRange",
+      valueRange: [valueMin, valueMax],
+    });
+  }, [dispatch, valueMax, valueMin]);
+
+  const { min, max } = {
+    min: dataset.controls.range[0] * (valueMax - valueMin) + valueMin,
+    max: dataset.controls.range[1] * (valueMax - valueMin) + valueMin,
+  };
 
   const getFillColor = useCallback(
     (_d, { index }) => {
@@ -435,6 +424,9 @@ export function Scatterplot({ radius = 30 }) {
         setMode={setMode}
         features={mode}
         setFeatures={setFeatures}
+        resetBounds={() => setViewState(bounds)}
+        increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
+        decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
       />
       {error && !isPending && (
         <div className="cherita-alert">

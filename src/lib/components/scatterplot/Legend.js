@@ -42,7 +42,9 @@ export function Legend({ isCategorical = false, min = 0, max = 1 }) {
       <div className="cherita-legend">
         <div className="gradient">
           <p className="small m-0 p-0">
-            {dataset.selectedObs ? dataset.selectedObs.name : ""}
+            {dataset.colorEncoding === "obs" && dataset.selectedObs
+              ? dataset.selectedObs.name
+              : ""}
           </p>
         </div>
       </div>

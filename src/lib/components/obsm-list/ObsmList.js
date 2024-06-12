@@ -3,14 +3,14 @@ import React, { useEffect, useState } from "react";
 import { useFetch } from "../../utils/requests";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
-import { Alert } from "react-bootstrap";
-
-import Dropdown from "react-bootstrap/Dropdown";
-import Button from "react-bootstrap/Button";
-import DropdownButton from "react-bootstrap/DropdownButton";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
-import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-import Tooltip from "react-bootstrap/Tooltip";
+import {
+  Dropdown,
+  Button,
+  DropdownButton,
+  ButtonGroup,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 
 export function ObsmKeysList() {
   const ENDPOINT = "obsm/keys";
@@ -54,7 +54,7 @@ export function ObsmKeysList() {
         className={`custom ${active === item && "active"}`}
         onClick={() => {
           dispatch({
-            type: "obsmSelected",
+            type: "select.obsm",
             obsm: item,
           });
         }}

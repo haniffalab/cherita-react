@@ -49,6 +49,8 @@ const initialDataset = {
   sliceByObs: false,
   controls: {
     colorScale: "Viridis",
+    valueRange: [0, 1],
+    range: [0, 1],
     colorAxis: {
       dmin: 0,
       dmax: 1,
@@ -134,16 +136,24 @@ export function useDatasetDispatch() {
 
 function datasetReducer(dataset, action) {
   switch (action.type) {
-    case "obsSelected": {
-      return { ...dataset, selectedObs: action.obs };
+    case "select.obs": {
+      return {
+        ...dataset,
+        selectedObs: action.obs,
+        controls: {
+          ...dataset.controls,
+          range:
+            action.obs.type === "categorical" ? [0, 1] : dataset.controls.range,
+        },
+      };
     }
-    case "obsmSelected": {
+    case "select.obsm": {
       return { ...dataset, selectedObsm: action.obsm };
     }
-    case "varSelected": {
+    case "select.var": {
       return { ...dataset, selectedVar: action.var };
     }
-    case "multiVarSelected": {
+    case "select.multivar": {
       if (dataset.selectedMultiVar.find((i) => _.isEqual(i, action.var))) {
         return dataset;
       } else {
@@ -153,7 +163,15 @@ function datasetReducer(dataset, action) {
         };
       }
     }
-    case "multiVarDeselected": {
+    case "deselect.var": {
+      return {
+        ...dataset,
+        selectedVar: null,
+        colorEncoding:
+          dataset.colorEncoding === "var" ? null : dataset.colorEncoding,
+      };
+    }
+    case "deselect.multivar": {
       return {
         ...dataset,
         selectedMultiVar: dataset.selectedMultiVar.filter(
@@ -168,12 +186,16 @@ function datasetReducer(dataset, action) {
       return {
         ...dataset,
         selectedMultiVar: [],
+        colorEncoding:
+          dataset.colorEncoding === "var" ? null : dataset.colorEncoding,
       };
     }
     case "reset.var": {
       return {
         ...dataset,
         selectedVar: null,
+        colorEncoding:
+          dataset.colorEncoding === "var" ? null : dataset.colorEncoding,
       };
     }
     case "select.disease": {
@@ -211,6 +233,24 @@ function datasetReducer(dataset, action) {
         controls: {
           ...dataset.controls,
           colorScale: action.colorScale,
+        },
+      };
+    }
+    case "set.controls.valueRange": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          valueRange: action.valueRange,
+        },
+      };
+    }
+    case "set.controls.range": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          range: action.range,
         },
       };
     }
