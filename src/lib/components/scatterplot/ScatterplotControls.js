@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import _ from "lodash";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Dropdown } from "react-bootstrap";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { COLORSCALES } from "../../constants/colorscales";
-import { Box, Slider } from "@mui/material";
+import { Box, Slider, Typography } from "@mui/material";
 
 export const ScatterplotControls = () => {
   const dataset = useDataset();
@@ -41,11 +41,20 @@ export const ScatterplotControls = () => {
     ).toFixed(2);
   };
 
+  const marks = [
+    { value: 0, label: valueLabelFormat(0) },
+    { value: 1, label: valueLabelFormat(1) },
+  ];
+
+  const updateSlider = (_e, value) => {
+    setSliderValue(value);
+  };
+
   const updateRange = (_e, value) => {
     setSliderValue(value);
     dispatch({
       type: "set.controls.range",
-      range: value,
+      range: sliderValue,
     });
   };
 
@@ -55,16 +64,21 @@ export const ScatterplotControls = () => {
 
   const rangeSlider = (
     <Box className="w-100">
+      <Typography id="colorscale-range" gutterBottom>
+        Colorscale range
+      </Typography>
       <Slider
-        getAriaLabel={() => "Colorscale range"}
+        aria-labelledby="colorscale-range"
         min={0}
         max={1}
         step={0.001}
         value={sliderValue}
-        onChange={updateRange}
+        onChange={updateSlider}
+        onChangeCommitted={updateRange}
         valueLabelDisplay="auto"
         getAriaValueText={valueLabelFormat}
         valueLabelFormat={valueLabelFormat}
+        marks={marks}
         disabled={isCategorical}
       />
     </Box>
