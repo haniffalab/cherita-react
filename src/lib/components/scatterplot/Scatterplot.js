@@ -508,18 +508,20 @@ export function Scatterplot({ radius = 30 }) {
           </Alert>
         </div>
       )}
-      <Toolbox
-        mode={
-          dataset.colorEncoding === COLOR_ENCODINGS.VAR
-            ? dataset.selectedVar.name
-            : dataset.colorEncoding === COLOR_ENCODINGS.OBS
-            ? dataset.selectedObs.name
-            : null
-        }
-        obsLength={parseInt(obsmData.data?.length)}
-        slicedLength={parseInt(slicedLength)}
-      />
-      <Legend isCategorical={isCategorical} min={min} max={max} />
+      <div className="cherita-spatial-footer">
+        <Toolbox
+          mode={
+            dataset.colorEncoding === COLOR_ENCODINGS.VAR
+              ? dataset.selectedVar.name
+              : dataset.colorEncoding === COLOR_ENCODINGS.OBS
+              ? dataset.selectedObs.name
+              : null
+          }
+          obsLength={parseInt(obsmData.data?.length)}
+          slicedLength={parseInt(slicedLength)}
+        />
+        <Legend isCategorical={isCategorical} min={min} max={max} />
+      </div>
     </div>
   );
 }
