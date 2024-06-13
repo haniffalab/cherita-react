@@ -16,6 +16,7 @@ import {
 import { useColor } from "../../helpers/color-helper";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDroplet, faEye, faFont } from "@fortawesome/free-solid-svg-icons";
+import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 
 const N_BINS = 5;
 
@@ -96,9 +97,9 @@ export function ObsColsList() {
     if (!isPending && !serverError) {
       setObsColsList(
         _.map(fetchedData, (d) => {
-          if (d.type === "continuous") {
+          if (d.type === OBS_TYPES.CONTINUOUS) {
             d = binContinuous(d);
-          } else if (d.type === "discrete") {
+          } else if (d.type === OBS_TYPES.DISCRETE) {
             d = binDiscrete(d);
           }
           return { ...d, omit: [] };
@@ -189,7 +190,7 @@ export function ObsColsList() {
                       </Button>
                       <Button
                         variant={
-                          dataset.sliceByObs &&
+                          dataset.sliceBy.obs &&
                           dataset.selectedObs?.name === item.name
                             ? "primary"
                             : "outline-primary"
@@ -209,7 +210,7 @@ export function ObsColsList() {
                       </Button>
                       <Button
                         variant={
-                          dataset.colorEncoding === "obs" &&
+                          dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
                           dataset.selectedObs?.name === item.name
                             ? "primary"
                             : "outline-primary"
@@ -301,7 +302,7 @@ export function ObsColsList() {
     },
     [
       dataset.labelObs,
-      dataset.sliceByObs,
+      dataset.sliceBy.obs,
       dataset.selectedObs?.name,
       dataset.colorEncoding,
       dispatch,
@@ -356,7 +357,7 @@ export function ObsColsList() {
                       </Button>
                       <Button
                         variant={
-                          dataset.colorEncoding === "obs" &&
+                          dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
                           dataset.selectedObs?.name === item.name
                             ? "primary"
                             : "outline-primary"
@@ -419,9 +420,9 @@ export function ObsColsList() {
   const obsList = useMemo(
     () =>
       obsColsList.map((item) => {
-        if (item.type === "categorical") {
+        if (item.type === OBS_TYPES.CATEGORICAL) {
           return categoricalList(item, active);
-        } else if (item.type === "continuous") {
+        } else if (item.type === OBS_TYPES.CONTINUOUS) {
           return continuousList(item, active);
         } else {
           return otherList(item, active);

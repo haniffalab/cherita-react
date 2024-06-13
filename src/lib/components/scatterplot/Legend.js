@@ -3,6 +3,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import _ from "lodash";
 import { useDataset } from "../../context/DatasetContext";
 import { rgbToHex, useColor } from "../../helpers/color-helper";
+import { COLOR_ENCODINGS } from "../../constants/constants";
 
 export function Legend({ isCategorical = false, min = 0, max = 1 }) {
   const dataset = useDataset();
@@ -26,7 +27,7 @@ export function Legend({ isCategorical = false, min = 0, max = 1 }) {
       <div className="cherita-legend">
         <div className="gradient">
           <p className="small m-0 p-0">
-            {dataset.colorEncoding === "var"
+            {dataset.colorEncoding === COLOR_ENCODINGS.VAR
               ? dataset.selectedVar?.name
               : dataset.selectedObs?.name}
           </p>
@@ -42,7 +43,8 @@ export function Legend({ isCategorical = false, min = 0, max = 1 }) {
       <div className="cherita-legend">
         <div className="gradient">
           <p className="small m-0 p-0">
-            {dataset.colorEncoding === "obs" && dataset.selectedObs
+            {dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+            dataset.selectedObs
               ? dataset.selectedObs.name
               : ""}
           </p>

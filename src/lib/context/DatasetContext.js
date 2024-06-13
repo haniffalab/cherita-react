@@ -4,7 +4,11 @@ import { createContext, useContext, useReducer } from "react";
 import { QueryClient, QueryCache } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
-import { LOCAL_STORAGE_KEY } from "../constants/constants";
+import {
+  COLOR_ENCODINGS,
+  LOCAL_STORAGE_KEY,
+  OBS_TYPES,
+} from "../constants/constants";
 
 export const DatasetContext = createContext(null);
 export const DatasetDispatchContext = createContext(null);
@@ -46,7 +50,10 @@ const initialDataset = {
   selectedMultiVar: [],
   colorEncoding: null,
   labelObs: [],
-  sliceByObs: false,
+  sliceBy: {
+    obs: false,
+    polygons: false,
+  },
   controls: {
     colorScale: "Viridis",
     valueRange: [0, 1],
@@ -143,7 +150,9 @@ function datasetReducer(dataset, action) {
         controls: {
           ...dataset.controls,
           range:
-            action.obs.type === "categorical" ? [0, 1] : dataset.controls.range,
+            action.obs.type === OBS_TYPES.CATEGORICAL
+              ? [0, 1]
+              : dataset.controls.range,
         },
       };
     }
@@ -168,7 +177,9 @@ function datasetReducer(dataset, action) {
         ...dataset,
         selectedVar: null,
         colorEncoding:
-          dataset.colorEncoding === "var" ? null : dataset.colorEncoding,
+          dataset.colorEncoding === COLOR_ENCODINGS.VAR
+            ? null
+            : dataset.colorEncoding,
       };
     }
     case "deselect.multivar": {
@@ -187,7 +198,9 @@ function datasetReducer(dataset, action) {
         ...dataset,
         selectedMultiVar: [],
         colorEncoding:
-          dataset.colorEncoding === "var" ? null : dataset.colorEncoding,
+          dataset.colorEncoding === COLOR_ENCODINGS.VAR
+            ? null
+            : dataset.colorEncoding,
       };
     }
     case "reset.var": {
@@ -195,7 +208,9 @@ function datasetReducer(dataset, action) {
         ...dataset,
         selectedVar: null,
         colorEncoding:
-          dataset.colorEncoding === "var" ? null : dataset.colorEncoding,
+          dataset.colorEncoding === COLOR_ENCODINGS.VAR
+            ? null
+            : dataset.colorEncoding,
       };
     }
     case "select.disease": {
@@ -331,15 +346,39 @@ function datasetReducer(dataset, action) {
       if (_.isEqual(dataset.selectedObs, action.obs)) {
         return {
           ...dataset,
-          sliceByObs: !dataset.sliceByObs,
+          sliceBy: {
+            ...dataset.sliceBy,
+            obs: !dataset.sliceBy.obs,
+          },
         };
       } else {
         return {
           ...dataset,
           selectedObs: action.obs,
-          sliceByObs: true,
+          sliceBy: {
+            ...dataset.sliceBy,
+            obs: true,
+          },
         };
       }
+    }
+    case "toggle.slice.polygons": {
+      return {
+        ...dataset,
+        sliceBy: {
+          ...dataset.sliceBy,
+          polygons: !dataset.sliceBy.polygons,
+        },
+      };
+    }
+    case "disable.slice.polygons": {
+      return {
+        ...dataset,
+        sliceBy: {
+          ...dataset.sliceBy,
+          polygons: false,
+        },
+      };
     }
     case "add.label.obs": {
       if (dataset.labelObs.find((i) => _.isEqual(i, action.obs))) {

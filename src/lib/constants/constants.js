@@ -1,5 +1,16 @@
 export const LOCAL_STORAGE_KEY = "CHERITA";
 
+export const COLOR_ENCODINGS = {
+  VAR: "var",
+  OBS: "obs",
+};
+
+export const OBS_TYPES = {
+  CATEGORICAL: "categorical",
+  DISCRETE: "discrete",
+  CONTINUOUS: "continuous",
+};
+
 export const SELECTION_MODES = {
   SINGLE: "single",
   MULTIPLE: "multiple",

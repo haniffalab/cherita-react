@@ -11,6 +11,7 @@ import DeckGL from "@deck.gl/react";
 import { ScatterplotLayer } from "@deck.gl/layers";
 import { EditableGeoJsonLayer } from "@nebula.gl/layers";
 import { ViewMode } from "@nebula.gl/edit-modes";
+import { booleanPointInPolygon, point } from "@turf/turf";
 import { Alert } from "react-bootstrap";
 import { Toolbox } from "./Toolbox";
 import { SpatialControls } from "./SpatialControls";
@@ -26,6 +27,7 @@ import { useColor } from "../../helpers/color-helper";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
+import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 
 window.deck.log.level = 1;
 
@@ -43,13 +45,6 @@ export function Scatterplot({ radius = 30 }) {
   const dispatch = useDatasetDispatch();
   const { getColor } = useColor();
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
-  const [features, setFeatures] = useState({
-    type: "FeatureCollection",
-    features: [],
-  });
-  const [mode, setMode] = useState(() => ViewMode);
-  const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
-  const [featureState, setFeatureState] = useState([]);
   const [isRendering, setIsRendering] = useState(true);
   const [data, setData] = useState({
     ids: [],
@@ -57,6 +52,14 @@ export function Scatterplot({ radius = 30 }) {
     values: [],
     sliceValues: [],
   });
+
+  // EditableGeoJsonLayer
+  const [mode, setMode] = useState(() => ViewMode);
+  const [features, setFeatures] = useState({
+    type: "FeatureCollection",
+    features: [],
+  });
+  const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
 
   const [obsmParams, setObsmParams] = useState({
     url: dataset.url,
@@ -71,7 +74,7 @@ export function Scatterplot({ radius = 30 }) {
     path:
       "obs/" +
       dataset.selectedObs?.name +
-      (dataset.selectedObs?.type === "continuous" ? "" : "/codes"),
+      (dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS ? "" : "/codes"),
   });
 
   const [labelObsParams, setLabelObsParams] = useState([]);
@@ -112,7 +115,7 @@ export function Scatterplot({ radius = 30 }) {
         path:
           "obs/" +
           dataset.selectedObs?.name +
-          (dataset.selectedObs?.type === "continuous" ? "" : "/codes"),
+          (dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS ? "" : "/codes"),
       };
     });
   }, [dataset.selectedObs]);
@@ -122,7 +125,10 @@ export function Scatterplot({ radius = 30 }) {
       _.map(dataset.labelObs, (obs) => {
         return {
           url: dataset.url,
-          path: "obs/" + obs.name + (obs.type === "continuous" ? "" : "/codes"),
+          path:
+            "obs/" +
+            obs.name +
+            (obs.type === OBS_TYPES.CONTINUOUS ? "" : "/codes"),
           key: obs.name,
         };
       })
@@ -189,7 +195,7 @@ export function Scatterplot({ radius = 30 }) {
   }, [data.positions]);
 
   useEffect(() => {
-    if (dataset.colorEncoding === "var") {
+    if (dataset.colorEncoding === COLOR_ENCODINGS.VAR) {
       setIsRendering(true);
       if (!xData.isPending && !xData.serverError) {
         // @TODO: add condition to check obs slicing
@@ -211,7 +217,7 @@ export function Scatterplot({ radius = 30 }) {
   ]);
 
   useEffect(() => {
-    if (dataset.colorEncoding === "obs") {
+    if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
       setIsRendering(true);
       if (!obsData.isPending && !obsData.serverError) {
         setData((d) => {
@@ -222,7 +228,10 @@ export function Scatterplot({ radius = 30 }) {
           return { ...d, values: [] };
         });
       }
-    } else if (dataset.colorEncoding === "var" && dataset.sliceByObs) {
+    } else if (
+      dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
+      dataset.sliceBy.obs
+    ) {
       if (!obsData.isPending && !obsData.serverError) {
         setData((d) => {
           return { ...d, sliceValues: obsData.data };
@@ -238,30 +247,57 @@ export function Scatterplot({ radius = 30 }) {
     obsData.data,
     obsData.isPending,
     obsData.serverError,
-    dataset.sliceByObs,
+    dataset.sliceBy.obs,
   ]);
 
   const isCategorical = useMemo(() => {
-    if (dataset.colorEncoding === "obs") {
-      return dataset.selectedObs?.type === "categorical";
+    if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
+      return dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL;
     } else {
       return false;
     }
   }, [dataset.colorEncoding, dataset.selectedObs?.type]);
 
+  const isInSlice = useCallback(
+    (index, values, positions) => {
+      let inSlice = true;
+      if (dataset.sliceBy.obs && values) {
+        inSlice &= !_.includes(dataset.selectedObs?.omit, values[index]);
+      }
+      if (dataset.sliceBy.polygons && positions) {
+        inSlice &= _.some(features?.features, (_f, i) => {
+          return booleanPointInPolygon(
+            point([positions[index][0], positions[index][1]]),
+            features.features[i]
+          );
+        });
+      }
+      return inSlice;
+    },
+    [
+      dataset.selectedObs?.omit,
+      dataset.sliceBy.obs,
+      dataset.sliceBy.polygons,
+      features?.features,
+    ]
+  );
+
   const { valueMin, valueMax, slicedLength } = useMemo(() => {
-    if (dataset.colorEncoding === "var" && !!dataset.sliceByObs) {
+    if (
+      dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
+      !!dataset.sliceBy.obs
+    ) {
       const filtered = _.filter(data.values, (_v, i) => {
-        return !_.includes(dataset.selectedObs?.omit, data.sliceValues[i]);
+        return isInSlice(i, data.sliceValues, data.positions);
       });
       return {
         valueMin: _.min(filtered),
         valueMax: _.max(filtered),
         slicedLength: filtered.length,
       };
-    } else if (dataset.colorEncoding === "obs") {
+    } else if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
       const filtered = _.filter(data.values, (_v, i) => {
-        return !_.includes(dataset.selectedObs?.omit, data.values[i]);
+        return isInSlice(i, data.values, data.positions);
       });
       return {
         valueMin: _.min(data.values),
@@ -276,11 +312,12 @@ export function Scatterplot({ radius = 30 }) {
       };
     }
   }, [
+    data.positions,
     data.sliceValues,
     data.values,
     dataset.colorEncoding,
-    dataset.selectedObs?.omit,
-    dataset.sliceByObs,
+    dataset.sliceBy.obs,
+    isInSlice,
   ]);
 
   useEffect(() => {
@@ -298,10 +335,10 @@ export function Scatterplot({ radius = 30 }) {
   const getFillColor = useCallback(
     (_d, { index }) => {
       const grayOut =
-        dataset.colorEncoding === "obs"
-          ? _.includes(dataset.selectedObs?.omit, data.values[index])
-          : dataset.colorEncoding === "var" && !!dataset.sliceByObs
-          ? _.includes(dataset.selectedObs?.omit, data.sliceValues[index])
+        dataset.colorEncoding === COLOR_ENCODINGS.OBS
+          ? !isInSlice(index, data.values, data.positions)
+          : dataset.colorEncoding === COLOR_ENCODINGS.VAR
+          ? !isInSlice(index, data.sliceValues, data.positions)
           : false;
       return getColor(
         (data.values[index] - min) / (max - min),
@@ -310,13 +347,13 @@ export function Scatterplot({ radius = 30 }) {
       );
     },
     [
+      data.positions,
       data.sliceValues,
       data.values,
       dataset.colorEncoding,
-      dataset.selectedObs?.omit,
-      dataset.sliceByObs,
       getColor,
       isCategorical,
+      isInSlice,
       max,
       min,
     ]
@@ -345,9 +382,6 @@ export function Scatterplot({ radius = 30 }) {
         onEdit: ({ updatedData, editType, editContext }) => {
           setFeatures(updatedData);
           let updatedSelectedFeatureIndexes = selectedFeatureIndexes;
-          setFeatureState({
-            data: updatedData,
-          });
           if (editType === "addFeature") {
             // when a drawing is complete, the value of editType becomes addFeature
             const { featureIndexes } = editContext; //extracting indexes of current features selected
@@ -371,6 +405,14 @@ export function Scatterplot({ radius = 30 }) {
 
   const layers = useDeferredValue(memoizedLayers);
 
+  useEffect(() => {
+    if (!features?.features?.length) {
+      dispatch({
+        type: "disable.slice.polygons",
+      });
+    }
+  }, [dispatch, features?.features?.length]);
+
   function onLayerClick(info) {
     if (mode !== ViewMode) {
       // don't change selection while editing
@@ -385,7 +427,7 @@ export function Scatterplot({ radius = 30 }) {
     dataset.labelObs.length && {
       text: _.map(labelObsData, (v, k) => {
         const labelObs = _.find(dataset.labelObs, (o) => o.name === k);
-        if (labelObs.type === "continuous") {
+        if (labelObs.type === OBS_TYPES.CONTINUOUS) {
           return `${k}: ${parseFloat(v?.[index]).toLocaleString()}`;
         } else {
           return `${k}: ${labelObs.codesMap[v?.[index]]}`;
@@ -399,8 +441,10 @@ export function Scatterplot({ radius = 30 }) {
 
   const error =
     (dataset.selectedObsm && obsmData.serverError?.length) ||
-    (dataset.colorEncoding === "var" && xData.serverError?.length) ||
-    (dataset.colorEncoding === "obs" && obsData.serverError?.length) ||
+    (dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
+      xData.serverError?.length) ||
+    (dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+      obsData.serverError?.length) ||
     (dataset.labelObs.lengh && labelObsData.serverError?.length);
 
   return (
@@ -410,7 +454,7 @@ export function Scatterplot({ radius = 30 }) {
       <DeckGL
         viewState={viewState}
         onViewStateChange={(e) => setViewState(e.viewState)}
-        controller
+        controller={{ doubleClickZoom: mode === ViewMode }}
         layers={layers}
         onClick={onLayerClick}
         getTooltip={getTooltip}
@@ -418,11 +462,14 @@ export function Scatterplot({ radius = 30 }) {
           setIsRendering(false);
         }}
         useDevicePixels={false}
+        getCursor={({ isDragging }) =>
+          mode !== ViewMode ? "crosshair" : isDragging ? "grabbing" : "grab"
+        }
       ></DeckGL>
       <SpatialControls
         mode={mode}
         setMode={setMode}
-        features={mode}
+        features={features}
         setFeatures={setFeatures}
         resetBounds={() => setViewState(bounds)}
         increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
@@ -438,9 +485,9 @@ export function Scatterplot({ radius = 30 }) {
       )}
       <Toolbox
         mode={
-          dataset.colorEncoding === "var"
+          dataset.colorEncoding === COLOR_ENCODINGS.VAR
             ? dataset.selectedVar.name
-            : dataset.colorEncoding === "obs"
+            : dataset.colorEncoding === COLOR_ENCODINGS.OBS
             ? dataset.selectedObs.name
             : null
         }

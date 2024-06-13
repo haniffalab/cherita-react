@@ -5,6 +5,7 @@ import { Dropdown } from "react-bootstrap";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { COLORSCALES } from "../../constants/colorscales";
 import { Box, Slider, Typography } from "@mui/material";
+import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 
 export const ScatterplotControls = () => {
   const dataset = useDataset();
@@ -14,8 +15,8 @@ export const ScatterplotControls = () => {
   );
 
   const isCategorical =
-    dataset.colorEncoding === "obs"
-      ? dataset.selectedObs?.type === "categorical"
+    dataset.colorEncoding === COLOR_ENCODINGS.OBS
+      ? dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL
       : false;
 
   const colormapList = _.keys(COLORSCALES).map((key) => (

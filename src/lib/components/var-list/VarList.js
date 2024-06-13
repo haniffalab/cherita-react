@@ -10,7 +10,7 @@ import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { SELECTION_MODES } from "../../constants/constants";
+import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
 
 export function VarNamesList({
   mode = SELECTION_MODES.SINGLE,
@@ -116,7 +116,7 @@ export function VarNamesList({
                     type="button"
                     key={item.matrix_index}
                     variant={
-                      dataset.colorEncoding === "var" &&
+                      dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
                       active === item.matrix_index
                         ? "primary"
                         : "outline-primary"
