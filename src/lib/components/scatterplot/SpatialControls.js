@@ -35,6 +35,7 @@ export function SpatialControls({
   setMode,
   features,
   setFeatures,
+  selectedFeatureIndexes,
   resetBounds,
   increaseZoom,
   decreaseZoom,
@@ -47,7 +48,6 @@ export function SpatialControls({
   const handleShowControls = () => setShowControls(true);
 
   const onSelect = (eventKey, event) => {
-    console.log(eventKey); // selected event will trigger
     switch (eventKey) {
       case "DrawPolygonMode":
         setMode(() => DrawPolygonMode);
@@ -69,8 +69,7 @@ export function SpatialControls({
     }
   };
 
-  const deleteFeatures = (eventKey, event) => {
-    console.log(eventKey); // selected event will trigger
+  const deleteFeatures = (_eventKey, _event) => {
     setFeatures({
       type: "FeatureCollection",
       features: [],
@@ -79,11 +78,12 @@ export function SpatialControls({
 
   const polygonControls = (
     <div className="mt-2">
-      <ButtonGroup vertical>
+      <ButtonGroup vertical className="w-100">
         <Button
           variant={dataset.sliceBy.polygons ? "primary" : "outline-primary"}
           title="Filter data with polygons"
           onClick={() => {
+            setMode(() => ViewMode);
             dispatch({
               type: "toggle.slice.polygons",
             });
@@ -91,13 +91,29 @@ export function SpatialControls({
         >
           <JoinInner />
         </Button>
+        <Button
+          variant="outline-primary"
+          title="Delete selected polygons"
+          onClick={() => {
+            const newFeatures = features.features.filter(
+              (_f, i) => !selectedFeatureIndexes.includes(i)
+            );
+            setFeatures({
+              type: "FeatureCollection",
+              features: newFeatures,
+            });
+          }}
+          disabled={!selectedFeatureIndexes.length}
+        >
+          <FontAwesomeIcon icon={faTrash} />
+        </Button>
       </ButtonGroup>
     </div>
   );
 
   return (
     <div className="cherita-spatial-controls">
-      <ButtonGroup vertical>
+      <ButtonGroup vertical className="w-100">
         <Button onClick={increaseZoom} title="Increase zoom">
           <FontAwesomeIcon icon={faPlus} />
         </Button>

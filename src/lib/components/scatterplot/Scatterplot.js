@@ -27,7 +27,12 @@ import { useColor } from "../../helpers/color-helper";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
-import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
+import {
+  COLOR_ENCODINGS,
+  OBS_TYPES,
+  SELECTED_POLYGON_FILLCOLOR,
+  UNSELECTED_POLYGON_FILLCOLOR,
+} from "../../constants/constants";
 
 window.deck.log.level = 1;
 
@@ -283,10 +288,7 @@ export function Scatterplot({ radius = 30 }) {
   );
 
   const { valueMin, valueMax, slicedLength } = useMemo(() => {
-    if (
-      dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
-      !!dataset.sliceBy.obs
-    ) {
+    if (dataset.colorEncoding === COLOR_ENCODINGS.VAR) {
       const filtered = _.filter(data.values, (_v, i) => {
         return isInSlice(i, data.sliceValues, data.positions);
       });
@@ -316,7 +318,6 @@ export function Scatterplot({ radius = 30 }) {
     data.sliceValues,
     data.values,
     dataset.colorEncoding,
-    dataset.sliceBy.obs,
     isInSlice,
   ]);
 
@@ -383,14 +384,29 @@ export function Scatterplot({ radius = 30 }) {
           setFeatures(updatedData);
           let updatedSelectedFeatureIndexes = selectedFeatureIndexes;
           if (editType === "addFeature") {
-            // when a drawing is complete, the value of editType becomes addFeature
-            const { featureIndexes } = editContext; //extracting indexes of current features selected
+            const { featureIndexes } = editContext;
             updatedSelectedFeatureIndexes = [
               ...selectedFeatureIndexes,
               ...featureIndexes,
             ];
           }
-          setSelectedFeatureIndexes(updatedSelectedFeatureIndexes); //now update your state
+          setSelectedFeatureIndexes(updatedSelectedFeatureIndexes);
+        },
+        // getFillColor: POLYGON_FILLCOLOR,
+        _subLayerProps: {
+          geojson: {
+            getFillColor: (feature) => {
+              if (
+                selectedFeatureIndexes.some(
+                  (i) => features.features[i] === feature
+                )
+              ) {
+                return SELECTED_POLYGON_FILLCOLOR;
+              } else {
+                return UNSELECTED_POLYGON_FILLCOLOR;
+              }
+            },
+          },
         },
       }),
     ];
@@ -403,7 +419,9 @@ export function Scatterplot({ radius = 30 }) {
     selectedFeatureIndexes,
   ]);
 
-  const layers = useDeferredValue(memoizedLayers);
+  const layers = useDeferredValue(
+    mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers
+  ); // draw scatterplot on top of polygons when in ViewMode
 
   useEffect(() => {
     if (!features?.features?.length) {
@@ -419,7 +437,13 @@ export function Scatterplot({ radius = 30 }) {
       return;
     }
 
-    setSelectedFeatureIndexes(info.object ? [info.index] : []);
+    setSelectedFeatureIndexes((f) =>
+      info.object
+        ? info.layer.id === "cherita-layer-draw"
+          ? [info.index]
+          : f
+        : []
+    );
   }
 
   const getTooltip = ({ object, index }) =>
@@ -471,6 +495,7 @@ export function Scatterplot({ radius = 30 }) {
         setMode={setMode}
         features={features}
         setFeatures={setFeatures}
+        selectedFeatureIndexes={selectedFeatureIndexes}
         resetBounds={() => setViewState(bounds)}
         increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
         decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}

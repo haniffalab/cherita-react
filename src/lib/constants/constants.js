@@ -11,6 +11,9 @@ export const OBS_TYPES = {
   CONTINUOUS: "continuous",
 };
 
+export const SELECTED_POLYGON_FILLCOLOR = [107, 170, 209, 255 / 2];
+export const UNSELECTED_POLYGON_FILLCOLOR = [167, 191, 211, 255 / 3];
+
 export const SELECTION_MODES = {
   SINGLE: "single",
   MULTIPLE: "multiple",
