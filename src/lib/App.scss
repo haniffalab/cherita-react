@@ -104,10 +104,14 @@
     padding-left: 2rem;
     padding-right: 2rem;
     padding-bottom: 1rem;
+    pointer-events: none;
+    > * { 
+        pointer-events: auto;
+    }
 }
 
 .cherita-toolbox {
-    order: 1
+    order: 1;
 }
 
 .cherita-legend {

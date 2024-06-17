@@ -287,6 +287,7 @@ export function Scatterplot({ radius = 30 }) {
     ]
   );
 
+  // @TODO: also output filtered data and use in getFillColor
   const { valueMin, valueMax, slicedLength } = useMemo(() => {
     if (dataset.colorEncoding === COLOR_ENCODINGS.VAR) {
       const filtered = _.filter(data.values, (_v, i) => {
@@ -298,12 +299,13 @@ export function Scatterplot({ radius = 30 }) {
         slicedLength: filtered.length,
       };
     } else if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
+      const isContinuous = dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS;
       const filtered = _.filter(data.values, (_v, i) => {
         return isInSlice(i, data.values, data.positions);
       });
       return {
-        valueMin: _.min(data.values),
-        valueMax: _.max(data.values),
+        valueMin: _.min(isContinuous ? filtered : data.values),
+        valueMax: _.max(isContinuous ? filtered : data.values),
         slicedLength: filtered.length,
       };
     } else {
@@ -318,6 +320,7 @@ export function Scatterplot({ radius = 30 }) {
     data.sliceValues,
     data.values,
     dataset.colorEncoding,
+    dataset.selectedObs?.type,
     isInSlice,
   ]);
 
