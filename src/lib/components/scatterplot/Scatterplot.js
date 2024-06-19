@@ -266,7 +266,7 @@ export function Scatterplot({ radius = 30 }) {
   const isInSlice = useCallback(
     (index, values, positions) => {
       let inSlice = true;
-      if (dataset.sliceBy.obs && values) {
+      if ((dataset.sliceBy.obs || isCategorical) && values) {
         inSlice &= !_.includes(dataset.selectedObs?.omit, values[index]);
       }
       if (dataset.sliceBy.polygons && positions) {
@@ -283,7 +283,8 @@ export function Scatterplot({ radius = 30 }) {
       dataset.selectedObs?.omit,
       dataset.sliceBy.obs,
       dataset.sliceBy.polygons,
-      features?.features,
+      features.features,
+      isCategorical,
     ]
   );
 
