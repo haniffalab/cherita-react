@@ -151,7 +151,7 @@ function datasetReducer(dataset, action) {
         controls: {
           ...dataset.controls,
           range:
-            action.obs.type === OBS_TYPES.CATEGORICAL
+            action.obs?.type === OBS_TYPES.CATEGORICAL
               ? [0, 1]
               : dataset.controls.range,
         },

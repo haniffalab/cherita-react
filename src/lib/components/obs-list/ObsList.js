@@ -69,27 +69,31 @@ export function ObsColsList() {
   });
 
   const validateSelection = useCallback(
-    (selectedObs) => {
-      if (updatedObsColsList) {
-        const selection = _.find(obsColsList, (item) =>
-          _.isEqual(_.omit(item, ["omit"]), _.omit(selectedObs, ["omit"]))
-        );
-        if (!selection) {
-          setActive(null);
+    (obs) => {
+      return _.some(obsColsList, (item) =>
+        _.isEqual(_.omit(item, ["omit"]), _.omit(obs, ["omit"]))
+      );
+    },
+    [obsColsList]
+  );
+
+  useEffect(() => {
+    if (updatedObsColsList) {
+      if (dataset.selectedObs) {
+        if (validateSelection(dataset.selectedObs)) {
+          setActive(dataset.selectedObs.name);
+        } else {
           dispatch({
             type: "select.obs",
             obs: null,
           });
-        } else if (!_.isEqual(selectedObs.omit, selection.omit)) {
-          dispatch({
-            type: "select.obs",
-            obs: selection,
-          });
+          setActive(null);
         }
+      } else {
+        setActive(null);
       }
-    },
-    [dispatch, obsColsList, updatedObsColsList]
-  );
+    }
+  }, [dataset.selectedObs, dispatch, updatedObsColsList, validateSelection]);
 
   // @TODO: change api to return all obs and truncate here
   useEffect(() => {
@@ -108,24 +112,23 @@ export function ObsColsList() {
     }
   }, [fetchedData, isPending, serverError]);
 
-  useEffect(() => {
-    if (dataset.selectedObs) {
-      validateSelection(dataset.selectedObs);
-      setActive(dataset.selectedObs.name);
-    } else {
-      setActive(null);
-    }
-  }, [dataset.selectedObs, validateSelection]);
-
-  const toggleAll = (name, checked) => {
-    setObsColsList((l) => {
-      return _.map(l, (i) => {
-        return i.name === name
-          ? { ...i, omit: checked ? [] : _.map(i.values, (v) => i.codes[v]) }
-          : i;
+  const toggleAll = useCallback(
+    (item, checked, active) => {
+      const omit = checked ? [] : _.map(item.values, (v) => item.codes[v]);
+      setObsColsList((l) => {
+        return _.map(l, (i) => {
+          return i.name === item.name ? { ...i, omit: omit } : i;
+        });
       });
-    });
-  };
+      if (active === item.name) {
+        dispatch({
+          type: "select.obs",
+          obs: { ...item, omit: omit },
+        });
+      }
+    },
+    [dispatch]
+  );
 
   const categoricalList = useCallback(
     (item, active = null) => {
@@ -157,7 +160,7 @@ export function ObsColsList() {
                       label="Toggle all"
                       checked={!item.omit.length}
                       onChange={() => {
-                        toggleAll(item.name, !!item.omit.length);
+                        toggleAll(item, !!item.omit.length, active);
                       }}
                     />
                   </div>
@@ -198,9 +201,7 @@ export function ObsColsList() {
                         onClick={() => {
                           dispatch({
                             type: "toggle.slice.obs",
-                            obs: obsColsList.find(
-                              (obs) => obs.name === item.name
-                            ),
+                            obs: item,
                           });
                         }}
                         title="Slice to selected"
@@ -218,9 +219,7 @@ export function ObsColsList() {
                         onClick={() => {
                           dispatch({
                             type: "select.obs",
-                            obs: obsColsList.find(
-                              (obs) => obs.name === item.name
-                            ),
+                            obs: item,
                           });
                           dispatch({
                             type: "set.colorEncoding",
@@ -245,24 +244,26 @@ export function ObsColsList() {
                         label={value}
                         checked={!_.includes(item.omit, item.codes[value])}
                         onChange={() => {
+                          const newItem = {
+                            ...item,
+                            omit: !_.includes(item.omit, item.codes[value])
+                              ? [...item.omit, item.codes[value]]
+                              : _.filter(
+                                  item.omit,
+                                  (o) => o !== item.codes[value]
+                                ),
+                          };
                           setObsColsList((l) => {
                             return _.map(l, (i) => {
-                              return i.name === item.name
-                                ? {
-                                    ...i,
-                                    omit: !_.includes(
-                                      item.omit,
-                                      item.codes[value]
-                                    )
-                                      ? [...i.omit, item.codes[value]]
-                                      : _.filter(
-                                          i.omit,
-                                          (o) => o !== item.codes[value]
-                                        ),
-                                  }
-                                : i;
+                              return i.name === item.name ? newItem : i;
                             });
                           });
+                          if (active === item.name) {
+                            dispatch({
+                              type: "select.obs",
+                              obs: newItem,
+                            });
+                          }
                         }}
                       />
                     </div>
@@ -304,8 +305,8 @@ export function ObsColsList() {
       dataset.sliceBy.obs,
       dataset.selectedObs?.name,
       dataset.colorEncoding,
+      toggleAll,
       dispatch,
-      obsColsList,
       getColor,
     ]
   );
@@ -329,59 +330,55 @@ export function ObsColsList() {
             <ListGroup>
               <ListGroup.Item>
                 <div className="d-flex justify-content-end">
-                  <div>
-                    <ButtonGroup>
-                      <Button
-                        variant={inLabelObs ? "primary" : "outline-primary"}
-                        size="sm"
-                        onClick={() => {
-                          if (inLabelObs) {
-                            dispatch({
-                              type: "remove.label.obs",
-                              obsName: item.name,
-                            });
-                          } else {
-                            dispatch({
-                              type: "add.label.obs",
-                              obs: {
-                                name: item.name,
-                                type: item.type,
-                              },
-                            });
-                          }
-                        }}
-                        title="Add to tooltip"
-                      >
-                        <FontAwesomeIcon icon={faFont} />
-                      </Button>
-                      <Button
-                        variant={
-                          dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
-                          dataset.selectedObs?.name === item.name
-                            ? "primary"
-                            : "outline-primary"
+                  <ButtonGroup>
+                    <Button
+                      variant={inLabelObs ? "primary" : "outline-primary"}
+                      size="sm"
+                      onClick={() => {
+                        if (inLabelObs) {
+                          dispatch({
+                            type: "remove.label.obs",
+                            obsName: item.name,
+                          });
+                        } else {
+                          dispatch({
+                            type: "add.label.obs",
+                            obs: {
+                              name: item.name,
+                              type: item.type,
+                            },
+                          });
                         }
-                        size="sm"
-                        onClick={(key) => {
-                          if (key != null) {
-                            dispatch({
-                              type: "select.obs",
-                              obs: obsColsList.find(
-                                (obs) => obs.name === item.name
-                              ),
-                            });
-                            dispatch({
-                              type: "set.colorEncoding",
-                              value: "obs",
-                            });
-                          }
-                        }}
-                        title="Set as color encoding"
-                      >
-                        <FontAwesomeIcon icon={faDroplet} />
-                      </Button>
-                    </ButtonGroup>
-                  </div>
+                      }}
+                      title="Add to tooltip"
+                    >
+                      <FontAwesomeIcon icon={faFont} />
+                    </Button>
+                    <Button
+                      variant={
+                        dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+                        dataset.selectedObs?.name === item.name
+                          ? "primary"
+                          : "outline-primary"
+                      }
+                      size="sm"
+                      onClick={(key) => {
+                        if (key != null) {
+                          dispatch({
+                            type: "select.obs",
+                            obs: item,
+                          });
+                          dispatch({
+                            type: "set.colorEncoding",
+                            value: "obs",
+                          });
+                        }
+                      }}
+                      title="Set as color encoding"
+                    >
+                      <FontAwesomeIcon icon={faDroplet} />
+                    </Button>
+                  </ButtonGroup>
                 </div>
               </ListGroup.Item>
             </ListGroup>
@@ -399,7 +396,6 @@ export function ObsColsList() {
       dataset.labelObs,
       dataset.selectedObs?.name,
       dispatch,
-      obsColsList,
     ]
   );
 
