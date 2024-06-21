@@ -1,13 +1,14 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { VIOLINPLOT_STANDARDSCALES } from "../../constants/constants";
+
 import {
   Dropdown,
   ButtonGroup,
   ButtonToolbar,
   InputGroup,
 } from "react-bootstrap";
+
+import { VIOLINPLOT_STANDARDSCALES } from "../../constants/constants";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export function ViolinControls() {
   const dataset = useDataset();

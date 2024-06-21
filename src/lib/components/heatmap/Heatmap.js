@@ -1,10 +1,11 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Alert } from "react-bootstrap";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+
+import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
+
 import { useDataset } from "../../context/DatasetContext";
-import { useDebouncedFetch } from "../../utils/requests";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useDebouncedFetch } from "../../utils/requests";
 
 export function Heatmap() {
   const ENDPOINT = "heatmap";

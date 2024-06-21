@@ -1,12 +1,11 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import { React } from "react";
 
-import { ObsmKeysList } from "@haniffalab/cherita-react";
-
+import { faDroplet } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDroplet } from "@fortawesome/free-solid-svg-icons";
+
+import { ObsmKeysList } from "../obsm-list/ObsmList";
 
 export function Toolbox({ mode, obsLength, slicedLength }) {
   return (

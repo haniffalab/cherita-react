@@ -1,10 +1,6 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import _ from "lodash";
-import Dropdown from "react-bootstrap/Dropdown";
 import React, { useEffect, useState } from "react";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { DOTPLOT_STANDARDSCALES } from "../../constants/constants";
-import { COLORSCALES } from "../../constants/colorscales";
+
+import _ from "lodash";
 import {
   Button,
   ButtonGroup,
@@ -13,6 +9,11 @@ import {
   ToggleButton,
   InputGroup,
 } from "react-bootstrap";
+import Dropdown from "react-bootstrap/Dropdown";
+
+import { COLORSCALES } from "../../constants/colorscales";
+import { DOTPLOT_STANDARDSCALES } from "../../constants/constants";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export function DotplotControls() {
   const dataset = useDataset();

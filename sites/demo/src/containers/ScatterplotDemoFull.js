@@ -1,12 +1,5 @@
 import { React, useRef, useState, useLayoutEffect } from "react";
 
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
-import Card from "react-bootstrap/Card";
-
 import {
   DatasetProvider,
   Scatterplot,
@@ -21,6 +14,12 @@ import {
   VarNamesList,
   SearchBar,
 } from "@haniffalab/cherita-react";
+import Card from "react-bootstrap/Card";
+import Col from "react-bootstrap/Col";
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
+import Row from "react-bootstrap/Row";
 
 export default function ScatterplotDemo(props) {
   const targetRef = useRef();

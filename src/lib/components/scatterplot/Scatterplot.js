@@ -5,34 +5,35 @@ import React, {
   useCallback,
   useDeferredValue,
 } from "react";
-import _ from "lodash";
-import "bootstrap/dist/css/bootstrap.min.css";
-import DeckGL from "@deck.gl/react";
+
 import { ScatterplotLayer } from "@deck.gl/layers";
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
-import { ViewMode } from "@nebula.gl/edit-modes";
-import { booleanPointInPolygon, point } from "@turf/turf";
-import { Alert } from "react-bootstrap";
-import { Toolbox } from "./Toolbox";
-import { SpatialControls } from "./SpatialControls";
-import { Legend } from "./Legend";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { MapHelper } from "../../helpers/map-helper";
-import {
-  GET_OPTIONS,
-  useMultipleZarr,
-  useZarr,
-} from "../../helpers/zarr-helper";
-import { useColor } from "../../helpers/color-helper";
-import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { DeckGL } from "@deck.gl/react";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ViewMode } from "@nebula.gl/edit-modes";
+import { EditableGeoJsonLayer } from "@nebula.gl/layers";
+import { booleanPointInPolygon, point } from "@turf/turf";
+import _ from "lodash";
+import { Alert } from "react-bootstrap";
+
+import { Legend } from "./Legend";
+import { SpatialControls } from "./SpatialControls";
+import { Toolbox } from "./Toolbox";
 import {
   COLOR_ENCODINGS,
   OBS_TYPES,
   SELECTED_POLYGON_FILLCOLOR,
   UNSELECTED_POLYGON_FILLCOLOR,
 } from "../../constants/constants";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useColor } from "../../helpers/color-helper";
+import { MapHelper } from "../../helpers/map-helper";
+import {
+  GET_OPTIONS,
+  useMultipleZarr,
+  useZarr,
+} from "../../helpers/zarr-helper";
+import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 
 window.deck.log.level = 1;
 

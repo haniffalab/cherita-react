@@ -1,15 +1,16 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import _ from "lodash";
 import React from "react";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { MATRIXPLOT_STANDARDSCALES } from "../../constants/constants";
-import { COLORSCALES } from "../../constants/colorscales";
+
+import _ from "lodash";
 import {
   Dropdown,
   ButtonGroup,
   ButtonToolbar,
   InputGroup,
 } from "react-bootstrap";
+
+import { COLORSCALES } from "../../constants/colorscales";
+import { MATRIXPLOT_STANDARDSCALES } from "../../constants/constants";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export function MatrixplotControls() {
   const dataset = useDataset();

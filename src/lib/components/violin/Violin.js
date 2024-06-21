@@ -1,13 +1,14 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
-import Plot from "react-plotly.js";
-import { useDataset } from "../../context/DatasetContext";
-import { VIOLIN_MODES } from "../../constants/constants";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Alert, OverlayTrigger, Tooltip } from "react-bootstrap";
-import { useDebouncedFetch } from "../../utils/requests";
+import Plot from "react-plotly.js";
+
+import { VIOLIN_MODES } from "../../constants/constants";
+import { useDataset } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useDebouncedFetch } from "../../utils/requests";
 
 export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
   const ENDPOINT = "violin";

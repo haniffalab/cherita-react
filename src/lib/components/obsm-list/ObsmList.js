@@ -1,8 +1,5 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
-import { useFetch } from "../../utils/requests";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { LoadingSpinner } from "../../utils/LoadingIndicators";
+
 import {
   Dropdown,
   Button,
@@ -11,6 +8,10 @@ import {
   OverlayTrigger,
   Tooltip,
 } from "react-bootstrap";
+
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useFetch } from "../../utils/requests";
 
 export function ObsmKeysList() {
   const ENDPOINT = "obsm/keys";

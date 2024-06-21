@@ -1,18 +1,5 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState } from "react";
-import {
-  DrawPolygonMode,
-  DrawLineStringMode,
-  DrawPolygonByDraggingMode,
-  DrawRectangleMode,
-  ViewMode,
-  ModifyMode,
-} from "@nebula.gl/edit-modes";
-import Dropdown from "react-bootstrap/Dropdown";
-import Button from "react-bootstrap/Button";
-import DropdownButton from "react-bootstrap/DropdownButton";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import {
   faPlus,
   faMinus,
@@ -22,13 +9,24 @@ import {
   faTrash,
   faSliders,
 } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { JoinInner } from "@mui/icons-material";
-
 import {
-  ScatterplotControls,
-  OffcanvasControls,
-} from "@haniffalab/cherita-react";
+  DrawPolygonMode,
+  DrawLineStringMode,
+  DrawPolygonByDraggingMode,
+  DrawRectangleMode,
+  ViewMode,
+  ModifyMode,
+} from "@nebula.gl/edit-modes";
+import Button from "react-bootstrap/Button";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
+import Dropdown from "react-bootstrap/Dropdown";
+import DropdownButton from "react-bootstrap/DropdownButton";
+
+import { ScatterplotControls } from "./ScatterplotControls";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { OffcanvasControls } from "../Offcanvas";
 
 export function SpatialControls({
   mode,

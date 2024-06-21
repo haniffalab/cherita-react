@@ -1,9 +1,10 @@
-import "bootstrap/dist/css/bootstrap.min.css";
+import React from "react";
+
 import _ from "lodash";
 import { Dropdown } from "react-bootstrap";
-import React from "react";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+
 import { COLORSCALES } from "../../constants/colorscales";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export function HeatmapControls() {
   const dataset = useDataset();

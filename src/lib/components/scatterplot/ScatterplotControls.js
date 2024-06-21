@@ -1,11 +1,12 @@
 import React, { useEffect } from "react";
-import _ from "lodash";
-import "bootstrap/dist/css/bootstrap.min.css";
-import { Dropdown } from "react-bootstrap";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { COLORSCALES } from "../../constants/colorscales";
+
 import { Box, Slider, Typography } from "@mui/material";
+import _ from "lodash";
+import { Dropdown } from "react-bootstrap";
+
+import { COLORSCALES } from "../../constants/colorscales";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export const ScatterplotControls = () => {
   const dataset = useDataset();

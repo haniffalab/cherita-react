@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
-import _ from "lodash";
-import { createContext, useContext, useReducer } from "react";
+import React, { useEffect, createContext, useContext, useReducer } from "react";
+
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { QueryClient, QueryCache } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import _ from "lodash";
+
 import {
   COLOR_ENCODINGS,
   LOCAL_STORAGE_KEY,

@@ -1,6 +1,7 @@
+import { useCallback } from "react";
+
 import { COLORSCALES } from "../constants/colorscales";
 import { useDataset } from "../context/DatasetContext";
-import { useCallback } from "react";
 
 const GRAY = [214, 212, 212];
 

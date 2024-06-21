@@ -1,10 +1,11 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import Plot from "react-plotly.js";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { useDebouncedFetch } from "../../utils/requests";
+
 import { Alert } from "react-bootstrap";
+import Plot from "react-plotly.js";
+
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useDebouncedFetch } from "../../utils/requests";
 
 export function Dotplot() {
   const ENDPOINT = "dotplot";

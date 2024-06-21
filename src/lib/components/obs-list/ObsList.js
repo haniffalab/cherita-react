@@ -1,10 +1,8 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import _ from "lodash";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { useFetch } from "../../utils/requests";
-import { LoadingSpinner } from "../../utils/LoadingIndicators";
+
+import { faDroplet, faEye, faFont } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import _ from "lodash";
 import {
   Accordion,
   ListGroup,
@@ -13,10 +11,12 @@ import {
   ButtonGroup,
   Button,
 } from "react-bootstrap";
-import { useColor } from "../../helpers/color-helper";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDroplet, faEye, faFont } from "@fortawesome/free-solid-svg-icons";
+
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useColor } from "../../helpers/color-helper";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useFetch } from "../../utils/requests";
 
 const N_BINS = 5;
 

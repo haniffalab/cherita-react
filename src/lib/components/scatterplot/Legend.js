@@ -1,9 +1,10 @@
 import { React, useMemo } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
+
 import _ from "lodash";
+
+import { COLOR_ENCODINGS } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import { rgbToHex, useColor } from "../../helpers/color-helper";
-import { COLOR_ENCODINGS } from "../../constants/constants";
 
 export function Legend({ isCategorical = false, min = 0, max = 1 }) {
   const dataset = useDataset();

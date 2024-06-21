@@ -1,10 +1,11 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import Plot from "react-plotly.js";
-import { useDataset } from "../../context/DatasetContext";
+
 import { Alert } from "react-bootstrap";
-import { useDebouncedFetch } from "../../utils/requests";
+import Plot from "react-plotly.js";
+
+import { useDataset } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useDebouncedFetch } from "../../utils/requests";
 
 export function Matrixplot() {
   const ENDPOINT = "matrixplot";
