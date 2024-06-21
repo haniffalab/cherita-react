@@ -42,7 +42,6 @@ function binDiscrete(data, nBins = N_BINS) {
   return { ...data, ...bins };
 }
 
-// @TODO: add "slice" button
 export function ObsColsList() {
   const ENDPOINT = "obs/cols";
   const dataset = useDataset();

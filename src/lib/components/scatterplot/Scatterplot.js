@@ -288,29 +288,47 @@ export function Scatterplot({ radius = 30 }) {
     ]
   );
 
-  // @TODO: also output filtered data and use in getFillColor
-  const { valueMin, valueMax, slicedLength } = useMemo(() => {
+  const { filteredIndices, valueMin, valueMax, slicedLength } = useMemo(() => {
     if (dataset.colorEncoding === COLOR_ENCODINGS.VAR) {
-      const filtered = _.filter(data.values, (_v, i) => {
-        return isInSlice(i, data.sliceValues, data.positions);
-      });
+      const { filtered, filteredIndices } = _.reduce(
+        data.values,
+        (acc, v, i) => {
+          if (isInSlice(i, data.sliceValues, data.positions)) {
+            acc.filtered.push(v);
+            acc.filteredIndices.add(i);
+          }
+          return acc;
+        },
+        { filtered: [], filteredIndices: new Set() }
+      );
       return {
+        filteredIndices: filteredIndices,
         valueMin: _.min(filtered),
         valueMax: _.max(filtered),
         slicedLength: filtered.length,
       };
     } else if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
       const isContinuous = dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS;
-      const filtered = _.filter(data.values, (_v, i) => {
-        return isInSlice(i, data.values, data.positions);
-      });
+      const { filtered, filteredIndices } = _.reduce(
+        data.values,
+        (acc, v, i) => {
+          if (isInSlice(i, data.values, data.positions)) {
+            acc.filtered.push(v);
+            acc.filteredIndices.add(i);
+          }
+          return acc;
+        },
+        { filtered: [], filteredIndices: new Set() }
+      );
       return {
+        filteredIndices: filteredIndices,
         valueMin: _.min(isContinuous ? filtered : data.values),
         valueMax: _.max(isContinuous ? filtered : data.values),
         slicedLength: filtered.length,
       };
     } else {
       return {
+        filteredIndices: null,
         valueMin: _.min(data.values),
         valueMax: _.max(data.values),
         slicedLength: data.values.length,
@@ -339,29 +357,14 @@ export function Scatterplot({ radius = 30 }) {
 
   const getFillColor = useCallback(
     (_d, { index }) => {
-      const grayOut =
-        dataset.colorEncoding === COLOR_ENCODINGS.OBS
-          ? !isInSlice(index, data.values, data.positions)
-          : dataset.colorEncoding === COLOR_ENCODINGS.VAR
-          ? !isInSlice(index, data.sliceValues, data.positions)
-          : false;
+      const grayOut = filteredIndices && !filteredIndices.has(index);
       return getColor(
         (data.values[index] - min) / (max - min),
         isCategorical,
         grayOut
       );
     },
-    [
-      data.positions,
-      data.sliceValues,
-      data.values,
-      dataset.colorEncoding,
-      getColor,
-      isCategorical,
-      isInSlice,
-      max,
-      min,
-    ]
+    [data.values, filteredIndices, getColor, isCategorical, max, min]
   );
 
   const memoizedLayers = useMemo(() => {
