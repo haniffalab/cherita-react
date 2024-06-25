@@ -12,6 +12,7 @@ import {
   Button,
 } from "react-bootstrap";
 
+import { ObsValueList } from "./ObsValueList";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useColor } from "../../helpers/color-helper";
@@ -46,8 +47,8 @@ export function ObsColsList() {
   const ENDPOINT = "obs/cols";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const [obsColsList, setObsColsList] = useState([]);
-  const [updatedObsColsList, setUpdatedObsColsList] = useState(false);
+  const [obsCols, setObsCols] = useState({});
+  const [updatedObsCols, setupdatedObsCols] = useState(false);
   const [active, setActive] = useState(dataset.selectedObs?.name);
   const [params, setParams] = useState({
     url: dataset.url,
@@ -70,15 +71,16 @@ export function ObsColsList() {
 
   const validateSelection = useCallback(
     (obs) => {
-      return _.some(obsColsList, (item) =>
-        _.isEqual(_.omit(item, ["omit"]), _.omit(obs, ["omit"]))
+      return _.isEqual(
+        _.omit(obsCols[obs.name], ["omit"]),
+        _.omit(obs, ["omit"])
       );
     },
-    [obsColsList]
+    [obsCols]
   );
 
   useEffect(() => {
-    if (updatedObsColsList) {
+    if (updatedObsCols) {
       if (dataset.selectedObs) {
         if (validateSelection(dataset.selectedObs)) {
           setActive(dataset.selectedObs.name);
@@ -93,32 +95,36 @@ export function ObsColsList() {
         setActive(null);
       }
     }
-  }, [dataset.selectedObs, dispatch, updatedObsColsList, validateSelection]);
+  }, [dataset.selectedObs, dispatch, updatedObsCols, validateSelection]);
 
   // @TODO: change api to return all obs and truncate here
   useEffect(() => {
     if (!isPending && !serverError) {
-      setObsColsList(
-        _.map(fetchedData, (d) => {
-          if (d.type === OBS_TYPES.CONTINUOUS) {
-            d = binContinuous(d);
-          } else if (d.type === OBS_TYPES.DISCRETE) {
-            d = binDiscrete(d);
-          }
-          return { ...d, omit: [] };
-        })
+      setObsCols(
+        _.keyBy(
+          _.map(fetchedData, (d) => {
+            if (d.type === OBS_TYPES.CONTINUOUS) {
+              d = binContinuous(d);
+            } else if (d.type === OBS_TYPES.DISCRETE) {
+              d = binDiscrete(d);
+            }
+            return { ...d, omit: [] };
+          }),
+          "name"
+        )
       );
-      setUpdatedObsColsList(true);
+      setupdatedObsCols(true);
     }
   }, [fetchedData, isPending, serverError]);
 
   const toggleAll = useCallback(
     (item, checked, active) => {
       const omit = checked ? [] : _.map(item.values, (v) => item.codes[v]);
-      setObsColsList((l) => {
-        return _.map(l, (i) => {
-          return i.name === item.name ? { ...i, omit: omit } : i;
-        });
+      setObsCols((o) => {
+        return {
+          ...o,
+          [item.name]: { ...item, omit: omit },
+        };
       });
       if (active === item.name) {
         dispatch({
@@ -234,67 +240,40 @@ export function ObsColsList() {
                   </div>
                 </div>
               </ListGroup.Item>
-              {_.map(item.values, (value) => (
-                <ListGroup.Item key={value}>
-                  <div className="d-flex">
-                    <div className="flex-grow-1">
-                      <Form.Check // prettier-ignore
-                        type="switch"
-                        id="custom-switch"
-                        label={value}
-                        checked={!_.includes(item.omit, item.codes[value])}
-                        onChange={() => {
-                          const newItem = {
-                            ...item,
-                            omit: !_.includes(item.omit, item.codes[value])
-                              ? [...item.omit, item.codes[value]]
-                              : _.filter(
-                                  item.omit,
-                                  (o) => o !== item.codes[value]
-                                ),
-                          };
-                          setObsColsList((l) => {
-                            return _.map(l, (i) => {
-                              return i.name === item.name ? newItem : i;
-                            });
-                          });
-                          if (active === item.name) {
-                            dispatch({
-                              type: "select.obs",
-                              obs: newItem,
-                            });
-                          }
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                        viewBox="0 0 10 10"
-                      >
-                        <rect
-                          x="0"
-                          y="0"
-                          width="10"
-                          height="10"
-                          fill={`rgb(${getColor(
-                            (item.codes[value] - min) / (max - min),
-                            true,
-                            _.includes(item.omit, item.codes[value]),
-                            {
-                              alpha: 1,
-                            },
-                            "obs"
-                          )})`}
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </ListGroup.Item>
-              ))}
+              <ObsValueList
+                item={item}
+                onChange={(value) => {
+                  const newItem = {
+                    ...item,
+                    omit: !_.includes(item.omit, item.codes[value])
+                      ? [...item.omit, item.codes[value]]
+                      : _.filter(item.omit, (o) => o !== item.codes[value]),
+                  };
+                  setObsCols((o) => {
+                    return {
+                      ...o,
+                      [item.name]: newItem,
+                    };
+                  });
+                  if (active === item.name) {
+                    dispatch({
+                      type: "select.obs",
+                      obs: newItem,
+                    });
+                  }
+                }}
+                getFillColor={(value) => {
+                  return `rgb(${getColor(
+                    (item.codes[value] - min) / (max - min),
+                    true,
+                    _.includes(item.omit, item.codes[value]),
+                    {
+                      alpha: 1,
+                    },
+                    "obs"
+                  )})`;
+                }}
+              />
             </ListGroup>
           </Accordion.Body>
         </Accordion.Item>
@@ -414,7 +393,8 @@ export function ObsColsList() {
 
   const obsList = useMemo(
     () =>
-      obsColsList.map((item) => {
+      _.keys(obsCols).map((o) => {
+        const item = obsCols[o];
         if (item.type === OBS_TYPES.CATEGORICAL) {
           return categoricalList(item, active);
         } else if (item.type === OBS_TYPES.CONTINUOUS) {
@@ -423,7 +403,7 @@ export function ObsColsList() {
           return otherList(item, active);
         }
       }),
-    [obsColsList, categoricalList, active, continuousList, otherList]
+    [obsCols, categoricalList, active, continuousList, otherList]
   );
 
   if (!serverError) {
