@@ -71,10 +71,19 @@ export function ObsColsList() {
 
   const validateSelection = useCallback(
     (obs) => {
-      return _.isEqual(
-        _.omit(obsCols[obs.name], ["omit"]),
-        _.omit(obs, ["omit"])
-      );
+      if (
+        !_.isEqual(_.omit(obsCols[obs.name], ["omit"]), _.omit(obs, ["omit"]))
+      )
+        return false;
+      if (!_.isEqual(obsCols[obs.name].omit, obs.omit)) {
+        setObsCols((o) => {
+          return {
+            ...o,
+            [obs.name]: { ...o[obs.name], omit: obs.omit },
+          };
+        });
+      }
+      return true;
     },
     [obsCols]
   );
