@@ -102,9 +102,11 @@ export function DatasetProvider({
 
   useEffect(() => {
     try {
+      const localObj =
+        JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {};
       localStorage.setItem(
         LOCAL_STORAGE_KEY,
-        JSON.stringify({ [dataset.url]: dataset })
+        JSON.stringify({ ...localObj, [dataset.url]: dataset })
       );
     } catch (err) {
       if (
