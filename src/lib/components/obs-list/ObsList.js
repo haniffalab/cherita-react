@@ -148,11 +148,12 @@ export function ObsColsList() {
   const categoricalList = useCallback(
     (item, active = null) => {
       const codesMap = _.invert(item.codes);
+      item.codesMap = codesMap;
       const inLabelObs = _.some(dataset.labelObs, (i) =>
         _.isEqual(i, {
           name: item.name,
           type: item.type,
-          codesMap: codesMap,
+          codesMap: item.codesMap,
         })
       );
       const min = _.min(_.values(item.codes));
@@ -196,7 +197,7 @@ export function ObsColsList() {
                               obs: {
                                 name: item.name,
                                 type: item.type,
-                                codesMap: codesMap,
+                                codesMap: item.codesMap,
                               },
                             });
                           }

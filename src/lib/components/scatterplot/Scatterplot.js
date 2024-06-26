@@ -457,18 +457,45 @@ export function Scatterplot({ radius = 30 }) {
     );
   }
 
-  const getTooltip = ({ object, index }) =>
-    object &&
-    dataset.labelObs.length && {
-      text: _.map(labelObsData, (v, k) => {
-        const labelObs = _.find(dataset.labelObs, (o) => o.name === k);
-        if (labelObs.type === OBS_TYPES.CONTINUOUS) {
-          return `${k}: ${parseFloat(v?.[index]).toLocaleString()}`;
-        } else {
-          return `${k}: ${labelObs.codesMap[v?.[index]]}`;
-        }
-      }).join("\n"),
+  const getLabel = (o, v, index, isVar = false) => {
+    if (isVar || o.type === OBS_TYPES.CONTINUOUS) {
+      return `${o.name}: ${parseFloat(v?.[index]).toLocaleString()}`;
+    } else {
+      return `${o.name}: ${o.codesMap[v?.[index]]}`;
+    }
+  };
+
+  const getTooltip = ({ object, index }) => {
+    if (!object) return;
+    const text = [];
+
+    if (
+      dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+      dataset.selectedObs &&
+      !_.some(dataset.labelObs, { name: dataset.selectedObs.name })
+    ) {
+      text.push(getLabel(dataset.selectedObs, obsData.data, index));
+    }
+
+    if (dataset.colorEncoding === COLOR_ENCODINGS.VAR && dataset.selectedVar) {
+      text.push(getLabel(dataset.selectedVar, xData.data, index, true));
+    }
+
+    if (dataset.labelObs.length) {
+      text.push(
+        ..._.map(labelObsData, (v, k) => {
+          const labelObs = _.find(dataset.labelObs, (o) => o.name === k);
+          return getLabel(labelObs, v, index);
+        })
+      );
+    }
+
+    if (!text.length) return;
+
+    return {
+      text: text.length ? _.compact(text).join("\n") : null,
     };
+  };
 
   const isPending =
     (isRendering || xData.isPending || obsmData.isPending) &&

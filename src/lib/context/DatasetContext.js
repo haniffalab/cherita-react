@@ -157,6 +157,10 @@ function datasetReducer(dataset, action) {
               ? [0, 1]
               : dataset.controls.range,
         },
+        colorEncoding:
+          dataset.colorEncoding === COLOR_ENCODINGS.OBS && !action.obs
+            ? null
+            : dataset.colorEncoding,
       };
     }
     case "select.obsm": {
