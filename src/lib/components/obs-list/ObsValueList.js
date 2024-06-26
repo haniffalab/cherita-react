@@ -62,6 +62,7 @@ export function ObsValueList({ item, onChange, getFillColor }) {
                     <div className="d-flex">
                       <div className="flex-grow-1">
                         <Form.Check // prettier-ignore
+                          className="obs-value-list-check"
                           type="switch"
                           id="custom-switch"
                           label={value}

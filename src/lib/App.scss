@@ -129,6 +129,12 @@
     background-color: $accordion-button-active-bg
 }
 
+.obs-value-list-check {
+    padding-right: 1rem;
+    word-break: auto-phrase;
+    overflow-wrap: anywhere;
+}
+
 .grad-step {
     display: inline-block;
     height: 20px;
