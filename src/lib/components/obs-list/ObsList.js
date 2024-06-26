@@ -404,7 +404,10 @@ export function ObsColsList() {
     () =>
       _.keys(obsCols).map((o) => {
         const item = obsCols[o];
-        if (item.type === OBS_TYPES.CATEGORICAL) {
+        if (
+          item.type === OBS_TYPES.CATEGORICAL ||
+          item.type === OBS_TYPES.BOOLEAN
+        ) {
           return categoricalList(item, active);
         } else if (item.type === OBS_TYPES.CONTINUOUS) {
           return continuousList(item, active);

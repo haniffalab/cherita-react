@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 import _ from "lodash";
-import { ListGroup, Form } from "react-bootstrap";
+import { ListGroup, Form, Badge } from "react-bootstrap";
 
 export function ObsValueList({ item, onChange, getFillColor }) {
   const [parentNode, setParentNode] = useState(null);
@@ -59,7 +59,7 @@ export function ObsValueList({ item, onChange, getFillColor }) {
                   ref={valueVirtualizer.measureElement}
                 >
                   <ListGroup.Item key={value}>
-                    <div className="d-flex">
+                    <div className="d-flex align-items-center">
                       <div className="flex-grow-1">
                         <Form.Check // prettier-ignore
                           className="obs-value-list-check"
@@ -70,7 +70,19 @@ export function ObsValueList({ item, onChange, getFillColor }) {
                           onChange={() => onChange(value)}
                         />
                       </div>
-                      <div>
+                      <div className="d-flex align-items-center">
+                        <div className="px-1 m-0">
+                          <Badge
+                            className="value-count-badge"
+                            style={{
+                              fontWeight: "lighter",
+                            }}
+                          >
+                            {parseInt(
+                              item.value_counts[value]
+                            ).toLocaleString()}
+                          </Badge>
+                        </div>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="24"

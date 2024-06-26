@@ -80,7 +80,7 @@ export function Scatterplot({ radius = 30 }) {
     path:
       "obs/" +
       dataset.selectedObs?.name +
-      (dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS ? "" : "/codes"),
+      (dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
   });
 
   const [labelObsParams, setLabelObsParams] = useState([]);
@@ -121,7 +121,7 @@ export function Scatterplot({ radius = 30 }) {
         path:
           "obs/" +
           dataset.selectedObs?.name +
-          (dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS ? "" : "/codes"),
+          (dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
       };
     });
   }, [dataset.selectedObs]);
@@ -134,7 +134,7 @@ export function Scatterplot({ radius = 30 }) {
           path:
             "obs/" +
             obs.name +
-            (obs.type === OBS_TYPES.CONTINUOUS ? "" : "/codes"),
+            (obs.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
           key: obs.name,
         };
       })
@@ -258,7 +258,10 @@ export function Scatterplot({ radius = 30 }) {
 
   const isCategorical = useMemo(() => {
     if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
-      return dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL;
+      return (
+        dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+        dataset.selectedObs?.type === OBS_TYPES.BOOLEAN
+      );
     } else {
       return false;
     }

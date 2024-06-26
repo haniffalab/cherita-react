@@ -9,6 +9,7 @@ export const OBS_TYPES = {
   CATEGORICAL: "categorical",
   DISCRETE: "discrete",
   CONTINUOUS: "continuous",
+  BOOLEAN: "boolean",
 };
 
 export const SELECTED_POLYGON_FILLCOLOR = [107, 170, 209, 255 / 2];
