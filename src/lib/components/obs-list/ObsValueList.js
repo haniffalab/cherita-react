@@ -1,10 +1,17 @@
 import React, { useCallback, useEffect, useState } from "react";
 
+import { Tooltip } from "@mui/material";
+import { Gauge } from "@mui/x-charts";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import _ from "lodash";
 import { ListGroup, Form, Badge } from "react-bootstrap";
 
-export function ObsValueList({ item, onChange, getFillColor }) {
+export function ObsValueList({
+  item,
+  onChange,
+  getFillColor,
+  totalCounts = null,
+}) {
   const [parentNode, setParentNode] = useState(null);
 
   const valueVirtualizer = useVirtualizer({
@@ -52,6 +59,7 @@ export function ObsValueList({ item, onChange, getFillColor }) {
           >
             {virtualItems.map((virtualItem) => {
               const value = item.values[virtualItem.index];
+              const pct = (item.value_counts[value] / totalCounts) * 100;
               return (
                 <div
                   key={virtualItem.key}
@@ -72,16 +80,37 @@ export function ObsValueList({ item, onChange, getFillColor }) {
                       </div>
                       <div className="d-flex align-items-center">
                         <div className="px-1 m-0">
-                          <Badge
-                            className="value-count-badge"
-                            style={{
-                              fontWeight: "lighter",
-                            }}
+                          <Tooltip
+                            title={`${pct.toLocaleString()}%`}
+                            placement="left"
+                            arrow
                           >
-                            {parseInt(
-                              item.value_counts[value]
-                            ).toLocaleString()}
-                          </Badge>
+                            <div className="d-flex align-items-center">
+                              <Badge
+                                className="value-count-badge"
+                                style={{
+                                  fontWeight: "lighter",
+                                }}
+                              >
+                                {parseInt(
+                                  item.value_counts[value]
+                                ).toLocaleString()}
+                              </Badge>
+                              <div className="value-pct-gauge-container">
+                                <Gauge
+                                  value={pct}
+                                  text={null}
+                                  innerRadius={"50%"}
+                                  margin={{
+                                    top: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    left: 0,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </Tooltip>
                         </div>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"

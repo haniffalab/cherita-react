@@ -283,6 +283,7 @@ export function ObsColsList() {
                     "obs"
                   )})`;
                 }}
+                totalCounts={_.sum(_.values(item.value_counts))}
               />
             </ListGroup>
           </Accordion.Body>
