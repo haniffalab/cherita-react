@@ -1,5 +1,7 @@
-@import "bootstrap/scss/bootstrap";
 // Theme CSS
+$accordion-button-active-bg: #e7edf0;
+
+@import "bootstrap/scss/bootstrap";
 
 .loading-spinner {
     @extend .bg-light;
@@ -125,7 +127,7 @@
   }
 
 .cherita-accordion-active .accordion-button {
-    background-color: $accordion-button-active-bg
+    background-color: rgb(204, 227, 237)
 }
 
 .obs-value-list-check {

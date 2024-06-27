@@ -1,20 +1,23 @@
 import { WebMercatorViewport } from "@deck.gl/core";
 
 export class MapHelper {
-  fitBounds(coords) {
+  fitBounds(
+    coords,
+    { width = 400, height = 600 } = { width: 400, height: 600 }
+  ) {
     let view = new WebMercatorViewport({
-      width: 600,
-      height: 400,
-      longitude: -122.45,
-      latitude: 37.78,
+      width: width,
+      height: height,
+      longitude: 0,
+      latitude: 0,
       zoom: 12,
-      pitch: 30,
-      bearing: 15,
+      pitch: 0,
+      bearing: 0,
     });
-    let latMin = 90;
-    let latMax = -90;
-    let lonMin = 180;
-    let lonMax = -180;
+    let latMin = 50;
+    let latMax = -50;
+    let lonMin = 50;
+    let lonMax = -50;
     coords.forEach(function (coord) {
       const RECT_LAT_INDEX = "0";
       const RECT_LON_INDEX = "1";

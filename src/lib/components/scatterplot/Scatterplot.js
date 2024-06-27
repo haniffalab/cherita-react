@@ -4,6 +4,7 @@ import React, {
   useMemo,
   useCallback,
   useDeferredValue,
+  useRef,
 } from "react";
 
 import { ScatterplotLayer } from "@deck.gl/layers";
@@ -50,6 +51,7 @@ export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const { getColor } = useColor();
+  const deckRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [isRendering, setIsRendering] = useState(true);
   const [data, setData] = useState({
@@ -171,7 +173,10 @@ export function Scatterplot({ radius = 30 }) {
         return { ...d, positions: obsmData.data };
       });
       const mapHelper = new MapHelper();
-      const { latitude, longitude, zoom } = mapHelper.fitBounds(obsmData.data);
+      const { latitude, longitude, zoom } = mapHelper.fitBounds(obsmData.data, {
+        width: deckRef?.current?.deck?.width,
+        height: deckRef?.current?.deck?.height,
+      });
       setViewState((v) => {
         return {
           ...v,
@@ -193,10 +198,15 @@ export function Scatterplot({ radius = 30 }) {
     obsmData.serverError,
   ]);
 
-  const bounds = useMemo(() => {
+  const getBounds = useCallback(() => {
     const { latitude, longitude, zoom } = new MapHelper().fitBounds(
-      data.positions
+      data.positions,
+      {
+        width: deckRef?.current?.deck?.width,
+        height: deckRef?.current?.deck?.height,
+      }
     );
+
     return { latitude, longitude, zoom };
   }, [data.positions]);
 
@@ -527,6 +537,7 @@ export function Scatterplot({ radius = 30 }) {
         getCursor={({ isDragging }) =>
           mode !== ViewMode ? "crosshair" : isDragging ? "grabbing" : "grab"
         }
+        ref={deckRef}
       ></DeckGL>
       <SpatialControls
         mode={mode}
@@ -534,7 +545,7 @@ export function Scatterplot({ radius = 30 }) {
         features={features}
         setFeatures={setFeatures}
         selectedFeatureIndexes={selectedFeatureIndexes}
-        resetBounds={() => setViewState(bounds)}
+        resetBounds={() => setViewState(getBounds())}
         increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
         decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
       />
