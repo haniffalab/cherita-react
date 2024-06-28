@@ -200,3 +200,15 @@ $accordion-button-active-bg: #e7edf0;
     height: 1.5rem;
     padding: 0.2rem;
 }
+
+.feature-histogram-container {
+    height: 1.25rem;
+    width: 5rem;
+    display: flex;
+    align-items: center;
+}
+
+.feature-histogram {
+    @extend .feature-histogram-container;
+    background-color: rgb(222, 222, 222);
+}
