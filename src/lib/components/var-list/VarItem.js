@@ -24,6 +24,7 @@ function VarHistogram({ item }) {
     matrix_index: item.matrix_index,
   };
 
+  // @TODO: request given slice ?
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
     refetchOnMount: false,
   });
@@ -36,12 +37,33 @@ function VarHistogram({ item }) {
         <div className="feature-histogram">
           <SparkLineChart
             plotType="bar"
-            data={fetchedData.noscale}
+            data={fetchedData.log10}
             margin={{
               top: 0,
               right: 0,
               bottom: 0,
               left: 0,
+            }}
+            showHighlight={true}
+            showTooltip={true}
+            valueFormatter={(v, { dataIndex }) =>
+              `${fetchedData.hist[dataIndex].toLocaleString()}`
+            }
+            xAxis={{
+              data: _.range(fetchedData.bin_edges?.length) || null,
+              valueFormatter: (v) =>
+                `Bin [${fetchedData.bin_edges[
+                  v
+                ][0].toLocaleString()}, ${fetchedData.bin_edges[
+                  v
+                ][1].toLocaleString()}${
+                  v === fetchedData.bin_edges.length - 1 ? "]" : ")"
+                }`,
+            }}
+            slotProps={{
+              popper: {
+                className: "feature-histogram-tooltip",
+              },
             }}
           />
         </div>

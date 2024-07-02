@@ -212,3 +212,19 @@ $accordion-button-active-bg: #e7edf0;
     @extend .feature-histogram-container;
     background-color: rgb(222, 222, 222);
 }
+
+.feature-histogram-tooltip .MuiChartsTooltip-markCell,.MuiChartsTooltip-labelCell {
+    display: none;
+}
+
+.feature-histogram-tooltip .MuiChartsTooltip-valueCell {
+    padding: 0.5rem !important;
+}
+
+.feature-histogram-tooltip .MuiChartsTooltip-valueCell > p {
+    font-size: 0.85rem !important;
+}
+
+.feature-histogram-tooltip td > p {
+    font-size: 0.85rem !important;
+}
