@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import {
   faDroplet,
@@ -8,26 +8,46 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { SparkLineChart } from "@mui/x-charts";
+import {
+  blueberryTwilightPalette,
+  mangoFusionPalette,
+} from "@mui/x-charts/colorPalettes";
 import _ from "lodash";
 import { ListGroup, Button } from "react-bootstrap";
 
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useFilteredData } from "../../context/FilterContext";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
-import { useFetch } from "../../utils/requests";
+import { useDebouncedFetch } from "../../utils/requests";
 
 function VarHistogram({ item }) {
   const ENDPOINT = "var/histograms";
   const dataset = useDataset();
-  const params = {
+  const filteredData = useFilteredData();
+  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
+  const [params, setParams] = useState({
     url: dataset.url,
-    matrix_index: item.matrix_index,
-  };
-
-  // @TODO: request given slice ?
-  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
-    refetchOnMount: false,
+    var_index: item.matrix_index,
+    obs_indices: isSliced && Array.from(filteredData.obsIndices || []),
   });
+
+  useEffect(() => {
+    setParams((p) => {
+      return {
+        ...p,
+        obs_indices: isSliced && Array.from(filteredData.obsIndices || []),
+      };
+    });
+  }, [filteredData.obsIndices, isSliced]);
+
+  const { fetchedData, isPending, serverError } = useDebouncedFetch(
+    ENDPOINT,
+    params,
+    {
+      refetchOnMount: false,
+    }
+  );
 
   return (
     <div className="feature-histogram-container m-2">
@@ -44,6 +64,7 @@ function VarHistogram({ item }) {
               bottom: 0,
               left: 0,
             }}
+            colors={isSliced ? mangoFusionPalette : blueberryTwilightPalette}
             showHighlight={true}
             showTooltip={true}
             valueFormatter={(v, { dataIndex }) =>

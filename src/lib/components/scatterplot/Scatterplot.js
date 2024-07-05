@@ -27,6 +27,7 @@ import {
   UNSELECTED_POLYGON_FILLCOLOR,
 } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useFilteredDataDispatch } from "../../context/FilterContext";
 import { useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
 import {
@@ -50,6 +51,7 @@ const INITIAL_VIEW_STATE = {
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
+  const filterDispatch = useFilteredDataDispatch();
   const { getColor } = useColor();
   const deckRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
@@ -355,6 +357,21 @@ export function Scatterplot({ radius = 30 }) {
     dataset.colorEncoding,
     dataset.selectedObs?.type,
     isInSlice,
+  ]);
+
+  useEffect(() => {
+    filterDispatch({
+      type: "set.obs.indices",
+      indices:
+        dataset.sliceBy.obs || dataset.sliceBy.polygons
+          ? filteredIndices
+          : null,
+    });
+  }, [
+    dataset.sliceBy.obs,
+    dataset.sliceBy.polygons,
+    filterDispatch,
+    filteredIndices,
   ]);
 
   useEffect(() => {

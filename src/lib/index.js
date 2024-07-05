@@ -15,6 +15,7 @@ export { ViolinControls } from "./components/violin/ViolinControls";
 export { SELECTION_MODES, VIOLIN_MODES } from "./constants/constants";
 export { COLORSCALES } from "./constants/colorscales";
 export { DatasetProvider } from "./context/DatasetContext";
+export { FilterProvider } from "./context/FilterContext";
 export {
   OffcanvasObs,
   OffcanvasObsm,

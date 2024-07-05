@@ -5,6 +5,7 @@ import { QueryClient, QueryCache } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import _ from "lodash";
 
+import { FilterProvider } from "./FilterContext";
 import {
   COLOR_ENCODINGS,
   LOCAL_STORAGE_KEY,
@@ -129,7 +130,7 @@ export function DatasetProvider({
           client={queryClient}
           persistOptions={persistOptions}
         >
-          {children}
+          <FilterProvider>{children}</FilterProvider>
         </PersistQueryClientProvider>
       </DatasetDispatchContext.Provider>
     </DatasetContext.Provider>

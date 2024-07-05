@@ -71,7 +71,7 @@ export const useDebouncedFetch = (
   endpoint,
   params,
   delay = 500,
-  opts = null,
+  opts = {},
   apiUrl = null
 ) => {
   const { enabled = true } = opts;
