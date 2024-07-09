@@ -51,14 +51,17 @@ export function VarNamesList({
   }, [mode, dataset.selectedMultiVar]);
 
   const makeList = useCallback(
-    (vars) => {
+    (vars, isDiseaseGene = false) => {
       return vars.map((item) => (
-        <VarItem
-          item={item}
-          active={active}
-          setVarButtons={setVarButtons}
-          mode={mode}
-        />
+        <ListGroup.Item key={item.matrix_index}>
+          <VarItem
+            item={item}
+            active={active}
+            setVarButtons={setVarButtons}
+            mode={mode}
+            isDiseaseGene={isDiseaseGene}
+          />
+        </ListGroup.Item>
       ));
     },
     [active, mode]
@@ -69,12 +72,12 @@ export function VarNamesList({
   }, [makeList, varButtons]);
 
   const diseaseVarList = useMemo(() => {
-    return makeList(dataset.selectedDisease.genes);
+    return makeList(dataset.selectedDisease.genes, true);
   }, [makeList, dataset.selectedDisease.genes]);
 
   return (
     <div className="position-relative">
-      <div className="overflow-auto mt-2">
+      <div className="overflow-auto mt-3">
         <div className="d-flex justify-content-between">
           <h5>{_.capitalize(displayName)}</h5>
           <Button
@@ -96,7 +99,7 @@ export function VarNamesList({
         {dataset.selectedDisease?.id &&
           dataset.selectedDisease?.genes?.length > 0 && (
             <>
-              <div className="d-flex justify-content-between">
+              <div className="d-flex justify-content-between mt-3">
                 <h5>Disease genes</h5>
                 <Button
                   variant="link"
@@ -110,7 +113,7 @@ export function VarNamesList({
                 </Button>
               </div>
               <p>{dataset.selectedDisease?.name}</p>
-              {diseaseVarList}
+              <ListGroup>{diseaseVarList}</ListGroup>
             </>
           )}
       </div>

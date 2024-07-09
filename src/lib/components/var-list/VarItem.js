@@ -13,7 +13,7 @@ import {
   mangoFusionPalette,
 } from "@mui/x-charts/colorPalettes";
 import _ from "lodash";
-import { ListGroup, Button } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
@@ -98,6 +98,7 @@ export function VarItem({
   active,
   setVarButtons,
   mode = SELECTION_MODES.SINGLE,
+  isDiseaseGene = false,
 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
@@ -148,11 +149,11 @@ export function VarItem({
 
   if (item && mode === SELECTION_MODES.SINGLE) {
     return (
-      <ListGroup.Item key={item.matrix_index}>
+      <>
         <div className="d-flex justify-content-between">
           <div className="d-flex justify-content-between align-items-center w-100">
             <div>{item.name}</div>
-            <VarHistogram item={item} />
+            {!isDiseaseGene && <VarHistogram item={item} />}
           </div>
 
           <div className="d-flex align-items-center gap-1">
@@ -179,22 +180,24 @@ export function VarItem({
             >
               <FontAwesomeIcon icon={faDroplet} />
             </Button>
-            <Button
-              type="button"
-              className="m-0 p-0 px-1"
-              variant="outline-secondary"
-              title="Remove from list"
-              onClick={() => removeVar(item)}
-            >
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
+            {!isDiseaseGene && (
+              <Button
+                type="button"
+                className="m-0 p-0 px-1"
+                variant="outline-secondary"
+                title="Remove from list"
+                onClick={() => removeVar(item)}
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </Button>
+            )}
           </div>
         </div>
-      </ListGroup.Item>
+      </>
     );
   } else if (mode === SELECTION_MODES.MULTIPLE) {
     return (
-      <ListGroup.Item key={item.matrix_index}>
+      <>
         <div className="d-flex">
           <div className="flex-grow-1">
             <Button
@@ -228,7 +231,7 @@ export function VarItem({
             <FontAwesomeIcon icon={faPlus} />
           </div>
         </div>
-      </ListGroup.Item>
+      </>
     );
   } else {
     return null;
