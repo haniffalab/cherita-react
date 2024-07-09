@@ -15,7 +15,9 @@ export function VarNamesList({
   const dispatch = useDatasetDispatch();
   const [varButtons, setVarButtons] = useState(
     mode === SELECTION_MODES.SINGLE
-      ? [dataset.selectedVar]
+      ? dataset.selectedVar
+        ? [dataset.selectedVar]
+        : []
       : dataset.selectedMultiVar
   );
   const [active, setActive] = useState(

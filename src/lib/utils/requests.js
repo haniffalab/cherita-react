@@ -46,7 +46,7 @@ export async function fetchData(
   return await response.json();
 }
 
-export const useFetch = (endpoint, params, opts = null, apiUrl = null) => {
+export const useFetch = (endpoint, params, opts = {}, apiUrl = null) => {
   const { enabled = true } = opts;
   const {
     data: fetchedData,

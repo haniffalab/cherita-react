@@ -1,19 +1,12 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 
-import { faDroplet, faEye, faFont } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import {
-  Accordion,
-  ListGroup,
-  Alert,
-  Form,
-  ButtonGroup,
-  Button,
-} from "react-bootstrap";
+import { Accordion, ListGroup, Alert } from "react-bootstrap";
 
-import { ObsValueList } from "./ObsValueList";
-import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
+import { ObsCategoryList } from "./ObsCategoryList";
+import { ObsContinuousItem } from "./ObsContinuousItem";
+import { ObsToolbar } from "./ObsToolbar";
+import { OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useColor } from "../../helpers/color-helper";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
@@ -106,7 +99,6 @@ export function ObsColsList() {
     }
   }, [dataset.selectedObs, dispatch, updatedObsCols, validateSelection]);
 
-  // @TODO: change api to return all obs and truncate here
   useEffect(() => {
     if (!isPending && !serverError) {
       setObsCols(
@@ -145,6 +137,75 @@ export function ObsColsList() {
     [dispatch]
   );
 
+  const toggleLabel = useCallback(
+    (item, inLabelObs) => {
+      if (inLabelObs) {
+        dispatch({
+          type: "remove.label.obs",
+          obsName: item.name,
+        });
+      } else {
+        dispatch({
+          type: "add.label.obs",
+          obs: {
+            name: item.name,
+            type: item.type,
+            codesMap: item.codesMap,
+          },
+        });
+      }
+    },
+    [dispatch]
+  );
+
+  const toggleSlice = useCallback(
+    (item) => {
+      dispatch({
+        type: "toggle.slice.obs",
+        obs: item,
+      });
+    },
+    [dispatch]
+  );
+
+  const toggleColor = useCallback(
+    (item) => {
+      dispatch({
+        type: "select.obs",
+        obs: item,
+      });
+      dispatch({
+        type: "set.colorEncoding",
+        value: "obs",
+      });
+    },
+    [dispatch]
+  );
+
+  const toggleObs = useCallback(
+    (item, value) => {
+      const newItem = {
+        ...item,
+        omit: !_.includes(item.omit, item.codes[value])
+          ? [...item.omit, item.codes[value]]
+          : _.filter(item.omit, (o) => o !== item.codes[value]),
+      };
+      setObsCols((o) => {
+        return {
+          ...o,
+          [item.name]: newItem,
+        };
+      });
+      if (active === item.name) {
+        dispatch({
+          type: "select.obs",
+          obs: newItem,
+        });
+      }
+    },
+    [active, dispatch]
+  );
+
   const categoricalList = useCallback(
     (item, active = null) => {
       const codesMap = _.invert(item.codes);
@@ -168,109 +229,31 @@ export function ObsColsList() {
           <Accordion.Body>
             <ListGroup>
               <ListGroup.Item>
-                <div className="d-flex">
-                  <div className="flex-grow-1">
-                    <Form.Check // prettier-ignore
-                      type="switch"
-                      id="custom-switch"
-                      label="Toggle all"
-                      checked={!item.omit.length}
-                      onChange={() => {
-                        toggleAll(item, !!item.omit.length, active);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <ButtonGroup>
-                      <Button
-                        variant={inLabelObs ? "primary" : "outline-primary"}
-                        size="sm"
-                        onClick={() => {
-                          if (inLabelObs) {
-                            dispatch({
-                              type: "remove.label.obs",
-                              obsName: item.name,
-                            });
-                          } else {
-                            dispatch({
-                              type: "add.label.obs",
-                              obs: {
-                                name: item.name,
-                                type: item.type,
-                                codesMap: item.codesMap,
-                              },
-                            });
-                          }
-                        }}
-                        title="Add to tooltip"
-                      >
-                        <FontAwesomeIcon icon={faFont} />
-                      </Button>
-                      <Button
-                        variant={
-                          dataset.sliceBy.obs &&
-                          dataset.selectedObs?.name === item.name
-                            ? "primary"
-                            : "outline-primary"
-                        }
-                        size="sm"
-                        onClick={() => {
-                          dispatch({
-                            type: "toggle.slice.obs",
-                            obs: item,
-                          });
-                        }}
-                        title="Slice to selected"
-                      >
-                        <FontAwesomeIcon icon={faEye} />
-                      </Button>
-                      <Button
-                        variant={
-                          dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
-                          dataset.selectedObs?.name === item.name
-                            ? "primary"
-                            : "outline-primary"
-                        }
-                        size="sm"
-                        onClick={() => {
-                          dispatch({
-                            type: "select.obs",
-                            obs: item,
-                          });
-                          dispatch({
-                            type: "set.colorEncoding",
-                            value: "obs",
-                          });
-                        }}
-                        title="Set as color encoding"
-                      >
-                        <FontAwesomeIcon icon={faDroplet} />
-                      </Button>
-                    </ButtonGroup>
-                  </div>
-                </div>
+                <ObsToolbar
+                  item={item}
+                  inLabelObs={inLabelObs}
+                  showToggleAllObs={true}
+                  showLabel={true}
+                  showSlice={true}
+                  showColor={true}
+                  onToggleAllObs={() => {
+                    toggleAll(item, !!item.omit.length, active);
+                  }}
+                  onToggleLabel={() => {
+                    toggleLabel(item, inLabelObs);
+                  }}
+                  onToggleSlice={() => {
+                    toggleSlice(item);
+                  }}
+                  onToggleColor={() => {
+                    toggleColor(item);
+                  }}
+                />
               </ListGroup.Item>
-              <ObsValueList
+              <ObsCategoryList
                 item={item}
                 onChange={(value) => {
-                  const newItem = {
-                    ...item,
-                    omit: !_.includes(item.omit, item.codes[value])
-                      ? [...item.omit, item.codes[value]]
-                      : _.filter(item.omit, (o) => o !== item.codes[value]),
-                  };
-                  setObsCols((o) => {
-                    return {
-                      ...o,
-                      [item.name]: newItem,
-                    };
-                  });
-                  if (active === item.name) {
-                    dispatch({
-                      type: "select.obs",
-                      obs: newItem,
-                    });
-                  }
+                  toggleObs(item, value);
                 }}
                 getFillColor={(value) => {
                   return `rgb(${getColor(
@@ -292,11 +275,11 @@ export function ObsColsList() {
     },
     [
       dataset.labelObs,
-      dataset.sliceBy.obs,
-      dataset.selectedObs?.name,
-      dataset.colorEncoding,
       toggleAll,
-      dispatch,
+      toggleLabel,
+      toggleSlice,
+      toggleColor,
+      toggleObs,
       getColor,
     ]
   );
@@ -319,74 +302,28 @@ export function ObsColsList() {
           <Accordion.Body>
             <ListGroup>
               <ListGroup.Item>
-                <div className="d-flex justify-content-end">
-                  <ButtonGroup>
-                    <Button
-                      variant={inLabelObs ? "primary" : "outline-primary"}
-                      size="sm"
-                      onClick={() => {
-                        if (inLabelObs) {
-                          dispatch({
-                            type: "remove.label.obs",
-                            obsName: item.name,
-                          });
-                        } else {
-                          dispatch({
-                            type: "add.label.obs",
-                            obs: {
-                              name: item.name,
-                              type: item.type,
-                            },
-                          });
-                        }
-                      }}
-                      title="Add to tooltip"
-                    >
-                      <FontAwesomeIcon icon={faFont} />
-                    </Button>
-                    <Button
-                      variant={
-                        dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
-                        dataset.selectedObs?.name === item.name
-                          ? "primary"
-                          : "outline-primary"
-                      }
-                      size="sm"
-                      onClick={(key) => {
-                        if (key != null) {
-                          dispatch({
-                            type: "select.obs",
-                            obs: item,
-                          });
-                          dispatch({
-                            type: "set.colorEncoding",
-                            value: "obs",
-                          });
-                        }
-                      }}
-                      title="Set as color encoding"
-                    >
-                      <FontAwesomeIcon icon={faDroplet} />
-                    </Button>
-                  </ButtonGroup>
-                </div>
+                <ObsToolbar
+                  item={item}
+                  inLabelObs={inLabelObs}
+                  showToggleAllObs={false}
+                  showLabel={true}
+                  showSlice={false}
+                  showColor={true}
+                  onToggleLabel={() => {
+                    toggleLabel(item, inLabelObs);
+                  }}
+                  onToggleColor={(key) => {
+                    toggleColor(item);
+                  }}
+                />
               </ListGroup.Item>
             </ListGroup>
-            <p>Min: {item.min}</p>
-            <p>Max: {item.max}</p>
-            <p>Mean: {item.mean}</p>
-            <p>Median: {item.median}</p>
-            <p>NBins: {item.nBins}</p>
+            <ObsContinuousItem item={item} />
           </Accordion.Body>
         </Accordion.Item>
       );
     },
-    [
-      dataset.colorEncoding,
-      dataset.labelObs,
-      dataset.selectedObs?.name,
-      dispatch,
-    ]
+    [dataset.labelObs, toggleColor, toggleLabel]
   );
 
   const otherList = useCallback((item, active = null) => {

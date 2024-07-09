@@ -118,7 +118,7 @@ export default function ScatterplotDemo(props) {
           >
             <Card className="cherita-app-features d-none d-xl-block">
               <Card.Body>
-                <SearchBar />
+                <SearchBar searchDiseases={true} />
                 <VarNamesList mode={SELECTION_MODES.SINGLE} />
               </Card.Body>
             </Card>

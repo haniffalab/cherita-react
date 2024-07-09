@@ -6,7 +6,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import _ from "lodash";
 import { ListGroup, Form, Badge } from "react-bootstrap";
 
-export function ObsValueList({
+export function ObsCategoryList({
   item,
   onChange,
   getFillColor,
