@@ -2,6 +2,7 @@ import React from "react";
 
 import { faDroplet, faEye, faFont } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import _ from "lodash";
 import { Form, ButtonGroup, Button } from "react-bootstrap";
 
 import { COLOR_ENCODINGS } from "../../constants/constants";
@@ -9,17 +10,24 @@ import { useDataset } from "../../context/DatasetContext";
 
 export function ObsToolbar({
   item,
-  showToggleAllObs,
-  showLabel,
-  showSlice,
-  showColor,
+  showToggleAllObs = true,
+  showLabel = true,
+  showSlice = true,
+  showColor = true,
   onToggleAllObs,
   onToggleLabel,
   onToggleSlice,
   onToggleColor,
-  inLabelObs,
 }) {
   const dataset = useDataset();
+
+  const allToggledOn = !item.omit.length;
+  const inLabelObs = _.some(dataset.labelObs, (i) => i.name === item.name);
+  const inSliceObs =
+    dataset.sliceBy.obs && dataset.selectedObs?.name === item.name;
+  const isColorEncoding =
+    dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+    dataset.selectedObs?.name === item.name;
 
   return (
     <div className="d-flex">
@@ -29,7 +37,7 @@ export function ObsToolbar({
             type="switch"
             id="custom-switch"
             label="Toggle all"
-            checked={!item.omit.length}
+            checked={allToggledOn}
             onChange={onToggleAllObs}
           />
         )}
@@ -48,11 +56,7 @@ export function ObsToolbar({
           )}
           {showSlice && (
             <Button
-              variant={
-                dataset.sliceBy.obs && dataset.selectedObs?.name === item.name
-                  ? "primary"
-                  : "outline-primary"
-              }
+              variant={inSliceObs ? "primary" : "outline-primary"}
               size="sm"
               onClick={onToggleSlice}
               title="Slice to selected"
@@ -62,12 +66,7 @@ export function ObsToolbar({
           )}
           {showColor && (
             <Button
-              variant={
-                dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
-                dataset.selectedObs?.name === item.name
-                  ? "primary"
-                  : "outline-primary"
-              }
+              variant={isColorEncoding ? "primary" : "outline-primary"}
               size="sm"
               onClick={onToggleColor}
               title="Set as color encoding"
