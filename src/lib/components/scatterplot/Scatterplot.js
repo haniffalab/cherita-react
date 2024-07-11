@@ -48,6 +48,8 @@ const INITIAL_VIEW_STATE = {
   bearing: 0,
 };
 
+const EPSILON = 1e-6;
+
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
@@ -282,9 +284,36 @@ export function Scatterplot({ radius = 30 }) {
   const isInSlice = useCallback(
     (index, values, positions) => {
       let inSlice = true;
-      if ((dataset.sliceBy.obs || isCategorical) && values) {
+
+      if (isCategorical && values) {
         inSlice &= !_.includes(dataset.selectedObs?.omit, values[index]);
+      } else if (
+        (dataset.sliceBy.obs ||
+          dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS) &&
+        !!dataset.selectedObs?.omit.length &&
+        values
+      ) {
+        if (dataset.selectedObs.type === OBS_TYPES.CATEGORICAL) {
+          inSlice &= !_.includes(dataset.selectedObs.omit, values[index]);
+        } else if (dataset.selectedObs.type === OBS_TYPES.CONTINUOUS) {
+          const binEdges = dataset.selectedObs.bins.binEdges;
+          const lastEdges = binEdges[binEdges.length - 1];
+          // add small value to last bin edge to include the last value
+          const modifiedBinEdges = [
+            ..._.initial(binEdges),
+            [lastEdges[0], lastEdges[1] + EPSILON],
+          ];
+          const binIndices = _.difference(
+            _.range(modifiedBinEdges.length),
+            dataset.selectedObs.omit
+          );
+          const ranges = _.at(modifiedBinEdges, binIndices);
+          inSlice &= _.some(ranges, (range) =>
+            _.inRange(values[index], ...range)
+          );
+        }
       }
+
       if (dataset.sliceBy.polygons && positions) {
         inSlice &= _.some(features?.features, (_f, i) => {
           return booleanPointInPolygon(
@@ -296,7 +325,7 @@ export function Scatterplot({ radius = 30 }) {
       return inSlice;
     },
     [
-      dataset.selectedObs?.omit,
+      dataset.selectedObs,
       dataset.sliceBy.obs,
       dataset.sliceBy.polygons,
       features.features,

@@ -162,6 +162,10 @@ function datasetReducer(dataset, action) {
           dataset.colorEncoding === COLOR_ENCODINGS.OBS && !action.obs
             ? null
             : dataset.colorEncoding,
+        sliceBy: {
+          ...dataset.sliceBy,
+          obs: action.obs ? dataset.sliceBy.obs : false,
+        },
       };
     }
     case "select.obsm": {
