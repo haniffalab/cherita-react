@@ -281,6 +281,19 @@ export function Scatterplot({ radius = 30 }) {
     }
   }, [dataset.colorEncoding, dataset.selectedObs?.type]);
 
+  const isInBins = (v, binEdges, indices) => {
+    const lastEdge = _.last(binEdges);
+    const allButLastEdges = _.initial(binEdges);
+    // add epsilon to last edge to include the last value
+    const modifiedBinEdges = [
+      ...allButLastEdges,
+      [lastEdge[0], lastEdge[1] + EPSILON],
+    ];
+    const binIndices = _.difference(_.range(binEdges.length), indices);
+    const ranges = _.at(modifiedBinEdges, binIndices);
+    return _.some(ranges, (range) => _.inRange(v, ...range));
+  };
+
   const isInSlice = useCallback(
     (index, values, positions) => {
       let inSlice = true;
@@ -289,7 +302,8 @@ export function Scatterplot({ radius = 30 }) {
         inSlice &= !_.includes(dataset.selectedObs?.omit, values[index]);
       } else if (
         (dataset.sliceBy.obs ||
-          dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS) &&
+          (dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+            dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS)) &&
         !!dataset.selectedObs?.omit.length &&
         values
       ) {
@@ -299,22 +313,10 @@ export function Scatterplot({ radius = 30 }) {
           if (Number.isNaN(values[index])) {
             inSlice &= !_.includes(dataset.selectedObs.omit, -1);
           } else {
-            const binEdges = dataset.selectedObs.bins.binEdges;
-            const lastEdge = _.last(binEdges);
-            const allButLastEdges = _.initial(binEdges);
-            // add epsilon to last edge to include the last value
-            const modifiedBinEdges = [
-              ...allButLastEdges,
-              [lastEdge[0], lastEdge[1] + EPSILON],
-            ];
-
-            const binIndices = _.difference(
-              _.range(binEdges.length),
+            inSlice &= isInBins(
+              values[index],
+              dataset.selectedObs.bins.binEdges,
               _.without(dataset.selectedObs.omit, -1)
-            );
-            const ranges = _.at(modifiedBinEdges, binIndices);
-            inSlice &= _.some(ranges, (range) =>
-              _.inRange(values[index], ...range)
             );
           }
         }
@@ -331,7 +333,10 @@ export function Scatterplot({ radius = 30 }) {
       return inSlice;
     },
     [
-      dataset.selectedObs,
+      dataset.colorEncoding,
+      dataset.selectedObs?.bins?.binEdges,
+      dataset.selectedObs?.omit,
+      dataset.selectedObs?.type,
       dataset.sliceBy.obs,
       dataset.sliceBy.polygons,
       features.features,

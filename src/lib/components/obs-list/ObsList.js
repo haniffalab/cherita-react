@@ -167,7 +167,7 @@ export function ObsColsList() {
         />
       );
     } else {
-      return <></>;
+      return;
     }
   });
 

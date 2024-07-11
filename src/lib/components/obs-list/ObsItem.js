@@ -256,6 +256,7 @@ function ObsContinuousStats({ obs }) {
 
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params);
 
+  // @TODO: fix width issue
   return (
     <>
       <div className="d-flex justify-content-between mt-3 align-items-center">
