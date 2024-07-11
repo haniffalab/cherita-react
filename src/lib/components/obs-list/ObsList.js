@@ -37,7 +37,7 @@ export function ObsColsList() {
       setObsCols(
         _.keyBy(
           _.map(fetchedData, (d) => {
-            return { ...d, omit: [] };
+            return { ...d, codesMap: _.invert(d.codes), omit: [] };
           }),
           "name"
         )
@@ -81,7 +81,7 @@ export function ObsColsList() {
     }
   };
 
-  const toggleLabel = (item, codesMap = null) => {
+  const toggleLabel = (item) => {
     const inLabelObs = _.some(dataset.labelObs, (i) => i.name === item.name);
     if (inLabelObs) {
       dispatch({
@@ -94,7 +94,6 @@ export function ObsColsList() {
         obs: {
           name: item.name,
           type: item.type,
-          codesMap: codesMap || _.invert(item.codes),
         },
       });
     }

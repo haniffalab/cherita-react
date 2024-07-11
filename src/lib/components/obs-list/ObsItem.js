@@ -124,16 +124,16 @@ function CategoricalItem({
 }) {
   const value = data.values[index];
   const pct = (data.value_counts[value] / totalCounts) * 100;
-  const label =
-    data.type === OBS_TYPES.CONTINUOUS
-      ? `[ ${data.bins.binEdges[
-          index
-        ][0].toLocaleString()}, ${data.bins.binEdges[
-          index
-        ][1].toLocaleString()}${
-          index === data.bins.binEdges.length - 1 ? " ]" : " )"
-        }`
-      : value;
+  let label = value;
+  if (data.type === OBS_TYPES.CONTINUOUS && data.codes[value] !== -1) {
+    label = `[ ${data.bins.binEdges[
+      data.codes[value]
+    ][0].toLocaleString()}, ${data.bins.binEdges[
+      data.codes[value]
+    ][1].toLocaleString()}${
+      data.codes[value] === data.bins.binEdges.length - 1 ? " ]" : " )"
+    }`;
+  }
 
   const { getColor } = useColor();
 
@@ -258,7 +258,7 @@ function ObsContinuousStats({ obs }) {
 
   return (
     <>
-      <div className="d-flex justify-content-between mt-3">
+      <div className="d-flex justify-content-between mt-3 align-items-center">
         <Table size="sm" className="obs-continuous-stats" striped>
           <tbody>
             <tr>
@@ -284,7 +284,7 @@ function ObsContinuousStats({ obs }) {
           </tbody>
         </Table>
         {isPending && <LoadingLinear />}
-        {!serverError && fetchedData && (
+        {!isPending && !serverError && (
           <div className="obs-distribution">
             <SparkLineChart
               data={fetchedData.kde_values[1]}

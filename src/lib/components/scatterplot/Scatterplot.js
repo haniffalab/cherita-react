@@ -296,21 +296,27 @@ export function Scatterplot({ radius = 30 }) {
         if (dataset.selectedObs.type === OBS_TYPES.CATEGORICAL) {
           inSlice &= !_.includes(dataset.selectedObs.omit, values[index]);
         } else if (dataset.selectedObs.type === OBS_TYPES.CONTINUOUS) {
-          const binEdges = dataset.selectedObs.bins.binEdges;
-          const lastEdges = binEdges[binEdges.length - 1];
-          // add small value to last bin edge to include the last value
-          const modifiedBinEdges = [
-            ..._.initial(binEdges),
-            [lastEdges[0], lastEdges[1] + EPSILON],
-          ];
-          const binIndices = _.difference(
-            _.range(modifiedBinEdges.length),
-            dataset.selectedObs.omit
-          );
-          const ranges = _.at(modifiedBinEdges, binIndices);
-          inSlice &= _.some(ranges, (range) =>
-            _.inRange(values[index], ...range)
-          );
+          if (Number.isNaN(values[index])) {
+            inSlice &= !_.includes(dataset.selectedObs.omit, -1);
+          } else {
+            const binEdges = dataset.selectedObs.bins.binEdges;
+            const lastEdge = _.last(binEdges);
+            const allButLastEdges = _.initial(binEdges);
+            // add epsilon to last edge to include the last value
+            const modifiedBinEdges = [
+              ...allButLastEdges,
+              [lastEdge[0], lastEdge[1] + EPSILON],
+            ];
+
+            const binIndices = _.difference(
+              _.range(binEdges.length),
+              _.without(dataset.selectedObs.omit, -1)
+            );
+            const ranges = _.at(modifiedBinEdges, binIndices);
+            inSlice &= _.some(ranges, (range) =>
+              _.inRange(values[index], ...range)
+            );
+          }
         }
       }
 
@@ -513,11 +519,11 @@ export function Scatterplot({ radius = 30 }) {
     );
   }
 
-  const getLabel = (o, v, index, isVar = false) => {
+  const getLabel = (o, v, isVar = false) => {
     if (isVar || o.type === OBS_TYPES.CONTINUOUS) {
-      return `${o.name}: ${parseFloat(v?.[index]).toLocaleString()}`;
+      return `${o.name}: ${parseFloat(v).toLocaleString()}`;
     } else {
-      return `${o.name}: ${o.codesMap[v?.[index]]}`;
+      return `${o.name}: ${o.codesMap[v]}`;
     }
   };
 
@@ -530,18 +536,18 @@ export function Scatterplot({ radius = 30 }) {
       dataset.selectedObs &&
       !_.some(dataset.labelObs, { name: dataset.selectedObs.name })
     ) {
-      text.push(getLabel(dataset.selectedObs, obsData.data, index));
+      text.push(getLabel(dataset.selectedObs, obsData.data?.[index]));
     }
 
     if (dataset.colorEncoding === COLOR_ENCODINGS.VAR && dataset.selectedVar) {
-      text.push(getLabel(dataset.selectedVar, xData.data, index, true));
+      text.push(getLabel(dataset.selectedVar, xData.data?.[index], true));
     }
 
     if (dataset.labelObs.length) {
       text.push(
         ..._.map(labelObsData, (v, k) => {
           const labelObs = _.find(dataset.labelObs, (o) => o.name === k);
-          return getLabel(labelObs, v, index);
+          return getLabel(labelObs, v[index]);
         })
       );
     }
