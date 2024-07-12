@@ -4,7 +4,7 @@ import { Tooltip } from "@mui/material";
 import { Gauge, SparkLineChart } from "@mui/x-charts";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import _ from "lodash";
-import { Accordion, ListGroup, Form, Badge, Table } from "react-bootstrap";
+import { ListGroup, Form, Badge, Table } from "react-bootstrap";
 
 import { ObsToolbar } from "./ObsToolbar";
 import { OBS_TYPES } from "../../constants/constants";
@@ -203,7 +203,6 @@ function CategoricalItem({
 
 export function CategoricalObs({
   obs,
-  isActive = false,
   toggleAll,
   toggleObs,
   toggleLabel,
@@ -215,34 +214,25 @@ export function CategoricalObs({
   const max = _.max(_.values(obs.codes));
 
   return (
-    <Accordion.Item
-      key={obs.name}
-      eventKey={obs.name}
-      className={isActive && "cherita-accordion-active"}
-    >
-      <Accordion.Header>{obs.name}</Accordion.Header>
-      <Accordion.Body>
-        <ListGroup>
-          <ListGroup.Item>
-            <ObsToolbar
-              item={obs}
-              onToggleAllObs={toggleAll}
-              onToggleLabel={toggleLabel}
-              onToggleSlice={toggleSlice}
-              onToggleColor={toggleColor}
-            />
-          </ListGroup.Item>
-          <VirtualizedList
-            data={obs}
-            ItemComponent={CategoricalItem}
-            totalCounts={totalCounts}
-            min={min}
-            max={max}
-            onChange={toggleObs}
-          />
-        </ListGroup>
-      </Accordion.Body>
-    </Accordion.Item>
+    <ListGroup>
+      <ListGroup.Item>
+        <ObsToolbar
+          item={obs}
+          onToggleAllObs={toggleAll}
+          onToggleLabel={toggleLabel}
+          onToggleSlice={toggleSlice}
+          onToggleColor={toggleColor}
+        />
+      </ListGroup.Item>
+      <VirtualizedList
+        data={obs}
+        ItemComponent={CategoricalItem}
+        totalCounts={totalCounts}
+        min={min}
+        max={max}
+        onChange={toggleObs}
+      />
+    </ListGroup>
   );
 }
 
@@ -256,7 +246,7 @@ function ObsContinuousStats({ obs }) {
 
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params);
 
-  // @TODO: fix width issue
+  // @TODO: fix width issue when min/max/etc values are too large
   return (
     <>
       <div className="d-flex justify-content-between mt-3 align-items-center">
@@ -290,7 +280,7 @@ function ObsContinuousStats({ obs }) {
             <SparkLineChart
               data={fetchedData.kde_values[1]}
               showHighlight={true}
-              showTooltip={true}
+              showTooltip={true} // throws Maximum update depth exceeded error. Documented here: https://github.com/mui/mui-x/issues/13450
               margin={{
                 top: 10,
                 right: 20,
@@ -318,7 +308,6 @@ function ObsContinuousStats({ obs }) {
 export function ContinuousObs({
   obs,
   updateObs,
-  isActive = false,
   toggleAll,
   toggleObs,
   toggleLabel,
@@ -355,41 +344,32 @@ export function ContinuousObs({
 
   return (
     <>
-      <Accordion.Item
-        key={obs.name}
-        eventKey={obs.name}
-        className={isActive && "cherita-accordion-active"}
-      >
-        <Accordion.Header>{obs.name}</Accordion.Header>
-        <Accordion.Body>
-          {isPending && <LoadingLinear />}
-          {!serverError && updatedObs && (
-            <>
-              <ListGroup>
-                <ListGroup.Item>
-                  <ObsToolbar
-                    item={obs}
-                    onToggleAllObs={toggleAll}
-                    onToggleLabel={toggleLabel}
-                    onToggleSlice={toggleSlice}
-                    onToggleColor={toggleColor}
-                  />
-                </ListGroup.Item>
-                <VirtualizedList
-                  data={obs}
-                  ItemComponent={CategoricalItem}
-                  totalCounts={totalCounts}
-                  min={min}
-                  max={max}
-                  onChange={toggleObs}
-                  showColor={false}
-                />
-              </ListGroup>
-              <ObsContinuousStats obs={obs} />
-            </>
-          )}
-        </Accordion.Body>
-      </Accordion.Item>
+      {isPending && <LoadingLinear />}
+      {!serverError && updatedObs && (
+        <>
+          <ListGroup>
+            <ListGroup.Item>
+              <ObsToolbar
+                item={obs}
+                onToggleAllObs={toggleAll}
+                onToggleLabel={toggleLabel}
+                onToggleSlice={toggleSlice}
+                onToggleColor={toggleColor}
+              />
+            </ListGroup.Item>
+            <VirtualizedList
+              data={obs}
+              ItemComponent={CategoricalItem}
+              totalCounts={totalCounts}
+              min={min}
+              max={max}
+              onChange={toggleObs}
+              showColor={false}
+            />
+          </ListGroup>
+          <ObsContinuousStats obs={obs} />
+        </>
+      )}
     </>
   );
 }

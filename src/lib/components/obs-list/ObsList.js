@@ -136,39 +136,43 @@ export function ObsColsList() {
   };
 
   const obsList = _.map(obsCols, (item) => {
-    if (
-      item.type === OBS_TYPES.CATEGORICAL ||
-      item.type === OBS_TYPES.BOOLEAN
-    ) {
-      return (
-        <CategoricalObs
-          key={item.name}
-          obs={item}
-          isActive={active === item.name}
-          toggleAll={() => toggleAll(item)}
-          toggleObs={(value) => toggleObs(item, value)}
-          toggleLabel={() => toggleLabel(item)}
-          toggleSlice={() => toggleSlice(item)}
-          toggleColor={() => toggleColor(item)}
-        />
-      );
-    } else if (item.type === OBS_TYPES.CONTINUOUS) {
-      return (
-        <ContinuousObs
-          key={item.name}
-          obs={item}
-          updateObs={updateObs}
-          isActive={active === item.name}
-          toggleAll={() => toggleAll(item)}
-          toggleObs={(value) => toggleObs(item, value)}
-          toggleLabel={() => toggleLabel(item)}
-          toggleSlice={() => toggleSlice(item)}
-          toggleColor={() => toggleColor(item)}
-        />
-      );
-    } else {
-      return;
+    if (item.type === OBS_TYPES.DISCRETE) {
+      return null;
     }
+    return (
+      <Accordion.Item
+        key={item.name}
+        eventKey={item.name}
+        className={active === item.name && "cherita-accordion-active"}
+      >
+        <Accordion.Header>{item.name}</Accordion.Header>
+        <Accordion.Body>
+          {item.type === OBS_TYPES.CATEGORICAL ||
+          item.type === OBS_TYPES.BOOLEAN ? (
+            <CategoricalObs
+              key={item.name}
+              obs={item}
+              toggleAll={() => toggleAll(item)}
+              toggleObs={(value) => toggleObs(item, value)}
+              toggleLabel={() => toggleLabel(item)}
+              toggleSlice={() => toggleSlice(item)}
+              toggleColor={() => toggleColor(item)}
+            />
+          ) : (
+            <ContinuousObs
+              key={item.name}
+              obs={item}
+              updateObs={updateObs}
+              toggleAll={() => toggleAll(item)}
+              toggleObs={(value) => toggleObs(item, value)}
+              toggleLabel={() => toggleLabel(item)}
+              toggleSlice={() => toggleSlice(item)}
+              toggleColor={() => toggleColor(item)}
+            />
+          )}
+        </Accordion.Body>
+      </Accordion.Item>
+    );
   });
 
   if (!serverError) {
