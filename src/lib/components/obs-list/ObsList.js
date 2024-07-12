@@ -47,18 +47,14 @@ export function ObsColsList() {
 
   // @TODO: fix re-rendering performance issue
   useEffect(() => {
-    if (obsCols && dataset.selectedObs) {
-      if (_.isEqual(obsCols[dataset.selectedObs.name], dataset.selectedObs)) {
-        setActive(dataset.selectedObs.name);
+    if (obsCols) {
+      if (obsCols[dataset.selectedObs?.name]) {
+        setActive(dataset.selectedObs?.name);
       } else {
-        dispatch({
-          type: "select.obs",
-          obs: null,
-        });
         setActive(null);
       }
     }
-  }, [dataset.selectedObs, dispatch, obsCols]);
+  }, [dataset.selectedObs, obsCols]);
 
   const updateObs = (updatedObs) => {
     setObsCols((o) => {
@@ -152,6 +148,7 @@ export function ObsColsList() {
             <CategoricalObs
               key={item.name}
               obs={item}
+              updateObs={updateObs}
               toggleAll={() => toggleAll(item)}
               toggleObs={(value) => toggleObs(item, value)}
               toggleLabel={() => toggleLabel(item)}

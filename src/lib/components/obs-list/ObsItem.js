@@ -8,7 +8,7 @@ import { ListGroup, Form, Badge, Table } from "react-bootstrap";
 
 import { ObsToolbar } from "./ObsToolbar";
 import { OBS_TYPES } from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useColor } from "../../helpers/color-helper";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
@@ -203,15 +203,34 @@ function CategoricalItem({
 
 export function CategoricalObs({
   obs,
+  updateObs,
   toggleAll,
   toggleObs,
   toggleLabel,
   toggleSlice,
   toggleColor,
 }) {
+  const dataset = useDataset();
+  const dispatch = useDatasetDispatch();
   const totalCounts = _.sum(_.values(obs.value_counts));
   const min = _.min(_.values(obs.codes));
   const max = _.max(_.values(obs.codes));
+
+  useEffect(() => {
+    if (dataset.selectedObs?.name === obs.name) {
+      const selectedObsData = _.omit(dataset.selectedObs, ["omit"]);
+      const obsData = _.omit(obs, ["omit"]);
+      if (!_.isEqual(selectedObsData, obsData)) {
+        // outdated selectedObs
+        dispatch({
+          type: "select.obs",
+          obs: obs,
+        });
+      } else if (!_.isEqual(dataset.selectedObs.omit, obs.omit)) {
+        updateObs({ ...obs, omit: dataset.selectedObs.omit });
+      }
+    }
+  }, [dataset.selectedObs, dispatch, obs, obs.name, updateObs]);
 
   return (
     <ListGroup>
@@ -316,6 +335,7 @@ export function ContinuousObs({
 }) {
   const ENDPOINT = "obs/bins";
   const dataset = useDataset();
+  const dispatch = useDatasetDispatch();
   const binnedObs = binContinuous(obs);
   const params = {
     url: dataset.url,
@@ -328,6 +348,8 @@ export function ContinuousObs({
     refetchOnMount: false,
   });
 
+  const updatedObs = fetchedData && _.isMatch(obs, fetchedData);
+
   useEffect(() => {
     // Update ObsList obsCols with bin data
     // after update -> re-render -> obs will already be updated
@@ -336,7 +358,21 @@ export function ContinuousObs({
     }
   }, [binnedObs, fetchedData, isPending, obs, serverError, updateObs]);
 
-  const updatedObs = fetchedData && _.isMatch(obs, fetchedData);
+  useEffect(() => {
+    if (updatedObs && dataset.selectedObs?.name === obs.name) {
+      const selectedObsData = _.omit(dataset.selectedObs, ["omit"]);
+      const obsData = _.omit(obs, ["omit"]);
+      if (!_.isEqual(selectedObsData, obsData)) {
+        // outdated selectedObs
+        dispatch({
+          type: "select.obs",
+          obs: obs,
+        });
+      } else if (!_.isEqual(dataset.selectedObs.omit, obs.omit)) {
+        updateObs({ ...obs, omit: dataset.selectedObs.omit });
+      }
+    }
+  }, [dataset.selectedObs, dispatch, obs, obs.name, updateObs, updatedObs]);
 
   const totalCounts = _.sum(_.values(obs?.value_counts));
   const min = _.min(_.values(obs?.codes));
