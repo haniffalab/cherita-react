@@ -97,8 +97,8 @@ function VarDiseaseInfoItem({ data, index }) {
   const item = data[index];
 
   return (
-    <ListGroup.Item>
-      <div className="feature-disease-info">
+    <ListGroup.Item className="feature-disease-info">
+      <div>
         {item.disease_name} <br />
         <Table striped>
           <tbody>

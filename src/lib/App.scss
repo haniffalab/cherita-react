@@ -245,6 +245,10 @@ input[type="checkbox"], .cursor-pointer {
 
 .feature-disease-info {
     font-weight: lighter;
+    border-top: 1px solid var(list-group-border-color);
+    border-right: 0;
+    border-left: 0;
+    border-bottom: 0;
 }
 
 .feature-disease-info table {
