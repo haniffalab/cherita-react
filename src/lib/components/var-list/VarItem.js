@@ -1,8 +1,7 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   faDroplet,
-  faPlus,
   faCircleInfo,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
@@ -13,13 +12,14 @@ import {
   mangoFusionPalette,
 } from "@mui/x-charts/colorPalettes";
 import _ from "lodash";
-import { Button } from "react-bootstrap";
+import { Button, Collapse, ListGroup, Table } from "react-bootstrap";
 
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
-import { useDebouncedFetch } from "../../utils/requests";
+import { useFetch, useDebouncedFetch } from "../../utils/requests";
+import { VirtualizedList } from "../../utils/VirtualizedList";
 
 function VarHistogram({ item }) {
   const ENDPOINT = "var/histograms";
@@ -93,6 +93,154 @@ function VarHistogram({ item }) {
   );
 }
 
+function VarDiseaseInfoItem({ data, index }) {
+  const item = data[index];
+
+  return (
+    <ListGroup.Item>
+      <div className="feature-disease-info">
+        {item.disease_name} <br />
+        <Table striped>
+          <tbody>
+            <tr>
+              <td>Confidence</td>
+              <td>{item.confidence || "unknown"}</td>
+            </tr>
+            <tr>
+              <td>Organ{item.organs.length > 1 ? "s" : ""}</td>
+              <td>{item.organs.map((o) => o.name).join(", ")}</td>
+            </tr>
+            {!!item.metadata?.length &&
+              item.metadata.map((m) => {
+                return (
+                  <tr>
+                    <td>{m.key}</td>
+                    <td>{m.value}</td>
+                  </tr>
+                );
+              })}
+          </tbody>
+        </Table>
+      </div>
+    </ListGroup.Item>
+  );
+}
+
+function VarDiseaseInfo({ data }) {
+  return (
+    <>
+      <ListGroup>
+        <VirtualizedList
+          data={data}
+          count={data.length}
+          estimateSize={70}
+          maxHeight="40vh"
+          ItemComponent={VarDiseaseInfoItem}
+        />
+      </ListGroup>
+    </>
+  );
+}
+
+function SingleSelectionItem({
+  item,
+  isActive,
+  selectVar,
+  removeVar,
+  isDiseaseGene,
+}) {
+  const ENDPOINT = "disease/gene";
+  const [openInfo, setOpenInfo] = useState(false);
+  const dataset = useDataset();
+  const params = {
+    geneName: item.name,
+    diseaseDatasets: dataset.diseaseDatasets,
+  };
+
+  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params);
+
+  return (
+    <>
+      <div
+        className="d-flex justify-content-between cursor-pointer"
+        onClick={() => {
+          setOpenInfo((o) => !o);
+        }}
+      >
+        <div className="d-flex justify-content-between align-items-center w-100">
+          <div>{item.name}</div>
+          {!isDiseaseGene && <VarHistogram item={item} />}
+        </div>
+
+        <div className="d-flex align-items-center gap-1">
+          <FontAwesomeIcon icon={faCircleInfo} />
+          <Button
+            type="button"
+            key={item.matrix_index}
+            variant={isActive ? "primary" : "outline-primary"}
+            className="m-0 p-0 px-1"
+            onClick={(e) => {
+              e.stopPropagation();
+              selectVar();
+            }}
+            disabled={item.matrix_index === -1}
+            title={
+              item.matrix_index === -1
+                ? "Not present in data"
+                : "Set as color encoding"
+            }
+          >
+            <FontAwesomeIcon icon={faDroplet} />
+          </Button>
+          {!isDiseaseGene && (
+            <Button
+              type="button"
+              className="m-0 p-0 px-1"
+              variant="outline-secondary"
+              title="Remove from list"
+              onClick={(e) => {
+                e.stopPropagation();
+                removeVar();
+              }}
+            >
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          )}
+        </div>
+      </div>
+      {!isPending && !serverError && !!fetchedData.length && (
+        <Collapse in={openInfo}>
+          <div className="mt-2">
+            <VarDiseaseInfo data={fetchedData} />
+          </div>
+        </Collapse>
+      )}
+    </>
+  );
+}
+
+function MultipleSelectionItem({ item, isActive, toggleVar }) {
+  return (
+    <>
+      <div className="d-flex">
+        <div className="flex-grow-1">
+          <Button
+            type="button"
+            key={item.matrix_index}
+            variant={isActive ? "primary" : "outline-primary"}
+            className="m-0 p-0 px-1"
+            onClick={toggleVar}
+            disabled={item.matrix_index === -1}
+            title={item.matrix_index === -1 ? "Not present in data" : ""}
+          >
+            {item.name}
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function VarItem({
   item,
   active,
@@ -103,135 +251,77 @@ export function VarItem({
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
 
-  const selectVar = useCallback(
-    (item) => {
-      if (mode === SELECTION_MODES.SINGLE) {
-        dispatch({
-          type: "select.var",
-          var: item,
-        });
-        dispatch({
-          type: "set.colorEncoding",
-          value: "var",
-        });
-      } else if (mode === SELECTION_MODES.MULTIPLE) {
-        dispatch({
-          type: "select.multivar",
-          var: item,
-        });
-      }
-    },
-    [dispatch, mode]
-  );
-
-  const removeVar = useCallback(
-    (v) => {
-      setVarButtons((b) => {
-        return b.filter((i) => i.name !== v.name);
+  const selectVar = (v) => {
+    if (mode === SELECTION_MODES.SINGLE) {
+      dispatch({
+        type: "select.var",
+        var: v,
       });
-      if (mode === SELECTION_MODES.SINGLE) {
-        if (active === v.matrix_index) {
-          dispatch({
-            type: "deselect.var",
-          });
-        }
-      } else if (mode === SELECTION_MODES.MULTIPLE) {
-        if (active.includes(v.matrix_index)) {
-          dispatch({
-            type: "deselect.multivar",
-            var: v,
-          });
-        }
+      dispatch({
+        type: "set.colorEncoding",
+        value: "var",
+      });
+    } else if (mode === SELECTION_MODES.MULTIPLE) {
+      dispatch({
+        type: "select.multivar",
+        var: v,
+      });
+    }
+  };
+
+  const removeVar = (v) => {
+    setVarButtons((b) => {
+      return b.filter((i) => i.name !== v.name);
+    });
+    if (mode === SELECTION_MODES.SINGLE) {
+      if (active === v.matrix_index) {
+        dispatch({
+          type: "deselect.var",
+        });
       }
-    },
-    [active, dispatch, mode, setVarButtons]
-  );
+    } else if (mode === SELECTION_MODES.MULTIPLE) {
+      if (active.includes(v.matrix_index)) {
+        dispatch({
+          type: "deselect.multivar",
+          var: v,
+        });
+      }
+    }
+  };
+
+  const toggleVar = (v) => {
+    if (active.includes(v.matrix_index)) {
+      dispatch({
+        type: "deselect.multivar",
+        var: v,
+      });
+    } else {
+      selectVar(v);
+    }
+  };
 
   if (item && mode === SELECTION_MODES.SINGLE) {
     return (
-      <>
-        <div className="d-flex justify-content-between">
-          <div className="d-flex justify-content-between align-items-center w-100">
-            <div>{item.name}</div>
-            {!isDiseaseGene && <VarHistogram item={item} />}
-          </div>
-
-          <div className="d-flex align-items-center gap-1">
-            <FontAwesomeIcon icon={faCircleInfo} />
-            <Button
-              type="button"
-              key={item.matrix_index}
-              variant={
-                dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
-                active === item.matrix_index
-                  ? "primary"
-                  : "outline-primary"
-              }
-              className="m-0 p-0 px-1"
-              onClick={() => {
-                selectVar(item);
-              }}
-              disabled={item.matrix_index === -1}
-              title={
-                item.matrix_index === -1
-                  ? "Not present in data"
-                  : "Set as color encoding"
-              }
-            >
-              <FontAwesomeIcon icon={faDroplet} />
-            </Button>
-            {!isDiseaseGene && (
-              <Button
-                type="button"
-                className="m-0 p-0 px-1"
-                variant="outline-secondary"
-                title="Remove from list"
-                onClick={() => removeVar(item)}
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </Button>
-            )}
-          </div>
-        </div>
-      </>
+      <SingleSelectionItem
+        item={item}
+        isActive={
+          dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
+          active === item.matrix_index
+        }
+        selectVar={() => selectVar(item)}
+        removeVar={() => removeVar(item)}
+        isDiseaseGene={isDiseaseGene}
+      />
     );
   } else if (mode === SELECTION_MODES.MULTIPLE) {
     return (
-      <>
-        <div className="d-flex">
-          <div className="flex-grow-1">
-            <Button
-              type="button"
-              key={item.matrix_index}
-              variant={
-                item.matrix_index !== -1 &&
-                _.includes(active, item.matrix_index)
-                  ? "primary"
-                  : "outline-primary"
-              }
-              className="m-0 p-0 px-1"
-              onClick={() => {
-                if (active.includes(item.matrix_index)) {
-                  dispatch({
-                    type: "deselect.multivar",
-                    var: item,
-                  });
-                } else {
-                  selectVar(item);
-                }
-              }}
-              disabled={item.matrix_index === -1}
-              title={item.matrix_index === -1 ? "Not present in data" : ""}
-            >
-              {item.name}
-            </Button>
-          </div>
-          <div>
-            {" "}
-            <FontAwesomeIcon icon={faPlus} />
-          </div>
-        </div>
-      </>
+      <MultipleSelectionItem
+        item={item}
+        isActive={
+          item.matrix_index !== -1 && _.includes(active, item.matrix_index)
+        }
+        toggleVar={() => toggleVar(item)}
+      />
     );
   } else {
     return null;

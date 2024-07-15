@@ -3,6 +3,10 @@ $accordion-button-active-bg: #e7edf0;
 
 @import "bootstrap/scss/bootstrap";
 
+input[type="checkbox"], .cursor-pointer {
+    cursor: pointer;
+}
+
 .loading-spinner {
     @extend .bg-light;
     height: 100%;
@@ -237,4 +241,12 @@ $accordion-button-active-bg: #e7edf0;
 
 .feature-histogram-tooltip td > p {
     font-size: 0.85rem !important;
+}
+
+.feature-disease-info {
+    font-weight: lighter;
+}
+
+.feature-disease-info table {
+    margin: 0;
 }

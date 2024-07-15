@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useEffect } from "react";
 
 import { Tooltip } from "@mui/material";
 import { Gauge, SparkLineChart } from "@mui/x-charts";
-import { useVirtualizer } from "@tanstack/react-virtual";
 import _ from "lodash";
 import { ListGroup, Form, Badge, Table } from "react-bootstrap";
 
@@ -12,6 +11,7 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useColor } from "../../helpers/color-helper";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
+import { VirtualizedList } from "../../utils/VirtualizedList";
 
 const N_BINS = 5;
 
@@ -40,77 +40,6 @@ function binDiscrete(data, nBins = N_BINS) {
     binSize: binSize,
   };
   return { ...data, bins: bins };
-}
-
-function VirtualizedList({
-  data,
-  ItemComponent,
-  estimateSize = 44,
-  overscan = 25,
-  maxHeight = "80vh",
-  ...props
-}) {
-  const [parentNode, setParentNode] = useState(null);
-
-  const itemVirtualizer = useVirtualizer({
-    count: data.values.length,
-    getScrollElement: () => parentNode,
-    estimateSize: () => estimateSize,
-    overscan: overscan,
-  });
-
-  const refCallback = useCallback((node) => {
-    setParentNode(node);
-  }, []);
-
-  const virtualItems = itemVirtualizer.getVirtualItems();
-
-  useEffect(() => {
-    itemVirtualizer.measure();
-  }, [itemVirtualizer, parentNode?.clientHeight]);
-
-  return (
-    <div
-      ref={refCallback}
-      style={{
-        overflowY: "auto",
-        maxHeight: maxHeight,
-      }}
-    >
-      <div
-        style={{
-          height: `${itemVirtualizer.getTotalSize()}px`,
-          width: "100%",
-          position: "relative",
-          willChange: "transform",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            transform: `translateY(${virtualItems[0]?.start ?? 0}px)`,
-          }}
-        >
-          {virtualItems.map((virtualItem, index) => (
-            <div
-              key={virtualItem.key}
-              data-index={virtualItem.index}
-              ref={itemVirtualizer.measureElement}
-            >
-              <ItemComponent
-                data={data}
-                index={index}
-                {...props}
-              ></ItemComponent>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function CategoricalItem({
@@ -245,6 +174,7 @@ export function CategoricalObs({
       </ListGroup.Item>
       <VirtualizedList
         data={obs}
+        count={obs.values.length}
         ItemComponent={CategoricalItem}
         totalCounts={totalCounts}
         min={min}
@@ -310,7 +240,13 @@ function ObsContinuousStats({ obs }) {
                 data: fetchedData.kde_values[0],
                 valueFormatter: (v) => `${v.toLocaleString()}`,
               }}
-              valueFormatter={(v) => `${v.toLocaleString()}`}
+              valueFormatter={(v) =>
+                `${
+                  v !== 0 && v < 0.0001
+                    ? v.toExponential(2)
+                    : v.toLocaleString()
+                }`
+              }
               slotProps={{
                 popper: {
                   className: "feature-histogram-tooltip",
@@ -395,6 +331,7 @@ export function ContinuousObs({
             </ListGroup.Item>
             <VirtualizedList
               data={obs}
+              count={obs.values.length}
               ItemComponent={CategoricalItem}
               totalCounts={totalCounts}
               min={min}

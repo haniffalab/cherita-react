@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState, useMemo } from "react";
 
 import _ from "lodash";
-import { ListGroup, Button } from "react-bootstrap";
+import { ListGroup, Button, Accordion } from "react-bootstrap";
 
 import { VarItem } from "./VarItem";
 import { SELECTION_MODES } from "../../constants/constants";
@@ -56,6 +56,8 @@ export function VarNamesList({
     (vars, isDiseaseGene = false) => {
       return vars.map((item) => (
         <ListGroup.Item key={item.matrix_index}>
+          {/* <Accordion.Item key={item.matrix_index}>
+          <Accordion.Header> */}
           <VarItem
             item={item}
             active={active}
@@ -63,6 +65,9 @@ export function VarNamesList({
             mode={mode}
             isDiseaseGene={isDiseaseGene}
           />
+          {/* </Accordion.Header>
+          <Accordion.Body>test text</Accordion.Body>
+        </Accordion.Item> */}
         </ListGroup.Item>
       ));
     },
@@ -116,6 +121,7 @@ export function VarNamesList({
               </div>
               <p>{dataset.selectedDisease?.name}</p>
               <ListGroup>{diseaseVarList}</ListGroup>
+              {/* <Accordion>{diseaseVarList}</Accordion> */}
             </>
           )}
       </div>
