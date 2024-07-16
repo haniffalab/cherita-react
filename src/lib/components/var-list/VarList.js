@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 
 import _ from "lodash";
-import { ListGroup, Button, Accordion } from "react-bootstrap";
+import { ListGroup, Button, Alert } from "react-bootstrap";
 
 import { VarItem } from "./VarItem";
 import { SELECTION_MODES } from "../../constants/constants";
@@ -52,35 +52,27 @@ export function VarNamesList({
     }
   }, [mode, dataset.selectedMultiVar]);
 
-  const makeList = useCallback(
-    (vars, isDiseaseGene = false) => {
-      return vars.map((item) => (
-        <ListGroup.Item key={item.matrix_index}>
-          {/* <Accordion.Item key={item.matrix_index}>
-          <Accordion.Header> */}
-          <VarItem
-            item={item}
-            active={active}
-            setVarButtons={setVarButtons}
-            mode={mode}
-            isDiseaseGene={isDiseaseGene}
-          />
-          {/* </Accordion.Header>
-          <Accordion.Body>test text</Accordion.Body>
-        </Accordion.Item> */}
-        </ListGroup.Item>
-      ));
-    },
-    [active, mode]
-  );
+  const makeListItem = (item, isDiseaseGene = false) => {
+    return (
+      <ListGroup.Item key={item.matrix_index}>
+        <VarItem
+          item={item}
+          active={active}
+          setVarButtons={setVarButtons}
+          mode={mode}
+          isDiseaseGene={isDiseaseGene}
+        />
+      </ListGroup.Item>
+    );
+  };
 
-  const varList = useMemo(() => {
-    return makeList(varButtons);
-  }, [makeList, varButtons]);
+  const varList = _.map(varButtons, (item) => {
+    return makeListItem(item);
+  });
 
-  const diseaseVarList = useMemo(() => {
-    return makeList(dataset.selectedDisease.genes, true);
-  }, [makeList, dataset.selectedDisease.genes]);
+  const diseaseVarList = _.map(dataset.selectedDisease.genes, (item) => {
+    return makeListItem(item, true);
+  });
 
   return (
     <div className="position-relative">
@@ -102,9 +94,15 @@ export function VarNamesList({
             clear
           </Button>
         </div>
-        <ListGroup>{varList}</ListGroup>
+        {!varList.length ? (
+          <Alert variant="light">Search for a feature.</Alert>
+        ) : (
+          <ListGroup>{varList}</ListGroup>
+        )}
         {dataset.selectedDisease?.id &&
-          dataset.selectedDisease?.genes?.length > 0 && (
+          (!dataset.selectedDisease?.genes?.length ? (
+            <Alert variant="light">No disease genes found.</Alert>
+          ) : (
             <>
               <div className="d-flex justify-content-between mt-3">
                 <h5>Disease genes</h5>
@@ -121,9 +119,8 @@ export function VarNamesList({
               </div>
               <p>{dataset.selectedDisease?.name}</p>
               <ListGroup>{diseaseVarList}</ListGroup>
-              {/* <Accordion>{diseaseVarList}</Accordion> */}
             </>
-          )}
+          ))}
       </div>
     </div>
   );

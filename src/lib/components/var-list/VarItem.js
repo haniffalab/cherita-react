@@ -156,6 +156,7 @@ function SingleSelectionItem({
     geneName: item.name,
     diseaseDatasets: dataset.diseaseDatasets,
   };
+  const isNotInData = item.matrix_index === -1;
 
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params);
 
@@ -177,17 +178,21 @@ function SingleSelectionItem({
           <Button
             type="button"
             key={item.matrix_index}
-            variant={isActive ? "primary" : "outline-primary"}
+            variant={
+              isActive
+                ? "primary"
+                : isNotInData
+                ? "outline-secondary"
+                : "outline-primary"
+            }
             className="m-0 p-0 px-1"
             onClick={(e) => {
               e.stopPropagation();
               selectVar();
             }}
-            disabled={item.matrix_index === -1}
+            disabled={isNotInData}
             title={
-              item.matrix_index === -1
-                ? "Not present in data"
-                : "Set as color encoding"
+              isNotInData ? "Not present in data" : "Set as color encoding"
             }
           >
             <FontAwesomeIcon icon={faDroplet} />
@@ -220,6 +225,7 @@ function SingleSelectionItem({
 }
 
 function MultipleSelectionItem({ item, isActive, toggleVar }) {
+  const isNotInData = item.matrix_index === -1;
   return (
     <>
       <div className="d-flex">
@@ -230,8 +236,8 @@ function MultipleSelectionItem({ item, isActive, toggleVar }) {
             variant={isActive ? "primary" : "outline-primary"}
             className="m-0 p-0 px-1"
             onClick={toggleVar}
-            disabled={item.matrix_index === -1}
-            title={item.matrix_index === -1 ? "Not present in data" : ""}
+            disabled={isNotInData}
+            title={isNotInData ? "Not present in data" : ""}
           >
             {item.name}
           </Button>
