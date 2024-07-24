@@ -6,13 +6,12 @@ import _ from "lodash";
 import { ListGroup, Form, Badge, Table } from "react-bootstrap";
 
 import { ObsToolbar } from "./ObsToolbar";
-import { OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useColor } from "../../helpers/color-helper";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
-import { VirtualizedList } from "../../utils/VirtualizedList";
 import { prettyNumerical } from "../../utils/string";
+import { VirtualizedList } from "../../utils/VirtualizedList";
 
 const N_BINS = 5;
 
@@ -43,26 +42,24 @@ function binDiscrete(data, nBins = N_BINS) {
   return { ...data, bins: bins };
 }
 
+function getContinuousLabel(code, binEdges) {
+  return `[ ${prettyNumerical(binEdges[code][0])}, ${prettyNumerical(
+    binEdges[code][1]
+  )}${code === binEdges.length - 1 ? " ]" : " )"}`;
+}
+
 function CategoricalItem({
-  data,
-  index,
-  totalCounts,
+  value,
+  label,
+  code,
+  value_counts,
+  pct,
+  isOmitted,
   min,
   max,
   onChange,
   showColor = true,
 }) {
-  const value = data.values[index];
-  const pct = (data.value_counts[value] / totalCounts) * 100;
-  let label = value;
-  if (data.type === OBS_TYPES.CONTINUOUS && data.codes[value] !== -1) {
-    label = `[ ${prettyNumerical(
-      data.bins.binEdges[data.codes[value]][0]
-    )}, ${prettyNumerical(data.bins.binEdges[data.codes[value]][1])}${
-      data.codes[value] === data.bins.binEdges.length - 1 ? " ]" : " )"
-    }`;
-  }
-
   const { getColor } = useColor();
 
   return (
@@ -73,7 +70,7 @@ function CategoricalItem({
             className="obs-value-list-check"
             type="switch"
             label={label}
-            checked={!_.includes(data.omit, data.codes[value])}
+            checked={!isOmitted}
             onChange={() => onChange(value)}
           />
         </div>
@@ -85,7 +82,7 @@ function CategoricalItem({
                   className="value-count-badge"
                   style={{ fontWeight: "lighter" }}
                 >
-                  {prettyNumerical(parseInt(data.value_counts[value]))}
+                  {prettyNumerical(parseInt(value_counts))}
                 </Badge>
                 <div className="value-pct-gauge-container">
                   <Gauge
@@ -113,9 +110,9 @@ function CategoricalItem({
                   width="10"
                   height="10"
                   fill={`rgb(${getColor(
-                    (data.codes[value] - min) / (max - min),
+                    (code - min) / (max - min),
                     true,
-                    _.includes(data.omit, data.codes[value]),
+                    isOmitted,
                     { alpha: 1 },
                     "obs"
                   )})`}
@@ -160,6 +157,17 @@ export function CategoricalObs({
     }
   }, [dataset.selectedObs, dispatch, obs, obs.name, updateObs]);
 
+  const getDataAtIndex = (index) => {
+    return {
+      value: obs.values[index],
+      code: obs.codes[obs.values[index]],
+      value_counts: obs.value_counts[obs.values[index]],
+      pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
+      isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
+      label: prettyNumerical(obs.values[index]),
+    };
+  };
+
   return (
     <ListGroup>
       <ListGroup.Item>
@@ -172,7 +180,7 @@ export function CategoricalObs({
         />
       </ListGroup.Item>
       <VirtualizedList
-        data={obs}
+        getDataAtIndex={getDataAtIndex}
         count={obs.values.length}
         ItemComponent={CategoricalItem}
         totalCounts={totalCounts}
@@ -307,6 +315,20 @@ export function ContinuousObs({
   const min = _.min(_.values(obs?.codes));
   const max = _.max(_.values(obs?.codes));
 
+  const getDataAtIndex = (index) => {
+    return {
+      value: obs.values[index],
+      code: obs.codes[obs.values[index]],
+      value_counts: obs.value_counts[obs.values[index]],
+      pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
+      isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
+      label: getContinuousLabel(
+        obs.codes[obs.values[index]],
+        obs.bins.binEdges
+      ),
+    };
+  };
+
   return (
     <>
       {isPending && <LoadingLinear />}
@@ -323,7 +345,7 @@ export function ContinuousObs({
               />
             </ListGroup.Item>
             <VirtualizedList
-              data={obs}
+              getDataAtIndex={getDataAtIndex}
               count={obs.values.length}
               ItemComponent={CategoricalItem}
               totalCounts={totalCounts}

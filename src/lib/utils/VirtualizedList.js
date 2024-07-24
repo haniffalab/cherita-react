@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
 export function VirtualizedList({
-  data,
+  getDataAtIndex,
   count,
   ItemComponent,
   estimateSize = 44,
@@ -55,15 +55,14 @@ export function VirtualizedList({
             transform: `translateY(${virtualItems[0]?.start ?? 0}px)`,
           }}
         >
-          {virtualItems.map((virtualItem, index) => (
+          {virtualItems.map((virtualItem) => (
             <div
               key={virtualItem.key}
               data-index={virtualItem.index}
               ref={itemVirtualizer.measureElement}
             >
               <ItemComponent
-                data={data}
-                index={index}
+                {...getDataAtIndex(virtualItem.index)}
                 {...props}
               ></ItemComponent>
             </div>

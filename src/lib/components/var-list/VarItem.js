@@ -19,8 +19,8 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
 import { useFetch, useDebouncedFetch } from "../../utils/requests";
-import { VirtualizedList } from "../../utils/VirtualizedList";
 import { prettyNumerical } from "../../utils/string";
+import { VirtualizedList } from "../../utils/VirtualizedList";
 
 function VarHistogram({ item }) {
   const ENDPOINT = "var/histograms";
