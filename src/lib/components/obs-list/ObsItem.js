@@ -12,6 +12,7 @@ import { useColor } from "../../helpers/color-helper";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 import { VirtualizedList } from "../../utils/VirtualizedList";
+import { prettyNumerical } from "../../utils/string";
 
 const N_BINS = 5;
 
@@ -55,11 +56,9 @@ function CategoricalItem({
   const pct = (data.value_counts[value] / totalCounts) * 100;
   let label = value;
   if (data.type === OBS_TYPES.CONTINUOUS && data.codes[value] !== -1) {
-    label = `[ ${data.bins.binEdges[
-      data.codes[value]
-    ][0].toLocaleString()}, ${data.bins.binEdges[
-      data.codes[value]
-    ][1].toLocaleString()}${
+    label = `[ ${prettyNumerical(
+      data.bins.binEdges[data.codes[value]][0]
+    )}, ${prettyNumerical(data.bins.binEdges[data.codes[value]][1])}${
       data.codes[value] === data.bins.binEdges.length - 1 ? " ]" : " )"
     }`;
   }
@@ -80,13 +79,13 @@ function CategoricalItem({
         </div>
         <div className="d-flex align-items-center">
           <div className="pl-1 m-0">
-            <Tooltip title={`${pct.toLocaleString()}%`} placement="left" arrow>
+            <Tooltip title={`${prettyNumerical(pct)}%`} placement="left" arrow>
               <div className="d-flex align-items-center">
                 <Badge
                   className="value-count-badge"
                   style={{ fontWeight: "lighter" }}
                 >
-                  {parseInt(data.value_counts[value]).toLocaleString()}
+                  {prettyNumerical(parseInt(data.value_counts[value]))}
                 </Badge>
                 <div className="value-pct-gauge-container">
                   <Gauge
@@ -203,11 +202,11 @@ function ObsContinuousStats({ obs }) {
           <tbody>
             <tr>
               <td>Min</td>
-              <td className="text-end">{obs.min.toLocaleString()}</td>
+              <td className="text-end">{prettyNumerical(obs.min)}</td>
             </tr>
             <tr>
               <td>Max</td>
-              <td className="text-end">{obs.max.toLocaleString()}</td>
+              <td className="text-end">{prettyNumerical(obs.max)}</td>
             </tr>
           </tbody>
         </Table>
@@ -215,11 +214,11 @@ function ObsContinuousStats({ obs }) {
           <tbody>
             <tr>
               <td>Mean</td>
-              <td className="text-end">{obs.mean.toLocaleString()}</td>
+              <td className="text-end">{prettyNumerical(obs.mean)}</td>
             </tr>
             <tr>
               <td>Median</td>
-              <td className="text-end">{obs.median.toLocaleString()}</td>
+              <td className="text-end">{prettyNumerical(obs.median)}</td>
             </tr>
           </tbody>
         </Table>
@@ -238,15 +237,9 @@ function ObsContinuousStats({ obs }) {
               }}
               xAxis={{
                 data: fetchedData.kde_values[0],
-                valueFormatter: (v) => `${v.toLocaleString()}`,
+                valueFormatter: (v) => `${prettyNumerical(v)}`,
               }}
-              valueFormatter={(v) =>
-                `${
-                  v !== 0 && v < 0.0001
-                    ? v.toExponential(2)
-                    : v.toLocaleString()
-                }`
-              }
+              valueFormatter={(v) => `${prettyNumerical(v)}`}
               slotProps={{
                 popper: {
                   className: "feature-histogram-tooltip",

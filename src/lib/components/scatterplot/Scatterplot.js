@@ -36,6 +36,7 @@ import {
   useZarr,
 } from "../../helpers/zarr-helper";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
+import { prettyNumerical } from "../../utils/string";
 
 window.deck.log.level = 1;
 
@@ -526,7 +527,7 @@ export function Scatterplot({ radius = 30 }) {
 
   const getLabel = (o, v, isVar = false) => {
     if (isVar || o.type === OBS_TYPES.CONTINUOUS) {
-      return `${o.name}: ${parseFloat(v).toLocaleString()}`;
+      return `${o.name}: ${prettyNumerical(parseFloat(v))}`;
     } else {
       return `${o.name}: ${o.codesMap[v]}`;
     }
@@ -606,26 +607,26 @@ export function Scatterplot({ radius = 30 }) {
         increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
         decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
       />
-      {error && !isPending && (
-        <div className="cherita-alert">
-          <Alert variant="danger">
-            <FontAwesomeIcon icon={faTriangleExclamation} />
-            Error loading data
-          </Alert>
-        </div>
-      )}
       <div className="cherita-spatial-footer">
-        <Toolbox
-          mode={
-            dataset.colorEncoding === COLOR_ENCODINGS.VAR
-              ? dataset.selectedVar.name
-              : dataset.colorEncoding === COLOR_ENCODINGS.OBS
-              ? dataset.selectedObs.name
-              : null
-          }
-          obsLength={parseInt(obsmData.data?.length)}
-          slicedLength={parseInt(slicedLength)}
-        />
+        <div className="cherita-toolbox-footer">
+          {error && !isPending && (
+            <Alert variant="danger">
+              <FontAwesomeIcon icon={faTriangleExclamation} />
+              &nbsp;Error loading data
+            </Alert>
+          )}
+          <Toolbox
+            mode={
+              dataset.colorEncoding === COLOR_ENCODINGS.VAR
+                ? dataset.selectedVar.name
+                : dataset.colorEncoding === COLOR_ENCODINGS.OBS
+                ? dataset.selectedObs.name
+                : null
+            }
+            obsLength={parseInt(obsmData.data?.length)}
+            slicedLength={parseInt(slicedLength)}
+          />
+        </div>
         <Legend isCategorical={isCategorical} min={min} max={max} />
       </div>
     </div>

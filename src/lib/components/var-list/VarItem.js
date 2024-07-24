@@ -20,6 +20,7 @@ import { useFilteredData } from "../../context/FilterContext";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
 import { useFetch, useDebouncedFetch } from "../../utils/requests";
 import { VirtualizedList } from "../../utils/VirtualizedList";
+import { prettyNumerical } from "../../utils/string";
 
 function VarHistogram({ item }) {
   const ENDPOINT = "var/histograms";
@@ -68,16 +69,14 @@ function VarHistogram({ item }) {
             showHighlight={true}
             showTooltip={true}
             valueFormatter={(v, { dataIndex }) =>
-              `${fetchedData.hist[dataIndex].toLocaleString()}`
+              `${prettyNumerical(fetchedData.hist[dataIndex])}`
             }
             xAxis={{
               data: _.range(fetchedData.bin_edges?.length) || null,
               valueFormatter: (v) =>
-                `Bin [${fetchedData.bin_edges[
-                  v
-                ][0].toLocaleString()}, ${fetchedData.bin_edges[
-                  v
-                ][1].toLocaleString()}${
+                `Bin [${prettyNumerical(
+                  fetchedData.bin_edges[v][0]
+                )}, ${prettyNumerical(fetchedData.bin_edges[v][1])}${
                   v === fetchedData.bin_edges.length - 1 ? "]" : ")"
                 }`,
             }}

@@ -5,6 +5,7 @@ import _ from "lodash";
 import { COLOR_ENCODINGS } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import { rgbToHex, useColor } from "../../helpers/color-helper";
+import { prettyNumerical } from "../../utils/string";
 
 export function Legend({ isCategorical = false, min = 0, max = 1 }) {
   const dataset = useDataset();
@@ -33,9 +34,11 @@ export function Legend({ isCategorical = false, min = 0, max = 1 }) {
               : dataset.selectedObs?.name}
           </p>
           {spanList}
-          <span className="domain-min">{min.toFixed(1)}</span>
-          <span className="domain-med">{((min + max) * 0.5).toFixed(1)}</span>
-          <span className="domain-max">{max.toFixed(1)}</span>
+          <span className="domain-min">{prettyNumerical(min)}</span>
+          <span className="domain-med">
+            {prettyNumerical((min + max) * 0.5)}
+          </span>
+          <span className="domain-max">{prettyNumerical(max)}</span>
         </div>
       </div>
     );

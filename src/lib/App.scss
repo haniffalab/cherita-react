@@ -83,12 +83,6 @@ input[type="checkbox"], .cursor-pointer {
     height: 100%;
 }
 
-.cherita-alert {
-    position: absolute;
-    z-index: 10;
-    bottom: 40px;
-    left: 20px;
-}
 .cherita-spatial-controls {
     position: absolute;
     z-index: 10;
@@ -113,6 +107,15 @@ input[type="checkbox"], .cursor-pointer {
     > * { 
         pointer-events: auto;
     }
+}
+
+.cherita-toolbox-footer {
+    display: flex;
+    flex-direction: column;
+}
+
+.cherita-toolbox-footer .alert {
+    width: fit-content;
 }
 
 .cherita-toolbox {
