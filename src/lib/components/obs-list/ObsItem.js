@@ -291,7 +291,11 @@ export function ContinuousObs({
     // Update ObsList obsCols with bin data
     // after update -> re-render -> obs will already be updated
     if (!isPending && !serverError && !_.isMatch(obs, fetchedData)) {
-      updateObs({ ...binnedObs, ...fetchedData });
+      updateObs({
+        ...binnedObs,
+        ...fetchedData,
+        codesMap: _.invert(fetchedData.codes),
+      });
     }
   }, [binnedObs, fetchedData, isPending, obs, serverError, updateObs]);
 
