@@ -9,7 +9,7 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 
-export function ObsColsList() {
+export function ObsColsList({ showColor = true }) {
   const ENDPOINT = "obs/cols";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
@@ -154,6 +154,7 @@ export function ObsColsList() {
               toggleLabel={() => toggleLabel(item)}
               toggleSlice={() => toggleSlice(item)}
               toggleColor={() => toggleColor(item)}
+              showColor={showColor}
             />
           ) : (
             <ContinuousObs

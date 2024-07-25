@@ -134,6 +134,7 @@ export function CategoricalObs({
   toggleLabel,
   toggleSlice,
   toggleColor,
+  showColor = true,
 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
@@ -187,6 +188,7 @@ export function CategoricalObs({
         min={min}
         max={max}
         onChange={toggleObs}
+        showColor={showColor}
       />
     </ListGroup>
   );

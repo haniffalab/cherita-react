@@ -8,14 +8,14 @@ import { ObsmKeysList } from "../obsm-list/ObsmList";
 import { SearchBar } from "../search-bar/SearchBar";
 import { VarNamesList } from "../var-list/VarList";
 
-export function OffcanvasObs({ show, handleClose }) {
+export function OffcanvasObs({ show, handleClose, ...props }) {
   return (
     <Offcanvas show={show} onHide={handleClose} scroll={true} backdrop={false}>
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Categories</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body className="p-0">
-        <ObsColsList />
+        <ObsColsList {...props} />
       </Offcanvas.Body>
     </Offcanvas>
   );
