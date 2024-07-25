@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import _ from "lodash";
 import { Alert, OverlayTrigger, Tooltip } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
@@ -16,12 +17,28 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
-  const [params, setParams] = useState({
-    url: dataset.url,
-    keys: [],
-    scale: dataset.controls.standardScale,
-    varNamesCol: dataset.varNamesCol,
-  });
+  const [params, setParams] = useState(
+    mode === VIOLIN_MODES.MULTIKEY
+      ? {
+          url: dataset.url,
+          keys: [],
+          scale: dataset.controls.standardScale,
+          varNamesCol: dataset.varNamesCol,
+        }
+      : {
+          url: dataset.url,
+          keys: dataset.selectedVar.index,
+          selectedObs: dataset.selectedObs,
+          obsValues: !dataset.selectedObs?.omit.length
+            ? null
+            : _.difference(
+                _.values(dataset.selectedObs?.codes),
+                dataset.selectedObs?.omit
+              ).map((c) => dataset.selectedObs?.codesMap[c]),
+          scale: dataset.controls.standardScale,
+          varNamesCol: dataset.varNamesCol,
+        }
+  );
   // @TODO: set default scale
 
   useEffect(() => {
@@ -52,6 +69,12 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
           url: dataset.url,
           keys: dataset.selectedVar.index,
           selectedObs: dataset.selectedObs,
+          obsValues: !dataset.selectedObs?.omit.length
+            ? null
+            : _.difference(
+                _.values(dataset.selectedObs?.codes),
+                dataset.selectedObs?.omit
+              ).map((c) => dataset.selectedObs?.codesMap[c]),
           scale: dataset.controls.standardScale,
           varNamesCol: dataset.varNamesCol,
         };

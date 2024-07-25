@@ -14,7 +14,7 @@ export function OffcanvasObs({ show, handleClose }) {
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Categories</Offcanvas.Title>
       </Offcanvas.Header>
-      <Offcanvas.Body>
+      <Offcanvas.Body className="p-0">
         <ObsColsList />
       </Offcanvas.Body>
     </Offcanvas>

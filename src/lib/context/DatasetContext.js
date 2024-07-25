@@ -27,7 +27,14 @@ const queryClient = new QueryClient({
   }),
 });
 // Type of queries to store responses
-const persistKeys = ["obs/cols", "var/names", "obsm/keys", "var/histograms"];
+const persistKeys = [
+  "obs/cols",
+  "var/names",
+  "obsm/keys",
+  "var/histograms",
+  "obs/bins",
+  "obs/distribution",
+];
 const persistOptions = {
   persister: createSyncStoragePersister({
     storage: window.localStorage,

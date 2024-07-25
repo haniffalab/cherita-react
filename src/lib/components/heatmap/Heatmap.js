@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import _ from "lodash";
 import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
@@ -17,6 +18,12 @@ export function Heatmap() {
   const [params, setParams] = useState({
     url: dataset.url,
     selectedObs: dataset.selectedObs,
+    obsValues: !dataset.selectedObs?.omit.length
+      ? null
+      : _.difference(
+          _.values(dataset.selectedObs?.codes),
+          dataset.selectedObs?.omit
+        ).map((c) => dataset.selectedObs?.codesMap[c]),
     selectedMultiVar: dataset.selectedMultiVar.map((i) => i.index),
     varNamesCol: dataset.varNamesCol,
   });
@@ -32,6 +39,12 @@ export function Heatmap() {
         ...p,
         url: dataset.url,
         selectedObs: dataset.selectedObs,
+        obsValues: !dataset.selectedObs?.omit.length
+          ? null
+          : _.difference(
+              _.values(dataset.selectedObs?.codes),
+              dataset.selectedObs?.omit
+            ).map((c) => dataset.selectedObs?.codesMap[c]),
         selectedMultiVar: dataset.selectedMultiVar.map((i) => i.index),
         varNamesCol: dataset.varNamesCol,
       };
