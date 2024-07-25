@@ -90,6 +90,7 @@ export function ObsColsList({ showColor = true }) {
         obs: {
           name: item.name,
           type: item.type,
+          codesMap: item.codesMap,
         },
       });
     }
