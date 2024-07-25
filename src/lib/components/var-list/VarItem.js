@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
 
-import {
-  faDroplet,
-  faCircleInfo,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faDroplet, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { MoreVert } from "@mui/icons-material";
 import { SparkLineChart } from "@mui/x-charts";
 import {
   blueberryTwilightPalette,
@@ -157,60 +154,64 @@ function SingleSelectionItem({
 
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params);
 
+  const hasDiseaseInfo = !isPending && !serverError && !!fetchedData.length;
+
   return (
     <>
       <div
-        className="d-flex justify-content-between cursor-pointer"
+        className={`d-flex justify-content-between ${
+          hasDiseaseInfo ? "cursor-pointer" : ""
+        }`}
         onClick={() => {
           setOpenInfo((o) => !o);
         }}
       >
         <div className="d-flex justify-content-between align-items-center w-100">
           <div>{item.name}</div>
-          {!isDiseaseGene && <VarHistogram item={item} />}
-        </div>
 
-        <div className="d-flex align-items-center gap-1">
-          <FontAwesomeIcon icon={faCircleInfo} />
-          <Button
-            type="button"
-            key={item.matrix_index}
-            variant={
-              isActive
-                ? "primary"
-                : isNotInData
-                ? "outline-secondary"
-                : "outline-primary"
-            }
-            className="m-0 p-0 px-1"
-            onClick={(e) => {
-              e.stopPropagation();
-              selectVar();
-            }}
-            disabled={isNotInData}
-            title={
-              isNotInData ? "Not present in data" : "Set as color encoding"
-            }
-          >
-            <FontAwesomeIcon icon={faDroplet} />
-          </Button>
-          {!isDiseaseGene && (
+          <div className="d-flex align-items-center gap-1">
+            {hasDiseaseInfo && <MoreVert />}
+            {!isDiseaseGene && <VarHistogram item={item} />}
             <Button
               type="button"
+              key={item.matrix_index}
+              variant={
+                isActive
+                  ? "primary"
+                  : isNotInData
+                  ? "outline-secondary"
+                  : "outline-primary"
+              }
               className="m-0 p-0 px-1"
-              variant="outline-secondary"
-              title="Remove from list"
               onClick={(e) => {
                 e.stopPropagation();
-                removeVar();
+                selectVar();
               }}
+              disabled={isNotInData}
+              title={
+                isNotInData ? "Not present in data" : "Set as color encoding"
+              }
             >
-              <FontAwesomeIcon icon={faTrash} />
+              <FontAwesomeIcon icon={faDroplet} />
             </Button>
-          )}
+            {!isDiseaseGene && (
+              <Button
+                type="button"
+                className="m-0 p-0 px-1"
+                variant="outline-secondary"
+                title="Remove from list"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeVar();
+                }}
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
-      {!isPending && !serverError && !!fetchedData.length && (
+      {hasDiseaseInfo && (
         <Collapse in={openInfo}>
           <div className="mt-2">
             <VarDiseaseInfo data={fetchedData} />
