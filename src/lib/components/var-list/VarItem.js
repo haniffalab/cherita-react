@@ -92,9 +92,7 @@ function VarHistogram({ item }) {
   );
 }
 
-function VarDiseaseInfoItem({ data, index }) {
-  const item = data[index];
-
+function VarDiseaseInfoItem(item) {
   return (
     <ListGroup.Item className="feature-disease-info">
       <div>
@@ -130,7 +128,7 @@ function VarDiseaseInfo({ data }) {
     <>
       <ListGroup>
         <VirtualizedList
-          data={data}
+          getDataAtIndex={(index) => data[index]}
           count={data.length}
           estimateSize={70}
           maxHeight="40vh"
