@@ -10,13 +10,13 @@ import {
   useVarSearch,
 } from "../../utils/search";
 
-export function VarSearchResults({ text, setShowSuggestions }) {
+export function VarSearchResults({ text, setShowSuggestions, handleSelect }) {
   const [suggestions, setSuggestions] = useState([]);
+  const dispatch = useDatasetDispatch();
 
   const {
     setParams,
     data: { fetchedData = [], isPending, serverError },
-    onSelect,
   } = useVarSearch();
 
   const deferredData = useDeferredValue(suggestions);
@@ -55,7 +55,7 @@ export function VarSearchResults({ text, setShowSuggestions }) {
           as="button"
           disabled={isStale}
           onClick={() => {
-            onSelect(item);
+            handleSelect(dispatch, item);
             _.delay(() => {
               setShowSuggestions(false);
             }, 150);
@@ -65,7 +65,7 @@ export function VarSearchResults({ text, setShowSuggestions }) {
         </Dropdown.Item>
       );
     });
-  }, [deferredData, isStale, onSelect, setShowSuggestions]);
+  }, [deferredData, dispatch, handleSelect, isStale, setShowSuggestions]);
 
   return (
     <div>

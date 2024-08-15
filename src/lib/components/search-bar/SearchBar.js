@@ -5,7 +5,26 @@ import { Form, FormGroup, Dropdown } from "react-bootstrap";
 
 import { DiseasesSearchResults, VarSearchResults } from "./SearchResults";
 
-export function SearchBar({ searchVar = true, searchDiseases = false }) {
+function onVarSelect(dispatch, item) {
+  dispatch({
+    type: "select.var",
+    var: item,
+  });
+  dispatch({
+    type: "select.multivar",
+    var: item,
+  });
+  dispatch({
+    type: "set.colorEncoding",
+    value: "var",
+  });
+}
+
+export function SearchBar({
+  searchVar = true,
+  searchDiseases = false,
+  handleSelect = onVarSelect,
+}) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [text, setText] = useState("");
   const inputRef = useRef(null);
@@ -59,6 +78,7 @@ export function SearchBar({ searchVar = true, searchDiseases = false }) {
                 <VarSearchResults
                   text={text}
                   setShowSuggestions={setShowSuggestions}
+                  handleSelect={handleSelect}
                 />
               )}
               {searchVar && searchDiseases && <Dropdown.Divider />}

@@ -26,7 +26,6 @@ export const useDiseaseSearch = () => {
 export const useVarSearch = () => {
   const ENDPOINT = "var/names";
   const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
   const [params, setParams] = useState({
     url: dataset.url,
     col: dataset.varNamesCol,
@@ -37,26 +36,10 @@ export const useVarSearch = () => {
     enabled: !!params.text.length,
   });
 
-  const onSelect = (item) => {
-    dispatch({
-      type: "select.var",
-      var: item,
-    });
-    dispatch({
-      type: "select.multivar",
-      var: item,
-    });
-    dispatch({
-      type: "set.colorEncoding",
-      value: "var",
-    });
-  };
-
   return {
     params,
     setParams,
     data,
-    onSelect,
   };
 };
 

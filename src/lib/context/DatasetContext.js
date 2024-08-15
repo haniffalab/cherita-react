@@ -22,7 +22,7 @@ const queryClient = new QueryClient({
   },
   queryCache: new QueryCache({
     onError: (error, query) => {
-      console.error(error);
+      console.error(error, query);
     },
   }),
 });
@@ -59,6 +59,7 @@ const initialDataset = {
   selectedMultiVar: [],
   colorEncoding: null,
   labelObs: [],
+  varSets: [],
   sliceBy: {
     obs: false,
     polygons: false,
@@ -191,16 +192,6 @@ function datasetReducer(dataset, action) {
         };
       }
     }
-    case "deselect.var": {
-      return {
-        ...dataset,
-        selectedVar: null,
-        colorEncoding:
-          dataset.colorEncoding === COLOR_ENCODINGS.VAR
-            ? null
-            : dataset.colorEncoding,
-      };
-    }
     case "deselect.multivar": {
       return {
         ...dataset,
@@ -230,6 +221,62 @@ function datasetReducer(dataset, action) {
           dataset.colorEncoding === COLOR_ENCODINGS.VAR
             ? null
             : dataset.colorEncoding,
+      };
+    }
+    case "add.varSet": {
+      return {
+        ...dataset,
+        varSets: [...dataset.varSets, action.varSet],
+      };
+    }
+    case "remove.varSet": {
+      return {
+        ...dataset,
+        varSets: dataset.varSets.filter((a) => a.name !== action.varSet.name),
+      };
+    }
+    case "reset.varSets": {
+      return {
+        ...dataset,
+        varSets: [],
+      };
+    }
+    case "add.varSet.var": {
+      if (
+        dataset.varSets
+          .find((s) => s.name === action.varSet.name)
+          .vars.find((v) => _.isEqual(v, action.var))
+      ) {
+        return dataset;
+      } else {
+        return {
+          ...dataset,
+          varSets: dataset.varSets.map((s) => {
+            if (s.name === action.varSet.name) {
+              return {
+                ...s,
+                vars: [...s.vars, action.var],
+              };
+            } else {
+              return s;
+            }
+          }),
+        };
+      }
+    }
+    case "remove.varSet.var": {
+      return {
+        ...dataset,
+        varSets: dataset.varSets.map((s) => {
+          if (s.name === action.varSet.name) {
+            return {
+              ...s,
+              vars: s.vars.filter((v) => v.name !== action.var.name),
+            };
+          } else {
+            return s;
+          }
+        }),
       };
     }
     case "select.disease": {

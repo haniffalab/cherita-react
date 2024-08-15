@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 
+import { Add } from "@mui/icons-material";
 import _ from "lodash";
 import { ListGroup, Button, Alert } from "react-bootstrap";
 
 import { VarItem } from "./VarItem";
+import { VarSet } from "./VarSet";
 import { SELECTION_MODES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
@@ -16,14 +18,14 @@ export function VarNamesList({
   const [varButtons, setVarButtons] = useState(
     mode === SELECTION_MODES.SINGLE
       ? dataset.selectedVar
-        ? [dataset.selectedVar]
-        : []
-      : dataset.selectedMultiVar
+        ? _.unionWith([dataset.selectedVar], dataset.varSets, _.isEqual)
+        : [...dataset.varSets]
+      : [...dataset.selectedMultiVar, ...dataset.varSets]
   );
   const [active, setActive] = useState(
     mode === SELECTION_MODES.SINGLE
-      ? dataset.selectedVar?.matrix_index
-      : dataset.selectedMultiVar.map((i) => i.matrix_index)
+      ? dataset.selectedVar?.matrix_index || dataset.selectedVar?.name
+      : dataset.selectedMultiVar.map((i) => i.matrix_index || i.name)
   );
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function VarNamesList({
           return v;
         }
       });
-      setActive(dataset.selectedVar?.matrix_index);
+      setActive(dataset.selectedVar?.matrix_index || dataset.selectedVar?.name);
     }
   }, [mode, dataset.selectedVar]);
 
@@ -48,9 +50,30 @@ export function VarNamesList({
           return v;
         }
       });
-      setActive(dataset.selectedMultiVar.map((i) => i.matrix_index));
+      setActive(dataset.selectedMultiVar.map((i) => i.matrix_index || i.name));
     }
   }, [mode, dataset.selectedMultiVar]);
+
+  useEffect(() => {
+    setVarButtons((v) => {
+      const filtered = v.filter(
+        (i) => !i.isSet || _.some(dataset.varSets, (s) => s.name === i.name)
+      );
+      const newSets = dataset.varSets.filter(
+        (s) => !_.some(filtered, (i) => i.name === s.name)
+      );
+      return [
+        ...filtered.map((i) => {
+          if (i.isSet) {
+            return dataset.varSets.find((s) => s.name === i.name);
+          } else {
+            return i;
+          }
+        }),
+        ...newSets,
+      ];
+    });
+  }, [dataset.varSets]);
 
   const makeListItem = (item, isDiseaseGene = false) => {
     return (
@@ -66,33 +89,80 @@ export function VarNamesList({
     );
   };
 
+  const makeSetListItem = (set) => {
+    return (
+      <ListGroup.Item key={set.name}>
+        <VarSet set={set} active={active} mode={mode} />
+      </ListGroup.Item>
+    );
+  };
+
   const varList = _.map(varButtons, (item) => {
-    return makeListItem(item);
+    if (item.isSet) {
+      return makeSetListItem(item);
+    } else {
+      return makeListItem(item);
+    }
   });
 
   const diseaseVarList = _.map(dataset.selectedDisease.genes, (item) => {
     return makeListItem(item, true);
   });
 
+  const newSetName = () => {
+    let n = 1;
+    let setName = `Set ${n}`;
+    const setNameExists = (name) => {
+      return dataset.varSets.some((set) => set.name === name);
+    };
+    while (setNameExists(setName)) {
+      n++;
+      setName = `Set ${n}`;
+    }
+    return setName;
+  };
+
   return (
     <div className="position-relative">
       <div className="overflow-auto mt-3">
         <div className="d-flex justify-content-between">
           <h5>{_.capitalize(displayName)}</h5>
-          <Button
-            variant="link"
-            onClick={() => {
-              setVarButtons([]);
-              dispatch({
-                type:
-                  mode === SELECTION_MODES.SINGLE
-                    ? "reset.var"
-                    : "reset.multiVar",
-              });
-            }}
-          >
-            clear
-          </Button>
+          <div>
+            <Button
+              variant="light"
+              className="p-1"
+              onClick={() => {
+                dispatch({
+                  type: "add.varSet",
+                  varSet: {
+                    name: newSetName(),
+                    vars: [],
+                    isSet: true,
+                  },
+                });
+              }}
+            >
+              <Add />
+              New set
+            </Button>
+            <Button
+              variant="link"
+              onClick={() => {
+                setVarButtons([]);
+                dispatch({
+                  type:
+                    mode === SELECTION_MODES.SINGLE
+                      ? "reset.var"
+                      : "reset.multiVar",
+                });
+                dispatch({
+                  type: "reset.varSets",
+                });
+              }}
+            >
+              clear
+            </Button>
+          </div>
         </div>
         {!varList.length ? (
           <Alert variant="light">Search for a feature.</Alert>
