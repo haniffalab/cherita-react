@@ -56,24 +56,38 @@ export function VarNamesList({
 
   useEffect(() => {
     setVarButtons((v) => {
-      const filtered = v.filter(
-        (i) => !i.isSet || _.some(dataset.varSets, (s) => s.name === i.name)
-      );
-      const newSets = dataset.varSets.filter(
-        (s) => !_.some(filtered, (i) => i.name === s.name)
-      );
-      return [
-        ...filtered.map((i) => {
-          if (i.isSet) {
-            return dataset.varSets.find((s) => s.name === i.name);
-          } else {
-            return i;
-          }
-        }),
-        ...newSets,
-      ];
+      const updated = _.map(v, (i) => {
+        if (i.isSet) {
+          return dataset.varSets.find((s) => s.name === i.name);
+        } else return i;
+      });
+      const newSets = _.difference(dataset.varSets, updated);
+      return [...updated, ...newSets];
     });
-  }, [dataset.varSets]);
+
+    if (mode === SELECTION_MODES.SINGLE) {
+      if (dataset.selectedVar.isSet) {
+        const selectedSet = dataset.varSets.find(
+          (s) => s.name === dataset.selectedVar.name
+        );
+        dispatch({
+          type: "select.var",
+          var: selectedSet,
+        });
+      }
+    } else {
+      dispatch({
+        type: "update.multiVar",
+        vars: dataset.varSets,
+      });
+    }
+  }, [
+    mode,
+    dataset.varSets,
+    dataset.selectedVar.isSet,
+    dataset.selectedVar.name,
+    dispatch,
+  ]);
 
   const makeListItem = (item, isDiseaseGene = false) => {
     return (

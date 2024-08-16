@@ -183,7 +183,13 @@ function datasetReducer(dataset, action) {
       return { ...dataset, selectedVar: action.var };
     }
     case "select.multivar": {
-      if (dataset.selectedMultiVar.find((i) => _.isEqual(i, action.var))) {
+      if (
+        dataset.selectedMultiVar.find((i) =>
+          action.var.isSet
+            ? i.matrix_index === action.var.matrix_index
+            : i.name === action.var.name
+        )
+      ) {
         return dataset;
       } else {
         return {
@@ -198,6 +204,17 @@ function datasetReducer(dataset, action) {
         selectedMultiVar: dataset.selectedMultiVar.filter(
           (a) => a.matrix_index !== action.var.matrix_index
         ),
+      };
+    }
+    case "update.multivar": {
+      return {
+        ...dataset,
+        selelectedMultiVar: dataset.selectedMultiVar.map((i) => {
+          if (i.isSet) {
+            return action.vars.find((s) => s.name === i.name);
+          }
+          return i;
+        }),
       };
     }
     case "set.colorEncoding": {
@@ -242,17 +259,14 @@ function datasetReducer(dataset, action) {
       };
     }
     case "add.varSet.var": {
-      if (
-        dataset.varSets
-          .find((s) => s.name === action.varSet.name)
-          .vars.find((v) => _.isEqual(v, action.var))
-      ) {
+      const varSet = dataset.varSets.find((s) => s.name === action.varSet.name);
+      if (varSet.vars.find((v) => _.isEqual(v, action.var))) {
         return dataset;
       } else {
         return {
           ...dataset,
           varSets: dataset.varSets.map((s) => {
-            if (s.name === action.varSet.name) {
+            if (s.name === varSet.name) {
               return {
                 ...s,
                 vars: [...s.vars, action.var],
@@ -265,10 +279,11 @@ function datasetReducer(dataset, action) {
       }
     }
     case "remove.varSet.var": {
+      const varSet = dataset.varSets.find((s) => s.name === action.varSet.name);
       return {
         ...dataset,
         varSets: dataset.varSets.map((s) => {
-          if (s.name === action.varSet.name) {
+          if (s.name === varSet.name) {
             return {
               ...s,
               vars: s.vars.filter((v) => v.name !== action.var.name),
