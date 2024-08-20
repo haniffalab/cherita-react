@@ -239,7 +239,7 @@ function MultipleSelectionItem({ item, isActive, toggleVar }) {
             className="m-0 p-0 px-1"
             onClick={toggleVar}
             disabled={isNotInData}
-            title={isNotInData ? "Not present in data" : ""}
+            title={isNotInData ? "Not present in data" : item.name}
           >
             {item.name}
           </Button>

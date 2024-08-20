@@ -8,8 +8,11 @@ import _ from "lodash";
 import { FilterProvider } from "./FilterContext";
 import {
   COLOR_ENCODINGS,
+  DOTPLOT_SCALES,
   LOCAL_STORAGE_KEY,
+  MATRIXPLOT_SCALES,
   OBS_TYPES,
+  VIOLINPLOT_SCALES,
 } from "../constants/constants";
 
 export const DatasetContext = createContext(null);
@@ -74,7 +77,11 @@ const initialDataset = {
       cmin: 0,
       cmax: 1,
     },
-    standardScale: null,
+    scale: {
+      dotplot: DOTPLOT_SCALES.NONE,
+      matrixplot: MATRIXPLOT_SCALES.NONE,
+      violinplot: VIOLINPLOT_SCALES.WIDTH,
+    },
     meanOnlyExpressed: false,
     expressionCutoff: 0.0,
   },
@@ -186,8 +193,8 @@ function datasetReducer(dataset, action) {
       if (
         dataset.selectedMultiVar.find((i) =>
           action.var.isSet
-            ? i.matrix_index === action.var.matrix_index
-            : i.name === action.var.name
+            ? i.name === action.var.name
+            : i.matrix_index === action.var.matrix_index
         )
       ) {
         return dataset;
@@ -201,8 +208,10 @@ function datasetReducer(dataset, action) {
     case "deselect.multivar": {
       return {
         ...dataset,
-        selectedMultiVar: dataset.selectedMultiVar.filter(
-          (a) => a.matrix_index !== action.var.matrix_index
+        selectedMultiVar: dataset.selectedMultiVar.filter((a) =>
+          action.var.isSet
+            ? a.name !== action.var.name
+            : a.matrix_index !== action.var.matrix_index
         ),
       };
     }
@@ -396,12 +405,15 @@ function datasetReducer(dataset, action) {
         },
       };
     }
-    case "set.controls.standardScale": {
+    case "set.controls.scale": {
       return {
         ...dataset,
         controls: {
           ...dataset.controls,
-          standardScale: action.standardScale,
+          scale: {
+            ...dataset.controls.scale,
+            [action.plot]: action.scale,
+          },
         },
       };
     }

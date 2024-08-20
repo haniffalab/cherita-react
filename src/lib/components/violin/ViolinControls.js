@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
+import _ from "lodash";
 import {
   Dropdown,
   ButtonGroup,
@@ -7,38 +8,26 @@ import {
   InputGroup,
 } from "react-bootstrap";
 
-import { VIOLINPLOT_STANDARDSCALES } from "../../constants/constants";
+import { VIOLINPLOT_SCALES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export function ViolinControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const [activeStandardScale, setActiveStandardScale] = useState(
-    dataset.controls.standardScale
-  );
 
-  useEffect(() => {
-    if (dataset.controls.standardScale) {
-      setActiveStandardScale(
-        VIOLINPLOT_STANDARDSCALES.find(
-          (obs) => obs.value === dataset.controls.standardScale
-        ).name
-      );
-    }
-  }, [dataset.controls.standardScale]);
-
-  const standardScaleList = VIOLINPLOT_STANDARDSCALES.map((item) => (
+  const scaleList = _.values(VIOLINPLOT_SCALES).map((scale) => (
     <Dropdown.Item
-      key={item.value}
-      active={activeStandardScale === item.value}
+      key={scale.value}
+      active={dataset.controls.scale.violinplot === scale}
       onClick={() => {
         dispatch({
-          type: "set.controls.standardScale",
-          standardScale: item.value,
+          type: "set.controls.scale",
+          plot: "violinplot",
+          scale: scale,
         });
       }}
     >
-      {item.name}
+      {scale.name}
     </Dropdown.Item>
   ));
 
@@ -46,12 +35,12 @@ export function ViolinControls() {
     <ButtonToolbar>
       <ButtonGroup>
         <InputGroup>
-          <InputGroup.Text>Standard scale</InputGroup.Text>
+          <InputGroup.Text>Scale</InputGroup.Text>
           <Dropdown>
             <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {activeStandardScale}
+              {dataset.controls.scale.violinplot.name}
             </Dropdown.Toggle>
-            <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
+            <Dropdown.Menu>{scaleList}</Dropdown.Menu>
           </Dropdown>
         </InputGroup>
       </ButtonGroup>

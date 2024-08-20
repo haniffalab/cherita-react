@@ -66,7 +66,7 @@ export function VarNamesList({
     });
 
     if (mode === SELECTION_MODES.SINGLE) {
-      if (dataset.selectedVar.isSet) {
+      if (dataset.selectedVar?.isSet) {
         const selectedSet = dataset.varSets.find(
           (s) => s.name === dataset.selectedVar.name
         );
@@ -77,15 +77,15 @@ export function VarNamesList({
       }
     } else {
       dispatch({
-        type: "update.multiVar",
+        type: "update.multivar",
         vars: dataset.varSets,
       });
     }
   }, [
     mode,
     dataset.varSets,
-    dataset.selectedVar.isSet,
-    dataset.selectedVar.name,
+    dataset.selectedVar?.isSet,
+    dataset.selectedVar?.name,
     dispatch,
   ]);
 

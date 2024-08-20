@@ -17,28 +17,37 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
-  const [params, setParams] = useState(
-    mode === VIOLIN_MODES.MULTIKEY
-      ? {
-          url: dataset.url,
-          keys: [],
-          scale: dataset.controls.standardScale,
-          varNamesCol: dataset.varNamesCol,
-        }
-      : {
-          url: dataset.url,
-          keys: dataset.selectedVar.index,
-          selectedObs: dataset.selectedObs,
-          obsValues: !dataset.selectedObs?.omit.length
-            ? null
-            : _.difference(
-                _.values(dataset.selectedObs?.codes),
-                dataset.selectedObs?.omit
-              ).map((c) => dataset.selectedObs?.codesMap[c]),
-          scale: dataset.controls.standardScale,
-          varNamesCol: dataset.varNamesCol,
-        }
-  );
+  const [params, setParams] = useState({
+    url: dataset.url,
+    mode: mode,
+    scale: dataset.controls.scale.violinplot.value,
+    varNamesCol: dataset.varNamesCol,
+    ...{
+      [VIOLIN_MODES.MULTIKEY]: {
+        varKeys: dataset.selectedMultiVar.map((i) =>
+          i.isSet
+            ? { name: i.name, indices: i.vars.map((v) => v.index) }
+            : i.index
+        ),
+        obsKeys: [], // @TODO: implement
+      },
+      [VIOLIN_MODES.GROUPBY]: {
+        varKey: dataset.selectedVar?.isSet
+          ? {
+              name: dataset.selectedVar?.name,
+              indices: dataset.selectedVar?.vars.map((v) => v.index),
+            }
+          : dataset.selectedVar?.index,
+        obsCol: dataset.selectedObs,
+        obsValues: !dataset.selectedObs?.omit.length
+          ? null
+          : _.difference(
+              _.values(dataset.selectedObs?.codes),
+              dataset.selectedObs?.omit
+            ).map((c) => dataset.selectedObs?.codesMap[c]),
+      },
+    }[mode],
+  });
   // @TODO: set default scale
 
   useEffect(() => {
@@ -52,8 +61,13 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
         return {
           ...p,
           url: dataset.url,
-          keys: dataset.selectedMultiVar.map((i) => i.index),
-          scale: dataset.controls.standardScale,
+          mode: mode,
+          varKeys: dataset.selectedMultiVar.map((i) =>
+            i.isSet
+              ? { name: i.name, indices: i.vars.map((v) => v.index) }
+              : i.index
+          ),
+          scale: dataset.controls.scale.violinplot.value,
           varNamesCol: dataset.varNamesCol,
         };
       });
@@ -67,21 +81,27 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
         return {
           ...p,
           url: dataset.url,
-          keys: dataset.selectedVar.index,
-          selectedObs: dataset.selectedObs,
+          mode: mode,
+          varKey: dataset.selectedVar?.isSet
+            ? {
+                name: dataset.selectedVar?.name,
+                indices: dataset.selectedVar?.vars.map((v) => v.index),
+              }
+            : dataset.selectedVar?.index,
+          obsCol: dataset.selectedObs,
           obsValues: !dataset.selectedObs?.omit.length
             ? null
             : _.difference(
                 _.values(dataset.selectedObs?.codes),
                 dataset.selectedObs?.omit
               ).map((c) => dataset.selectedObs?.codesMap[c]),
-          scale: dataset.controls.standardScale,
+          scale: dataset.controls.scale.violinplot.value,
           varNamesCol: dataset.varNamesCol,
         };
       });
     }
   }, [
-    dataset.controls.standardScale,
+    dataset.controls.scale.violinplot.value,
     dataset.selectedMultiVar,
     dataset.selectedObs,
     dataset.selectedVar,
@@ -96,10 +116,9 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     500,
     {
       enabled:
-        (mode === VIOLIN_MODES.MULTIKEY && !!params.keys) ||
-        (mode === VIOLIN_MODES.GROUPBY &&
-          !!params.keys.length &&
-          !!params.selectedObs),
+        (mode === VIOLIN_MODES.MULTIKEY &&
+          (!!params.varKeys.length || !!params.obsKeys.length)) ||
+        (mode === VIOLIN_MODES.GROUPBY && !!params.varKey && !!params.obsCol),
     }
   );
 

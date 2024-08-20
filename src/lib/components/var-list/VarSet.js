@@ -104,6 +104,27 @@ function SingleSelectionSet({
   );
 }
 
+function MultipleSelectionSet({ set, isActive, toggleSet }) {
+  return (
+    <>
+      <div className="d-flex">
+        <div className="flex-grow-1">
+          <Button
+            type="button"
+            key={set.name}
+            variant={isActive ? "primary" : "outline-primary"}
+            className="m-0 p-0 px-1"
+            onClick={toggleSet}
+            title={set.name}
+          >
+            {set.name}
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
@@ -155,6 +176,17 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
     });
   };
 
+  const toggleSet = () => {
+    if (active.includes(set.name)) {
+      dispatch({
+        type: "deselect.multivar",
+        var: set,
+      });
+    } else {
+      selectSet();
+    }
+  };
+
   if (set && mode === SELECTION_MODES.SINGLE) {
     return (
       <SingleSelectionSet
@@ -168,16 +200,12 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
       />
     );
   } else if (mode === SELECTION_MODES.MULTIPLE) {
-    // @TODO: implement multiple selection set
     return (
-      <></>
-      // <MultipleSelectionItem
-      //   item={item}
-      //   isActive={
-      //     item.matrix_index !== -1 && _.includes(active, item.matrix_index)
-      //   }
-      //   toggleVar={() => toggleVar(item)}
-      // />
+      <MultipleSelectionSet
+        set={set}
+        isActive={_.includes(active, set.name)}
+        toggleSet={() => toggleSet(set)}
+      />
     );
   } else {
     return null;

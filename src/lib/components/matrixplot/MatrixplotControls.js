@@ -9,7 +9,7 @@ import {
 } from "react-bootstrap";
 
 import { COLORSCALES } from "../../constants/colorscales";
-import { MATRIXPLOT_STANDARDSCALES } from "../../constants/constants";
+import { MATRIXPLOT_SCALES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export function MatrixplotControls() {
@@ -31,18 +31,19 @@ export function MatrixplotControls() {
     </Dropdown.Item>
   ));
 
-  const standardScaleList = MATRIXPLOT_STANDARDSCALES.map((item) => (
+  const standardScaleList = _.values(MATRIXPLOT_SCALES).map((scale) => (
     <Dropdown.Item
-      key={item.value}
-      active={dataset.controls.standardScale === item.name}
+      key={scale.value}
+      active={dataset.controls.scale.matrixplot.name === scale.name}
       onClick={() => {
         dispatch({
-          type: "set.controls.standardScale",
-          standardScale: item.value,
+          type: "set.controls.scale",
+          plot: "matrixplot",
+          scale: scale,
         });
       }}
     >
-      {item.name}
+      {scale.name}
     </Dropdown.Item>
   ));
 
@@ -61,7 +62,7 @@ export function MatrixplotControls() {
           <InputGroup.Text>Standard scale</InputGroup.Text>
           <Dropdown>
             <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {dataset.controls.standardScale}
+              {dataset.controls.scale.matrixplot.name}
             </Dropdown.Toggle>
             <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
           </Dropdown>
