@@ -134,7 +134,6 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
       return (
         <div className="cherita-violin position-relative">
           {isPending && <LoadingSpinner />}
-          <h5>{mode}</h5>
           <Plot
             data={data}
             layout={layout}

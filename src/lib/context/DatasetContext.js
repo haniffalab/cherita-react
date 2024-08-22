@@ -86,11 +86,7 @@ const initialDataset = {
     expressionCutoff: 0.0,
   },
   diseaseDatasets: [],
-  selectedDisease: {
-    id: null,
-    name: null,
-    genes: [],
-  },
+  selectedDisease: null,
 };
 
 const initializer = (initialState) => {
@@ -309,27 +305,13 @@ function datasetReducer(dataset, action) {
         selectedDisease: {
           id: action.id,
           name: action.name,
-          genes: [],
-        },
-      };
-    }
-    case "set.disease.genes": {
-      return {
-        ...dataset,
-        selectedDisease: {
-          ...dataset.selectedDisease,
-          genes: action.genes,
         },
       };
     }
     case "reset.disease": {
       return {
         ...dataset,
-        selectedDisease: {
-          id: null,
-          name: null,
-          genes: [],
-        },
+        selectedDisease: null,
       };
     }
     case "set.controls.colorScale": {
