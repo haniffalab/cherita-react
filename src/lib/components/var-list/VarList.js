@@ -73,6 +73,7 @@ function DiseaseVarList({ makeListItem }) {
 export function VarNamesList({
   mode = SELECTION_MODES.SINGLE,
   displayName = "genes",
+  showDiseaseVarList = true,
 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
@@ -240,7 +241,7 @@ export function VarNamesList({
         ) : (
           <ListGroup>{varList}</ListGroup>
         )}
-        <DiseaseVarList makeListItem={makeListItem} />
+        {showDiseaseVarList && <DiseaseVarList makeListItem={makeListItem} />}
       </div>
     </div>
   );
