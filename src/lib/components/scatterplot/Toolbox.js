@@ -16,9 +16,9 @@ export function Toolbox({ mode, obsLength, slicedLength }) {
         <Button size="sm">
           <FontAwesomeIcon icon={faDroplet} /> {mode}
         </Button>
-        {(mode || !Number.isNaN(obsLength)) &&
+        {(mode || !isNaN(obsLength)) &&
           (mode !== null &&
-          !Number.isNaN(slicedLength) &&
+          !isNaN(slicedLength) &&
           slicedLength !== obsLength ? (
             <Button size="sm">
               {prettyNumerical(slicedLength)} out of{" "}

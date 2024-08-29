@@ -165,7 +165,7 @@ export function CategoricalObs({
       value_counts: obs.value_counts[obs.values[index]],
       pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
       isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
-      label: prettyNumerical(obs.values[index]),
+      label: obs.values[index],
     };
   };
 
@@ -328,10 +328,9 @@ export function ContinuousObs({
       value_counts: obs.value_counts[obs.values[index]],
       pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
       isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
-      label: getContinuousLabel(
-        obs.codes[obs.values[index]],
-        obs.bins.binEdges
-      ),
+      label: isNaN(obs.values[index])
+        ? "NaN"
+        : getContinuousLabel(obs.codes[obs.values[index]], obs.bins.binEdges),
     };
   };
 

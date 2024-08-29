@@ -25,7 +25,7 @@ const interpolateColor = (color1, color2, factor) => {
 };
 
 const computeColor = (colormap, value) => {
-  if (!colormap || Number.isNaN(value)) {
+  if (!colormap || isNaN(value)) {
     return [0, 0, 0, 255];
   } else if (value <= 0) {
     return parseHexColor(colormap[0]);

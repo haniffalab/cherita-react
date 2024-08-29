@@ -29,6 +29,7 @@
     "deck.gl": "^8.9.19",
     "jquery": "^3.7.0",
     "nebula.gl": "^1.0.4",
+    "numbro": "^2.5.0",
     "plotly.js": "^2.23.2",
     "popper.js": "^1.16.1",
     "react-bootstrap": "^2.7.4",

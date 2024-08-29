@@ -331,7 +331,7 @@ export function Scatterplot({ radius = 30 }) {
         if (dataset.selectedObs.type === OBS_TYPES.CATEGORICAL) {
           inSlice &= !_.includes(dataset.selectedObs.omit, values[index]);
         } else if (dataset.selectedObs.type === OBS_TYPES.CONTINUOUS) {
-          if (Number.isNaN(values[index])) {
+          if (isNaN(values[index])) {
             inSlice &= !_.includes(dataset.selectedObs.omit, -1);
           } else {
             inSlice &= isInBins(
