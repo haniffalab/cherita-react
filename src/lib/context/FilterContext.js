@@ -4,7 +4,7 @@ export const FilteredDataContext = createContext(null);
 export const FilteredDataDispatchContext = createContext(null);
 
 const initialFilterData = {
-  obsIndices: [],
+  obsIndices: [], // @TODO: split to byObs and byPolygons ?
   varIndices: [],
 };
 

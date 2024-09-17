@@ -6,10 +6,40 @@ import { ListGroup, Button, Alert } from "react-bootstrap";
 
 import { VarItem } from "./VarItem";
 import { VarSet } from "./VarSet";
-import { SELECTION_MODES } from "../../constants/constants";
+import { SELECTION_MODES, VAR_SORT } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 
+const useVarMean = (varKeys, enabled = false) => {
+  const ENDPOINT = "matrix/mean";
+  const dataset = useDataset();
+  const [params, setParams] = useState({
+    url: dataset.url,
+    varKeys: _.map(varKeys, (v) =>
+      v.isSet ? { name: v.name, indices: v.vars.map((v) => v.index) } : v.index
+    ),
+    varNamesCol: dataset.varNamesCol,
+  });
+
+  useEffect(() => {
+    setParams((p) => {
+      return {
+        ...p,
+        varKeys: _.map(varKeys, (v) =>
+          v.isSet
+            ? { name: v.name, indices: v.vars.map((v) => v.index) }
+            : v.index
+        ),
+      };
+    });
+  }, [varKeys]);
+
+  return useFetch(ENDPOINT, params);
+};
+
+// @TODO: display where disease data comes from
+// add to disease dataset metadata
 function DiseaseVarList({ makeListItem }) {
   const ENDPOINT = "disease/genes";
   const dataset = useDataset();
@@ -45,8 +75,13 @@ function DiseaseVarList({ makeListItem }) {
   return (
     <>
       {dataset.selectedDisease &&
-        (!diseaseVars.length ? (
-          <Alert variant="light">No disease genes found.</Alert>
+        (!isPending && !fetchedData?.length ? (
+          <>
+            <div className="d-flex justify-content-between mt-3">
+              <h5>Disease genes</h5>
+            </div>
+            <Alert variant="light">No disease genes found.</Alert>
+          </>
         ) : (
           <>
             <div className="d-flex justify-content-between mt-3">
@@ -63,7 +98,9 @@ function DiseaseVarList({ makeListItem }) {
               </Button>
             </div>
             <p>{dataset.selectedDisease?.name}</p>
-            <ListGroup>{diseaseVarList}</ListGroup>
+            <ListGroup>
+              {isPending ? <LoadingSpinner /> : diseaseVarList}
+            </ListGroup>
           </>
         ))}
     </>
@@ -89,6 +126,7 @@ export function VarNamesList({
       ? dataset.selectedVar?.matrix_index || dataset.selectedVar?.name
       : dataset.selectedMultiVar.map((i) => i.matrix_index || i.name)
   );
+  const [sortedVarButtons, setSortedVarButtons] = useState([]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.SINGLE) {
@@ -151,6 +189,42 @@ export function VarNamesList({
     dispatch,
   ]);
 
+  const varMeans = useVarMean(
+    varButtons,
+    dataset.varSort.var.sort === VAR_SORT.MATRIX
+  );
+
+  useEffect(() => {
+    if (
+      dataset.varSort.var.sort === VAR_SORT.MATRIX &&
+      !varMeans.isPending &&
+      !varMeans.serverError
+    ) {
+      setSortedVarButtons(
+        _.orderBy(
+          varButtons,
+          (o) => {
+            return varMeans.fetchedData[o.name];
+          },
+          dataset.varSort.var.sortOrder
+        )
+      );
+    } else if (dataset.varSort.var.sort === VAR_SORT.NAME) {
+      setSortedVarButtons(
+        _.orderBy(varButtons, "name", dataset.varSort.var.sortOrder)
+      );
+    } else {
+      setSortedVarButtons(varButtons);
+    }
+  }, [
+    dataset.varSort.var.sort,
+    dataset.varSort.var.sortOrder,
+    varButtons,
+    varMeans.isPending,
+    varMeans.serverError,
+    varMeans.fetchedData,
+  ]);
+
   const makeListItem = (item, isDiseaseGene = false) => {
     return (
       <ListGroup.Item key={item.matrix_index}>
@@ -173,7 +247,7 @@ export function VarNamesList({
     );
   };
 
-  const varList = _.map(varButtons, (item) => {
+  const varList = _.map(sortedVarButtons, (item) => {
     if (item.isSet) {
       return makeSetListItem(item);
     } else {
