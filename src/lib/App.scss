@@ -257,3 +257,14 @@ input[type="checkbox"], .cursor-pointer {
 .feature-disease-info table {
     margin: 0;
 }
+
+.var-list-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 3rem;
+}
+
+.var-list-toolbar .svg-inline--fa {
+    height: 1.2rem;
+}

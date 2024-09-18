@@ -489,6 +489,42 @@ function datasetReducer(dataset, action) {
         labelObs: [],
       };
     }
+    case "set.varSort": {
+      return {
+        ...dataset,
+        varSort: {
+          ...dataset.varSort,
+          [action.var]: {
+            sort: action.sort,
+            sortOrder: action.sortOrder,
+          },
+        },
+      };
+    }
+    case "set.varSort.sort": {
+      return {
+        ...dataset,
+        varSort: {
+          ...dataset.varSort,
+          [action.var]: {
+            ...dataset.varSort[action.var],
+            sort: action.sort,
+          },
+        },
+      };
+    }
+    case "set.varSort.sortOrder": {
+      return {
+        ...dataset,
+        varSort: {
+          ...dataset.varSort,
+          [action.var]: {
+            ...dataset.varSort[action.var],
+            sortOrder: action.sortOrder,
+          },
+        },
+      };
+    }
     default: {
       throw Error("Unknown action: " + action.type);
     }
