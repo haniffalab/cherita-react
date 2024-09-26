@@ -8,10 +8,72 @@ import { VarItem } from "./VarItem";
 import { VarSet } from "./VarSet";
 import { SELECTION_MODES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useFetch } from "../../utils/requests";
+
+function DiseaseVarList({ makeListItem }) {
+  const ENDPOINT = "disease/genes";
+  const dataset = useDataset();
+  const dispatch = useDatasetDispatch();
+  const [diseaseVars, setDiseaseVars] = useState([]);
+  const [params, setParams] = useState({
+    url: dataset.url,
+    col: dataset.varNamesCol,
+    diseaseId: dataset.selectedDisease?.id,
+    diseaseDatasets: dataset.diseaseDatasets,
+  });
+
+  useEffect(() => {
+    setParams((p) => {
+      return { ...p, diseaseId: dataset.selectedDisease?.id };
+    });
+  }, [dataset.selectedDisease]);
+
+  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
+    enabled: !!params.diseaseId,
+  });
+
+  useEffect(() => {
+    if (!isPending && !serverError) {
+      setDiseaseVars(fetchedData);
+    }
+  }, [fetchedData, isPending, serverError]);
+
+  const diseaseVarList = _.map(diseaseVars, (item) => {
+    return makeListItem(item, true);
+  });
+
+  return (
+    <>
+      {dataset.selectedDisease &&
+        (!diseaseVars.length ? (
+          <Alert variant="light">No disease genes found.</Alert>
+        ) : (
+          <>
+            <div className="d-flex justify-content-between mt-3">
+              <h5>Disease genes</h5>
+              <Button
+                variant="link"
+                onClick={() => {
+                  dispatch({
+                    type: "reset.disease",
+                  });
+                }}
+              >
+                clear
+              </Button>
+            </div>
+            <p>{dataset.selectedDisease?.name}</p>
+            <ListGroup>{diseaseVarList}</ListGroup>
+          </>
+        ))}
+    </>
+  );
+}
 
 export function VarNamesList({
   mode = SELECTION_MODES.SINGLE,
   displayName = "genes",
+  showDiseaseVarList = true,
 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
@@ -119,10 +181,6 @@ export function VarNamesList({
     }
   });
 
-  const diseaseVarList = _.map(dataset.selectedDisease.genes, (item) => {
-    return makeListItem(item, true);
-  });
-
   const newSetName = () => {
     let n = 1;
     let setName = `Set ${n}`;
@@ -183,28 +241,7 @@ export function VarNamesList({
         ) : (
           <ListGroup>{varList}</ListGroup>
         )}
-        {dataset.selectedDisease?.id &&
-          (!dataset.selectedDisease?.genes?.length ? (
-            <Alert variant="light">No disease genes found.</Alert>
-          ) : (
-            <>
-              <div className="d-flex justify-content-between mt-3">
-                <h5>Disease genes</h5>
-                <Button
-                  variant="link"
-                  onClick={() => {
-                    dispatch({
-                      type: "reset.disease",
-                    });
-                  }}
-                >
-                  clear
-                </Button>
-              </div>
-              <p>{dataset.selectedDisease?.name}</p>
-              <ListGroup>{diseaseVarList}</ListGroup>
-            </>
-          ))}
+        {showDiseaseVarList && <DiseaseVarList makeListItem={makeListItem} />}
       </div>
     </div>
   );
