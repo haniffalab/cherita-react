@@ -2,13 +2,11 @@ import { React } from "react";
 
 import Offcanvas from "react-bootstrap/Offcanvas";
 
-import {
-  ObsColsList,
-  ObsmKeysList,
-  VarNamesList,
-  SELECTION_MODES,
-} from "@haniffalab/cherita-react";
+import { SELECTION_MODES } from "../../constants/constants";
+import { ObsColsList } from "../obs-list/ObsList";
+import { ObsmKeysList } from "../obsm-list/ObsmList";
 import { SearchBar } from "../search-bar/SearchBar";
+import { VarNamesList } from "../var-list/VarList";
 
 export function OffcanvasObs({ show, handleClose }) {
   return (

@@ -1,79 +1,11 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+
+import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import {
-  PLOTLY_COLORSCALES,
-  MATRIXPLOT_STANDARDSCALES,
-} from "../../constants/constants";
-import {
-  Alert,
-  Dropdown,
-  ButtonGroup,
-  ButtonToolbar,
-  InputGroup,
-} from "react-bootstrap";
+
+import { useDataset } from "../../context/DatasetContext";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
-
-export function MatrixplotControls() {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
-
-  const colorScaleList = PLOTLY_COLORSCALES.map((item) => (
-    <Dropdown.Item
-      key={item}
-      active={dataset.controls.colorScale === item}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.colorScale",
-          colorScale: item,
-        });
-      }}
-    >
-      {item}
-    </Dropdown.Item>
-  ));
-
-  const standardScaleList = MATRIXPLOT_STANDARDSCALES.map((item) => (
-    <Dropdown.Item
-      key={item.value}
-      active={dataset.controls.standardScale === item.name}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.standardScale",
-          standardScale: item.value,
-        });
-      }}
-    >
-      {item.name}
-    </Dropdown.Item>
-  ));
-
-  return (
-    <ButtonToolbar>
-      <ButtonGroup>
-        <Dropdown>
-          <Dropdown.Toggle id="dropdownColorscale" variant="light">
-            {dataset.controls.colorScale}
-          </Dropdown.Toggle>
-          <Dropdown.Menu>{colorScaleList}</Dropdown.Menu>
-        </Dropdown>
-      </ButtonGroup>
-      <ButtonGroup>
-        <InputGroup>
-          <InputGroup.Text>Standard scale</InputGroup.Text>
-          <Dropdown>
-            <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {dataset.controls.standardScale}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
-          </Dropdown>
-        </InputGroup>
-      </ButtonGroup>
-    </ButtonToolbar>
-  );
-}
 
 export function Matrixplot() {
   const ENDPOINT = "matrixplot";

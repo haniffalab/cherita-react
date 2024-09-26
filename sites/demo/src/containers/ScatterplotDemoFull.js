@@ -1,12 +1,5 @@
 import { React, useRef, useState, useLayoutEffect } from "react";
 
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
-import Card from "react-bootstrap/Card";
-
 import {
   DatasetProvider,
   Scatterplot,
@@ -21,6 +14,12 @@ import {
   VarNamesList,
   SearchBar,
 } from "@haniffalab/cherita-react";
+import Card from "react-bootstrap/Card";
+import Col from "react-bootstrap/Col";
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
+import Row from "react-bootstrap/Row";
 
 export default function ScatterplotDemo(props) {
   const targetRef = useRef();
@@ -67,6 +66,7 @@ export default function ScatterplotDemo(props) {
       <DatasetProvider {...props}>
         <Row className="g-0">
           <Col
+            xs={0}
             lg={4}
             xl={3}
             xxl={3}
@@ -74,43 +74,56 @@ export default function ScatterplotDemo(props) {
           >
             <ObsColsList />
           </Col>
-          <Col xs={12} lg={8} xl={9} xxl={9} className="cherita-app-plot">
-            <Navbar
-              expand="sm"
-              bg="primary"
-              className="cherita-navbar d-block d-xl-none"
-            >
-              <Container fluid>
-                <Navbar.Toggle aria-controls="navbarScroll" />
-                <Navbar.Collapse id="navbarScroll">
-                  <Nav className="me-auto my-0" navbarScroll>
-                    <Nav.Item className="d-block d-lg-none">
-                      <Nav.Link onClick={handleShowObs}>Categories</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link onClick={handleShowVars}>Features</Nav.Link>
-                    </Nav.Item>
-                  </Nav>
-                  <Nav className="d-flex">
-                    <Nav.Item>
-                      <Nav.Link onClick={handleShowControls}>Controls</Nav.Link>
-                    </Nav.Item>
-                    <Nav.Item>
-                      <Nav.Link onClick={handleShowInfo}>Info</Nav.Link>
-                    </Nav.Item>
-                  </Nav>
-                </Navbar.Collapse>
-              </Container>
-            </Navbar>
+          <Col xs={12} lg={8} xl={6} xxl={6} className="cherita-app-plot">
+            <div className="position-relative">
+              <Navbar
+                expand="sm"
+                bg="primary"
+                className="cherita-navbar d-block d-xl-none"
+              >
+                <Container fluid>
+                  <Navbar.Toggle aria-controls="navbarScroll" />
+                  <Navbar.Collapse id="navbarScroll">
+                    <Nav className="me-auto my-0" navbarScroll>
+                      <Nav.Item className="d-block d-lg-none">
+                        <Nav.Link onClick={handleShowObs}>Categories</Nav.Link>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <Nav.Link onClick={handleShowVars}>Features</Nav.Link>
+                      </Nav.Item>
+                    </Nav>
+                    <Nav className="d-flex">
+                      <Nav.Item>
+                        <Nav.Link onClick={handleShowControls}>
+                          Controls
+                        </Nav.Link>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <Nav.Link onClick={handleShowInfo}>Info</Nav.Link>
+                      </Nav.Item>
+                    </Nav>
+                  </Navbar.Collapse>
+                </Container>
+              </Navbar>
+            </div>
             <div className="cherita-container-scatterplot">
               <Scatterplot />
             </div>
+          </Col>
+          <Col
+            lg={0}
+            xl={3}
+            xxl={3}
+            className="cherita-app-var d-none d-lg-block"
+          >
             <Card className="cherita-app-features d-none d-xl-block">
               <Card.Body>
                 <SearchBar />
                 <VarNamesList mode={SELECTION_MODES.SINGLE} />
               </Card.Body>
             </Card>
+          </Col>
+          <Col>
             <OffcanvasObs show={showObs} handleClose={handleCloseObs} />
             <OffcanvasObsm show={showObsm} handleClose={handleCloseObsm} />
             <OffcanvasVars

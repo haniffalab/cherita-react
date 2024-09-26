@@ -1,16 +1,17 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
-import { useFetch } from "../../utils/requests";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
-import { Alert } from "react-bootstrap";
 
-import Dropdown from "react-bootstrap/Dropdown";
-import Button from "react-bootstrap/Button";
-import DropdownButton from "react-bootstrap/DropdownButton";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
-import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-import Tooltip from "react-bootstrap/Tooltip";
+import {
+  Dropdown,
+  Button,
+  DropdownButton,
+  ButtonGroup,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
+
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useFetch } from "../../utils/requests";
 
 export function ObsmKeysList() {
   const ENDPOINT = "obsm/keys";
@@ -54,7 +55,7 @@ export function ObsmKeysList() {
         className={`custom ${active === item && "active"}`}
         onClick={() => {
           dispatch({
-            type: "obsmSelected",
+            type: "select.obsm",
             obsm: item,
           });
         }}
@@ -70,7 +71,8 @@ export function ObsmKeysList() {
         {isPending && <LoadingSpinner />}
         <DropdownButton
           as={ButtonGroup}
-          title={dataset.selectedObsm}
+          title={dataset.selectedObsm || "Select an embedding"}
+          variant={dataset.selectedObsm ? "primary" : "outline-primary"}
           id="bg-nested-dropdown"
           size="sm"
         >

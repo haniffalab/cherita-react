@@ -1,6 +1,19 @@
 @import "bootstrap/scss/bootstrap";
 
 // Theme CSS
+
+.loading-spinner {
+    @extend .bg-light;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    z-index: 1;
+    opacity: 75%;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+}
+
 .cherita-container {
     margin: 40px auto;
     background-color: #fff;
@@ -13,11 +26,13 @@
 }
 
 .cherita-navbar {
+    @extend .mx-1;
+    @extend .my-2;
     position: absolute;
     z-index: 11;
-    top: 20px;
-    right: 20px;
-    left: 20px;
+    top: 0;
+    left: 0;
+    right: 0;
     border-radius: 0.25rem;
 }
 
@@ -59,46 +74,65 @@
 
 .cherita-container-scatterplot {
     position: relative;
-    min-height: 300px;
+    min-height: 500px;
     height: 100%;
 }
 
-.cherita-toolbox {
+.cherita-alert {
     position: absolute;
     z-index: 10;
-    bottom: 20px;
+    bottom: 40px;
     left: 20px;
 }
 .cherita-spatial-controls {
     position: absolute;
     z-index: 10;
-    top: 20px;
-    left: 20px;
+    top: 1rem;
+    left: 1rem;
+    width: 3rem;
+}
+
+.cherita-spatial-footer {
+    position: absolute;
+    z-index: 10;
+    bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    width: 100%;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-bottom: 1rem;
+    pointer-events: none;
+    > * { 
+        pointer-events: auto;
+    }
+}
+
+.cherita-toolbox {
+    order: 1;
+}
+
+.cherita-legend {
+    order: 2;
+    width: 12rem;
 }
 
 @include media-breakpoint-down(xl) {
     .cherita-spatial-controls {
         top: 100px;
     }
-    .cherita-toolbox {
-        right: 20px;
-        left: auto;
-    }
   }
-
-
-
-
-.cherita-legend {
-    position: absolute;
-    z-index: 10;
-    bottom: 20px;
-    right: 20px;
-    width: 200px;
-}
 
 .cherita-accordion-active .accordion-button {
     background-color: $accordion-button-active-bg
+}
+
+.obs-value-list-check {
+    padding-right: 1rem;
+    word-break: auto-phrase;
+    overflow-wrap: anywhere;
 }
 
 .grad-step {
@@ -107,7 +141,7 @@
     width: 1%;
 }
 .gradient {
-    width: 85%;
+    width: 100%;
     white-space: nowrap;
     position: relative;
     display: inline-block;

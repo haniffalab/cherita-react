@@ -1,8 +1,5 @@
 import { React, useState } from "react";
 
-import Container from "react-bootstrap/Container";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
 import {
   DatasetProvider,
   Matrixplot,
@@ -12,6 +9,9 @@ import {
   OffcanvasControls,
   OffcanvasInfo,
 } from "@haniffalab/cherita-react";
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
+import Navbar from "react-bootstrap/Navbar";
 
 export default function MatrixplotDemo(props) {
   const [showObs, setShowObs] = useState(false);

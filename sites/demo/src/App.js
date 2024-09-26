@@ -1,9 +1,9 @@
 import React from "react";
+
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
-import Header from "./components/Header";
 import Footer from "./components/Footer";
-
+import Header from "./components/Header";
 import DotplotDemo from "./containers/DotplotDemo";
 import HeatmapDemo from "./containers/HeatmapDemo";
 import MatrixplotDemo from "./containers/MatrixplotDemo";

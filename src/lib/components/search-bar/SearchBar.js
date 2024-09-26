@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
+
 import _ from "lodash";
 import { Form, FormGroup, Dropdown } from "react-bootstrap";
+
 import { DiseasesSearchResults, VarSearchResults } from "./SearchResults";
 
 export function SearchBar({ searchVar = true, searchDiseases = false }) {

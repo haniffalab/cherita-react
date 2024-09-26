@@ -1,10 +1,15 @@
-import React, { useEffect } from "react";
-import _ from "lodash";
-import { createContext, useContext, useReducer } from "react";
+import React, { useEffect, createContext, useContext, useReducer } from "react";
+
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { QueryClient, QueryCache } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
-import { LOCAL_STORAGE_KEY } from "../constants/constants";
+import _ from "lodash";
+
+import {
+  COLOR_ENCODINGS,
+  LOCAL_STORAGE_KEY,
+  OBS_TYPES,
+} from "../constants/constants";
 
 export const DatasetContext = createContext(null);
 export const DatasetDispatchContext = createContext(null);
@@ -38,7 +43,6 @@ const persistOptions = {
 };
 
 const initialDataset = {
-  obs: {},
   varNamesCol: null,
   selectedObs: null,
   selectedObsm: null,
@@ -46,8 +50,15 @@ const initialDataset = {
   selectedMultiObs: [],
   selectedMultiVar: [],
   colorEncoding: null,
+  labelObs: [],
+  sliceBy: {
+    obs: false,
+    polygons: false,
+  },
   controls: {
     colorScale: "Viridis",
+    valueRange: [0, 1],
+    range: [0, 1],
     colorAxis: {
       dmin: 0,
       dmax: 1,
@@ -57,9 +68,6 @@ const initialDataset = {
     standardScale: null,
     meanOnlyExpressed: false,
     expressionCutoff: 0.0,
-  },
-  state: {
-    obs: {},
   },
   diseaseDatasets: [],
   selectedDisease: {
@@ -94,9 +102,11 @@ export function DatasetProvider({
 
   useEffect(() => {
     try {
+      const localObj =
+        JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY)) || {};
       localStorage.setItem(
         LOCAL_STORAGE_KEY,
-        JSON.stringify({ [dataset.url]: dataset })
+        JSON.stringify({ ...localObj, [dataset.url]: dataset })
       );
     } catch (err) {
       if (
@@ -136,19 +146,26 @@ export function useDatasetDispatch() {
 
 function datasetReducer(dataset, action) {
   switch (action.type) {
-    case "set.obs": {
-      return { ...dataset, obs: action.value };
+    case "select.obs": {
+      return {
+        ...dataset,
+        selectedObs: action.obs,
+        controls: {
+          ...dataset.controls,
+          range:
+            action.obs?.type === OBS_TYPES.CATEGORICAL
+              ? [0, 1]
+              : dataset.controls.range,
+        },
+      };
     }
-    case "obsSelected": {
-      return { ...dataset, selectedObs: action.obs };
-    }
-    case "obsmSelected": {
+    case "select.obsm": {
       return { ...dataset, selectedObsm: action.obsm };
     }
-    case "varSelected": {
+    case "select.var": {
       return { ...dataset, selectedVar: action.var };
     }
-    case "multiVarSelected": {
+    case "select.multivar": {
       if (dataset.selectedMultiVar.find((i) => _.isEqual(i, action.var))) {
         return dataset;
       } else {
@@ -158,7 +175,17 @@ function datasetReducer(dataset, action) {
         };
       }
     }
-    case "multiVarDeselected": {
+    case "deselect.var": {
+      return {
+        ...dataset,
+        selectedVar: null,
+        colorEncoding:
+          dataset.colorEncoding === COLOR_ENCODINGS.VAR
+            ? null
+            : dataset.colorEncoding,
+      };
+    }
+    case "deselect.multivar": {
       return {
         ...dataset,
         selectedMultiVar: dataset.selectedMultiVar.filter(
@@ -173,12 +200,20 @@ function datasetReducer(dataset, action) {
       return {
         ...dataset,
         selectedMultiVar: [],
+        colorEncoding:
+          dataset.colorEncoding === COLOR_ENCODINGS.VAR
+            ? null
+            : dataset.colorEncoding,
       };
     }
     case "reset.var": {
       return {
         ...dataset,
         selectedVar: null,
+        colorEncoding:
+          dataset.colorEncoding === COLOR_ENCODINGS.VAR
+            ? null
+            : dataset.colorEncoding,
       };
     }
     case "select.disease": {
@@ -216,6 +251,24 @@ function datasetReducer(dataset, action) {
         controls: {
           ...dataset.controls,
           colorScale: action.colorScale,
+        },
+      };
+    }
+    case "set.controls.valueRange": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          valueRange: action.valueRange,
+        },
+      };
+    }
+    case "set.controls.range": {
+      return {
+        ...dataset,
+        controls: {
+          ...dataset.controls,
+          range: action.range,
         },
       };
     }
@@ -290,6 +343,66 @@ function datasetReducer(dataset, action) {
           ...dataset.controls,
           expressionCutoff: action.expressionCutoff,
         },
+      };
+    }
+    case "toggle.slice.obs": {
+      if (_.isEqual(dataset.selectedObs, action.obs)) {
+        return {
+          ...dataset,
+          sliceBy: {
+            ...dataset.sliceBy,
+            obs: !dataset.sliceBy.obs,
+          },
+        };
+      } else {
+        return {
+          ...dataset,
+          selectedObs: action.obs,
+          sliceBy: {
+            ...dataset.sliceBy,
+            obs: true,
+          },
+        };
+      }
+    }
+    case "toggle.slice.polygons": {
+      return {
+        ...dataset,
+        sliceBy: {
+          ...dataset.sliceBy,
+          polygons: !dataset.sliceBy.polygons,
+        },
+      };
+    }
+    case "disable.slice.polygons": {
+      return {
+        ...dataset,
+        sliceBy: {
+          ...dataset.sliceBy,
+          polygons: false,
+        },
+      };
+    }
+    case "add.label.obs": {
+      if (dataset.labelObs.find((i) => _.isEqual(i, action.obs))) {
+        return dataset;
+      } else {
+        return {
+          ...dataset,
+          labelObs: [...dataset.labelObs, action.obs],
+        };
+      }
+    }
+    case "remove.label.obs": {
+      return {
+        ...dataset,
+        labelObs: dataset.labelObs.filter((a) => a.name !== action.obsName),
+      };
+    }
+    case "reset.label.obs": {
+      return {
+        ...dataset,
+        labelObs: [],
       };
     }
     default: {

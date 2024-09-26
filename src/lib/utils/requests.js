@@ -1,5 +1,6 @@
-import { useDebounce } from "@uidotdev/usehooks";
 import { useQuery } from "@tanstack/react-query";
+import { useDebounce } from "@uidotdev/usehooks";
+
 import { parseError } from "./errors";
 
 export async function fetchData(

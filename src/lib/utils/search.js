@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { useDataset, useDatasetDispatch } from "../context/DatasetContext";
+
 import { useFetch } from "./requests";
+import { useDataset, useDatasetDispatch } from "../context/DatasetContext";
 
 export const useDiseaseSearch = () => {
   const ENDPOINT = "diseases";
@@ -28,6 +29,7 @@ export const useVarSearch = () => {
   const dispatch = useDatasetDispatch();
   const [params, setParams] = useState({
     url: dataset.url,
+    col: dataset.varNamesCol,
     text: "",
   });
 
@@ -37,11 +39,11 @@ export const useVarSearch = () => {
 
   const onSelect = (item) => {
     dispatch({
-      type: "varSelected",
+      type: "select.var",
       var: item,
     });
     dispatch({
-      type: "multiVarSelected",
+      type: "select.multivar",
       var: item,
     });
     dispatch({

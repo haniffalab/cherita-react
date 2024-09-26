@@ -1,18 +1,23 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import _ from "lodash";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { useFetch } from "../../utils/requests";
-import chroma from "chroma-js";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
-import { Accordion, ListGroup, Alert } from "react-bootstrap";
 
-import { Form } from "react-bootstrap";
-import { ButtonGroup } from "react-bootstrap";
-import { Button } from "react-bootstrap";
+import { faDroplet, faEye, faFont } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDroplet } from "@fortawesome/free-solid-svg-icons";
+import _ from "lodash";
+import {
+  Accordion,
+  ListGroup,
+  Alert,
+  Form,
+  ButtonGroup,
+  Button,
+} from "react-bootstrap";
+
+import { ObsValueList } from "./ObsValueList";
+import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useColor } from "../../helpers/color-helper";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useFetch } from "../../utils/requests";
 
 const N_BINS = 5;
 
@@ -42,13 +47,14 @@ export function ObsColsList() {
   const ENDPOINT = "obs/cols";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const [obsColsList, setObsColsList] = useState([]);
-  const [obs, setObs] = useState([]);
-  const [updatedObsColsList, setUpdatedObsColsList] = useState(false);
+  const [obsCols, setObsCols] = useState({});
+  const [updatedObsCols, setupdatedObsCols] = useState(false);
   const [active, setActive] = useState(dataset.selectedObs?.name);
   const [params, setParams] = useState({
     url: dataset.url,
   });
+
+  const { getColor } = useColor();
 
   useEffect(() => {
     setParams((p) => {
@@ -64,76 +70,93 @@ export function ObsColsList() {
   });
 
   const validateSelection = useCallback(
-    (selectedObs) => {
-      if (updatedObsColsList) {
-        if (!_.some(obsColsList, selectedObs)) {
-          setActive(null);
-          dispatch({
-            type: "obsSelected",
-            obs: null,
-          });
-        }
+    (obs) => {
+      if (
+        !_.isEqual(_.omit(obsCols[obs.name], ["omit"]), _.omit(obs, ["omit"]))
+      )
+        return false;
+      if (!_.isEqual(obsCols[obs.name].omit, obs.omit)) {
+        setObsCols((o) => {
+          return {
+            ...o,
+            [obs.name]: { ...o[obs.name], omit: obs.omit },
+          };
+        });
       }
+      return true;
     },
-    [dispatch, obsColsList, updatedObsColsList]
+    [obsCols]
   );
 
   useEffect(() => {
+    if (updatedObsCols) {
+      if (dataset.selectedObs) {
+        if (validateSelection(dataset.selectedObs)) {
+          setActive(dataset.selectedObs.name);
+        } else {
+          dispatch({
+            type: "select.obs",
+            obs: null,
+          });
+          setActive(null);
+        }
+      } else {
+        setActive(null);
+      }
+    }
+  }, [dataset.selectedObs, dispatch, updatedObsCols, validateSelection]);
+
+  // @TODO: change api to return all obs and truncate here
+  useEffect(() => {
     if (!isPending && !serverError) {
-      setObs(
-        fetchedData.reduce((result, key) => {
-          const colors = chroma.scale("Accent").colors(key.n_values, "rgb");
-          result[key.name] = {
-            type: key.type,
-          };
-          if (key.type === "categorical") {
-            result[key.name]["is_truncated"] = key.is_truncated;
-            result[key.name]["n_values"] = key.n_values;
-            result[key.name]["values"] = key.values;
-            result[key.name]["state"] = key.values.map((value, index) => {
-              return {
-                value: value,
-                color: chroma(colors[index]).rgb(),
-                checked: true,
-              };
-            });
-          }
-          return result;
-        }, {})
+      setObsCols(
+        _.keyBy(
+          _.map(fetchedData, (d) => {
+            if (d.type === OBS_TYPES.CONTINUOUS) {
+              d = binContinuous(d);
+            } else if (d.type === OBS_TYPES.DISCRETE) {
+              d = binDiscrete(d);
+            }
+            return { ...d, omit: [] };
+          }),
+          "name"
+        )
       );
-      setObsColsList(
-        fetchedData.map((d) => {
-          if (d.type === "continuous") {
-            d = binContinuous(d);
-          }
-          if (d.type === "discrete") {
-            d = binDiscrete(d);
-          }
-          return d;
-        })
-      );
-      setUpdatedObsColsList(true);
+      setupdatedObsCols(true);
     }
   }, [fetchedData, isPending, serverError]);
 
-  useEffect(() => {
-    if (dataset.selectedObs) {
-      validateSelection(dataset.selectedObs);
-      setActive(dataset.selectedObs.name);
-    } else {
-      setActive(null);
-    }
-  }, [dataset.selectedObs, validateSelection]);
-
-  useEffect(() => {
-    dispatch({
-      type: "set.obs",
-      value: obs,
-    });
-  }, [obs, dispatch]);
+  const toggleAll = useCallback(
+    (item, checked, active) => {
+      const omit = checked ? [] : _.map(item.values, (v) => item.codes[v]);
+      setObsCols((o) => {
+        return {
+          ...o,
+          [item.name]: { ...item, omit: omit },
+        };
+      });
+      if (active === item.name) {
+        dispatch({
+          type: "select.obs",
+          obs: { ...item, omit: omit },
+        });
+      }
+    },
+    [dispatch]
+  );
 
   const categoricalList = useCallback(
     (item, active = null) => {
+      const codesMap = _.invert(item.codes);
+      const inLabelObs = _.some(dataset.labelObs, (i) =>
+        _.isEqual(i, {
+          name: item.name,
+          type: item.type,
+          codesMap: codesMap,
+        })
+      );
+      const min = _.min(_.values(item.codes));
+      const max = _.max(_.values(item.codes));
       return (
         <Accordion.Item
           key={item.name}
@@ -144,33 +167,81 @@ export function ObsColsList() {
           <Accordion.Body>
             <ListGroup>
               <ListGroup.Item>
-                <div class="d-flex">
-                  <div class="flex-grow-1">
+                <div className="d-flex">
+                  <div className="flex-grow-1">
                     <Form.Check // prettier-ignore
                       type="switch"
                       id="custom-switch"
                       label="Toggle all"
+                      checked={!item.omit.length}
+                      onChange={() => {
+                        toggleAll(item, !!item.omit.length, active);
+                      }}
                     />
                   </div>
                   <div>
                     <ButtonGroup>
                       <Button
-                        variant="secondary"
+                        variant={inLabelObs ? "primary" : "outline-primary"}
                         size="sm"
-                        onClick={(key) => {
-                          if (key != null) {
+                        onClick={() => {
+                          if (inLabelObs) {
                             dispatch({
-                              type: "obsSelected",
-                              obs: obsColsList.find(
-                                (obs) => obs.name === item.name
-                              ),
+                              type: "remove.label.obs",
+                              obsName: item.name,
                             });
+                          } else {
                             dispatch({
-                              type: "set.colorEncoding",
-                              value: "obs",
+                              type: "add.label.obs",
+                              obs: {
+                                name: item.name,
+                                type: item.type,
+                                codesMap: codesMap,
+                              },
                             });
                           }
                         }}
+                        title="Add to tooltip"
+                      >
+                        <FontAwesomeIcon icon={faFont} />
+                      </Button>
+                      <Button
+                        variant={
+                          dataset.sliceBy.obs &&
+                          dataset.selectedObs?.name === item.name
+                            ? "primary"
+                            : "outline-primary"
+                        }
+                        size="sm"
+                        onClick={() => {
+                          dispatch({
+                            type: "toggle.slice.obs",
+                            obs: item,
+                          });
+                        }}
+                        title="Slice to selected"
+                      >
+                        <FontAwesomeIcon icon={faEye} />
+                      </Button>
+                      <Button
+                        variant={
+                          dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+                          dataset.selectedObs?.name === item.name
+                            ? "primary"
+                            : "outline-primary"
+                        }
+                        size="sm"
+                        onClick={() => {
+                          dispatch({
+                            type: "select.obs",
+                            obs: item,
+                          });
+                          dispatch({
+                            type: "set.colorEncoding",
+                            value: "obs",
+                          });
+                        }}
+                        title="Set as color encoding"
                       >
                         <FontAwesomeIcon icon={faDroplet} />
                       </Button>
@@ -178,64 +249,143 @@ export function ObsColsList() {
                   </div>
                 </div>
               </ListGroup.Item>
-              {item.values.map((value, index) => (
-                <ListGroup.Item key={value}>
-                  <div class="d-flex">
-                    <div class="flex-grow-1">
-                      <Form.Check // prettier-ignore
-                        type="switch"
-                        id="custom-switch"
-                        label={value}
-                      />
-                    </div>
-                    <div>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        fill="currentColor"
-                        viewBox="0 0 10 10"
-                      >
-                        <rect
-                          x="0"
-                          y="0"
-                          width="10"
-                          height="10"
-                          fill={`rgb(${
-                            obs[item.name]["state"][index]["color"]
-                          })`}
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </ListGroup.Item>
-              ))}
+              <ObsValueList
+                item={item}
+                onChange={(value) => {
+                  const newItem = {
+                    ...item,
+                    omit: !_.includes(item.omit, item.codes[value])
+                      ? [...item.omit, item.codes[value]]
+                      : _.filter(item.omit, (o) => o !== item.codes[value]),
+                  };
+                  setObsCols((o) => {
+                    return {
+                      ...o,
+                      [item.name]: newItem,
+                    };
+                  });
+                  if (active === item.name) {
+                    dispatch({
+                      type: "select.obs",
+                      obs: newItem,
+                    });
+                  }
+                }}
+                getFillColor={(value) => {
+                  return `rgb(${getColor(
+                    (item.codes[value] - min) / (max - min),
+                    true,
+                    _.includes(item.omit, item.codes[value]),
+                    {
+                      alpha: 1,
+                    },
+                    "obs"
+                  )})`;
+                }}
+              />
             </ListGroup>
           </Accordion.Body>
         </Accordion.Item>
       );
     },
-    [obs]
+    [
+      dataset.labelObs,
+      dataset.sliceBy.obs,
+      dataset.selectedObs?.name,
+      dataset.colorEncoding,
+      toggleAll,
+      dispatch,
+      getColor,
+    ]
   );
 
-  const continuousList = useCallback((item, active = null) => {
-    return (
-      <Accordion.Item
-        key={item.name}
-        eventKey={item.name}
-        className={item.name === active ? "cherita-accordion-active" : ""}
-      >
-        <Accordion.Header>{item.name}</Accordion.Header>
-        <Accordion.Body>
-          <p>Min: {item.min}</p>
-          <p>Max: {item.max}</p>
-          <p>Mean: {item.mean}</p>
-          <p>Median: {item.median}</p>
-          <p>NBins: {item.nBins}</p>
-        </Accordion.Body>
-      </Accordion.Item>
-    );
-  }, []);
+  const continuousList = useCallback(
+    (item, active = null) => {
+      const inLabelObs = _.some(dataset.labelObs, (i) =>
+        _.isEqual(i, {
+          name: item.name,
+          type: item.type,
+        })
+      );
+      return (
+        <Accordion.Item
+          key={item.name}
+          eventKey={item.name}
+          className={item.name === active ? "cherita-accordion-active" : ""}
+        >
+          <Accordion.Header>{item.name}</Accordion.Header>
+          <Accordion.Body>
+            <ListGroup>
+              <ListGroup.Item>
+                <div className="d-flex justify-content-end">
+                  <ButtonGroup>
+                    <Button
+                      variant={inLabelObs ? "primary" : "outline-primary"}
+                      size="sm"
+                      onClick={() => {
+                        if (inLabelObs) {
+                          dispatch({
+                            type: "remove.label.obs",
+                            obsName: item.name,
+                          });
+                        } else {
+                          dispatch({
+                            type: "add.label.obs",
+                            obs: {
+                              name: item.name,
+                              type: item.type,
+                            },
+                          });
+                        }
+                      }}
+                      title="Add to tooltip"
+                    >
+                      <FontAwesomeIcon icon={faFont} />
+                    </Button>
+                    <Button
+                      variant={
+                        dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+                        dataset.selectedObs?.name === item.name
+                          ? "primary"
+                          : "outline-primary"
+                      }
+                      size="sm"
+                      onClick={(key) => {
+                        if (key != null) {
+                          dispatch({
+                            type: "select.obs",
+                            obs: item,
+                          });
+                          dispatch({
+                            type: "set.colorEncoding",
+                            value: "obs",
+                          });
+                        }
+                      }}
+                      title="Set as color encoding"
+                    >
+                      <FontAwesomeIcon icon={faDroplet} />
+                    </Button>
+                  </ButtonGroup>
+                </div>
+              </ListGroup.Item>
+            </ListGroup>
+            <p>Min: {item.min}</p>
+            <p>Max: {item.max}</p>
+            <p>Mean: {item.mean}</p>
+            <p>Median: {item.median}</p>
+            <p>NBins: {item.nBins}</p>
+          </Accordion.Body>
+        </Accordion.Item>
+      );
+    },
+    [
+      dataset.colorEncoding,
+      dataset.labelObs,
+      dataset.selectedObs?.name,
+      dispatch,
+    ]
+  );
 
   const otherList = useCallback((item, active = null) => {
     return (
@@ -252,22 +402,23 @@ export function ObsColsList() {
 
   const obsList = useMemo(
     () =>
-      obsColsList.map((item) => {
-        if (item.type === "categorical") {
+      _.keys(obsCols).map((o) => {
+        const item = obsCols[o];
+        if (item.type === OBS_TYPES.CATEGORICAL) {
           return categoricalList(item, active);
-        } else if (item.type === "continuous") {
+        } else if (item.type === OBS_TYPES.CONTINUOUS) {
           return continuousList(item, active);
         } else {
           return otherList(item, active);
         }
       }),
-    [obsColsList, categoricalList, active, continuousList, otherList]
+    [obsCols, categoricalList, active, continuousList, otherList]
   );
 
   if (!serverError) {
     return (
-      <div className="position-relative">
-        <div className="list-group overflow-auto">
+      <div className="position-relative h-100">
+        <div className="list-group overflow-auto h-100">
           {isPending && <LoadingSpinner />}
           <Accordion flush defaultActiveKey={active} alwaysOpen>
             {obsList}

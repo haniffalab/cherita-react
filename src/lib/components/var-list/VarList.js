@@ -1,16 +1,17 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useCallback, useEffect, useState, useMemo } from "react";
-import _ from "lodash";
-import { Button } from "react-bootstrap";
-import { ListGroup } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDroplet } from "@fortawesome/free-solid-svg-icons";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
+import {
+  faDroplet,
+  faPlus,
+  faCircleInfo,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import _ from "lodash";
+import { ListGroup, Button } from "react-bootstrap";
+
+import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { SELECTION_MODES } from "../../constants/constants";
 
 export function VarNamesList({
   mode = SELECTION_MODES.SINGLE,
@@ -35,7 +36,7 @@ export function VarNamesList({
         if (dataset.selectedVar) {
           return _.unionWith(v, [dataset.selectedVar], _.isEqual);
         } else {
-          return [];
+          return v;
         }
       });
       setActive(dataset.selectedVar?.matrix_index);
@@ -48,7 +49,7 @@ export function VarNamesList({
         if (dataset.selectedMultiVar.length) {
           return _.unionWith(v, dataset.selectedMultiVar, _.isEqual);
         } else {
-          return [];
+          return v;
         }
       });
       setActive(dataset.selectedMultiVar.map((i) => i.matrix_index));
@@ -59,7 +60,7 @@ export function VarNamesList({
     (item) => {
       if (mode === SELECTION_MODES.SINGLE) {
         dispatch({
-          type: "varSelected",
+          type: "select.var",
           var: item,
         });
         dispatch({
@@ -68,7 +69,7 @@ export function VarNamesList({
         });
       } else if (mode === SELECTION_MODES.MULTIPLE) {
         dispatch({
-          type: "multiVarSelected",
+          type: "select.multivar",
           var: item,
         });
       }
@@ -76,14 +77,37 @@ export function VarNamesList({
     [dispatch, mode]
   );
 
+  const removeVar = useCallback(
+    (v) => {
+      setVarButtons((b) => {
+        return b.filter((i) => i.name !== v.name);
+      });
+      if (mode === SELECTION_MODES.SINGLE) {
+        if (active === v.matrix_index) {
+          dispatch({
+            type: "deselect.var",
+          });
+        }
+      } else if (mode === SELECTION_MODES.MULTIPLE) {
+        if (active.includes(v.matrix_index)) {
+          dispatch({
+            type: "deselect.multivar",
+            var: v,
+          });
+        }
+      }
+    },
+    [active, dispatch, mode]
+  );
+
   const makeList = useCallback(
     (vars) => {
       return vars.map((item) => {
         if (item && mode === SELECTION_MODES.SINGLE) {
           return (
-            <ListGroup.Item key={item}>
-              <div class="d-flex gap-1">
-                <div class="flex-grow-1">{item.name}</div>
+            <ListGroup.Item key={item.name}>
+              <div className="d-flex gap-1">
+                <div className="flex-grow-1">{item.name}</div>
 
                 <div>
                   <FontAwesomeIcon icon={faCircleInfo} />
@@ -92,46 +116,59 @@ export function VarNamesList({
                   <Button
                     type="button"
                     key={item.matrix_index}
-                    className={`m-0 p-0 px-1 btn-link ${
-                      active === item.matrix_index && "active"
-                    }`}
+                    variant={
+                      dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
+                      active === item.matrix_index
+                        ? "primary"
+                        : "outline-primary"
+                    }
+                    className="m-0 p-0 px-1"
                     onClick={() => {
                       selectVar(item);
                     }}
                     disabled={item.matrix_index === -1}
                     title={
-                      item.matrix_index === -1 ? "Not present in data" : ""
+                      item.matrix_index === -1
+                        ? "Not present in data"
+                        : "Set as color encoding"
                     }
                   >
                     <FontAwesomeIcon icon={faDroplet} />
                   </Button>
                 </div>
                 <div>
-                  <FontAwesomeIcon icon={faTrash} />
+                  <Button
+                    type="button"
+                    className="m-0 p-0 px-1"
+                    variant="outline-secondary"
+                    title="Remove from list"
+                    onClick={() => removeVar(item)}
+                  >
+                    <FontAwesomeIcon icon={faTrash} />
+                  </Button>
                 </div>
               </div>
             </ListGroup.Item>
           );
         } else if (mode === SELECTION_MODES.MULTIPLE) {
           return (
-            <ListGroup.Item key={item}>
-              <div class="d-flex">
-                <div class="flex-grow-1">
+            <ListGroup.Item key={item.name}>
+              <div className="d-flex">
+                <div className="flex-grow-1">
                   <Button
                     type="button"
                     key={item.matrix_index}
                     variant={
-                      item.matrix_index !== -1
-                        ? "outline-primary"
-                        : "outline-secondary"
+                      item.matrix_index !== -1 &&
+                      _.includes(active, item.matrix_index)
+                        ? "primary"
+                        : "outline-primary"
                     }
-                    className={`${
-                      active.includes(item.matrix_index) && "active"
-                    } m-1`}
+                    className="m-0 p-0 px-1"
                     onClick={() => {
                       if (active.includes(item.matrix_index)) {
                         dispatch({
-                          type: "multiVarDeselected",
+                          type: "deselect.multivar",
                           var: item,
                         });
                       } else {
@@ -158,7 +195,7 @@ export function VarNamesList({
         }
       });
     },
-    [active, dispatch, mode, selectVar]
+    [active, dataset.colorEncoding, dispatch, mode, removeVar, selectVar]
   );
 
   const varList = useMemo(() => {
@@ -178,6 +215,7 @@ export function VarNamesList({
             <Button
               variant="link"
               onClick={() => {
+                setVarButtons([]);
                 dispatch({
                   type:
                     mode === SELECTION_MODES.SINGLE

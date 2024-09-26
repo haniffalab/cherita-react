@@ -1,40 +1,31 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import Dropdown from "react-bootstrap/Dropdown";
 import { React } from "react";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
-import {
-  DrawPolygonMode,
-  DrawLineStringMode,
-  DrawPolygonByDraggingMode,
-  DrawRectangleMode,
-  ViewMode,
-  ModifyMode,
-} from "@nebula.gl/edit-modes";
-
-import {
-  ObsColsList,
-  ObsmKeysList,
-  VarNamesList,
-  SELECTION_MODES,
-} from "@haniffalab/cherita-react";
-
-import Button from "react-bootstrap/Button";
-import DropdownButton from "react-bootstrap/DropdownButton";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDroplet } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import Button from "react-bootstrap/Button";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 
-export function Toolbox({ mode, setMode, features, setFeatures }) {
-  const dataset = useDataset();
+import { ObsmKeysList } from "../obsm-list/ObsmList";
+
+export function Toolbox({ mode, obsLength, slicedLength }) {
   return (
     <div className="cherita-toolbox">
       <ButtonGroup>
         <ObsmKeysList />
         <Button size="sm">
-          <FontAwesomeIcon icon={faDroplet} /> CD14
+          <FontAwesomeIcon icon={faDroplet} /> {mode}
         </Button>
-        <Button size="sm">Cells XXXX</Button>
+        {(mode || !Number.isNaN(obsLength)) &&
+          (mode !== null &&
+          !Number.isNaN(slicedLength) &&
+          slicedLength !== obsLength ? (
+            <Button size="sm">
+              {slicedLength.toLocaleString()} out of{" "}
+              {obsLength.toLocaleString()} cells
+            </Button>
+          ) : (
+            <Button size="sm">{obsLength.toLocaleString()} cells</Button>
+          ))}
       </ButtonGroup>
     </div>
   );

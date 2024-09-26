@@ -1,73 +1,14 @@
-import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Alert, OverlayTrigger, Tooltip } from "react-bootstrap";
 import Plot from "react-plotly.js";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import {
-  VIOLIN_MODES,
-  VIOLINPLOT_STANDARDSCALES,
-} from "../../constants/constants";
-import {
-  Alert,
-  Dropdown,
-  ButtonGroup,
-  ButtonToolbar,
-  InputGroup,
-  OverlayTrigger,
-  Tooltip,
-} from "react-bootstrap";
+
+import { VIOLIN_MODES } from "../../constants/constants";
+import { useDataset } from "../../context/DatasetContext";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
-
-export function ViolinControls() {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
-  const [activeStandardScale, setActiveStandardScale] = useState(
-    dataset.controls.standardScale
-  );
-
-  useEffect(() => {
-    if (dataset.controls.standardScale) {
-      setActiveStandardScale(
-        VIOLINPLOT_STANDARDSCALES.find(
-          (obs) => obs.value === dataset.controls.standardScale
-        ).name
-      );
-    }
-  }, [dataset.controls.standardScale]);
-
-  const standardScaleList = VIOLINPLOT_STANDARDSCALES.map((item) => (
-    <Dropdown.Item
-      key={item.value}
-      active={activeStandardScale === item.value}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.standardScale",
-          standardScale: item.value,
-        });
-      }}
-    >
-      {item.name}
-    </Dropdown.Item>
-  ));
-
-  return (
-    <ButtonToolbar>
-      <ButtonGroup>
-        <InputGroup>
-          <InputGroup.Text>Standard scale</InputGroup.Text>
-          <Dropdown>
-            <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {activeStandardScale}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
-          </Dropdown>
-        </InputGroup>
-      </ButtonGroup>
-    </ButtonToolbar>
-  );
-}
 
 export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
   const ENDPOINT = "violin";

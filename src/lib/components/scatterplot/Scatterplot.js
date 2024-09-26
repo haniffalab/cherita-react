@@ -1,52 +1,41 @@
-import React, { useEffect, useState, useMemo } from "react";
-import _ from "lodash";
-import "bootstrap/dist/css/bootstrap.min.css";
-import DeckGL from "@deck.gl/react";
-import { ScatterplotLayer } from "@deck.gl/layers";
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
-import { ViewMode } from "@nebula.gl/edit-modes";
-import Dropdown from "react-bootstrap/Dropdown";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  useDeferredValue,
+} from "react";
 
-import { Toolbox } from "./Toolbox";
-import { SpatialControls } from "./SpatialControls";
+import { ScatterplotLayer } from "@deck.gl/layers";
+import { DeckGL } from "@deck.gl/react";
+import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ViewMode } from "@nebula.gl/edit-modes";
+import { EditableGeoJsonLayer } from "@nebula.gl/layers";
+import { booleanPointInPolygon, point } from "@turf/turf";
+import _ from "lodash";
+import { Alert } from "react-bootstrap";
+
 import { Legend } from "./Legend";
-import { PLOTLY_COLORSCALES } from "../../constants/constants";
+import { SpatialControls } from "./SpatialControls";
+import { Toolbox } from "./Toolbox";
+import {
+  COLOR_ENCODINGS,
+  OBS_TYPES,
+  SELECTED_POLYGON_FILLCOLOR,
+  UNSELECTED_POLYGON_FILLCOLOR,
+} from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { MapHelper } from "../../helpers/map-helper";
-import { GET_OPTIONS, useZarr } from "../../helpers/zarr-helper";
 import { useColor } from "../../helpers/color-helper";
-import { LoadingSpinner } from "../../utils/LoadingSpinner";
+import { MapHelper } from "../../helpers/map-helper";
+import {
+  GET_OPTIONS,
+  useMultipleZarr,
+  useZarr,
+} from "../../helpers/zarr-helper";
+import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 
 window.deck.log.level = 1;
-
-export function ScatterplotControls() {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
-
-  const colormapList = PLOTLY_COLORSCALES.map((item) => (
-    <Dropdown.Item
-      key={item}
-      active={dataset.controls.colorScale === item}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.colorScale",
-          colorScale: item,
-        });
-      }}
-    >
-      {item}
-    </Dropdown.Item>
-  ));
-
-  return (
-    <Dropdown>
-      <Dropdown.Toggle id="dropdownColorscale" variant="light">
-        {dataset.controls.colorScale}
-      </Dropdown.Toggle>
-      <Dropdown.Menu>{colormapList}</Dropdown.Menu>
-    </Dropdown>
-  );
-}
 
 const INITIAL_VIEW_STATE = {
   longitude: 0,
@@ -57,25 +46,26 @@ const INITIAL_VIEW_STATE = {
   bearing: 0,
 };
 
-const DEFAULT_DATA_POINT = {
-  value: null,
-  position: null,
-  color: null,
-};
-
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
-  const { getScale, getColor } = useColor();
+  const dispatch = useDatasetDispatch();
+  const { getColor } = useColor();
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+  const [isRendering, setIsRendering] = useState(true);
+  const [data, setData] = useState({
+    ids: [],
+    positions: [],
+    values: [],
+    sliceValues: [],
+  });
+
+  // EditableGeoJsonLayer
+  const [mode, setMode] = useState(() => ViewMode);
   const [features, setFeatures] = useState({
     type: "FeatureCollection",
     features: [],
   });
-  const [mode, setMode] = useState(() => ViewMode);
   const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
-  const [featureState, setFeatureState] = useState([]);
-  const [scale, setScale] = useState(() => getScale());
-  const [data, setData] = useState([]);
 
   const [obsmParams, setObsmParams] = useState({
     url: dataset.url,
@@ -87,8 +77,13 @@ export function Scatterplot({ radius = 30 }) {
   });
   const [obsParams, setObsParams] = useState({
     url: dataset.url,
-    path: "obs/" + dataset.selectedObs?.name + "/codes",
+    path:
+      "obs/" +
+      dataset.selectedObs?.name +
+      (dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS ? "" : "/codes"),
   });
+
+  const [labelObsParams, setLabelObsParams] = useState([]);
 
   // needs to be wrapped in useMemo as it is an array an could cause an infinite loop otherwise
   const xSelection = useMemo(
@@ -99,6 +94,7 @@ export function Scatterplot({ radius = 30 }) {
   const obsmData = useZarr(obsmParams, null, GET_OPTIONS);
   const xData = useZarr(xParams, xSelection, GET_OPTIONS);
   const obsData = useZarr(obsParams, null, GET_OPTIONS);
+  const labelObsData = useMultipleZarr(labelObsParams, GET_OPTIONS);
 
   useEffect(() => {
     setObsmParams((p) => {
@@ -122,10 +118,28 @@ export function Scatterplot({ radius = 30 }) {
     setObsParams((p) => {
       return {
         ...p,
-        path: "obs/" + dataset.selectedObs?.name + "/codes",
+        path:
+          "obs/" +
+          dataset.selectedObs?.name +
+          (dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS ? "" : "/codes"),
       };
     });
   }, [dataset.selectedObs]);
+
+  useEffect(() => {
+    setLabelObsParams(
+      _.map(dataset.labelObs, (obs) => {
+        return {
+          url: dataset.url,
+          path:
+            "obs/" +
+            obs.name +
+            (obs.type === OBS_TYPES.CONTINUOUS ? "" : "/codes"),
+          key: obs.name,
+        };
+      })
+    );
+  }, [dataset.labelObs, dataset.url]);
 
   useEffect(() => {
     setObsmParams((p) => {
@@ -152,10 +166,9 @@ export function Scatterplot({ radius = 30 }) {
 
   useEffect(() => {
     if (!obsmData.isPending && !obsmData.serverError) {
+      setIsRendering(true);
       setData((d) => {
-        return _.map(obsmData.data, (p, index) => {
-          return _.defaults({ position: p }, d?.[index], DEFAULT_DATA_POINT);
-        });
+        return { ...d, positions: obsmData.data };
       });
       const mapHelper = new MapHelper();
       const { latitude, longitude, zoom } = mapHelper.fitBounds(obsmData.data);
@@ -168,10 +181,9 @@ export function Scatterplot({ radius = 30 }) {
         };
       });
     } else if (!obsmData.isPending && obsmData.serverError) {
+      setIsRendering(true);
       setData((d) => {
-        return _.map(d, (e) => {
-          return _.defaults({ position: null }, e, DEFAULT_DATA_POINT);
-        });
+        return { ...d, positions: [] };
       });
     }
   }, [
@@ -181,34 +193,24 @@ export function Scatterplot({ radius = 30 }) {
     obsmData.serverError,
   ]);
 
+  const bounds = useMemo(() => {
+    const { latitude, longitude, zoom } = new MapHelper().fitBounds(
+      data.positions
+    );
+    return { latitude, longitude, zoom };
+  }, [data.positions]);
+
   useEffect(() => {
-    if (dataset.colorEncoding === "var") {
+    if (dataset.colorEncoding === COLOR_ENCODINGS.VAR) {
+      setIsRendering(true);
       if (!xData.isPending && !xData.serverError) {
-        const s = getScale(xData.data);
-        setScale(() => s);
+        // @TODO: add condition to check obs slicing
         setData((d) => {
-          return _.map(xData.data, (v, index) => {
-            return _.defaults(
-              {
-                value: v,
-                color: getColor(s, v),
-              },
-              d?.[index],
-              DEFAULT_DATA_POINT
-            );
-          });
+          return { ...d, values: xData.data };
         });
       } else if (!xData.isPending && xData.serverError) {
-        const s = getScale();
-        setScale(() => s);
         setData((d) => {
-          return _.map(d, (e) => {
-            return _.defaults(
-              { value: null, color: null },
-              e,
-              DEFAULT_DATA_POINT
-            );
-          });
+          return { ...d, values: [] };
         });
       }
     }
@@ -217,38 +219,32 @@ export function Scatterplot({ radius = 30 }) {
     xData.data,
     xData.isPending,
     xData.serverError,
-    getScale,
     getColor,
   ]);
 
   useEffect(() => {
-    if (dataset.colorEncoding === "obs") {
+    if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
+      setIsRendering(true);
       if (!obsData.isPending && !obsData.serverError) {
-        const s = getScale(obsData.data);
-        setScale(() => s);
         setData((d) => {
-          return _.map(obsData.data, (v, index) => {
-            return _.defaults(
-              {
-                value: v,
-                color: getColor(s, v),
-              },
-              d?.[index],
-              DEFAULT_DATA_POINT
-            );
-          });
+          return { ...d, values: obsData.data };
         });
       } else if (!obsData.isPending && obsData.serverError) {
-        const s = getScale();
-        setScale(() => s);
         setData((d) => {
-          return _.map(d, (e) => {
-            return _.defaults(
-              { value: null, color: null },
-              e,
-              DEFAULT_DATA_POINT
-            );
-          });
+          return { ...d, values: [] };
+        });
+      }
+    } else if (
+      dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
+      dataset.sliceBy.obs
+    ) {
+      if (!obsData.isPending && !obsData.serverError) {
+        setData((d) => {
+          return { ...d, sliceValues: obsData.data };
+        });
+      } else if (!obsData.isPending && obsData.serverError) {
+        setData((d) => {
+          return { ...d, sliceValues: [] };
         });
       }
     }
@@ -257,20 +253,135 @@ export function Scatterplot({ radius = 30 }) {
     obsData.data,
     obsData.isPending,
     obsData.serverError,
-    getScale,
-    getColor,
+    dataset.sliceBy.obs,
   ]);
 
-  const layers = useMemo(() => {
+  const isCategorical = useMemo(() => {
+    if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
+      return dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL;
+    } else {
+      return false;
+    }
+  }, [dataset.colorEncoding, dataset.selectedObs?.type]);
+
+  const isInSlice = useCallback(
+    (index, values, positions) => {
+      let inSlice = true;
+      if ((dataset.sliceBy.obs || isCategorical) && values) {
+        inSlice &= !_.includes(dataset.selectedObs?.omit, values[index]);
+      }
+      if (dataset.sliceBy.polygons && positions) {
+        inSlice &= _.some(features?.features, (_f, i) => {
+          return booleanPointInPolygon(
+            point([positions[index][0], positions[index][1]]),
+            features.features[i]
+          );
+        });
+      }
+      return inSlice;
+    },
+    [
+      dataset.selectedObs?.omit,
+      dataset.sliceBy.obs,
+      dataset.sliceBy.polygons,
+      features.features,
+      isCategorical,
+    ]
+  );
+
+  const { filteredIndices, valueMin, valueMax, slicedLength } = useMemo(() => {
+    if (dataset.colorEncoding === COLOR_ENCODINGS.VAR) {
+      const { filtered, filteredIndices } = _.reduce(
+        data.values,
+        (acc, v, i) => {
+          if (isInSlice(i, data.sliceValues, data.positions)) {
+            acc.filtered.push(v);
+            acc.filteredIndices.add(i);
+          }
+          return acc;
+        },
+        { filtered: [], filteredIndices: new Set() }
+      );
+      return {
+        filteredIndices: filteredIndices,
+        valueMin: _.min(filtered),
+        valueMax: _.max(filtered),
+        slicedLength: filtered.length,
+      };
+    } else if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
+      const isContinuous = dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS;
+      const { filtered, filteredIndices } = _.reduce(
+        data.values,
+        (acc, v, i) => {
+          if (isInSlice(i, data.values, data.positions)) {
+            acc.filtered.push(v);
+            acc.filteredIndices.add(i);
+          }
+          return acc;
+        },
+        { filtered: [], filteredIndices: new Set() }
+      );
+      return {
+        filteredIndices: filteredIndices,
+        valueMin: _.min(isContinuous ? filtered : data.values),
+        valueMax: _.max(isContinuous ? filtered : data.values),
+        slicedLength: filtered.length,
+      };
+    } else {
+      return {
+        filteredIndices: null,
+        valueMin: _.min(data.values),
+        valueMax: _.max(data.values),
+        slicedLength: data.values.length,
+      };
+    }
+  }, [
+    data.positions,
+    data.sliceValues,
+    data.values,
+    dataset.colorEncoding,
+    dataset.selectedObs?.type,
+    isInSlice,
+  ]);
+
+  useEffect(() => {
+    dispatch({
+      type: "set.controls.valueRange",
+      valueRange: [valueMin, valueMax],
+    });
+  }, [dispatch, valueMax, valueMin]);
+
+  const { min, max } = {
+    min: dataset.controls.range[0] * (valueMax - valueMin) + valueMin,
+    max: dataset.controls.range[1] * (valueMax - valueMin) + valueMin,
+  };
+
+  const getFillColor = useCallback(
+    (_d, { index }) => {
+      const grayOut = filteredIndices && !filteredIndices.has(index);
+      return getColor(
+        (data.values[index] - min) / (max - min),
+        isCategorical,
+        grayOut
+      );
+    },
+    [data.values, filteredIndices, getColor, isCategorical, max, min]
+  );
+
+  const memoizedLayers = useMemo(() => {
     return [
       new ScatterplotLayer({
         id: "cherita-layer-scatterplot",
-        data: data,
+        pickable: true,
+        data: data.positions,
         radiusScale: radius,
         radiusMinPixels: 1,
-        getPosition: (d) => d.position,
-        getFillColor: (d) => d.color,
+        getPosition: (d) => d,
+        getFillColor: getFillColor,
         getRadius: 1,
+        updateTriggers: {
+          getFillColor: getFillColor,
+        },
       }),
       new EditableGeoJsonLayer({
         id: "cherita-layer-draw",
@@ -280,22 +391,53 @@ export function Scatterplot({ radius = 30 }) {
         onEdit: ({ updatedData, editType, editContext }) => {
           setFeatures(updatedData);
           let updatedSelectedFeatureIndexes = selectedFeatureIndexes;
-          setFeatureState({
-            data: updatedData,
-          });
           if (editType === "addFeature") {
-            // when a drawing is complete, the value of editType becomes addFeature
-            const { featureIndexes } = editContext; //extracting indexes of current features selected
+            const { featureIndexes } = editContext;
             updatedSelectedFeatureIndexes = [
               ...selectedFeatureIndexes,
               ...featureIndexes,
             ];
           }
-          setSelectedFeatureIndexes(updatedSelectedFeatureIndexes); //now update your state
+          setSelectedFeatureIndexes(updatedSelectedFeatureIndexes);
+        },
+        // getFillColor: POLYGON_FILLCOLOR,
+        _subLayerProps: {
+          geojson: {
+            getFillColor: (feature) => {
+              if (
+                selectedFeatureIndexes.some(
+                  (i) => features.features[i] === feature
+                )
+              ) {
+                return SELECTED_POLYGON_FILLCOLOR;
+              } else {
+                return UNSELECTED_POLYGON_FILLCOLOR;
+              }
+            },
+          },
         },
       }),
     ];
-  }, [data, features, mode, radius, selectedFeatureIndexes]);
+  }, [
+    data.positions,
+    features,
+    getFillColor,
+    mode,
+    radius,
+    selectedFeatureIndexes,
+  ]);
+
+  const layers = useDeferredValue(
+    mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers
+  ); // draw scatterplot on top of polygons when in ViewMode
+
+  useEffect(() => {
+    if (!features?.features?.length) {
+      dispatch({
+        type: "disable.slice.polygons",
+      });
+    }
+  }, [dispatch, features?.features?.length]);
 
   function onLayerClick(info) {
     if (mode !== ViewMode) {
@@ -303,35 +445,91 @@ export function Scatterplot({ radius = 30 }) {
       return;
     }
 
-    setSelectedFeatureIndexes(info.object ? [info.index] : []);
+    setSelectedFeatureIndexes((f) =>
+      info.object
+        ? info.layer.id === "cherita-layer-draw"
+          ? [info.index]
+          : f
+        : []
+    );
   }
 
-  // @TODO: add error message
+  const getTooltip = ({ object, index }) =>
+    object &&
+    dataset.labelObs.length && {
+      text: _.map(labelObsData, (v, k) => {
+        const labelObs = _.find(dataset.labelObs, (o) => o.name === k);
+        if (labelObs.type === OBS_TYPES.CONTINUOUS) {
+          return `${k}: ${parseFloat(v?.[index]).toLocaleString()}`;
+        } else {
+          return `${k}: ${labelObs.codesMap[v?.[index]]}`;
+        }
+      }).join("\n"),
+    };
+
+  const isPending =
+    (isRendering || xData.isPending || obsmData.isPending) &&
+    !obsmData.isPending;
+
+  const error =
+    (dataset.selectedObsm && obsmData.serverError?.length) ||
+    (dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
+      xData.serverError?.length) ||
+    (dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+      obsData.serverError?.length) ||
+    (dataset.labelObs.lengh && labelObsData.serverError?.length);
+
   return (
     <div className="cherita-scatterplot">
-      {(obsmData.isPending || xData.isPending || obsmData.isPending) && (
-        <LoadingSpinner />
-      )}
+      {obsmData.isPending && <LoadingSpinner disableShrink={true} />}
+      {isPending && <LoadingLinear />}
       <DeckGL
         viewState={viewState}
         onViewStateChange={(e) => setViewState(e.viewState)}
-        controller
+        controller={{ doubleClickZoom: mode === ViewMode }}
         layers={layers}
         onClick={onLayerClick}
+        getTooltip={getTooltip}
+        onAfterRender={() => {
+          setIsRendering(false);
+        }}
+        useDevicePixels={false}
+        getCursor={({ isDragging }) =>
+          mode !== ViewMode ? "crosshair" : isDragging ? "grabbing" : "grab"
+        }
       ></DeckGL>
       <SpatialControls
         mode={mode}
         setMode={setMode}
-        features={mode}
+        features={features}
         setFeatures={setFeatures}
+        selectedFeatureIndexes={selectedFeatureIndexes}
+        resetBounds={() => setViewState(bounds)}
+        increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
+        decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
       />
-      <Toolbox
-        mode={mode}
-        setMode={setMode}
-        features={mode}
-        setFeatures={setFeatures}
-      />
-      <Legend scale={scale} />
+      {error && !isPending && (
+        <div className="cherita-alert">
+          <Alert variant="danger">
+            <FontAwesomeIcon icon={faTriangleExclamation} />
+            Error loading data
+          </Alert>
+        </div>
+      )}
+      <div className="cherita-spatial-footer">
+        <Toolbox
+          mode={
+            dataset.colorEncoding === COLOR_ENCODINGS.VAR
+              ? dataset.selectedVar.name
+              : dataset.colorEncoding === COLOR_ENCODINGS.OBS
+              ? dataset.selectedObs.name
+              : null
+          }
+          obsLength={parseInt(obsmData.data?.length)}
+          slicedLength={parseInt(slicedLength)}
+        />
+        <Legend isCategorical={isCategorical} min={min} max={max} />
+      </div>
     </div>
   );
 }

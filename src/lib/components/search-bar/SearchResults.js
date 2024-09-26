@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useDeferredValue } from "react";
+
 import _ from "lodash";
 import { Dropdown } from "react-bootstrap";
+
 import { useDatasetDispatch } from "../../context/DatasetContext";
 import {
   useGetDisease,
   useDiseaseSearch,
   useVarSearch,
 } from "../../utils/search";
-import { useDeferredValue } from "react";
 
 export function VarSearchResults({ text, setShowSuggestions }) {
   const [suggestions, setSuggestions] = useState([]);

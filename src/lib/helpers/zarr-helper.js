@@ -1,4 +1,5 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
+
 import { openArray } from "zarr";
 
 export const GET_OPTIONS = {
@@ -19,29 +20,60 @@ export class ZarrHelper {
   }
 }
 
+const fetchDataFromZarr = async (url, path, s, opts) => {
+  try {
+    const zarrHelper = new ZarrHelper();
+    const z = await zarrHelper.open(url, path);
+    const result = await z.get(s, opts);
+    return result.data;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
 export const useZarr = ({ url, path }, s = null, opts = {}) => {
   const [data, setData] = useState(null);
   const [isPending, setIsPending] = useState(true);
   const [serverError, setServerError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsPending(true);
-        setServerError(null);
-        const zarrHelper = new ZarrHelper();
-        const z = await zarrHelper.open(url, path);
-        const result = await z.get(s, opts);
-        setData(result.data);
-      } catch (error) {
+    setIsPending(true);
+    setServerError(null);
+    fetchDataFromZarr(url, path, s, opts)
+      .then((data) => {
+        setData(data);
+      })
+      .catch((error) => {
         setServerError(error.message);
-      } finally {
+      })
+      .finally(() => {
         setIsPending(false);
-      }
-    };
-
-    fetchData();
+      });
   }, [opts, path, s, url]);
 
   return { data, isPending, serverError };
+};
+
+export const useMultipleZarr = (inputs, opts = {}) => {
+  const [results, setResults] = useState({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const results = await Promise.all(
+        inputs.map((input) =>
+          fetchDataFromZarr(input.url, input.path, input.s, opts)
+        )
+      );
+      const dataObject = {};
+      results.forEach((result, index) => {
+        const key = inputs[index].key;
+        dataObject[key] = result;
+      });
+      setResults(dataObject);
+    };
+
+    fetchData();
+  }, [inputs, opts]);
+
+  return results;
 };

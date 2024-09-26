@@ -1,7 +1,16 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import Dropdown from "react-bootstrap/Dropdown";
-import { React, useState } from "react";
+import React, { useState } from "react";
 
+import {
+  faPlus,
+  faMinus,
+  faCrosshairs,
+  faHand,
+  faDrawPolygon,
+  faTrash,
+  faSliders,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { JoinInner } from "@mui/icons-material";
 import {
   DrawPolygonMode,
   DrawLineStringMode,
@@ -10,34 +19,33 @@ import {
   ViewMode,
   ModifyMode,
 } from "@nebula.gl/edit-modes";
-
 import Button from "react-bootstrap/Button";
-import DropdownButton from "react-bootstrap/DropdownButton";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
+import Dropdown from "react-bootstrap/Dropdown";
+import DropdownButton from "react-bootstrap/DropdownButton";
 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowPointer } from "@fortawesome/free-solid-svg-icons";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { faMinus } from "@fortawesome/free-solid-svg-icons";
-import { faCrosshairs } from "@fortawesome/free-solid-svg-icons";
-import { faHand } from "@fortawesome/free-solid-svg-icons";
-import { faDrawPolygon } from "@fortawesome/free-solid-svg-icons";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import { faSliders } from "@fortawesome/free-solid-svg-icons";
+import { ScatterplotControls } from "./ScatterplotControls";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { OffcanvasControls } from "../Offcanvas";
 
-import {
-  ScatterplotControls,
-  OffcanvasControls,
-} from "@haniffalab/cherita-react";
-
-export function SpatialControls({ mode, setMode, features, setFeatures }) {
+export function SpatialControls({
+  mode,
+  setMode,
+  features,
+  setFeatures,
+  selectedFeatureIndexes,
+  resetBounds,
+  increaseZoom,
+  decreaseZoom,
+}) {
+  const dataset = useDataset();
+  const dispatch = useDatasetDispatch();
   const [showControls, setShowControls] = useState(false);
 
   const handleCloseControls = () => setShowControls(false);
   const handleShowControls = () => setShowControls(true);
 
   const onSelect = (eventKey, event) => {
-    console.log(eventKey); // selected event will trigger
     switch (eventKey) {
       case "DrawPolygonMode":
         setMode(() => DrawPolygonMode);
@@ -59,27 +67,65 @@ export function SpatialControls({ mode, setMode, features, setFeatures }) {
     }
   };
 
-  const deleteFeatures = (eventKey, event) => {
-    console.log(eventKey); // selected event will trigger
+  const deleteFeatures = (_eventKey, _event) => {
     setFeatures({
       type: "FeatureCollection",
       features: [],
     });
   };
 
+  const polygonControls = (
+    <div className="mt-2">
+      <ButtonGroup vertical className="w-100">
+        <Button
+          variant={dataset.sliceBy.polygons ? "primary" : "outline-primary"}
+          title="Filter data with polygons"
+          onClick={() => {
+            setMode(() => ViewMode);
+            dispatch({
+              type: "toggle.slice.polygons",
+            });
+          }}
+        >
+          <JoinInner />
+        </Button>
+        <Button
+          variant="outline-primary"
+          title="Delete selected polygons"
+          onClick={() => {
+            const newFeatures = features.features.filter(
+              (_f, i) => !selectedFeatureIndexes.includes(i)
+            );
+            setFeatures({
+              type: "FeatureCollection",
+              features: newFeatures,
+            });
+          }}
+          disabled={!selectedFeatureIndexes.length}
+        >
+          <FontAwesomeIcon icon={faTrash} />
+        </Button>
+      </ButtonGroup>
+    </div>
+  );
+
   return (
     <div className="cherita-spatial-controls">
-      <ButtonGroup vertical>
-        <Button>
+      <ButtonGroup vertical className="w-100">
+        <Button onClick={increaseZoom} title="Increase zoom">
           <FontAwesomeIcon icon={faPlus} />
         </Button>
-        <Button>
+        <Button onClick={decreaseZoom} title="Decrease zoom">
           <FontAwesomeIcon icon={faMinus} />
         </Button>
-        <Button>
+        <Button onClick={resetBounds} title="Reset zoom and center">
           <FontAwesomeIcon icon={faCrosshairs} />
         </Button>
-        <Button>
+        <Button
+          onClick={() => setMode(() => ViewMode)}
+          title="Set dragging mode"
+          variant={mode === ViewMode ? "primary" : "outline-primary"}
+        >
           <FontAwesomeIcon icon={faHand} />
         </Button>
         <DropdownButton
@@ -95,7 +141,6 @@ export function SpatialControls({ mode, setMode, features, setFeatures }) {
           onSelect={onSelect}
         >
           <Dropdown.Header>Selection tools</Dropdown.Header>
-          <Dropdown.Divider />
           <Dropdown.Item eventKey="DrawPolygonMode">
             Draw a polygon
           </Dropdown.Item>
@@ -103,15 +148,16 @@ export function SpatialControls({ mode, setMode, features, setFeatures }) {
             Draw a Polygon by Dragging
           </Dropdown.Item>
           <Dropdown.Item eventKey="ModifyMode">Modify polygons</Dropdown.Item>
-          <Dropdown.Item eventKey="ViewMode">ViewMode</Dropdown.Item>
+          <Dropdown.Item eventKey="ViewMode">Viewing mode</Dropdown.Item>
           <Dropdown.Item onClick={deleteFeatures}>
-            <FontAwesomeIcon icon={faTrash} /> Delete Plydons
+            <FontAwesomeIcon icon={faTrash} /> Delete polygons
           </Dropdown.Item>
         </DropdownButton>
         <Button onClick={handleShowControls}>
           <FontAwesomeIcon icon={faSliders} />
         </Button>
       </ButtonGroup>
+      {!!features?.features?.length && polygonControls}
       <OffcanvasControls
         show={showControls}
         handleClose={handleCloseControls}
