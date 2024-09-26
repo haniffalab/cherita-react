@@ -1,10 +1,20 @@
 import React, { useState } from "react";
 
-import { faDroplet, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faDroplet,
+  faTrash,
+  faCircleInfo,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { List } from "@mui/icons-material";
 import _ from "lodash";
-import { ListGroup, Button, Collapse } from "react-bootstrap";
+import {
+  ListGroup,
+  Button,
+  Collapse,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
 
 import { SingleSelectionItem } from "./VarItem";
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
@@ -59,6 +69,16 @@ function SingleSelectionSet({
           <div>{set.name}</div>
 
           <div className="d-flex align-items-center gap-1">
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                <Tooltip>
+                  This set represents the mean value of its features
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faCircleInfo}></FontAwesomeIcon>
+            </OverlayTrigger>
             <List />
             {/* <VarHistogram set={set} /> */}
             <Button
