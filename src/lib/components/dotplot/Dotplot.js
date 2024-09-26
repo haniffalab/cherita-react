@@ -18,14 +18,16 @@ export function Dotplot() {
   const [hasSelections, setHasSelections] = useState(false);
   const [params, setParams] = useState({
     url: dataset.url,
-    selectedObs: dataset.selectedObs,
+    obsCol: dataset.selectedObs,
     obsValues: !dataset.selectedObs?.omit.length
       ? null
       : _.difference(
           _.values(dataset.selectedObs?.codes),
           dataset.selectedObs?.omit
         ).map((c) => dataset.selectedObs?.codesMap[c]),
-    selectedMultiVar: dataset.selectedMultiVar.map((i) => i.index),
+    varKeys: dataset.selectedMultiVar.map((i) =>
+      i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
+    ),
     standardScale: dataset.controls.standardScale,
     meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
     expressionCutoff: dataset.controls.expressionCutoff,
@@ -43,14 +45,18 @@ export function Dotplot() {
       return {
         ...p,
         url: dataset.url,
-        selectedObs: dataset.selectedObs,
+        obsCol: dataset.selectedObs,
         obsValues: !dataset.selectedObs?.omit.length
           ? null
           : _.difference(
               _.values(dataset.selectedObs?.codes),
               dataset.selectedObs?.omit
             ).map((c) => dataset.selectedObs?.codesMap[c]),
-        selectedMultiVar: dataset.selectedMultiVar.map((i) => i.index),
+        varKeys: dataset.selectedMultiVar.map((i) =>
+          i.isSet
+            ? { name: i.name, indices: i.vars.map((v) => v.index) }
+            : i.index
+        ),
         standardScale: dataset.controls.standardScale,
         meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
         expressionCutoff: dataset.controls.expressionCutoff,
@@ -80,7 +86,7 @@ export function Dotplot() {
     ENDPOINT,
     params,
     500,
-    { enabled: !!params.selectedObs && !!params.selectedMultiVar.length }
+    { enabled: !!params.obsCol && !!params.varKeys.length }
   );
 
   useEffect(() => {

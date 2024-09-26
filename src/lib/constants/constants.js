@@ -25,19 +25,19 @@ export const VIOLIN_MODES = {
   GROUPBY: "groupby",
 };
 
-export const MATRIXPLOT_STANDARDSCALES = [
-  { value: null, name: "None" },
-  { value: "group", name: "Group" },
-  { value: "var", name: "Var" },
-];
+export const MATRIXPLOT_SCALES = {
+  NONE: { value: null, name: "None" },
+  GROUP: { value: "group", name: "Group" },
+  VAR: { value: "var", name: "Var" },
+};
 
-export const DOTPLOT_STANDARDSCALES = [
-  { value: null, name: "None" },
-  { value: "group", name: "Group" },
-  { value: "var", name: "Var" },
-];
+export const DOTPLOT_SCALES = {
+  NONE: { value: null, name: "None" },
+  GROUP: { value: "group", name: "Group" },
+  VAR: { value: "var", name: "Var" },
+};
 
-export const VIOLINPLOT_STANDARDSCALES = [
-  { value: "width", name: "Width" },
-  { value: "count", name: "Count" },
-];
+export const VIOLINPLOT_SCALES = {
+  WIDTH: { value: "width", name: "Width" },
+  COUNT: { value: "count", name: "Count" },
+};

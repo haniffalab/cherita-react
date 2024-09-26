@@ -8,8 +8,11 @@ import _ from "lodash";
 import { FilterProvider } from "./FilterContext";
 import {
   COLOR_ENCODINGS,
+  DOTPLOT_SCALES,
   LOCAL_STORAGE_KEY,
+  MATRIXPLOT_SCALES,
   OBS_TYPES,
+  VIOLINPLOT_SCALES,
 } from "../constants/constants";
 
 export const DatasetContext = createContext(null);
@@ -22,7 +25,7 @@ const queryClient = new QueryClient({
   },
   queryCache: new QueryCache({
     onError: (error, query) => {
-      console.error(error);
+      console.error(error, query);
     },
   }),
 });
@@ -59,6 +62,7 @@ const initialDataset = {
   selectedMultiVar: [],
   colorEncoding: null,
   labelObs: [],
+  varSets: [],
   sliceBy: {
     obs: false,
     polygons: false,
@@ -73,16 +77,16 @@ const initialDataset = {
       cmin: 0,
       cmax: 1,
     },
-    standardScale: null,
+    scale: {
+      dotplot: DOTPLOT_SCALES.NONE,
+      matrixplot: MATRIXPLOT_SCALES.NONE,
+      violinplot: VIOLINPLOT_SCALES.WIDTH,
+    },
     meanOnlyExpressed: false,
     expressionCutoff: 0.0,
   },
   diseaseDatasets: [],
-  selectedDisease: {
-    id: null,
-    name: null,
-    genes: [],
-  },
+  selectedDisease: null,
 };
 
 const initializer = (initialState) => {
@@ -182,7 +186,13 @@ function datasetReducer(dataset, action) {
       return { ...dataset, selectedVar: action.var };
     }
     case "select.multivar": {
-      if (dataset.selectedMultiVar.find((i) => _.isEqual(i, action.var))) {
+      if (
+        dataset.selectedMultiVar.find((i) =>
+          action.var.isSet
+            ? i.name === action.var.name
+            : i.matrix_index === action.var.matrix_index
+        )
+      ) {
         return dataset;
       } else {
         return {
@@ -191,22 +201,25 @@ function datasetReducer(dataset, action) {
         };
       }
     }
-    case "deselect.var": {
-      return {
-        ...dataset,
-        selectedVar: null,
-        colorEncoding:
-          dataset.colorEncoding === COLOR_ENCODINGS.VAR
-            ? null
-            : dataset.colorEncoding,
-      };
-    }
     case "deselect.multivar": {
       return {
         ...dataset,
-        selectedMultiVar: dataset.selectedMultiVar.filter(
-          (a) => a.matrix_index !== action.var.matrix_index
+        selectedMultiVar: dataset.selectedMultiVar.filter((a) =>
+          action.var.isSet
+            ? a.name !== action.var.name
+            : a.matrix_index !== action.var.matrix_index
         ),
+      };
+    }
+    case "update.multivar": {
+      return {
+        ...dataset,
+        selelectedMultiVar: dataset.selectedMultiVar.map((i) => {
+          if (i.isSet) {
+            return action.vars.find((s) => s.name === i.name);
+          }
+          return i;
+        }),
       };
     }
     case "set.colorEncoding": {
@@ -232,33 +245,73 @@ function datasetReducer(dataset, action) {
             : dataset.colorEncoding,
       };
     }
+    case "add.varSet": {
+      return {
+        ...dataset,
+        varSets: [...dataset.varSets, action.varSet],
+      };
+    }
+    case "remove.varSet": {
+      return {
+        ...dataset,
+        varSets: dataset.varSets.filter((a) => a.name !== action.varSet.name),
+      };
+    }
+    case "reset.varSets": {
+      return {
+        ...dataset,
+        varSets: [],
+      };
+    }
+    case "add.varSet.var": {
+      const varSet = dataset.varSets.find((s) => s.name === action.varSet.name);
+      if (varSet.vars.find((v) => _.isEqual(v, action.var))) {
+        return dataset;
+      } else {
+        return {
+          ...dataset,
+          varSets: dataset.varSets.map((s) => {
+            if (s.name === varSet.name) {
+              return {
+                ...s,
+                vars: [...s.vars, action.var],
+              };
+            } else {
+              return s;
+            }
+          }),
+        };
+      }
+    }
+    case "remove.varSet.var": {
+      const varSet = dataset.varSets.find((s) => s.name === action.varSet.name);
+      return {
+        ...dataset,
+        varSets: dataset.varSets.map((s) => {
+          if (s.name === varSet.name) {
+            return {
+              ...s,
+              vars: s.vars.filter((v) => v.name !== action.var.name),
+            };
+          } else {
+            return s;
+          }
+        }),
+      };
+    }
     case "select.disease": {
       return {
         ...dataset,
         selectedDisease: {
           id: action.id,
           name: action.name,
-          genes: [],
-        },
-      };
-    }
-    case "set.disease.genes": {
-      return {
-        ...dataset,
-        selectedDisease: {
-          ...dataset.selectedDisease,
-          genes: action.genes,
         },
       };
     }
     case "reset.disease": {
       return {
         ...dataset,
-        selectedDisease: {
-          id: null,
-          name: null,
-          genes: [],
-        },
+        selectedDisease: null,
       };
     }
     case "set.controls.colorScale": {
@@ -334,12 +387,15 @@ function datasetReducer(dataset, action) {
         },
       };
     }
-    case "set.controls.standardScale": {
+    case "set.controls.scale": {
       return {
         ...dataset,
         controls: {
           ...dataset.controls,
-          standardScale: action.standardScale,
+          scale: {
+            ...dataset.controls.scale,
+            [action.plot]: action.scale,
+          },
         },
       };
     }

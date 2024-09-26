@@ -51,6 +51,10 @@ const INITIAL_VIEW_STATE = {
 
 const EPSILON = 1e-6;
 
+const meanData = (_i, data) => {
+  return _.zipWith(...data, (...values) => _.mean(values));
+};
+
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
@@ -78,10 +82,25 @@ export function Scatterplot({ radius = 30 }) {
     url: dataset.url,
     path: "obsm/" + dataset.selectedObsm,
   });
-  const [xParams, setXParams] = useState({
-    url: dataset.url,
-    path: "X",
-  });
+  const [xParams, setXParams] = useState(
+    !dataset.selectedVar
+      ? []
+      : !dataset.selectedVar?.isSet
+      ? [
+          {
+            url: dataset.url,
+            path: "X",
+            s: [null, dataset.selectedVar?.matrix_index],
+          },
+        ]
+      : _.map(dataset.selectedVar?.vars, (v) => {
+          return {
+            url: dataset.url,
+            path: "X",
+            s: [null, v.matrix_index],
+          };
+        })
+  );
   const [obsParams, setObsParams] = useState({
     url: dataset.url,
     path:
@@ -92,14 +111,8 @@ export function Scatterplot({ radius = 30 }) {
 
   const [labelObsParams, setLabelObsParams] = useState([]);
 
-  // needs to be wrapped in useMemo as it is an array an could cause an infinite loop otherwise
-  const xSelection = useMemo(
-    () => [null, dataset.selectedVar?.matrix_index],
-    [dataset.selectedVar]
-  );
-
   const obsmData = useZarr(obsmParams, null, GET_OPTIONS);
-  const xData = useZarr(xParams, xSelection, GET_OPTIONS);
+  const xData = useMultipleZarr(xParams, GET_OPTIONS, meanData);
   const obsData = useZarr(obsParams, null, GET_OPTIONS);
   const labelObsData = useMultipleZarr(labelObsParams, GET_OPTIONS);
 
@@ -113,13 +126,26 @@ export function Scatterplot({ radius = 30 }) {
   }, [dataset.selectedObsm]);
 
   useEffect(() => {
-    setXParams((p) => {
-      return {
-        ...p,
-        s: [null, dataset.selectedVar?.matrix_index],
-      };
-    });
-  }, [dataset.selectedVar]);
+    setXParams(
+      !dataset.selectedVar
+        ? []
+        : !dataset.selectedVar?.isSet
+        ? [
+            {
+              url: dataset.url,
+              path: "X",
+              s: [null, dataset.selectedVar?.matrix_index],
+            },
+          ]
+        : _.map(dataset.selectedVar?.vars, (v) => {
+            return {
+              url: dataset.url,
+              path: "X",
+              s: [null, v.matrix_index],
+            };
+          })
+    );
+  }, [dataset.selectedVar, dataset.url]);
 
   useEffect(() => {
     setObsParams((p) => {
@@ -150,12 +176,6 @@ export function Scatterplot({ radius = 30 }) {
 
   useEffect(() => {
     setObsmParams((p) => {
-      return {
-        ...p,
-        url: dataset.url,
-      };
-    });
-    setXParams((p) => {
       return {
         ...p,
         url: dataset.url,
@@ -551,7 +571,7 @@ export function Scatterplot({ radius = 30 }) {
 
     if (dataset.labelObs.length) {
       text.push(
-        ..._.map(labelObsData, (v, k) => {
+        ..._.map(labelObsData.data, (v, k) => {
           const labelObs = _.find(dataset.labelObs, (o) => o.name === k);
           return getLabel(labelObs, v[index]);
         })

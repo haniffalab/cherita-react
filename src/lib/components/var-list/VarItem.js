@@ -48,11 +48,11 @@ function VarHistogram({ item }) {
   );
 
   return (
-    <div className="feature-histogram-container m-2">
+    <div className="feature-histogram-container">
       {isPending ? (
         <LoadingLinear />
       ) : !serverError && fetchedData ? (
-        <div className="feature-histogram">
+        <div className="feature-histogram m-1">
           <SparkLineChart
             plotType="bar"
             data={fetchedData.log10}
@@ -136,12 +136,14 @@ function VarDiseaseInfo({ data }) {
   );
 }
 
-function SingleSelectionItem({
+export function SingleSelectionItem({
   item,
   isActive,
   selectVar,
   removeVar,
-  isDiseaseGene,
+  isDiseaseGene = false,
+  showSetColorEncoding = true,
+  showRemove = true,
 }) {
   const ENDPOINT = "disease/gene";
   const [openInfo, setOpenInfo] = useState(false);
@@ -172,29 +174,31 @@ function SingleSelectionItem({
           <div className="d-flex align-items-center gap-1">
             {hasDiseaseInfo && <MoreVert />}
             {!isDiseaseGene && <VarHistogram item={item} />}
-            <Button
-              type="button"
-              key={item.matrix_index}
-              variant={
-                isActive
-                  ? "primary"
-                  : isNotInData
-                  ? "outline-secondary"
-                  : "outline-primary"
-              }
-              className="m-0 p-0 px-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                selectVar();
-              }}
-              disabled={isNotInData}
-              title={
-                isNotInData ? "Not present in data" : "Set as color encoding"
-              }
-            >
-              <FontAwesomeIcon icon={faDroplet} />
-            </Button>
-            {!isDiseaseGene && (
+            {showSetColorEncoding && (
+              <Button
+                type="button"
+                key={item.matrix_index}
+                variant={
+                  isActive
+                    ? "primary"
+                    : isNotInData
+                    ? "outline-secondary"
+                    : "outline-primary"
+                }
+                className="m-0 p-0 px-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  selectVar();
+                }}
+                disabled={isNotInData}
+                title={
+                  isNotInData ? "Not present in data" : "Set as color encoding"
+                }
+              >
+                <FontAwesomeIcon icon={faDroplet} />
+              </Button>
+            )}
+            {(!isDiseaseGene || !showRemove) && (
               <Button
                 type="button"
                 className="m-0 p-0 px-1"
@@ -235,7 +239,7 @@ function MultipleSelectionItem({ item, isActive, toggleVar }) {
             className="m-0 p-0 px-1"
             onClick={toggleVar}
             disabled={isNotInData}
-            title={isNotInData ? "Not present in data" : ""}
+            title={isNotInData ? "Not present in data" : item.name}
           >
             {item.name}
           </Button>
@@ -255,11 +259,11 @@ export function VarItem({
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
 
-  const selectVar = (v) => {
+  const selectVar = () => {
     if (mode === SELECTION_MODES.SINGLE) {
       dispatch({
         type: "select.var",
-        var: v,
+        var: item,
       });
       dispatch({
         type: "set.colorEncoding",
@@ -268,39 +272,39 @@ export function VarItem({
     } else if (mode === SELECTION_MODES.MULTIPLE) {
       dispatch({
         type: "select.multivar",
-        var: v,
+        var: item,
       });
     }
   };
 
-  const removeVar = (v) => {
+  const removeVar = () => {
     setVarButtons((b) => {
-      return b.filter((i) => i.name !== v.name);
+      return b.filter((i) => i.name !== item.name);
     });
     if (mode === SELECTION_MODES.SINGLE) {
-      if (active === v.matrix_index) {
+      if (active === item.matrix_index) {
         dispatch({
-          type: "deselect.var",
+          type: "reset.var",
         });
       }
     } else if (mode === SELECTION_MODES.MULTIPLE) {
-      if (active.includes(v.matrix_index)) {
+      if (active.includes(item.matrix_index)) {
         dispatch({
           type: "deselect.multivar",
-          var: v,
+          var: item,
         });
       }
     }
   };
 
-  const toggleVar = (v) => {
-    if (active.includes(v.matrix_index)) {
+  const toggleVar = () => {
+    if (active.includes(item.matrix_index)) {
       dispatch({
         type: "deselect.multivar",
-        var: v,
+        var: item,
       });
     } else {
-      selectVar(v);
+      selectVar(item);
     }
   };
 
@@ -312,8 +316,8 @@ export function VarItem({
           dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
           active === item.matrix_index
         }
-        selectVar={() => selectVar(item)}
-        removeVar={() => removeVar(item)}
+        selectVar={selectVar}
+        removeVar={removeVar}
         isDiseaseGene={isDiseaseGene}
       />
     );
@@ -324,7 +328,7 @@ export function VarItem({
         isActive={
           item.matrix_index !== -1 && _.includes(active, item.matrix_index)
         }
-        toggleVar={() => toggleVar(item)}
+        toggleVar={toggleVar}
       />
     );
   } else {

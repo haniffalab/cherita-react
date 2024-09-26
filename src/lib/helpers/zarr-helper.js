@@ -54,26 +54,47 @@ export const useZarr = ({ url, path }, s = null, opts = {}) => {
   return { data, isPending, serverError };
 };
 
-export const useMultipleZarr = (inputs, opts = {}) => {
-  const [results, setResults] = useState({});
+const fetchDataFromZarrs = async (inputs, opts) => {
+  try {
+    const results = await Promise.all(
+      inputs.map((input) =>
+        fetchDataFromZarr(input.url, input.path, input.s, opts)
+      )
+    );
+    return results;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+const aggregateData = (inputs, data) => {
+  const dataObject = {};
+  data.forEach((result, index) => {
+    const key = inputs[index].key;
+    dataObject[key] = result;
+  });
+  return dataObject;
+};
+
+export const useMultipleZarr = (inputs, opts = {}, agg = aggregateData) => {
+  const [data, setData] = useState(null);
+  const [isPending, setIsPending] = useState(true);
+  const [serverError, setServerError] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const results = await Promise.all(
-        inputs.map((input) =>
-          fetchDataFromZarr(input.url, input.path, input.s, opts)
-        )
-      );
-      const dataObject = {};
-      results.forEach((result, index) => {
-        const key = inputs[index].key;
-        dataObject[key] = result;
+    setIsPending(true);
+    setServerError(null);
+    fetchDataFromZarrs(inputs, opts)
+      .then((data) => {
+        setData(agg(inputs, data));
+      })
+      .catch((error) => {
+        setServerError(error.message);
+      })
+      .finally(() => {
+        setIsPending(false);
       });
-      setResults(dataObject);
-    };
+  }, [agg, inputs, opts]);
 
-    fetchData();
-  }, [inputs, opts]);
-
-  return results;
+  return { data, isPending, serverError };
 };

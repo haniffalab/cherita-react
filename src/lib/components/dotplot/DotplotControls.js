@@ -12,14 +12,13 @@ import {
 import Dropdown from "react-bootstrap/Dropdown";
 
 import { COLORSCALES } from "../../constants/colorscales";
-import { DOTPLOT_STANDARDSCALES } from "../../constants/constants";
+import { DOTPLOT_SCALES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export function DotplotControls() {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [controls, setControls] = useState({
-    standardScale: dataset.controls.standardScale,
     expressionCutoff: dataset.controls.expressionCutoff,
     colorAxis: {
       cmin: dataset.controls.colorAxis.cmin,
@@ -34,8 +33,13 @@ export function DotplotControls() {
         cmin: dataset.controls.colorAxis.cmin,
         cmax: dataset.controls.colorAxis.cmax,
       },
+      expressionCutoff: dataset.controls.expressionCutoff,
     }));
-  }, [dataset.controls.colorAxis.cmin, dataset.controls.colorAxis.cmax]);
+  }, [
+    dataset.controls.colorAxis.cmin,
+    dataset.controls.colorAxis.cmax,
+    dataset.controls.expressionCutoff,
+  ]);
 
   const colorScaleList = _.keys(COLORSCALES).map((key) => (
     <Dropdown.Item
@@ -52,18 +56,19 @@ export function DotplotControls() {
     </Dropdown.Item>
   ));
 
-  const standardScaleList = DOTPLOT_STANDARDSCALES.map((item) => (
+  const standardScaleList = _.values(DOTPLOT_SCALES).map((scale) => (
     <Dropdown.Item
-      key={item.value}
-      active={dataset.controls.standardScale === item.value}
+      key={scale.value}
+      active={dataset.controls.scale.dotplot === scale}
       onClick={() => {
         dispatch({
-          type: "set.controls.standardScale",
-          standardScale: item.value,
+          type: "set.controls.scale",
+          plot: "dotplot",
+          scale: scale,
         });
       }}
     >
-      {item.name}
+      {scale.name}
     </Dropdown.Item>
   ));
 
@@ -82,7 +87,7 @@ export function DotplotControls() {
           <InputGroup.Text>Standard scale</InputGroup.Text>
           <Dropdown>
             <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {dataset.controls.standardScale}
+              {dataset.controls.scale.dotplot.name}
             </Dropdown.Toggle>
             <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
           </Dropdown>
