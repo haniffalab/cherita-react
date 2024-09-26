@@ -5,6 +5,7 @@ import { QueryClient, QueryCache } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import _ from "lodash";
 
+import { FilterProvider } from "./FilterContext";
 import {
   COLOR_ENCODINGS,
   LOCAL_STORAGE_KEY,
@@ -26,7 +27,14 @@ const queryClient = new QueryClient({
   }),
 });
 // Type of queries to store responses
-const persistKeys = ["obs/cols", "var/names", "obsm/keys"];
+const persistKeys = [
+  "obs/cols",
+  "var/names",
+  "obsm/keys",
+  "var/histograms",
+  "obs/bins",
+  "obs/distribution",
+];
 const persistOptions = {
   persister: createSyncStoragePersister({
     storage: window.localStorage,
@@ -129,7 +137,7 @@ export function DatasetProvider({
           client={queryClient}
           persistOptions={persistOptions}
         >
-          {children}
+          <FilterProvider>{children}</FilterProvider>
         </PersistQueryClientProvider>
       </DatasetDispatchContext.Provider>
     </DatasetContext.Provider>
@@ -156,6 +164,14 @@ function datasetReducer(dataset, action) {
             action.obs?.type === OBS_TYPES.CATEGORICAL
               ? [0, 1]
               : dataset.controls.range,
+        },
+        colorEncoding:
+          dataset.colorEncoding === COLOR_ENCODINGS.OBS && !action.obs
+            ? null
+            : dataset.colorEncoding,
+        sliceBy: {
+          ...dataset.sliceBy,
+          obs: action.obs ? dataset.sliceBy.obs : false,
         },
       };
     }

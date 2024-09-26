@@ -57,7 +57,11 @@ export default function MatrixplotDemo(props) {
           <div className="cherita-container-plot">
             <Matrixplot />
           </div>
-          <OffcanvasObs show={showObs} handleClose={handleCloseObs} />
+          <OffcanvasObs
+            show={showObs}
+            handleClose={handleCloseObs}
+            showColor={false}
+          />
           <OffcanvasVars show={showVars} handleClose={handleCloseVars} />
           <OffcanvasControls
             show={showControls}

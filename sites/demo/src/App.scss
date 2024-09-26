@@ -44,6 +44,7 @@ $font-family-sans-serif: Poppins, system-ui, -apple-system, "Segoe UI", Roboto, 
 
 .cherita-app-var {
   @extend .p-3;
+  max-height: 100%;
 }
 
 .cherita-app div.row{

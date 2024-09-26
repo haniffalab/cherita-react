@@ -1,16 +1,10 @@
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 
-import {
-  faDroplet,
-  faPlus,
-  faCircleInfo,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { ListGroup, Button } from "react-bootstrap";
+import { ListGroup, Button, Alert } from "react-bootstrap";
 
-import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
+import { VarItem } from "./VarItem";
+import { SELECTION_MODES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 
 export function VarNamesList({
@@ -21,7 +15,9 @@ export function VarNamesList({
   const dispatch = useDatasetDispatch();
   const [varButtons, setVarButtons] = useState(
     mode === SELECTION_MODES.SINGLE
-      ? [dataset.selectedVar]
+      ? dataset.selectedVar
+        ? [dataset.selectedVar]
+        : []
       : dataset.selectedMultiVar
   );
   const [active, setActive] = useState(
@@ -56,201 +52,75 @@ export function VarNamesList({
     }
   }, [mode, dataset.selectedMultiVar]);
 
-  const selectVar = useCallback(
-    (item) => {
-      if (mode === SELECTION_MODES.SINGLE) {
-        dispatch({
-          type: "select.var",
-          var: item,
-        });
-        dispatch({
-          type: "set.colorEncoding",
-          value: "var",
-        });
-      } else if (mode === SELECTION_MODES.MULTIPLE) {
-        dispatch({
-          type: "select.multivar",
-          var: item,
-        });
-      }
-    },
-    [dispatch, mode]
-  );
+  const makeListItem = (item, isDiseaseGene = false) => {
+    return (
+      <ListGroup.Item key={item.matrix_index}>
+        <VarItem
+          item={item}
+          active={active}
+          setVarButtons={setVarButtons}
+          mode={mode}
+          isDiseaseGene={isDiseaseGene}
+        />
+      </ListGroup.Item>
+    );
+  };
 
-  const removeVar = useCallback(
-    (v) => {
-      setVarButtons((b) => {
-        return b.filter((i) => i.name !== v.name);
-      });
-      if (mode === SELECTION_MODES.SINGLE) {
-        if (active === v.matrix_index) {
-          dispatch({
-            type: "deselect.var",
-          });
-        }
-      } else if (mode === SELECTION_MODES.MULTIPLE) {
-        if (active.includes(v.matrix_index)) {
-          dispatch({
-            type: "deselect.multivar",
-            var: v,
-          });
-        }
-      }
-    },
-    [active, dispatch, mode]
-  );
+  const varList = _.map(varButtons, (item) => {
+    return makeListItem(item);
+  });
 
-  const makeList = useCallback(
-    (vars) => {
-      return vars.map((item) => {
-        if (item && mode === SELECTION_MODES.SINGLE) {
-          return (
-            <ListGroup.Item key={item.name}>
-              <div className="d-flex gap-1">
-                <div className="flex-grow-1">{item.name}</div>
-
-                <div>
-                  <FontAwesomeIcon icon={faCircleInfo} />
-                </div>
-                <div>
-                  <Button
-                    type="button"
-                    key={item.matrix_index}
-                    variant={
-                      dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
-                      active === item.matrix_index
-                        ? "primary"
-                        : "outline-primary"
-                    }
-                    className="m-0 p-0 px-1"
-                    onClick={() => {
-                      selectVar(item);
-                    }}
-                    disabled={item.matrix_index === -1}
-                    title={
-                      item.matrix_index === -1
-                        ? "Not present in data"
-                        : "Set as color encoding"
-                    }
-                  >
-                    <FontAwesomeIcon icon={faDroplet} />
-                  </Button>
-                </div>
-                <div>
-                  <Button
-                    type="button"
-                    className="m-0 p-0 px-1"
-                    variant="outline-secondary"
-                    title="Remove from list"
-                    onClick={() => removeVar(item)}
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </Button>
-                </div>
-              </div>
-            </ListGroup.Item>
-          );
-        } else if (mode === SELECTION_MODES.MULTIPLE) {
-          return (
-            <ListGroup.Item key={item.name}>
-              <div className="d-flex">
-                <div className="flex-grow-1">
-                  <Button
-                    type="button"
-                    key={item.matrix_index}
-                    variant={
-                      item.matrix_index !== -1 &&
-                      _.includes(active, item.matrix_index)
-                        ? "primary"
-                        : "outline-primary"
-                    }
-                    className="m-0 p-0 px-1"
-                    onClick={() => {
-                      if (active.includes(item.matrix_index)) {
-                        dispatch({
-                          type: "deselect.multivar",
-                          var: item,
-                        });
-                      } else {
-                        selectVar(item);
-                      }
-                    }}
-                    disabled={item.matrix_index === -1}
-                    title={
-                      item.matrix_index === -1 ? "Not present in data" : ""
-                    }
-                  >
-                    {item.name}
-                  </Button>
-                </div>
-                <div>
-                  {" "}
-                  <FontAwesomeIcon icon={faPlus} />
-                </div>
-              </div>
-            </ListGroup.Item>
-          );
-        } else {
-          return null;
-        }
-      });
-    },
-    [active, dataset.colorEncoding, dispatch, mode, removeVar, selectVar]
-  );
-
-  const varList = useMemo(() => {
-    return makeList(varButtons);
-  }, [makeList, varButtons]);
-
-  const diseaseVarList = useMemo(() => {
-    return makeList(dataset.selectedDisease.genes);
-  }, [makeList, dataset.selectedDisease.genes]);
+  const diseaseVarList = _.map(dataset.selectedDisease.genes, (item) => {
+    return makeListItem(item, true);
+  });
 
   return (
     <div className="position-relative">
-      <div className="overflow-auto mt-2">
-        <div>
-          <div className="d-flex justify-content-between">
-            <h5>{_.capitalize(displayName)}</h5>
-            <Button
-              variant="link"
-              onClick={() => {
-                setVarButtons([]);
-                dispatch({
-                  type:
-                    mode === SELECTION_MODES.SINGLE
-                      ? "reset.var"
-                      : "reset.multiVar",
-                });
-              }}
-            >
-              clear
-            </Button>
-          </div>
+      <div className="overflow-auto mt-3">
+        <div className="d-flex justify-content-between">
+          <h5>{_.capitalize(displayName)}</h5>
+          <Button
+            variant="link"
+            onClick={() => {
+              setVarButtons([]);
+              dispatch({
+                type:
+                  mode === SELECTION_MODES.SINGLE
+                    ? "reset.var"
+                    : "reset.multiVar",
+              });
+            }}
+          >
+            clear
+          </Button>
+        </div>
+        {!varList.length ? (
+          <Alert variant="light">Search for a feature.</Alert>
+        ) : (
           <ListGroup>{varList}</ListGroup>
-        </div>
-        <div>
-          {dataset.selectedDisease?.id &&
-            dataset.selectedDisease?.genes?.length > 0 && (
-              <div>
-                <div className="d-flex justify-content-between">
-                  <h5>Disease genes</h5>
-                  <Button
-                    variant="link"
-                    onClick={() => {
-                      dispatch({
-                        type: "reset.disease",
-                      });
-                    }}
-                  >
-                    clear
-                  </Button>
-                </div>
-                <p>{dataset.selectedDisease?.name}</p>
-                {diseaseVarList}
+        )}
+        {dataset.selectedDisease?.id &&
+          (!dataset.selectedDisease?.genes?.length ? (
+            <Alert variant="light">No disease genes found.</Alert>
+          ) : (
+            <>
+              <div className="d-flex justify-content-between mt-3">
+                <h5>Disease genes</h5>
+                <Button
+                  variant="link"
+                  onClick={() => {
+                    dispatch({
+                      type: "reset.disease",
+                    });
+                  }}
+                >
+                  clear
+                </Button>
               </div>
-            )}
-        </div>
+              <p>{dataset.selectedDisease?.name}</p>
+              <ListGroup>{diseaseVarList}</ListGroup>
+            </>
+          ))}
       </div>
     </div>
   );

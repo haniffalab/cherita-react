@@ -57,7 +57,11 @@ export default function HeatmapDemo(props) {
           <div className="cherita-container-plot">
             <Heatmap />
           </div>
-          <OffcanvasObs show={showObs} handleClose={handleCloseObs} />
+          <OffcanvasObs
+            show={showObs}
+            handleClose={handleCloseObs}
+            showColor={false}
+          />
           <OffcanvasVars show={showVars} handleClose={handleCloseVars} />
           <OffcanvasControls
             show={showControls}

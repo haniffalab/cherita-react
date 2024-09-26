@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 
+import { prettyNumerical } from "../../utils/string";
 import { ObsmKeysList } from "../obsm-list/ObsmList";
 
 export function Toolbox({ mode, obsLength, slicedLength }) {
@@ -20,11 +21,11 @@ export function Toolbox({ mode, obsLength, slicedLength }) {
           !Number.isNaN(slicedLength) &&
           slicedLength !== obsLength ? (
             <Button size="sm">
-              {slicedLength.toLocaleString()} out of{" "}
-              {obsLength.toLocaleString()} cells
+              {prettyNumerical(slicedLength)} out of{" "}
+              {prettyNumerical(obsLength)} cells
             </Button>
           ) : (
-            <Button size="sm">{obsLength.toLocaleString()} cells</Button>
+            <Button size="sm">{prettyNumerical(obsLength)} cells</Button>
           ))}
       </ButtonGroup>
     </div>
