@@ -21,6 +21,7 @@ const useVarMean = (varKeys, enabled = false) => {
     varKeys: _.map(varKeys, (v) =>
       v.isSet ? { name: v.name, indices: v.vars.map((v) => v.index) } : v.index
     ),
+    // obsIndices:
     varNamesCol: dataset.varNamesCol,
   });
 
