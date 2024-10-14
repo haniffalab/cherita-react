@@ -26,7 +26,7 @@ import DropdownButton from "react-bootstrap/DropdownButton";
 
 import { ScatterplotControls } from "./ScatterplotControls";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { OffcanvasControls } from "../Offcanvas";
+import { OffcanvasControls } from "../offcanvas";
 
 export function SpatialControls({
   mode,

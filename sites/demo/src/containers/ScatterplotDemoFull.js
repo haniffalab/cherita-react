@@ -9,7 +9,6 @@ import {
   OffcanvasObsm,
   OffcanvasVars,
   OffcanvasControls,
-  OffcanvasInfo,
   ObsColsList,
   VarNamesList,
   SearchBar,
@@ -28,7 +27,6 @@ export default function ScatterplotDemo(props) {
   const [showObsm, setShowObsm] = useState(false);
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
   const handleCloseObs = () => setShowObs(false);
@@ -39,8 +37,6 @@ export default function ScatterplotDemo(props) {
   const handleShowVars = () => setShowVars(true);
   const handleCloseControls = () => setShowControls(false);
   const handleShowControls = () => setShowControls(true);
-  const handleCloseInfo = () => setShowInfo(false);
-  const handleShowInfo = () => setShowInfo(true);
 
   useLayoutEffect(() => {
     function updateDimensions() {
@@ -98,9 +94,6 @@ export default function ScatterplotDemo(props) {
                           Controls
                         </Nav.Link>
                       </Nav.Item>
-                      <Nav.Item>
-                        <Nav.Link onClick={handleShowInfo}>Info</Nav.Link>
-                      </Nav.Item>
                     </Nav>
                   </Navbar.Collapse>
                 </Container>
@@ -136,7 +129,6 @@ export default function ScatterplotDemo(props) {
               handleClose={handleCloseControls}
               Controls={ScatterplotControls}
             />
-            <OffcanvasInfo show={showInfo} handleClose={handleCloseInfo} />
           </Col>
         </Row>
       </DatasetProvider>

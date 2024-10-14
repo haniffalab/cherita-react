@@ -1,9 +1,10 @@
-import { defineConfig, loadEnv } from "vite";
-import react from "@vitejs/plugin-react";
 import * as path from "path";
 
+import react from "@vitejs/plugin-react";
+import { defineConfig, loadEnv } from "vite";
+
 // https://vitejs.dev/config/
-export default defineConfig(({mode}) => {
+export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     esbuild: {
@@ -13,6 +14,10 @@ export default defineConfig(({mode}) => {
     },
     resolve: {
       alias: {
+        "@haniffalab/cherita-react/scss": path.resolve(
+          __dirname,
+          "../../src/scss"
+        ),
         "@haniffalab/cherita-react": path.resolve(
           __dirname,
           "../../src/lib/index.js"
@@ -25,7 +30,7 @@ export default defineConfig(({mode}) => {
       },
     },
     define: {
-      "process.env": {...process.env, ...loadEnv(mode, process.cwd(), "")},
+      "process.env": { ...process.env, ...loadEnv(mode, process.cwd(), "") },
     },
-  }
+  };
 });
