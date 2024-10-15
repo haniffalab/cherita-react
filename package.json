@@ -52,7 +52,11 @@
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-config-react-app": "^7.0.1",
-    "eslint-plugin-import": "^2.29.1"
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.3.3",
+    "stylelint": "^16.10.0",
+    "stylelint-config-prettier": "^9.0.5",
+    "stylelint-config-standard-scss": "^13.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -61,6 +65,9 @@
     "build": "npm run build:babel && npm run build:scss",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "lint:scss": "stylelint 'src/**/*.scss' --fix",
+    "lint:js": "eslint 'src/**/*.js' --fix",
+    "lint": "npm run lint:scss && npm run lint:js",
     "start-demo": "npm run dev --prefix sites/demo"
   },
   "eslintConfig": {
