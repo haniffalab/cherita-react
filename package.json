@@ -5,8 +5,11 @@
   "license": "",
   "main": "dist/index.js",
   "module": "dist/index.js",
+  "style": "dist/css/cherita.css",
+  "sass": "scss/cherita.scss",
   "files": [
-    "dist"
+    "dist",
+    "src/scss"
   ],
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -50,13 +53,21 @@
     "eslint-config-prettier": "^8.8.0",
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-import": "^2.29.1",
-    "sass": "^1.79.5"
+    "prettier": "^3.3.3",
+    "stylelint": "^16.10.0",
+    "stylelint-config-prettier": "^9.0.5",
+    "stylelint-config-standard-scss": "^13.1.0"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "babel src/lib --out-dir dist --copy-files",
+    "build:babel": "babel src/lib --out-dir dist --copy-files",
+    "build:scss": "sass --load-path=node_modules src/scss/cherita.scss dist/css/cherita.css",
+    "build": "npm run build:babel && npm run build:scss",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "lint:scss": "stylelint 'src/**/*.scss' --fix",
+    "lint:js": "eslint 'src/**/*.js' --fix",
+    "lint": "npm run lint:scss && npm run lint:js",
     "start-demo": "npm run dev --prefix sites/demo"
   },
   "eslintConfig": {
