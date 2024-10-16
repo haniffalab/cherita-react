@@ -54,6 +54,7 @@
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-import": "^2.29.1",
     "prettier": "^3.3.3",
+    "sass": "^1.79.5",
     "stylelint": "^16.10.0",
     "stylelint-config-prettier": "^9.0.5",
     "stylelint-config-standard-scss": "^13.1.0"
