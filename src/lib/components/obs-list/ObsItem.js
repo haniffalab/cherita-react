@@ -10,7 +10,7 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useColor } from "../../helpers/color-helper";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
-import { prettyNumerical } from "../../utils/string";
+import { formatNumerical, FORMATS } from "../../utils/string";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 
 const N_BINS = 5;
@@ -43,8 +43,9 @@ function binDiscrete(data, nBins = N_BINS) {
 }
 
 function getContinuousLabel(code, binEdges) {
-  return `[ ${prettyNumerical(binEdges[code][0])}, ${prettyNumerical(
-    binEdges[code][1]
+  return `[ ${formatNumerical(binEdges[code][0])}, ${formatNumerical(
+    binEdges[code][1],
+    FORMATS.EXPONENTIAL
   )}${code === binEdges.length - 1 ? " ]" : " )"}`;
 }
 
@@ -76,13 +77,17 @@ function CategoricalItem({
         </div>
         <div className="d-flex align-items-center">
           <div className="pl-1 m-0">
-            <Tooltip title={`${prettyNumerical(pct)}%`} placement="left" arrow>
+            <Tooltip
+              title={`${formatNumerical(pct, FORMATS.EXPONENTIAL)}%`}
+              placement="left"
+              arrow
+            >
               <div className="d-flex align-items-center">
                 <Badge
                   className="value-count-badge"
                   style={{ fontWeight: "lighter" }}
                 >
-                  {prettyNumerical(parseInt(value_counts))}
+                  {formatNumerical(parseInt(value_counts), FORMATS.EXPONENTIAL)}
                 </Badge>
                 <div className="value-pct-gauge-container">
                   <Gauge
@@ -212,11 +217,15 @@ function ObsContinuousStats({ obs }) {
           <tbody>
             <tr>
               <td>Min</td>
-              <td className="text-end">{prettyNumerical(obs.min)}</td>
+              <td className="text-end">
+                {formatNumerical(obs.min, FORMATS.EXPONENTIAL)}
+              </td>
             </tr>
             <tr>
               <td>Max</td>
-              <td className="text-end">{prettyNumerical(obs.max)}</td>
+              <td className="text-end">
+                {formatNumerical(obs.max, FORMATS.EXPONENTIAL)}
+              </td>
             </tr>
           </tbody>
         </Table>
@@ -224,11 +233,15 @@ function ObsContinuousStats({ obs }) {
           <tbody>
             <tr>
               <td>Mean</td>
-              <td className="text-end">{prettyNumerical(obs.mean)}</td>
+              <td className="text-end">
+                {formatNumerical(obs.mean, FORMATS.EXPONENTIAL)}
+              </td>
             </tr>
             <tr>
               <td>Median</td>
-              <td className="text-end">{prettyNumerical(obs.median)}</td>
+              <td className="text-end">
+                {formatNumerical(obs.median, FORMATS.EXPONENTIAL)}
+              </td>
             </tr>
           </tbody>
         </Table>
@@ -247,9 +260,12 @@ function ObsContinuousStats({ obs }) {
               }}
               xAxis={{
                 data: fetchedData.kde_values[0],
-                valueFormatter: (v) => `${prettyNumerical(v)}`,
+                valueFormatter: (v) =>
+                  `${formatNumerical(v, FORMATS.EXPONENTIAL)}`,
               }}
-              valueFormatter={(v) => `${prettyNumerical(v)}`}
+              valueFormatter={(v) =>
+                `${formatNumerical(v, FORMATS.EXPONENTIAL)}`
+              }
               slotProps={{
                 popper: {
                   className: "feature-histogram-tooltip",
