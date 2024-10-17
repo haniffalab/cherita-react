@@ -105,14 +105,16 @@ function VarDiseaseInfoItem(item) {
               <td>Organ{item.organs.length > 1 ? "s" : ""}</td>
               <td>{item.organs.map((o) => o.name).join(", ")}</td>
             </tr>
-            {!!item.metadata?.length &&
-              item.metadata.map((m) => {
-                return (
-                  <tr>
-                    <td>{m.key}</td>
-                    <td>{m.value}</td>
-                  </tr>
-                );
+            {!_.isEmpty(item.metadata) &&
+              _.map(item.metadata, (value, key) => {
+                if (value !== null && value !== undefined) {
+                  return (
+                    <tr>
+                      <td>{key}</td>
+                      <td>{value}</td>
+                    </tr>
+                  );
+                }
               })}
           </tbody>
         </Table>
