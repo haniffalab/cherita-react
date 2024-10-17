@@ -9,7 +9,6 @@ import {
   OffcanvasObsm,
   OffcanvasVars,
   OffcanvasControls,
-  OffcanvasInfo,
 } from "@haniffalab/cherita-react";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
@@ -20,7 +19,6 @@ export default function ScatterplotDemo(props) {
   const [showObsm, setShowObsm] = useState(false);
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
 
   const handleCloseObs = () => setShowObs(false);
   const handleShowObs = () => setShowObs(true);
@@ -30,8 +28,6 @@ export default function ScatterplotDemo(props) {
   const handleShowVars = () => setShowVars(true);
   const handleCloseControls = () => setShowControls(false);
   const handleShowControls = () => setShowControls(true);
-  const handleCloseInfo = () => setShowInfo(false);
-  const handleShowInfo = () => setShowInfo(true);
   return (
     <Container>
       <div className="cherita-container">
@@ -55,9 +51,6 @@ export default function ScatterplotDemo(props) {
                   <Nav.Item>
                     <Nav.Link onClick={handleShowControls}>Controls</Nav.Link>
                   </Nav.Item>
-                  <Nav.Item>
-                    <Nav.Link onClick={handleShowInfo}>Info</Nav.Link>
-                  </Nav.Item>
                 </Nav>
               </Navbar.Collapse>
             </Container>
@@ -77,7 +70,6 @@ export default function ScatterplotDemo(props) {
             handleClose={handleCloseControls}
             Controls={ScatterplotControls}
           />
-          <OffcanvasInfo show={showInfo} handleClose={handleCloseInfo} />
         </DatasetProvider>
       </div>
     </Container>

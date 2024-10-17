@@ -21,5 +21,5 @@ export {
   OffcanvasObsm,
   OffcanvasVars,
   OffcanvasControls,
-  OffcanvasInfo,
-} from "./components/Offcanvas";
+} from "./components/offcanvas";
+export { FullPage } from "./components/full-page/FullPage";
