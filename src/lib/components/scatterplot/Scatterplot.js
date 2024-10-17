@@ -31,13 +31,13 @@ import { useFilteredDataDispatch } from "../../context/FilterContext";
 import { useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
-import { prettyNumerical } from "../../utils/string";
 import {
   useObsmData,
   useXData,
   useObsData,
   useLabelObsData,
 } from "../../utils/zarrData";
+import { formatNumerical } from "../../utils/string";
 
 window.deck.log.level = 1;
 
@@ -438,7 +438,7 @@ export function Scatterplot({ radius = 30 }) {
 
   const getLabel = (o, v, isVar = false) => {
     if (isVar || o.type === OBS_TYPES.CONTINUOUS) {
-      return `${o.name}: ${prettyNumerical(parseFloat(v))}`;
+      return `${o.name}: ${formatNumerical(parseFloat(v))}`;
     } else {
       return `${o.name}: ${o.codesMap[v]}`;
     }
@@ -531,8 +531,8 @@ export function Scatterplot({ radius = 30 }) {
               dataset.colorEncoding === COLOR_ENCODINGS.VAR
                 ? dataset.selectedVar.name
                 : dataset.colorEncoding === COLOR_ENCODINGS.OBS
-                ? dataset.selectedObs.name
-                : null
+                  ? dataset.selectedObs.name
+                  : null
             }
             obsLength={parseInt(obsmData.data?.length)}
             slicedLength={parseInt(slicedLength)}
