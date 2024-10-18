@@ -8,6 +8,7 @@ import DotplotDemo from "./containers/DotplotDemo";
 import { FullPageDemo } from "./containers/FullPageDemo";
 import HeatmapDemo from "./containers/HeatmapDemo";
 import MatrixplotDemo from "./containers/MatrixplotDemo";
+import { PseudospatialDemo } from "./containers/PseudospatialDemo";
 import ScatterplotDemo from "./containers/ScatterplotDemo";
 import ViolinDemo from "./containers/ViolinDemo";
 
@@ -30,6 +31,11 @@ export default function App(props) {
           element={<ScatterplotDemo {...props} />}
         />
         <Route exact path="/violin" element={<ViolinDemo {...props} />} />
+        <Route
+          exact
+          path="/pseudospatial"
+          element={<PseudospatialDemo {...props} />}
+        />
         <Route
           exact
           path="/full-page"

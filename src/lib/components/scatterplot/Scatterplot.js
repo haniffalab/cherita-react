@@ -31,13 +31,13 @@ import { useFilteredDataDispatch } from "../../context/FilterContext";
 import { useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
+import { formatNumerical } from "../../utils/string";
 import {
   useObsmData,
   useXData,
   useObsData,
   useLabelObsData,
 } from "../../utils/zarrData";
-import { formatNumerical } from "../../utils/string";
 
 window.deck.log.level = 1;
 
@@ -489,56 +489,58 @@ export function Scatterplot({ radius = 30 }) {
     (dataset.labelObs.lengh && labelObsData.serverError?.length);
 
   return (
-    <div className="cherita-scatterplot">
-      {obsmData.isPending && <LoadingSpinner disableShrink={true} />}
-      {isPending && <LoadingLinear />}
-      <DeckGL
-        viewState={viewState}
-        onViewStateChange={(e) => setViewState(e.viewState)}
-        controller={{ doubleClickZoom: mode === ViewMode }}
-        layers={layers}
-        onClick={onLayerClick}
-        getTooltip={getTooltip}
-        onAfterRender={() => {
-          setIsRendering(false);
-        }}
-        useDevicePixels={false}
-        getCursor={({ isDragging }) =>
-          mode !== ViewMode ? "crosshair" : isDragging ? "grabbing" : "grab"
-        }
-        ref={deckRef}
-      ></DeckGL>
-      <SpatialControls
-        mode={mode}
-        setMode={setMode}
-        features={features}
-        setFeatures={setFeatures}
-        selectedFeatureIndexes={selectedFeatureIndexes}
-        resetBounds={() => setViewState(getBounds())}
-        increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
-        decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
-      />
-      <div className="cherita-spatial-footer">
-        <div className="cherita-toolbox-footer">
-          {error && !isPending && (
-            <Alert variant="danger">
-              <FontAwesomeIcon icon={faTriangleExclamation} />
-              &nbsp;Error loading data
-            </Alert>
-          )}
-          <Toolbox
-            mode={
-              dataset.colorEncoding === COLOR_ENCODINGS.VAR
-                ? dataset.selectedVar.name
-                : dataset.colorEncoding === COLOR_ENCODINGS.OBS
-                  ? dataset.selectedObs.name
-                  : null
-            }
-            obsLength={parseInt(obsmData.data?.length)}
-            slicedLength={parseInt(slicedLength)}
-          />
+    <div className="cherita-container-scatterplot">
+      <div className="cherita-scatterplot">
+        {obsmData.isPending && <LoadingSpinner disableShrink={true} />}
+        {isPending && <LoadingLinear />}
+        <DeckGL
+          viewState={viewState}
+          onViewStateChange={(e) => setViewState(e.viewState)}
+          controller={{ doubleClickZoom: mode === ViewMode }}
+          layers={layers}
+          onClick={onLayerClick}
+          getTooltip={getTooltip}
+          onAfterRender={() => {
+            setIsRendering(false);
+          }}
+          useDevicePixels={false}
+          getCursor={({ isDragging }) =>
+            mode !== ViewMode ? "crosshair" : isDragging ? "grabbing" : "grab"
+          }
+          ref={deckRef}
+        ></DeckGL>
+        <SpatialControls
+          mode={mode}
+          setMode={setMode}
+          features={features}
+          setFeatures={setFeatures}
+          selectedFeatureIndexes={selectedFeatureIndexes}
+          resetBounds={() => setViewState(getBounds())}
+          increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
+          decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
+        />
+        <div className="cherita-spatial-footer">
+          <div className="cherita-toolbox-footer">
+            {error && !isPending && (
+              <Alert variant="danger">
+                <FontAwesomeIcon icon={faTriangleExclamation} />
+                &nbsp;Error loading data
+              </Alert>
+            )}
+            <Toolbox
+              mode={
+                dataset.colorEncoding === COLOR_ENCODINGS.VAR
+                  ? dataset.selectedVar.name
+                  : dataset.colorEncoding === COLOR_ENCODINGS.OBS
+                    ? dataset.selectedObs.name
+                    : null
+              }
+              obsLength={parseInt(obsmData.data?.length)}
+              slicedLength={parseInt(slicedLength)}
+            />
+          </div>
+          <Legend isCategorical={isCategorical} min={min} max={max} />
         </div>
-        <Legend isCategorical={isCategorical} min={min} max={max} />
       </div>
     </div>
   );
