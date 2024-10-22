@@ -12,6 +12,8 @@ export { Matrixplot } from "./components/matrixplot/Matrixplot";
 export { MatrixplotControls } from "./components/matrixplot/MatrixplotControls";
 export { Violin } from "./components/violin/Violin";
 export { ViolinControls } from "./components/violin/ViolinControls";
+export { Pseudospatial } from "./components/pseudospatial/Pseudospatial";
+// export { PseudospatiaControls } from "./components/pseudospatial/PseudospatialControls";
 export { SELECTION_MODES, VIOLIN_MODES } from "./constants/constants";
 export { COLORSCALES } from "./constants/colorscales";
 export { DatasetProvider } from "./context/DatasetContext";
@@ -22,4 +24,8 @@ export {
   OffcanvasVars,
   OffcanvasControls,
 } from "./components/offcanvas";
-export { FullPage } from "./components/full-page/FullPage";
+export {
+  FullPage,
+  FullPageScatterplot,
+  FullPagePseudospatial,
+} from "./components/full-page/FullPage";

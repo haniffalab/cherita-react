@@ -33,10 +33,10 @@ function formatAbbreviation(n, precision = 3) {
 }
 
 export function formatNumerical(n, format = FORMATS.THOUSAND, precision = 3) {
-  if (isNaN(n)) {
-    return "NaN";
-  } else if (n === 0) {
+  if (n === 0) {
     return "0";
+  } else if (!n || n === undefined || isNaN(n)) {
+    return "NaN";
   }
 
   switch (format) {

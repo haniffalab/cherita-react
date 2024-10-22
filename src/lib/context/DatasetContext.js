@@ -99,6 +99,7 @@ const initialDataset = {
       sortOrder: VAR_SORT_ORDER.ASC,
     },
   },
+  imageUrl: null,
 };
 
 const initializer = (initialState) => {
@@ -111,11 +112,7 @@ const initializer = (initialState) => {
   return _.assign(initialState, localValues);
 };
 
-export function DatasetProvider({
-  dataset_url,
-  dataset_params = null,
-  children,
-}) {
+export function DatasetProvider({ dataset_url, children, ...dataset_params }) {
   const [dataset, dispatch] = useReducer(
     datasetReducer,
     _.assign(

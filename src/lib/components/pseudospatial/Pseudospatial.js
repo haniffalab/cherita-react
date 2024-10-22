@@ -12,6 +12,7 @@ import Plot from "react-plotly.js";
 
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { ImageViewer } from "../../utils/ImageViewer";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 
@@ -22,6 +23,7 @@ const PLOT_TYPES = {
   MASKS: "masks",
 };
 
+// @TODO: get colorscale from dataset/scatterplot if shown next to it
 export function Pseudospatial() {
   const ENDPOINT = "pseudospatial"; // /categorical, /gene or /continuous
   const dataset = useDataset();
@@ -101,8 +103,8 @@ export function Pseudospatial() {
     setParams({ ...baseParams, ...getModeParams() });
   }, [
     baseParams,
-    dataset.selectedObs.codes,
-    dataset.selectedObs.omit,
+    dataset.selectedObs?.codes,
+    dataset.selectedObs?.omit,
     dataset.selectedVar,
     getModeParams,
     plotType,
@@ -129,7 +131,7 @@ export function Pseudospatial() {
           data={data}
           layout={layout}
           useResizeHandler={true}
-          style={{ maxWidth: "100%", height: "100%" }}
+          className="cherita-pseudospatial-plot"
         />
       </div>
     );
@@ -139,5 +141,17 @@ export function Pseudospatial() {
         <Alert variant="danger">{serverError.message}</Alert>
       </>
     );
+  }
+}
+
+export function PseudospatialImage() {
+  const dataset = useDataset();
+
+  if (dataset.imageUrl) {
+    return (
+      <ImageViewer src={dataset.imageUrl} alt="Pseudospatial reference image" />
+    );
+  } else {
+    return <></>;
   }
 }

@@ -11,7 +11,10 @@ import {
   OffcanvasVars,
   OffcanvasControls,
 } from "../offcanvas";
-import { Pseudospatial } from "../pseudospatial/Pseudospatial";
+import {
+  Pseudospatial,
+  PseudospatialImage,
+} from "../pseudospatial/Pseudospatial";
 import { Scatterplot } from "../scatterplot/Scatterplot";
 import { ScatterplotControls } from "../scatterplot/ScatterplotControls";
 import { SearchBar } from "../search-bar/SearchBar";
@@ -128,12 +131,21 @@ export function FullPagePseudospatial(props) {
     <FullPage {...props}>
       <div className="container-fluid h-100">
         <div className="row">
-          <div className="col-7">
+          <div className="col-12 col-lg-7">
             <Scatterplot />
           </div>
-          <div className="col-5">
-            <div className="p-2">
-              <Pseudospatial />
+          <div className="col-12 col-lg-5">
+            <div className="container-fluid h-100 d-flex align-itemms-center justify-content-center">
+              <div className="row w-100 py-3">
+                <div className="col-12">
+                  <div className="p-2">
+                    <Pseudospatial />
+                  </div>
+                </div>
+                <div className="col-12">
+                  <PseudospatialImage />
+                </div>
+              </div>
             </div>
           </div>
         </div>
