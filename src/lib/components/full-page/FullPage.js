@@ -88,7 +88,7 @@ export function FullPage({ children, ...props }) {
           <div className="cherita-app-var">
             <Card className="cherita-app-features">
               <Card.Body>
-                <SearchBar searchDiseases={true} />
+                <SearchBar searchDiseases={true} searchVar={true} />
                 <VarNamesList mode={SELECTION_MODES.SINGLE} />
               </Card.Body>
             </Card>

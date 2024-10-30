@@ -52,9 +52,11 @@ export const useColor = () => {
       categorical = false,
       grayOut = false,
       { alpha = 0.75, gray = 0.95 } = {},
-      colorEncoding = dataset.colorEncoding
+      colorEncoding = dataset.colorEncoding,
+      colorscale = null
     ) => {
       const colormap =
+        colorscale ||
         COLORSCALES[categorical ? "Accent" : dataset.controls.colorScale];
       if (colorEncoding) {
         if (grayOut) {

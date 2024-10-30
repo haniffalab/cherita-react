@@ -34,16 +34,24 @@ export function ObsColsList({ showColor = true }) {
 
   useEffect(() => {
     if (!isPending && !serverError) {
+      let filteredData = fetchedData;
+
+      if (dataset.obsCols) {
+        filteredData = _.filter(filteredData, (d) => {
+          return _.includes(dataset.obsCols, d.name);
+        });
+      }
+
       setObsCols(
         _.keyBy(
-          _.map(fetchedData, (d) => {
+          _.map(filteredData, (d) => {
             return { ...d, codesMap: _.invert(d.codes), omit: [] };
           }),
           "name"
         )
       );
     }
-  }, [fetchedData, isPending, serverError]);
+  }, [dataset.obsCols, fetchedData, isPending, serverError]);
 
   // @TODO: fix re-rendering performance issue
   useEffect(() => {

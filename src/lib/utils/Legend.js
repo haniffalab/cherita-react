@@ -2,10 +2,10 @@ import { React, useMemo } from "react";
 
 import _ from "lodash";
 
-import { COLOR_ENCODINGS } from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
-import { rgbToHex, useColor } from "../../helpers/color-helper";
-import { formatNumerical, FORMATS } from "../../utils/string";
+import { formatNumerical, FORMATS } from "./string";
+import { COLOR_ENCODINGS } from "../constants/constants";
+import { useDataset } from "../context/DatasetContext";
+import { rgbToHex, useColor } from "../helpers/color-helper";
 
 export function Legend({ isCategorical = false, min = 0, max = 1 }) {
   const dataset = useDataset();

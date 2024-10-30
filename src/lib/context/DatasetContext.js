@@ -100,6 +100,7 @@ const initialDataset = {
     },
   },
   imageUrl: null,
+  obsCols: null, // @TODO: implement specifying groups/categories for dropdowns
 };
 
 const initializer = (initialState) => {

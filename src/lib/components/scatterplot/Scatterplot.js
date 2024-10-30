@@ -17,7 +17,6 @@ import { booleanPointInPolygon, point } from "@turf/turf";
 import _ from "lodash";
 import { Alert } from "react-bootstrap";
 
-import { Legend } from "./Legend";
 import { SpatialControls } from "./SpatialControls";
 import { Toolbox } from "./Toolbox";
 import {
@@ -30,6 +29,7 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredDataDispatch } from "../../context/FilterContext";
 import { useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
+import { Legend } from "../../utils/Legend";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { formatNumerical } from "../../utils/string";
 import {

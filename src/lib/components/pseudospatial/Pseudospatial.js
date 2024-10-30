@@ -11,8 +11,10 @@ import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useDataset } from "../../context/DatasetContext";
+import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { ImageViewer } from "../../utils/ImageViewer";
+import { Legend } from "../../utils/Legend";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 
@@ -23,25 +25,9 @@ const PLOT_TYPES = {
   MASKS: "masks",
 };
 
-// @TODO: get colorscale from dataset/scatterplot if shown next to it
-export function Pseudospatial() {
-  const ENDPOINT = "pseudospatial"; // /categorical, /gene or /continuous
+function usePseudospatialData(plotType) {
+  const ENDPOINT = "pseudospatial";
   const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
-  const colorscale = useRef(dataset.controls.colorScale);
-  const [data, setData] = useState([]);
-  const [layout, setLayout] = useState({});
-  const [hasSelections, setHasSelections] = useState(false);
-
-  const plotType =
-    dataset.colorEncoding === COLOR_ENCODINGS.VAR
-      ? PLOT_TYPES.GENE
-      : dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-          dataset.selectedObs?.type === OBS_TYPES.BOOLEAN
-        ? PLOT_TYPES.CATEGORICAL
-        : dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS
-          ? PLOT_TYPES.CONTINUOUS
-          : PLOT_TYPES.MASKS;
 
   const baseParams = useMemo(() => {
     return {
@@ -63,65 +49,146 @@ export function Pseudospatial() {
               indices: dataset.selectedVar?.vars.map((v) => v.index),
             }
           : dataset.selectedVar?.index,
+        ...(dataset.sliceBy.obs
+          ? {
+              obsCol: dataset.selectedObs,
+              obsValues: !dataset.selectedObs?.omit.length
+                ? null
+                : _.difference(
+                    _.values(dataset.selectedObs?.codes),
+                    dataset.selectedObs?.omit
+                  ).map((c) => dataset.selectedObs?.codesMap[c]),
+            }
+          : {}),
       };
     } else if (plotType === PLOT_TYPES.CATEGORICAL) {
       return {
-        obsColName: dataset.selectedObs?.name,
-        obsValues: [],
+        obsCol: dataset.selectedObs,
+        obsValues: !dataset.selectedObs?.omit.length
+          ? null
+          : _.difference(
+              _.values(dataset.selectedObs?.codes),
+              dataset.selectedObs?.omit
+            ).map((c) => dataset.selectedObs?.codesMap[c]),
         mode: "counts", // "counts", "across" or "within"
       };
     } else if (plotType === "continuous") {
       return {
-        obsColName: dataset.selectedObs?.name,
+        obsCol: dataset.selectedObs,
+        obsValues: !dataset.selectedObs?.omit.length
+          ? null
+          : _.difference(
+              _.values(dataset.selectedObs?.codes),
+              dataset.selectedObs?.omit
+            ).map((c) => dataset.selectedObs?.codesMap[c]),
       };
     }
   }, [
-    dataset.selectedObs?.name,
+    dataset.selectedObs,
     dataset.selectedVar?.index,
     dataset.selectedVar?.isSet,
     dataset.selectedVar?.name,
     dataset.selectedVar?.vars,
+    dataset.sliceBy.obs,
     plotType,
   ]);
 
-  const [params, setParams] = useState({
-    ...baseParams,
-    ...getModeParams(),
-  });
+  const params = useMemo(() => {
+    return {
+      ...baseParams,
+      ...getModeParams(),
+    };
+  }, [baseParams, getModeParams]);
 
-  useEffect(() => {
-    if (plotType === PLOT_TYPES.GENE && dataset.selectedVar) {
-      setHasSelections(true);
-    } else if (
-      (plotType === PLOT_TYPES.CATEGORICAL ||
-        plotType === PLOT_TYPES.CONTINUOUS) &&
-      _.difference(dataset.selectedObs.omit, _.keys(dataset.selectedObs.codes))
-        .length
-    ) {
-      setHasSelections(true);
-    }
-    setParams({ ...baseParams, ...getModeParams() });
-  }, [
-    baseParams,
-    dataset.selectedObs?.codes,
-    dataset.selectedObs?.omit,
-    dataset.selectedVar,
-    getModeParams,
-    plotType,
-  ]);
+  return useDebouncedFetch(ENDPOINT + "/" + plotType, params, 500);
+}
 
-  const { fetchedData, isPending, serverError } = useDebouncedFetch(
-    ENDPOINT + "/" + plotType,
-    params,
-    500
-  );
+export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
+  const dataset = useDataset();
+  const [data, setData] = useState([]);
+  const [layout, setLayout] = useState({});
+  const { getColor } = useColor();
+  const colorscale = useRef(dataset.controls.colorScale);
+
+  const plotType =
+    dataset.colorEncoding === COLOR_ENCODINGS.VAR
+      ? PLOT_TYPES.GENE
+      : dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+          dataset.selectedObs?.type === OBS_TYPES.BOOLEAN
+        ? PLOT_TYPES.CATEGORICAL
+        : dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS
+          ? PLOT_TYPES.CONTINUOUS
+          : PLOT_TYPES.MASKS;
+
+  const updateColorscale = useCallback((colorscale) => {
+    setLayout((l) => {
+      return {
+        ...l,
+        coloraxis: { ...l.coloraxis, colorscale: colorscale },
+      };
+    });
+  }, []);
+
+  const { fetchedData, isPending, serverError } =
+    usePseudospatialData(plotType);
 
   useEffect(() => {
     if (!isPending && !serverError) {
       setData(fetchedData.data);
       setLayout(fetchedData.layout);
+      if (sharedColorscale) updateColorscale(colorscale.current);
     }
-  }, [fetchedData, isPending, serverError]);
+  }, [fetchedData, isPending, serverError, sharedColorscale, updateColorscale]);
+
+  useEffect(() => {
+    colorscale.current = dataset.controls.colorScale;
+    updateColorscale(colorscale.current);
+  }, [dataset.controls.colorScale, updateColorscale]);
+
+  useEffect(() => {
+    if (sharedColorscale) {
+      const { min, max } = {
+        min:
+          dataset.controls.range[0] *
+            (dataset.controls.valueRange[1] - dataset.controls.valueRange[0]) +
+          dataset.controls.valueRange[0],
+        max:
+          dataset.controls.range[1] *
+            (dataset.controls.valueRange[1] - dataset.controls.valueRange[0]) +
+          dataset.controls.valueRange[0],
+      };
+
+      setData((d) => {
+        return _.map(d, (trace) => {
+          const v = trace.meta.value;
+          const color = rgbToHex(getColor((v - min) / (max - min)));
+          return {
+            ...trace,
+            fillcolor: color,
+            line: { ...trace.line, color: color },
+          };
+        });
+      });
+
+      setLayout((l) => {
+        return {
+          ...l,
+          coloraxis: {
+            ...l.coloraxis,
+            cmin: min,
+            cmax: max,
+          },
+        };
+      });
+    }
+  }, [
+    dataset.controls.range,
+    dataset.controls.valueMax,
+    dataset.controls.valueMin,
+    dataset.controls.valueRange,
+    getColor,
+    sharedColorscale,
+  ]);
 
   if (!serverError) {
     return (
@@ -133,6 +200,13 @@ export function Pseudospatial() {
           useResizeHandler={true}
           className="cherita-pseudospatial-plot"
         />
+        {showLegend && (
+          <Legend
+            isCategorical={plotType === PLOT_TYPES.CATEGORICAL}
+            min={layout?.coloraxis?.cmin}
+            max={layout?.coloraxis?.cmax}
+          />
+        )}
       </div>
     );
   } else {
@@ -144,6 +218,7 @@ export function Pseudospatial() {
   }
 }
 
+// @TODO: explore making it a minimap
 export function PseudospatialImage() {
   const dataset = useDataset();
 
