@@ -10,7 +10,13 @@ import _ from "lodash";
 import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
-import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
+import { PseudospatialControls } from "./PseudospatialControls";
+import {
+  PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
+  PSEUDOSPATIAL_CATEGORICAL_MODES as MODES,
+  COLOR_ENCODINGS,
+  OBS_TYPES,
+} from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { ImageViewer } from "../../utils/ImageViewer";
@@ -18,14 +24,7 @@ import { Legend } from "../../utils/Legend";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 
-const PLOT_TYPES = {
-  GENE: "gene",
-  CATEGORICAL: "categorical",
-  CONTINUOUS: "continuous",
-  MASKS: "masks",
-};
-
-function usePseudospatialData(plotType) {
+function usePseudospatialData(plotType, mode = MODES.COUNTS) {
   const ENDPOINT = "pseudospatial";
   const dataset = useDataset();
 
@@ -40,7 +39,7 @@ function usePseudospatialData(plotType) {
     };
   }, [dataset.url, dataset.varNamesCol]);
 
-  const getModeParams = useCallback(() => {
+  const getPlotParams = useCallback(() => {
     if (plotType === PLOT_TYPES.GENE) {
       return {
         varKey: dataset.selectedVar?.isSet
@@ -70,7 +69,7 @@ function usePseudospatialData(plotType) {
               _.values(dataset.selectedObs?.codes),
               dataset.selectedObs?.omit
             ).map((c) => dataset.selectedObs?.codesMap[c]),
-        mode: "counts", // "counts", "across" or "within"
+        mode: mode.value,
       };
     } else if (plotType === "continuous") {
       return {
@@ -84,6 +83,7 @@ function usePseudospatialData(plotType) {
       };
     }
   }, [
+    mode,
     dataset.selectedObs,
     dataset.selectedVar?.index,
     dataset.selectedVar?.isSet,
@@ -96,9 +96,9 @@ function usePseudospatialData(plotType) {
   const params = useMemo(() => {
     return {
       ...baseParams,
-      ...getModeParams(),
+      ...getPlotParams(),
     };
-  }, [baseParams, getModeParams]);
+  }, [baseParams, getPlotParams]);
 
   return useDebouncedFetch(ENDPOINT + "/" + plotType, params, 500);
 }
@@ -109,6 +109,7 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
   const [layout, setLayout] = useState({});
   const { getColor } = useColor();
   const colorscale = useRef(dataset.controls.colorScale);
+  const [mode, setMode] = useState(MODES.COUNTS);
 
   const plotType =
     dataset.colorEncoding === COLOR_ENCODINGS.VAR
@@ -129,8 +130,10 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
     });
   }, []);
 
-  const { fetchedData, isPending, serverError } =
-    usePseudospatialData(plotType);
+  const { fetchedData, isPending, serverError } = usePseudospatialData(
+    plotType,
+    mode
+  );
 
   useEffect(() => {
     if (!isPending && !serverError) {
@@ -194,6 +197,11 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
     return (
       <div className="cherita-pseudospatial position-relative">
         {isPending && <LoadingSpinner />}
+        <PseudospatialControls
+          plotType={plotType}
+          mode={mode}
+          setMode={setMode}
+        />
         <Plot
           data={data}
           layout={layout}
@@ -202,7 +210,7 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
         />
         {showLegend && (
           <Legend
-            isCategorical={plotType === PLOT_TYPES.CATEGORICAL}
+            // isCategorical={plotType === PLOT_TYPES.CATEGORICAL}
             min={layout?.coloraxis?.cmin}
             max={layout?.coloraxis?.cmax}
           />
