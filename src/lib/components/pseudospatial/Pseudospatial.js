@@ -24,20 +24,20 @@ import { Legend } from "../../utils/Legend";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 
-function usePseudospatialData(plotType, mode = MODES.ACROSS) {
+function usePseudospatialData(plotType, maskSet = null, mode = MODES.ACROSS) {
   const ENDPOINT = "pseudospatial";
   const dataset = useDataset();
 
   const baseParams = useMemo(() => {
     return {
       url: dataset.url,
-      maskSet: "12_sections", // @TODO: get from anndata uns in controls
-      maskValues: [],
+      maskSet: maskSet,
+      maskValues: null,
       varNamesCol: dataset.varNamesCol,
       showColorbar: false,
       format: "json",
     };
-  }, [dataset.url, dataset.varNamesCol]);
+  }, [dataset.url, dataset.varNamesCol, maskSet]);
 
   const getPlotParams = useCallback(() => {
     if (plotType === PLOT_TYPES.GENE) {
@@ -100,7 +100,9 @@ function usePseudospatialData(plotType, mode = MODES.ACROSS) {
     };
   }, [baseParams, getPlotParams]);
 
-  return useDebouncedFetch(ENDPOINT + "/" + plotType, params, 500);
+  return useDebouncedFetch(ENDPOINT + "/" + plotType, params, 500, {
+    enabled: !!plotType && !!maskSet,
+  });
 }
 
 export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
@@ -110,6 +112,7 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
   const { getColor } = useColor();
   const colorscale = useRef(dataset.controls.colorScale);
   const [mode, setMode] = useState(MODES.ACROSS);
+  const [maskSet, setMaskSet] = useState(null);
 
   const plotType =
     dataset.colorEncoding === COLOR_ENCODINGS.VAR
@@ -132,6 +135,7 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
 
   const { fetchedData, isPending, serverError } = usePseudospatialData(
     plotType,
+    maskSet,
     mode
   );
 
@@ -193,22 +197,28 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
     sharedColorscale,
   ]);
 
+  const hasSelections = !!plotType && !!maskSet;
+
   if (!serverError) {
     return (
       <div className="cherita-pseudospatial position-relative">
-        {isPending && <LoadingSpinner />}
+        {hasSelections && isPending && <LoadingSpinner />}
         <PseudospatialControls
           plotType={plotType}
           mode={mode}
           setMode={setMode}
+          maskSet={maskSet}
+          setMaskSet={setMaskSet}
         />
-        <Plot
-          data={data}
-          layout={layout}
-          useResizeHandler={true}
-          className="cherita-pseudospatial-plot"
-        />
-        {showLegend && (
+        {hasSelections && (
+          <Plot
+            data={data}
+            layout={layout}
+            useResizeHandler={true}
+            className="cherita-pseudospatial-plot"
+          />
+        )}
+        {hasSelections && showLegend && (
           <Legend
             // isCategorical={plotType === PLOT_TYPES.CATEGORICAL}
             min={layout?.coloraxis?.cmin}
