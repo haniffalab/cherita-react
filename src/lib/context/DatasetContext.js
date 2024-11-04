@@ -12,6 +12,7 @@ import {
   LOCAL_STORAGE_KEY,
   MATRIXPLOT_SCALES,
   OBS_TYPES,
+  PSEUDOSPATIAL_CATEGORICAL_MODES,
   VAR_SORT,
   VAR_SORT_ORDER,
   VIOLINPLOT_SCALES,
@@ -99,8 +100,13 @@ const initialDataset = {
       sortOrder: VAR_SORT_ORDER.ASC,
     },
   },
-  imageUrl: null,
   obsCols: null, // @TODO: implement specifying groups/categories for dropdowns
+  imageUrl: null,
+  pseudospatial: {
+    maskSet: null,
+    maskValues: null,
+    categoricalMode: PSEUDOSPATIAL_CATEGORICAL_MODES.ACROSS.value,
+  },
 };
 
 const initializer = (initialState) => {
@@ -520,6 +526,33 @@ function datasetReducer(dataset, action) {
             ...dataset.varSort[action.var],
             sortOrder: action.sortOrder,
           },
+        },
+      };
+    }
+    case "set.pseudospatial.maskSet": {
+      return {
+        ...dataset,
+        pseudospatial: {
+          ...dataset.pseudospatial,
+          maskSet: action.maskSet,
+        },
+      };
+    }
+    case "set.pseudospatial.maskValues": {
+      return {
+        ...dataset,
+        pseudospatial: {
+          ...dataset.pseudospatial,
+          maskValues: action.maskValues,
+        },
+      };
+    }
+    case "set.pseudospatial.categoricalMode": {
+      return {
+        ...dataset,
+        pseudospatial: {
+          ...dataset.pseudospatial,
+          categoricalMode: action.categoricalMode,
         },
       };
     }

@@ -7,21 +7,28 @@ import {
   PSEUDOSPATIAL_CATEGORICAL_MODES as MODES,
   PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
 } from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
+import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFetch } from "../../utils/requests";
 
-function CategoricalMode({ mode, setMode }) {
-  const modeList = _.map(MODES, (value, key) => (
+function CategoricalMode() {
+  const dataset = useDataset();
+  const dispatch = useDatasetDispatch();
+  const modeList = _.map(MODES, (m, key) => (
     <Dropdown.Item
       key={key}
-      active={mode === value}
+      active={dataset.pseudospatial.categoricalMode === m}
       onClick={() => {
-        setMode(value);
+        dispatch({
+          type: "set.pseudospatial.categoricalMode",
+          categoricalMode: m.value,
+        });
       }}
     >
-      {_.capitalize(value.name)}
+      {_.capitalize(m.name)}
     </Dropdown.Item>
   ));
+
+  const mode = _.find(MODES, { value: dataset.pseudospatial.categoricalMode });
 
   return (
     <Dropdown>
@@ -33,9 +40,10 @@ function CategoricalMode({ mode, setMode }) {
   );
 }
 
-function MaskSet({ maskSet, setMaskSet }) {
+function MaskSet() {
   const ENDPOINT = "masks";
   const dataset = useDataset();
+  const dispatch = useDatasetDispatch();
   const [maskSets, setMaskSets] = useState(null);
 
   const [params, setParams] = useState({
@@ -62,9 +70,12 @@ function MaskSet({ maskSet, setMaskSet }) {
   const maskSetList = _.map(maskSets, (ms, key) => (
     <Dropdown.Item
       key={key}
-      active={maskSet === key}
+      active={dataset.pseudospatial.maskSet === key}
       onClick={() => {
-        setMaskSet(key);
+        dispatch({
+          type: "set.pseudospatial.maskSet",
+          maskSet: key,
+        });
       }}
     >
       {_.capitalize(key)}
@@ -73,27 +84,21 @@ function MaskSet({ maskSet, setMaskSet }) {
 
   return (
     <Dropdown>
-      <Dropdown.Toggle variant="light">{_.capitalize(maskSet)}</Dropdown.Toggle>
+      <Dropdown.Toggle variant="light">
+        {_.capitalize(dataset.pseudospatial.maskSet)}
+      </Dropdown.Toggle>
       <Dropdown.Menu>{maskSetList}</Dropdown.Menu>
     </Dropdown>
   );
 }
 
 // @TODO: add mask selection, colormap, colorbar slider
-export function PseudospatialControls({
-  plotType,
-  maskSet,
-  setMaskSet,
-  mode,
-  setMode,
-}) {
+export function PseudospatialControls({ plotType }) {
   return (
     <>
       <ButtonGroup>
-        {plotType === PLOT_TYPES.CATEGORICAL && (
-          <CategoricalMode mode={mode} setMode={setMode} />
-        )}
-        <MaskSet maskSet={maskSet} setMaskSet={setMaskSet} />
+        {plotType === PLOT_TYPES.CATEGORICAL && <CategoricalMode />}
+        <MaskSet />
       </ButtonGroup>
     </>
   );

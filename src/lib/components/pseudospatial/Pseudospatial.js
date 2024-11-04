@@ -13,7 +13,6 @@ import Plot from "react-plotly.js";
 import { PseudospatialControls } from "./PseudospatialControls";
 import {
   PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
-  PSEUDOSPATIAL_CATEGORICAL_MODES as MODES,
   COLOR_ENCODINGS,
   OBS_TYPES,
 } from "../../constants/constants";
@@ -24,20 +23,25 @@ import { Legend } from "../../utils/Legend";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 
-function usePseudospatialData(plotType, maskSet = null, mode = MODES.ACROSS) {
+function usePseudospatialData(plotType) {
   const ENDPOINT = "pseudospatial";
   const dataset = useDataset();
 
   const baseParams = useMemo(() => {
     return {
       url: dataset.url,
-      maskSet: maskSet,
-      maskValues: null,
+      maskSet: dataset.pseudospatial.maskSet,
+      maskValues: dataset.pseudospatial.maskValues,
       varNamesCol: dataset.varNamesCol,
       showColorbar: false,
       format: "json",
     };
-  }, [dataset.url, dataset.varNamesCol, maskSet]);
+  }, [
+    dataset.url,
+    dataset.pseudospatial.maskSet,
+    dataset.pseudospatial.maskValues,
+    dataset.varNamesCol,
+  ]);
 
   const getPlotParams = useCallback(() => {
     if (plotType === PLOT_TYPES.GENE) {
@@ -69,7 +73,7 @@ function usePseudospatialData(plotType, maskSet = null, mode = MODES.ACROSS) {
               _.values(dataset.selectedObs?.codes),
               dataset.selectedObs?.omit
             ).map((c) => dataset.selectedObs?.codesMap[c]),
-        mode: mode.value,
+        mode: dataset.pseudospatial.categoricalMode,
       };
     } else if (plotType === "continuous") {
       return {
@@ -83,7 +87,7 @@ function usePseudospatialData(plotType, maskSet = null, mode = MODES.ACROSS) {
       };
     }
   }, [
-    mode,
+    dataset.pseudospatial.categoricalMode,
     dataset.selectedObs,
     dataset.selectedVar?.index,
     dataset.selectedVar?.isSet,
@@ -101,7 +105,7 @@ function usePseudospatialData(plotType, maskSet = null, mode = MODES.ACROSS) {
   }, [baseParams, getPlotParams]);
 
   return useDebouncedFetch(ENDPOINT + "/" + plotType, params, 500, {
-    enabled: !!plotType && !!maskSet,
+    enabled: !!plotType && !!dataset.pseudospatial.maskSet,
   });
 }
 
@@ -111,8 +115,6 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
   const [layout, setLayout] = useState({});
   const { getColor } = useColor();
   const colorscale = useRef(dataset.controls.colorScale);
-  const [mode, setMode] = useState(MODES.ACROSS);
-  const [maskSet, setMaskSet] = useState(null);
 
   const plotType =
     dataset.colorEncoding === COLOR_ENCODINGS.VAR
@@ -133,11 +135,8 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
     });
   }, []);
 
-  const { fetchedData, isPending, serverError } = usePseudospatialData(
-    plotType,
-    maskSet,
-    mode
-  );
+  const { fetchedData, isPending, serverError } =
+    usePseudospatialData(plotType);
 
   useEffect(() => {
     if (!isPending && !serverError) {
@@ -197,19 +196,13 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
     sharedColorscale,
   ]);
 
-  const hasSelections = !!plotType && !!maskSet;
+  const hasSelections = !!plotType && !!dataset.pseudospatial.maskSet;
 
   if (!serverError) {
     return (
       <div className="cherita-pseudospatial position-relative">
         {hasSelections && isPending && <LoadingSpinner />}
-        <PseudospatialControls
-          plotType={plotType}
-          mode={mode}
-          setMode={setMode}
-          maskSet={maskSet}
-          setMaskSet={setMaskSet}
-        />
+        <PseudospatialControls plotType={plotType} />
         {hasSelections && (
           <Plot
             data={data}
@@ -219,11 +212,7 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
           />
         )}
         {hasSelections && showLegend && (
-          <Legend
-            // isCategorical={plotType === PLOT_TYPES.CATEGORICAL}
-            min={layout?.coloraxis?.cmin}
-            max={layout?.coloraxis?.cmax}
-          />
+          <Legend min={layout?.coloraxis?.cmin} max={layout?.coloraxis?.cmax} />
         )}
       </div>
     );
