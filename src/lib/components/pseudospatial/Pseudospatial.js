@@ -24,7 +24,7 @@ import { Legend } from "../../utils/Legend";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 
-function usePseudospatialData(plotType, mode = MODES.COUNTS) {
+function usePseudospatialData(plotType, mode = MODES.ACROSS) {
   const ENDPOINT = "pseudospatial";
   const dataset = useDataset();
 
@@ -109,7 +109,7 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
   const [layout, setLayout] = useState({});
   const { getColor } = useColor();
   const colorscale = useRef(dataset.controls.colorScale);
-  const [mode, setMode] = useState(MODES.COUNTS);
+  const [mode, setMode] = useState(MODES.ACROSS);
 
   const plotType =
     dataset.colorEncoding === COLOR_ENCODINGS.VAR

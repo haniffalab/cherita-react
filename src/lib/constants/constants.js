@@ -61,7 +61,6 @@ export const PSEUDOSPATIAL_PLOT_TYPES = {
 };
 
 export const PSEUDOSPATIAL_CATEGORICAL_MODES = {
-  COUNTS: { value: "counts", name: "Counts within section" },
   ACROSS: { value: "across", name: "% across sections" },
   WITHIN: { value: "within", name: "% within section" },
 };
