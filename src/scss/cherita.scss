@@ -58,8 +58,8 @@ input[type="checkbox"],
   background-color: #fff;
   border-radius: 0.25rem;
   box-shadow:
-    0 0.5em 1em 0.3em rgb(10 10 10 / 15%),
-    0 0 0 1px rgb(10 10 10 / 2%);
+    0 0.5em 1em 0.3em #0a0a0a26,
+    0 0 0 1px #0a0a0a05;
   color: #4a4a4a;
   max-width: 100%;
   position: relative;
@@ -90,7 +90,7 @@ input[type="checkbox"],
 /* Works on Firefox */
 .cherita-container * {
   scrollbar-width: thin;
-  scrollbar-color: rgb(70 70 70) auto;
+  scrollbar-color: #464646 auto;
 }
 
 /* Works on Chrome, Edge, and Safari */
@@ -103,7 +103,7 @@ input[type="checkbox"],
 }
 
 .cherita-container *::-webkit-scrollbar-thumb {
-  background-color: rgb(70 70 70);
+  background-color: #464646;
 }
 
 /* End scrollbar styling */
@@ -166,14 +166,8 @@ input[type="checkbox"],
   width: 12rem;
 }
 
-@include bootstrap.media-breakpoint-down(xl) {
-  .cherita-spatial-controls {
-    top: 100px;
-  }
-}
-
 .cherita-accordion-active .accordion-button {
-  background-color: rgb(204 227 237);
+  background-color: #cce3ed;
 }
 
 .obs-value-list-check {
@@ -250,8 +244,8 @@ input[type="checkbox"],
 }
 
 .value-count-badge {
-  color: black !important;
-  background-color: rgb(222 222 222) !important;
+  color: #000000 !important;
+  background-color: #dedede !important;
 }
 
 .value-pct-gauge-container {
@@ -270,7 +264,7 @@ input[type="checkbox"],
 .feature-histogram {
   @extend .feature-histogram-container;
 
-  background-color: rgb(222 222 222);
+  background-color: #dedede;
 }
 
 .feature-histogram-tooltip .MuiChartsTooltip-markCell,
