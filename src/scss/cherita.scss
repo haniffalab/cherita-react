@@ -360,6 +360,11 @@ input[type="checkbox"],
   height: 100%;
 }
 
+.cherita-pseudospatial-toolbar {
+  display: flex;
+  flex-direction: column;
+}
+
 /* Add a bottom border to the last item in the Accordion */
 .accordion-flush .accordion-item:last-child {
   border-bottom: 1px solid #dee2e6; /* Adjust the color and width as needed */

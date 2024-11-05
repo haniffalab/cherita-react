@@ -182,11 +182,13 @@ function MaskSet() {
 // @TODO: add colormap, colorbar slider
 export function PseudospatialToolbar({ plotType }) {
   return (
-    <>
+    <div className="cherita-pseudospatial-toolbar">
       <ButtonGroup>
-        {plotType === PLOT_TYPES.CATEGORICAL && <CategoricalMode />}
         <MaskSet />
       </ButtonGroup>
-    </>
+      <ButtonGroup>
+        {plotType === PLOT_TYPES.CATEGORICAL && <CategoricalMode />}
+      </ButtonGroup>
+    </div>
   );
 }
