@@ -10,7 +10,7 @@ import _ from "lodash";
 import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
-import { PseudospatialControls } from "./PseudospatialControls";
+import { PseudospatialToolbar } from "./PseudospatialToolbar";
 import {
   PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
   COLOR_ENCODINGS,
@@ -201,19 +201,24 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
   if (!serverError) {
     return (
       <div className="cherita-pseudospatial position-relative">
-        {hasSelections && isPending && <LoadingSpinner />}
-        <PseudospatialControls plotType={plotType} />
-        {hasSelections && (
-          <Plot
-            data={data}
-            layout={layout}
-            useResizeHandler={true}
-            className="cherita-pseudospatial-plot"
-          />
-        )}
-        {hasSelections && showLegend && (
-          <Legend min={layout?.coloraxis?.cmin} max={layout?.coloraxis?.cmax} />
-        )}
+        <PseudospatialToolbar plotType={plotType} />
+        <>
+          {hasSelections && isPending && <LoadingSpinner />}
+          {hasSelections && (
+            <Plot
+              data={data}
+              layout={layout}
+              useResizeHandler={true}
+              className="cherita-pseudospatial-plot"
+            />
+          )}
+          {hasSelections && showLegend && (
+            <Legend
+              min={layout?.coloraxis?.cmin}
+              max={layout?.coloraxis?.cmax}
+            />
+          )}
+        </>
       </div>
     );
   } else {
