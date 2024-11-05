@@ -109,7 +109,7 @@ function usePseudospatialData(plotType) {
   });
 }
 
-export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
+export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
   const dataset = useDataset();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
@@ -126,14 +126,31 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
           ? PLOT_TYPES.CONTINUOUS
           : PLOT_TYPES.MASKS;
 
-  const updateColorscale = useCallback((colorscale) => {
-    setLayout((l) => {
-      return {
-        ...l,
-        coloraxis: { ...l.coloraxis, colorscale: colorscale },
-      };
-    });
-  }, []);
+  const updateColorscale = useCallback(
+    (colorscale) => {
+      setLayout((l) => {
+        return {
+          ...l,
+          coloraxis: { ...l.coloraxis, colorscale: colorscale },
+        };
+      });
+
+      setData((d) => {
+        const min = layout?.coloraxis?.cmin;
+        const max = layout?.coloraxis?.cmax;
+        return _.map(d, (trace) => {
+          const v = trace.meta.value;
+          const color = rgbToHex(getColor({ value: (v - min) / (max - min) }));
+          return {
+            ...trace,
+            fillcolor: color,
+            line: { ...trace.line, color: color },
+          };
+        });
+      });
+    },
+    [getColor, layout?.coloraxis?.cmax, layout?.coloraxis?.cmin]
+  );
 
   const { fetchedData, isPending, serverError } =
     usePseudospatialData(plotType);
@@ -142,9 +159,9 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
     if (!isPending && !serverError) {
       setData(fetchedData.data);
       setLayout(fetchedData.layout);
-      if (sharedColorscale) updateColorscale(colorscale.current);
+      updateColorscale(colorscale.current);
     }
-  }, [fetchedData, isPending, serverError, sharedColorscale, updateColorscale]);
+  }, [fetchedData, isPending, serverError, sharedScaleRange, updateColorscale]);
 
   useEffect(() => {
     colorscale.current = dataset.controls.colorScale;
@@ -152,7 +169,7 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
   }, [dataset.controls.colorScale, updateColorscale]);
 
   useEffect(() => {
-    if (sharedColorscale) {
+    if (sharedScaleRange) {
       const { min, max } = {
         min:
           dataset.controls.range[0] *
@@ -167,7 +184,7 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
       setData((d) => {
         return _.map(d, (trace) => {
           const v = trace.meta.value;
-          const color = rgbToHex(getColor((v - min) / (max - min)));
+          const color = rgbToHex(getColor({ value: (v - min) / (max - min) }));
           return {
             ...trace,
             fillcolor: color,
@@ -193,7 +210,7 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
     dataset.controls.valueMin,
     dataset.controls.valueRange,
     getColor,
-    sharedColorscale,
+    sharedScaleRange,
   ]);
 
   const hasSelections = !!plotType && !!dataset.pseudospatial.maskSet;
@@ -210,6 +227,7 @@ export function Pseudospatial({ showLegend = true, sharedColorscale = false }) {
               layout={layout}
               useResizeHandler={true}
               className="cherita-pseudospatial-plot"
+              config={{ displaylogo: false }}
             />
           )}
           {hasSelections && showLegend && (

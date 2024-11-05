@@ -1,4 +1,4 @@
-import { React, useMemo } from "react";
+import { React, useMemo, useRef } from "react";
 
 import _ from "lodash";
 
@@ -7,13 +7,24 @@ import { COLOR_ENCODINGS } from "../constants/constants";
 import { useDataset } from "../context/DatasetContext";
 import { rgbToHex, useColor } from "../helpers/color-helper";
 
-export function Legend({ isCategorical = false, min = 0, max = 1 }) {
+export function Legend({
+  isCategorical = false,
+  min = 0,
+  max = 1,
+  colorscale = null,
+}) {
   const dataset = useDataset();
   const { getColor } = useColor();
 
   const spanList = useMemo(() => {
     return _.range(100).map((i) => {
-      var color = rgbToHex(getColor(i / 100, isCategorical));
+      var color = rgbToHex(
+        getColor({
+          value: i / 100,
+          categorical: isCategorical,
+          colorscale: colorscale,
+        })
+      );
       return (
         <span
           key={i}
@@ -22,7 +33,7 @@ export function Legend({ isCategorical = false, min = 0, max = 1 }) {
         ></span>
       );
     });
-  }, [getColor, isCategorical]);
+  }, [colorscale, getColor, isCategorical]);
 
   if (dataset.colorEncoding && !isCategorical) {
     return (

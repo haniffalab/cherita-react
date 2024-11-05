@@ -341,11 +341,11 @@ export function Scatterplot({ radius = 30 }) {
   const getFillColor = useCallback(
     (_d, { index }) => {
       const grayOut = filteredIndices && !filteredIndices.has(index);
-      return getColor(
-        (data.values[index] - min) / (max - min),
-        isCategorical,
-        grayOut
-      );
+      return getColor({
+        value: (data.values[index] - min) / (max - min),
+        categorical: isCategorical,
+        grayOut: grayOut,
+      });
     },
     [data.values, filteredIndices, getColor, isCategorical, max, min]
   );

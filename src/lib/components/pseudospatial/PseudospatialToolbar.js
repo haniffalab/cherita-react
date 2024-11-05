@@ -142,6 +142,11 @@ function MaskSet() {
     ? dataset.pseudospatial.maskValues?.length
     : maskSets?.[dataset.pseudospatial?.maskSet].length;
 
+  const toggleAllChecked =
+    !dataset.pseudospatial.maskValues ||
+    dataset.pseudospatial.maskValues?.length ===
+      maskSets?.[dataset.pseudospatial?.maskSet]?.length;
+
   return (
     <>
       <Dropdown>
@@ -163,11 +168,7 @@ function MaskSet() {
             <Form.Check
               type="checkbox"
               label="Toggle all"
-              checked={
-                !dataset.pseudospatial.maskValues ||
-                dataset.pseudospatial.maskValues?.length ===
-                  maskSets?.[dataset.pseudospatial?.maskSet]?.length
-              }
+              checked={toggleAllChecked}
               onChange={toggleMasks}
             />
           </Dropdown.ItemText>
