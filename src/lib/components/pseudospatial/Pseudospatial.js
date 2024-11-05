@@ -140,6 +140,9 @@ export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
         const max = layout?.coloraxis?.cmax;
         return _.map(d, (trace) => {
           const v = trace.meta.value;
+          if (v === null) {
+            return trace;
+          }
           const color = rgbToHex(getColor({ value: (v - min) / (max - min) }));
           return {
             ...trace,
@@ -184,6 +187,9 @@ export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
       setData((d) => {
         return _.map(d, (trace) => {
           const v = trace.meta.value;
+          if (v === null) {
+            return trace;
+          }
           const color = rgbToHex(getColor({ value: (v - min) / (max - min) }));
           return {
             ...trace,
