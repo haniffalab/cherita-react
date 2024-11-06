@@ -471,8 +471,11 @@ export function Scatterplot({ radius = 30 }) {
 
     if (!text.length) return;
 
+    const grayOut = filteredIndices && !filteredIndices.has(index);
+
     return {
       text: text.length ? _.compact(text).join("\n") : null,
+      className: grayOut ? "tooltip-grayout" : "deck-tooltip",
     };
   };
 
