@@ -140,7 +140,7 @@ function MaskSet() {
 
   const nMasks = dataset.pseudospatial.maskValues
     ? dataset.pseudospatial.maskValues?.length
-    : maskSets?.[dataset.pseudospatial?.maskSet].length;
+    : maskSets?.[dataset.pseudospatial?.maskSet]?.length || "No";
 
   const toggleAllChecked =
     !dataset.pseudospatial.maskValues ||
@@ -151,7 +151,7 @@ function MaskSet() {
     <>
       <Dropdown>
         <Dropdown.Toggle variant="light">
-          {_.capitalize(dataset.pseudospatial.maskSet)}
+          {_.capitalize(dataset.pseudospatial.maskSet || "Select a mask set")}
         </Dropdown.Toggle>
         <Dropdown.Menu>
           <Dropdown.Header>Mask set</Dropdown.Header>
