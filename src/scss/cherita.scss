@@ -370,6 +370,10 @@ input[type="checkbox"],
   border-bottom: 1px solid #dee2e6; /* Adjust the color and width as needed */
 }
 
+.cherita-scatterplot #deckgl-wrapper {
+  z-index: 1 !important;
+}
+
 .tooltip-grayout {
   color: #a0a7b4 !important;
   background-color: #3a424b !important;

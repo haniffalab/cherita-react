@@ -350,6 +350,7 @@ export function Scatterplot({ radius = 30 }) {
     [data.values, filteredIndices, getColor, isCategorical, max, min]
   );
 
+  // @TODO: add support for pseudospatial hover to reflect in radius
   const getRadius = useCallback(
     (_d, { index }) => {
       const grayOut = filteredIndices && !filteredIndices.has(index);
