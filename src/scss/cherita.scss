@@ -371,7 +371,12 @@ input[type="checkbox"],
 }
 
 .tooltip-grayout {
-  color: #a0a7b4;
-  background-color: #29323c;
+  color: #a0a7b4 !important;
+  background-color: #3a424b !important;
   opacity: 0.8;
+  z-index: 100 !important;
+}
+
+.deck-tooltip {
+  z-index: 100 !important;
 }

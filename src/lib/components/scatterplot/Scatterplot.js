@@ -350,6 +350,14 @@ export function Scatterplot({ radius = 30 }) {
     [data.values, filteredIndices, getColor, isCategorical, max, min]
   );
 
+  const getRadius = useCallback(
+    (_d, { index }) => {
+      const grayOut = filteredIndices && !filteredIndices.has(index);
+      return grayOut ? 1 : 3;
+    },
+    [filteredIndices]
+  );
+
   const memoizedLayers = useMemo(() => {
     return [
       new ScatterplotLayer({
@@ -360,9 +368,10 @@ export function Scatterplot({ radius = 30 }) {
         radiusMinPixels: 1,
         getPosition: (d) => d,
         getFillColor: getFillColor,
-        getRadius: 1,
+        getRadius: getRadius,
         updateTriggers: {
           getFillColor: getFillColor,
+          getRadius: getRadius,
         },
       }),
       new EditableGeoJsonLayer({
@@ -404,6 +413,7 @@ export function Scatterplot({ radius = 30 }) {
     data.positions,
     features,
     getFillColor,
+    getRadius,
     mode,
     radius,
     selectedFeatureIndexes,
