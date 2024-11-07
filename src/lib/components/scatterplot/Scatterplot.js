@@ -27,7 +27,7 @@ import {
 } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredDataDispatch } from "../../context/FilterContext";
-import { useColor } from "../../helpers/color-helper";
+import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
 import { Legend } from "../../utils/Legend";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
@@ -487,6 +487,11 @@ export function Scatterplot({ radius = 30 }) {
     return {
       text: text.length ? _.compact(text).join("\n") : null,
       className: grayOut ? "tooltip-grayout" : "deck-tooltip",
+      style: !grayOut
+        ? {
+            "border-left": `3px solid ${rgbToHex(getFillColor(null, { index }))}`,
+          }
+        : { "border-left": "none" },
     };
   };
 

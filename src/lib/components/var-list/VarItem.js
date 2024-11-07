@@ -92,7 +92,7 @@ function VarHistogram({ item }) {
 
 function VarDiseaseInfoItem(item) {
   return (
-    <ListGroup.Item className="feature-disease-info">
+    <ListGroup.Item key={item.disease_name} className="feature-disease-info">
       <div>
         {item.disease_name} <br />
         <Table striped>
