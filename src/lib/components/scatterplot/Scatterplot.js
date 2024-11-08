@@ -13,7 +13,6 @@ import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ViewMode } from "@nebula.gl/edit-modes";
 import { EditableGeoJsonLayer } from "@nebula.gl/layers";
-import { booleanPointInPolygon, point } from "@turf/turf";
 import _ from "lodash";
 import { Alert } from "react-bootstrap";
 
@@ -26,9 +25,9 @@ import {
   UNSELECTED_POLYGON_FILLCOLOR,
 } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { useFilteredDataDispatch } from "../../context/FilterContext";
 import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
+import { useFilter } from "../../utils/Filter";
 import { Legend } from "../../utils/Legend";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { formatNumerical } from "../../utils/string";
@@ -50,12 +49,9 @@ const INITIAL_VIEW_STATE = {
   bearing: 0,
 };
 
-const EPSILON = 1e-6;
-
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const filterDispatch = useFilteredDataDispatch();
   const { getColor } = useColor();
   const deckRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
@@ -80,6 +76,11 @@ export function Scatterplot({ radius = 30 }) {
   const obsData = useObsData();
   const labelObsData = useLabelObsData();
   // @TODO: assert length of obsmData, xData, obsData is equal
+
+  const { filteredIndices, valueMin, valueMax, slicedLength } = useFilter(
+    data,
+    features
+  );
 
   useEffect(() => {
     if (!obsmData.isPending && !obsmData.serverError) {
@@ -191,140 +192,6 @@ export function Scatterplot({ radius = 30 }) {
       return false;
     }
   }, [dataset.colorEncoding, dataset.selectedObs?.type]);
-
-  const isInBins = (v, binEdges, indices) => {
-    const lastEdge = _.last(binEdges);
-    const allButLastEdges = _.initial(binEdges);
-    // add epsilon to last edge to include the last value
-    const modifiedBinEdges = [
-      ...allButLastEdges,
-      [lastEdge[0], lastEdge[1] + EPSILON],
-    ];
-    const binIndices = _.difference(_.range(binEdges.length), indices);
-    const ranges = _.at(modifiedBinEdges, binIndices);
-    return _.some(ranges, (range) => _.inRange(v, ...range));
-  };
-
-  const isInSlice = useCallback(
-    (index, values, positions) => {
-      let inSlice = true;
-
-      if (isCategorical && values) {
-        inSlice &= !_.includes(dataset.selectedObs?.omit, values[index]);
-      } else if (
-        (dataset.sliceBy.obs ||
-          (dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
-            dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS)) &&
-        !!dataset.selectedObs?.omit.length &&
-        values
-      ) {
-        if (dataset.selectedObs.type === OBS_TYPES.CATEGORICAL) {
-          inSlice &= !_.includes(dataset.selectedObs.omit, values[index]);
-        } else if (dataset.selectedObs.type === OBS_TYPES.CONTINUOUS) {
-          if (isNaN(values[index])) {
-            inSlice &= !_.includes(dataset.selectedObs.omit, -1);
-          } else {
-            inSlice &= isInBins(
-              values[index],
-              dataset.selectedObs.bins.binEdges,
-              _.without(dataset.selectedObs.omit, -1)
-            );
-          }
-        }
-      }
-
-      if (dataset.sliceBy.polygons && positions) {
-        inSlice &= _.some(features?.features, (_f, i) => {
-          return booleanPointInPolygon(
-            point([positions[index][0], positions[index][1]]),
-            features.features[i]
-          );
-        });
-      }
-      return inSlice;
-    },
-    [
-      dataset.colorEncoding,
-      dataset.selectedObs?.bins?.binEdges,
-      dataset.selectedObs?.omit,
-      dataset.selectedObs?.type,
-      dataset.sliceBy.obs,
-      dataset.sliceBy.polygons,
-      features.features,
-      isCategorical,
-    ]
-  );
-
-  // @TODO: abstract filtering out of this component, maybe in FilterContext ?
-  const { filteredIndices, valueMin, valueMax, slicedLength } = useMemo(() => {
-    if (dataset.colorEncoding === COLOR_ENCODINGS.VAR) {
-      const { filtered, filteredIndices } = _.reduce(
-        data.values,
-        (acc, v, i) => {
-          if (isInSlice(i, data.sliceValues, data.positions)) {
-            acc.filtered.push(v);
-            acc.filteredIndices.add(i);
-          }
-          return acc;
-        },
-        { filtered: [], filteredIndices: new Set() }
-      );
-      return {
-        filteredIndices: filteredIndices,
-        valueMin: _.min(filtered),
-        valueMax: _.max(filtered),
-        slicedLength: filtered.length,
-      };
-    } else if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
-      const isContinuous = dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS;
-      const { filtered, filteredIndices } = _.reduce(
-        data.values,
-        (acc, v, i) => {
-          if (isInSlice(i, data.values, data.positions)) {
-            acc.filtered.push(v);
-            acc.filteredIndices.add(i);
-          }
-          return acc;
-        },
-        { filtered: [], filteredIndices: new Set() }
-      );
-      return {
-        filteredIndices: filteredIndices,
-        valueMin: _.min(isContinuous ? filtered : data.values),
-        valueMax: _.max(isContinuous ? filtered : data.values),
-        slicedLength: filtered.length,
-      };
-    } else {
-      return {
-        filteredIndices: null,
-        valueMin: _.min(data.values),
-        valueMax: _.max(data.values),
-        slicedLength: data.values.length,
-      };
-    }
-  }, [
-    data.positions,
-    data.sliceValues,
-    data.values,
-    dataset.colorEncoding,
-    dataset.selectedObs?.type,
-    isInSlice,
-  ]);
-
-  useEffect(() => {
-    filterDispatch({
-      type: "set.obs.indices",
-      indices:
-        dataset.sliceBy.obs || dataset.sliceBy.polygons
-          ? filteredIndices
-          : null,
-    });
-  }, [
-    dataset.sliceBy.obs,
-    dataset.sliceBy.polygons,
-    filterDispatch,
-    filteredIndices,
-  ]);
 
   useEffect(() => {
     dispatch({
