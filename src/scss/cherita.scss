@@ -370,6 +370,11 @@ input[type="checkbox"],
   border-bottom: 1px solid #dee2e6; /* Adjust the color and width as needed */
 }
 
+.var-disease-info-collapse {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
 .cherita-scatterplot #deckgl-wrapper {
   z-index: 1 !important;
 }
