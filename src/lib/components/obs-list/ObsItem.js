@@ -2,12 +2,13 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { Tooltip } from "@mui/material";
 import { Gauge, SparkLineChart } from "@mui/x-charts";
-import _, { set } from "lodash";
+import _ from "lodash";
 import { ListGroup, Form, Badge, Table } from "react-bootstrap";
 
 import { ObsToolbar } from "./ObsToolbar";
 import { COLOR_ENCODINGS } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useFilteredData } from "../../context/FilterContext";
 import { useColor } from "../../helpers/color-helper";
 import { Histogram } from "../../utils/Histogram";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
@@ -45,6 +46,8 @@ function getContinuousLabel(code, binEdges) {
 const useObsHistogram = (obs) => {
   const ENDPOINT = "obs/histograms";
   const dataset = useDataset();
+  const filteredData = useFilteredData();
+  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
   const [params, setParams] = useState({
     url: dataset.url,
     obsCol: obs,
@@ -54,6 +57,7 @@ const useObsHistogram = (obs) => {
           indices: dataset.selectedVar?.vars.map((v) => v.index),
         }
       : dataset.selectedVar?.index,
+    obsIndices: isSliced ? Array.from(filteredData.obsIndices || []) : null,
   });
 
   useEffect(() => {
@@ -67,6 +71,7 @@ const useObsHistogram = (obs) => {
               indices: dataset.selectedVar?.vars.map((v) => v.index),
             }
           : dataset.selectedVar?.index,
+        obsIndices: isSliced ? Array.from(filteredData.obsIndices || []) : null,
       };
     });
   }, [
@@ -74,6 +79,8 @@ const useObsHistogram = (obs) => {
     dataset.selectedVar?.isSet,
     dataset.selectedVar?.name,
     dataset.selectedVar?.vars,
+    filteredData.obsIndices,
+    isSliced,
     obs,
   ]);
 
@@ -94,7 +101,7 @@ function CategoricalItem({
   min,
   max,
   onChange,
-  histogramData = { data: null, isPending: false },
+  histogramData = { data: null, isPending: false, altColor: false },
   showColor = true,
 }) {
   const { getColor } = useColor();
@@ -115,6 +122,7 @@ function CategoricalItem({
           <Histogram
             data={histogramData.data}
             isPending={histogramData.isPending}
+            altColor={histogramData.altColor}
           />
           <div className="pl-1 m-0">
             <Tooltip
@@ -140,7 +148,7 @@ function CategoricalItem({
               </div>
             </Tooltip>
           </div>
-          {showColor && (
+          {showColor ? (
             <div className="pl-1">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -164,7 +172,7 @@ function CategoricalItem({
                 />
               </svg>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </ListGroup.Item>
@@ -186,6 +194,8 @@ export function CategoricalObs({
   const totalCounts = _.sum(_.values(obs.value_counts));
   const min = _.min(_.values(obs.codes));
   const max = _.max(_.values(obs.codes));
+
+  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
 
   const obsHistograms = useObsHistogram(obs);
 
@@ -219,12 +229,14 @@ export function CategoricalObs({
             ? {
                 data: obsHistograms.fetchedData?.[obs.values[index]],
                 isPending: obsHistograms.isPending,
+                altColor: isSliced,
               }
             : { data: null, isPending: false },
       };
     },
     [
       dataset.colorEncoding,
+      isSliced,
       obs.codes,
       obs.omit,
       obs.value_counts,
@@ -234,6 +246,8 @@ export function CategoricalObs({
       totalCounts,
     ]
   );
+
+  showColor &= dataset.colorEncoding === COLOR_ENCODINGS.OBS;
 
   return (
     <ListGroup>
