@@ -9,11 +9,13 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 
+// @TODO: fix expanded active on load
 export function ObsColsList({ showColor = true }) {
   const ENDPOINT = "obs/cols";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [obsCols, setObsCols] = useState(null);
+  const [expandedItems, setExpandedItems] = useState({});
   const [active, setActive] = useState(dataset.selectedObs?.name);
   const [params, setParams] = useState({
     url: dataset.url,
@@ -67,6 +69,12 @@ export function ObsColsList({ showColor = true }) {
   const updateObs = (updatedObs) => {
     setObsCols((o) => {
       return { ...o, [updatedObs.name]: updatedObs };
+    });
+  };
+
+  const handleAccordionToggle = (itemName) => {
+    setExpandedItems((prev) => {
+      return { ...prev, [itemName]: !prev[itemName] };
     });
   };
 
@@ -154,33 +162,36 @@ export function ObsColsList({ showColor = true }) {
           "cherita-accordion-active"
         }
       >
-        <Accordion.Header>{item.name}</Accordion.Header>
+        <Accordion.Header onClick={() => handleAccordionToggle(item.name)}>
+          {item.name}
+        </Accordion.Header>
         <Accordion.Body>
-          {item.type === OBS_TYPES.CATEGORICAL ||
-          item.type === OBS_TYPES.BOOLEAN ? (
-            <CategoricalObs
-              key={item.name}
-              obs={item}
-              updateObs={updateObs}
-              toggleAll={() => toggleAll(item)}
-              toggleObs={(value) => toggleObs(item, value)}
-              toggleLabel={() => toggleLabel(item)}
-              toggleSlice={() => toggleSlice(item)}
-              toggleColor={() => toggleColor(item)}
-              showColor={showColor}
-            />
-          ) : (
-            <ContinuousObs
-              key={item.name}
-              obs={item}
-              updateObs={updateObs}
-              toggleAll={() => toggleAll(item)}
-              toggleObs={(value) => toggleObs(item, value)}
-              toggleLabel={() => toggleLabel(item)}
-              toggleSlice={() => toggleSlice(item)}
-              toggleColor={() => toggleColor(item)}
-            />
-          )}
+          {expandedItems[item.name] &&
+            (item.type === OBS_TYPES.CATEGORICAL ||
+            item.type === OBS_TYPES.BOOLEAN ? (
+              <CategoricalObs
+                key={item.name}
+                obs={item}
+                updateObs={updateObs}
+                toggleAll={() => toggleAll(item)}
+                toggleObs={(value) => toggleObs(item, value)}
+                toggleLabel={() => toggleLabel(item)}
+                toggleSlice={() => toggleSlice(item)}
+                toggleColor={() => toggleColor(item)}
+                showColor={showColor}
+              />
+            ) : (
+              <ContinuousObs
+                key={item.name}
+                obs={item}
+                updateObs={updateObs}
+                toggleAll={() => toggleAll(item)}
+                toggleObs={(value) => toggleObs(item, value)}
+                toggleLabel={() => toggleLabel(item)}
+                toggleSlice={() => toggleSlice(item)}
+                toggleColor={() => toggleColor(item)}
+              />
+            ))}
         </Accordion.Body>
       </Accordion.Item>
     );

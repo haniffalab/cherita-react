@@ -1,13 +1,15 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { Tooltip } from "@mui/material";
 import { Gauge, SparkLineChart } from "@mui/x-charts";
-import _ from "lodash";
+import _, { set } from "lodash";
 import { ListGroup, Form, Badge, Table } from "react-bootstrap";
 
 import { ObsToolbar } from "./ObsToolbar";
+import { COLOR_ENCODINGS } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useColor } from "../../helpers/color-helper";
+import { Histogram } from "../../utils/Histogram";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 import { formatNumerical, FORMATS } from "../../utils/string";
@@ -33,21 +35,54 @@ function binContinuous(data, nBins = N_BINS) {
   return { ...data, bins: bins };
 }
 
-function binDiscrete(data, nBins = N_BINS) {
-  const binSize = _.round(data.n_values * (1 / nBins));
-  const bins = {
-    nBins: nBins,
-    binSize: binSize,
-  };
-  return { ...data, bins: bins };
-}
-
 function getContinuousLabel(code, binEdges) {
   return `[ ${formatNumerical(binEdges[code][0])}, ${formatNumerical(
     binEdges[code][1],
     FORMATS.EXPONENTIAL
   )}${code === binEdges.length - 1 ? " ]" : " )"}`;
 }
+
+const useObsHistogram = (obs) => {
+  const ENDPOINT = "obs/histograms";
+  const dataset = useDataset();
+  const [params, setParams] = useState({
+    url: dataset.url,
+    obsCol: obs,
+    varKey: dataset.selectedVar?.isSet
+      ? {
+          name: dataset.selectedVar?.name,
+          indices: dataset.selectedVar?.vars.map((v) => v.index),
+        }
+      : dataset.selectedVar?.index,
+  });
+
+  useEffect(() => {
+    setParams((p) => {
+      return {
+        ...p,
+        obsCol: obs,
+        varKey: dataset.selectedVar?.isSet
+          ? {
+              name: dataset.selectedVar?.name,
+              indices: dataset.selectedVar?.vars.map((v) => v.index),
+            }
+          : dataset.selectedVar?.index,
+      };
+    });
+  }, [
+    dataset.selectedVar?.index,
+    dataset.selectedVar?.isSet,
+    dataset.selectedVar?.name,
+    dataset.selectedVar?.vars,
+    obs,
+  ]);
+
+  return useFetch(ENDPOINT, params, {
+    enabled:
+      !!dataset.selectedVar && dataset.colorEncoding === COLOR_ENCODINGS.VAR,
+    refetchOnMount: false,
+  });
+};
 
 function CategoricalItem({
   value,
@@ -59,6 +94,7 @@ function CategoricalItem({
   min,
   max,
   onChange,
+  histogramData = { data: null, isPending: false },
   showColor = true,
 }) {
   const { getColor } = useColor();
@@ -76,6 +112,10 @@ function CategoricalItem({
           />
         </div>
         <div className="d-flex align-items-center">
+          <Histogram
+            data={histogramData.data}
+            isPending={histogramData.isPending}
+          />
           <div className="pl-1 m-0">
             <Tooltip
               title={`${formatNumerical(pct, FORMATS.EXPONENTIAL)}%`}
@@ -147,6 +187,8 @@ export function CategoricalObs({
   const min = _.min(_.values(obs.codes));
   const max = _.max(_.values(obs.codes));
 
+  const obsHistograms = useObsHistogram(obs);
+
   useEffect(() => {
     if (dataset.selectedObs?.name === obs.name) {
       const selectedObsData = _.omit(dataset.selectedObs, ["omit"]);
@@ -163,16 +205,35 @@ export function CategoricalObs({
     }
   }, [dataset.selectedObs, dispatch, obs, obs.name, updateObs]);
 
-  const getDataAtIndex = (index) => {
-    return {
-      value: obs.values[index],
-      code: obs.codes[obs.values[index]],
-      value_counts: obs.value_counts[obs.values[index]],
-      pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
-      isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
-      label: obs.values[index],
-    };
-  };
+  const getDataAtIndex = useCallback(
+    (index) => {
+      return {
+        value: obs.values[index],
+        code: obs.codes[obs.values[index]],
+        value_counts: obs.value_counts[obs.values[index]],
+        pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
+        isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
+        label: obs.values[index],
+        histogramData:
+          dataset.colorEncoding === COLOR_ENCODINGS.VAR
+            ? {
+                data: obsHistograms.fetchedData?.[obs.values[index]],
+                isPending: obsHistograms.isPending,
+              }
+            : { data: null, isPending: false },
+      };
+    },
+    [
+      dataset.colorEncoding,
+      obs.codes,
+      obs.omit,
+      obs.value_counts,
+      obs.values,
+      obsHistograms.fetchedData,
+      obsHistograms.isPending,
+      totalCounts,
+    ]
+  );
 
   return (
     <ListGroup>

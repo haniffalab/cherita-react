@@ -57,3 +57,7 @@ export function formatNumerical(n, format = FORMATS.THOUSAND, precision = 3) {
       return formatThousand(n, precision);
   }
 }
+
+export function formatString(s) {
+  return s.trim().replace(/_/g, " ");
+}

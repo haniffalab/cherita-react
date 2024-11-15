@@ -28,7 +28,7 @@ export function VirtualizedList({
 
   useEffect(() => {
     itemVirtualizer.measure();
-  }, [itemVirtualizer, parentNode?.clientHeight]);
+  }, [itemVirtualizer, parentNode?.clientHeight, getDataAtIndex]);
 
   return (
     <div

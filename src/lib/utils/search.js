@@ -14,6 +14,7 @@ export const useDiseaseSearch = () => {
 
   const data = useFetch(ENDPOINT, params, {
     enabled: !!params.text.length,
+    refetchOnMount: true,
   });
 
   return {
@@ -34,6 +35,7 @@ export const useVarSearch = () => {
 
   const data = useFetch(ENDPOINT, params, {
     enabled: !!params.text.length,
+    refetchOnMount: true,
   });
 
   return {
