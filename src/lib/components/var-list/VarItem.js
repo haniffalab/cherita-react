@@ -3,11 +3,6 @@ import React, { useEffect, useState } from "react";
 import { faDroplet, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MoreVert } from "@mui/icons-material";
-import { SparkLineChart } from "@mui/x-charts";
-import {
-  blueberryTwilightPalette,
-  mangoFusionPalette,
-} from "@mui/x-charts/colorPalettes";
 import _ from "lodash";
 import { Button, Collapse, ListGroup, Table } from "react-bootstrap";
 
@@ -15,9 +10,7 @@ import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { Histogram } from "../../utils/Histogram";
-import { LoadingLinear } from "../../utils/LoadingIndicators";
 import { useFetch, useDebouncedFetch } from "../../utils/requests";
-import { formatNumerical, FORMATS } from "../../utils/string";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 
 function VarHistogram({ item }) {

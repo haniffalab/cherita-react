@@ -170,6 +170,10 @@ input[type="checkbox"],
   background-color: #cce3ed;
 }
 
+.obs-item {
+  box-sizing: border-box;
+}
+
 .obs-value-list-check {
   padding-right: 1rem;
   word-break: auto-phrase;

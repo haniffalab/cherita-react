@@ -107,7 +107,7 @@ function CategoricalItem({
   const { getColor } = useColor();
 
   return (
-    <ListGroup.Item key={value}>
+    <ListGroup.Item key={value} className="obs-item">
       <div className="d-flex align-items-center">
         <div className="flex-grow-1">
           <Form.Check
