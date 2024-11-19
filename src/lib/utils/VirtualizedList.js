@@ -6,7 +6,7 @@ export function VirtualizedList({
   getDataAtIndex,
   count,
   ItemComponent,
-  estimateSize = 50,
+  estimateSize = 45,
   overscan = 25,
   maxHeight = "80vh",
   ...props
