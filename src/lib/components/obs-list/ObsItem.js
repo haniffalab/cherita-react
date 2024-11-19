@@ -50,7 +50,7 @@ const useObsHistogram = (obs) => {
   const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
   const [params, setParams] = useState({
     url: dataset.url,
-    obsCol: obs,
+    obsCol: _.omit(obs, "omit"), // avoid re-rendering when toggling unselected obs
     varKey: dataset.selectedVar?.isSet
       ? {
           name: dataset.selectedVar?.name,
@@ -64,7 +64,7 @@ const useObsHistogram = (obs) => {
     setParams((p) => {
       return {
         ...p,
-        obsCol: obs,
+        obsCol: _.omit(obs, "omit"),
         varKey: dataset.selectedVar?.isSet
           ? {
               name: dataset.selectedVar?.name,

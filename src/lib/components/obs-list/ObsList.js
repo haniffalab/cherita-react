@@ -9,14 +9,19 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 
-// @TODO: fix expanded active on load
 export function ObsColsList({ showColor = true }) {
   const ENDPOINT = "obs/cols";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
   const [obsCols, setObsCols] = useState(null);
-  const [expandedItems, setExpandedItems] = useState({});
   const [active, setActive] = useState(dataset.selectedObs?.name);
+  const [expandedItems, setExpandedItems] = useState(
+    active
+      ? {
+          [active]: true,
+        }
+      : {}
+  );
   const [params, setParams] = useState({
     url: dataset.url,
   });
@@ -73,9 +78,15 @@ export function ObsColsList({ showColor = true }) {
   };
 
   const handleAccordionToggle = (itemName) => {
-    setExpandedItems((prev) => {
-      return { ...prev, [itemName]: !prev[itemName] };
-    });
+    _.delay(
+      // to avoid contents of accordion disappearing while closing
+      () => {
+        setExpandedItems((prev) => {
+          return { ...prev, [itemName]: !prev[itemName] };
+        });
+      },
+      expandedItems[itemName] ? 250 : 0
+    );
   };
 
   const toggleAll = (item) => {
@@ -202,7 +213,7 @@ export function ObsColsList({ showColor = true }) {
       <div className="position-relative h-100">
         <div className="list-group overflow-auto h-100">
           {isPending && <LoadingSpinner />}
-          <Accordion flush defaultActiveKey={active} alwaysOpen>
+          <Accordion flush defaultActiveKey={[active]} alwaysOpen>
             {obsList}
           </Accordion>
         </div>
