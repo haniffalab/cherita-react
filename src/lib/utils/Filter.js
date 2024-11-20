@@ -34,6 +34,9 @@ export const useFilter = (data) => {
   const isContinuous = dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS;
 
   const isInPolygons = (polygons, positions, index) => {
+    if (!polygons?.length || !positions?.length) {
+      return false;
+    }
     return _.some(polygons, (_f, i) => {
       return booleanPointInPolygon(
         point([positions[index][0], positions[index][1]]),
@@ -79,7 +82,7 @@ export const useFilter = (data) => {
 
       if (dataset.sliceBy.polygons && positions) {
         inSlice &= isInPolygons(
-          dataset.polygons[dataset.selectedObsm] || [],
+          dataset.polygons[dataset.selectedObsm],
           positions,
           index
         );
