@@ -107,6 +107,7 @@ const initialDataset = {
     maskValues: null,
     categoricalMode: PSEUDOSPATIAL_CATEGORICAL_MODES.ACROSS.value,
   },
+  polygons: {},
 };
 
 const initializer = (initialState) => {
@@ -526,6 +527,15 @@ function datasetReducer(dataset, action) {
             ...dataset.varSort[action.var],
             sortOrder: action.sortOrder,
           },
+        },
+      };
+    }
+    case "set.polygons": {
+      return {
+        ...dataset,
+        polygons: {
+          ...dataset.polygons,
+          [action.obsm]: action.polygons,
         },
       };
     }

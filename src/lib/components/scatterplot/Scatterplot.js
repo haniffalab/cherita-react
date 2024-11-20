@@ -67,7 +67,7 @@ export function Scatterplot({ radius = 30 }) {
   const [mode, setMode] = useState(() => ViewMode);
   const [features, setFeatures] = useState({
     type: "FeatureCollection",
-    features: [],
+    features: dataset.polygons[dataset.selectedObsm] || [],
   });
   const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
 
@@ -77,10 +77,7 @@ export function Scatterplot({ radius = 30 }) {
   const labelObsData = useLabelObsData();
   // @TODO: assert length of obsmData, xData, obsData is equal
 
-  const { filteredIndices, valueMin, valueMax, slicedLength } = useFilter(
-    data,
-    features
-  );
+  const { filteredIndices, valueMin, valueMax, slicedLength } = useFilter(data);
 
   useEffect(() => {
     if (!obsmData.isPending && !obsmData.serverError) {
@@ -298,6 +295,14 @@ export function Scatterplot({ radius = 30 }) {
       });
     }
   }, [dispatch, features?.features?.length]);
+
+  useEffect(() => {
+    dispatch({
+      type: "set.polygons",
+      obsm: dataset.selectedObsm,
+      polygons: features?.features || [],
+    });
+  }, [dataset.selectedObsm, dispatch, features.features]);
 
   function onLayerClick(info) {
     if (mode !== ViewMode) {

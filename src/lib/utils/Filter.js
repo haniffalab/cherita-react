@@ -10,7 +10,7 @@ import { useFilteredDataDispatch } from "../context/FilterContext";
 const EPSILON = 1e-6;
 
 // @TODO: polish hook
-export const useFilter = (data, features) => {
+export const useFilter = (data) => {
   const dataset = useDataset();
   const filterDataDispatch = useFilteredDataDispatch();
 
@@ -27,35 +27,46 @@ export const useFilter = (data, features) => {
     return _.some(ranges, (range) => _.inRange(v, ...range));
   };
 
-  const isCategorical = useMemo(() => {
-    if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
-      return (
-        dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-        dataset.selectedObs?.type === OBS_TYPES.BOOLEAN
+  const isCategorical =
+    dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+    dataset.selectedObs?.type === OBS_TYPES.BOOLEAN;
+
+  const isContinuous = dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS;
+
+  const isInPolygons = (polygons, positions, index) => {
+    return _.some(polygons, (_f, i) => {
+      return booleanPointInPolygon(
+        point([positions[index][0], positions[index][1]]),
+        polygons[i]
       );
-    } else {
-      return false;
+    });
+  };
+
+  const isInValues = (omit, value) => {
+    if (!omit?.length) {
+      return true;
     }
-  }, [dataset.colorEncoding, dataset.selectedObs?.type]);
+    return !_.includes(omit, value);
+  };
 
   const isInSlice = useCallback(
     (index, values, positions) => {
       let inSlice = true;
 
-      if (isCategorical && values) {
-        inSlice &= !_.includes(dataset.selectedObs?.omit, values[index]);
-      } else if (
-        (dataset.sliceBy.obs ||
-          (dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
-            dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS)) &&
-        !!dataset.selectedObs?.omit.length &&
-        values
-      ) {
-        if (dataset.selectedObs.type === OBS_TYPES.CATEGORICAL) {
-          inSlice &= !_.includes(dataset.selectedObs.omit, values[index]);
-        } else if (dataset.selectedObs.type === OBS_TYPES.CONTINUOUS) {
+      if (values) {
+        if (isCategorical) {
+          if (
+            dataset.colorEncoding === COLOR_ENCODINGS.OBS ||
+            dataset.sliceBy.obs
+          ) {
+            inSlice &= isInValues(
+              dataset.selectedObs?.omit,
+              data.values[index]
+            );
+          }
+        } else if (isContinuous) {
           if (isNaN(values[index])) {
-            inSlice &= !_.includes(dataset.selectedObs.omit, -1);
+            inSlice &= isInValues(dataset.selectedObs?.omit, -1);
           } else {
             inSlice &= isInBins(
               values[index],
@@ -67,24 +78,25 @@ export const useFilter = (data, features) => {
       }
 
       if (dataset.sliceBy.polygons && positions) {
-        inSlice &= _.some(features?.features, (_f, i) => {
-          return booleanPointInPolygon(
-            point([positions[index][0], positions[index][1]]),
-            features.features[i]
-          );
-        });
+        inSlice &= isInPolygons(
+          dataset.polygons[dataset.selectedObsm] || [],
+          positions,
+          index
+        );
       }
       return inSlice;
     },
     [
+      data.values,
       dataset.colorEncoding,
+      dataset.polygons,
       dataset.selectedObs?.bins?.binEdges,
       dataset.selectedObs?.omit,
-      dataset.selectedObs?.type,
+      dataset.selectedObsm,
       dataset.sliceBy.obs,
       dataset.sliceBy.polygons,
-      features?.features,
       isCategorical,
+      isContinuous,
     ]
   );
 
