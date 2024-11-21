@@ -18,7 +18,7 @@ import { VirtualizedList } from "../../utils/VirtualizedList";
 
 const N_BINS = 5;
 
-function binContinuous(data, nBins = N_BINS) {
+function binContinuous(data, nBins) {
   const binSize = (data.max - data.min) * (1 / nBins);
   const thresholds = _.range(nBins + 1).map((b) => {
     return data.min + binSize * b;
@@ -57,7 +57,7 @@ const useObsHistogram = (obs) => {
           indices: dataset.selectedVar?.vars.map((v) => v.index),
         }
       : dataset.selectedVar?.index,
-    obsIndices: isSliced ? Array.from(filteredData.obsIndices || []) : null,
+    obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
   });
 
   useEffect(() => {
@@ -71,7 +71,7 @@ const useObsHistogram = (obs) => {
               indices: dataset.selectedVar?.vars.map((v) => v.index),
             }
           : dataset.selectedVar?.index,
-        obsIndices: isSliced ? Array.from(filteredData.obsIndices || []) : null,
+        obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
       };
     });
   }, [
@@ -366,7 +366,7 @@ export function ContinuousObs({
   const ENDPOINT = "obs/bins";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const binnedObs = binContinuous(obs);
+  const binnedObs = binContinuous(obs, _.min([N_BINS, obs.n_unique]));
   const params = {
     url: dataset.url,
     obsCol: binnedObs.name,

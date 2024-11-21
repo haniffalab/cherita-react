@@ -5,12 +5,15 @@ import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useFilteredData } from "../../context/FilterContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 
 export function Dotplot() {
   const ENDPOINT = "dotplot";
   const dataset = useDataset();
+  const filteredData = useFilteredData();
+  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
   const dispatch = useDatasetDispatch();
   const colorscale = useRef(dataset.controls.colorScale);
   const [data, setData] = useState([]);
@@ -28,6 +31,7 @@ export function Dotplot() {
     varKeys: dataset.selectedMultiVar.map((i) =>
       i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
     ),
+    obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
     standardScale: dataset.controls.standardScale,
     meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
     expressionCutoff: dataset.controls.expressionCutoff,
@@ -57,6 +61,7 @@ export function Dotplot() {
             ? { name: i.name, indices: i.vars.map((v) => v.index) }
             : i.index
         ),
+        obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
         standardScale: dataset.controls.standardScale,
         meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
         expressionCutoff: dataset.controls.expressionCutoff,
@@ -71,6 +76,8 @@ export function Dotplot() {
     dataset.controls.meanOnlyExpressed,
     dataset.controls.expressionCutoff,
     dataset.varNamesCol,
+    isSliced,
+    filteredData.obsIndices,
   ]);
 
   const updateColorscale = useCallback((colorscale) => {

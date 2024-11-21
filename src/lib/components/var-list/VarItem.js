@@ -21,14 +21,14 @@ function VarHistogram({ item }) {
   const [params, setParams] = useState({
     url: dataset.url,
     varKey: item.matrix_index,
-    obsIndices: isSliced ? Array.from(filteredData.obsIndices || []) : null,
+    obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
   });
 
   useEffect(() => {
     setParams((p) => {
       return {
         ...p,
-        obsIndices: isSliced ? Array.from(filteredData.obsIndices || []) : null,
+        obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
       };
     });
   }, [filteredData.obsIndices, isSliced]);

@@ -17,6 +17,7 @@ import {
   OBS_TYPES,
 } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
+import { useFilteredData } from "../../context/FilterContext";
 import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { ImageViewer } from "../../utils/ImageViewer";
 import { Legend } from "../../utils/Legend";
@@ -26,12 +27,15 @@ import { useDebouncedFetch } from "../../utils/requests";
 function usePseudospatialData(plotType) {
   const ENDPOINT = "pseudospatial";
   const dataset = useDataset();
+  const filteredData = useFilteredData();
+  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
 
   const baseParams = useMemo(() => {
     return {
       url: dataset.url,
       maskSet: dataset.pseudospatial.maskSet,
       maskValues: dataset.pseudospatial.maskValues,
+      obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
       varNamesCol: dataset.varNamesCol,
       showColorbar: false,
       format: "json",
@@ -41,6 +45,8 @@ function usePseudospatialData(plotType) {
     dataset.pseudospatial.maskSet,
     dataset.pseudospatial.maskValues,
     dataset.varNamesCol,
+    isSliced,
+    filteredData.obsIndices,
   ]);
 
   const getPlotParams = useCallback(() => {
