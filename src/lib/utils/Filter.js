@@ -55,18 +55,12 @@ export const useFilter = (data) => {
   const isInSlice = useCallback(
     (index, values, positions) => {
       let inSlice = true;
+      const obsSlice =
+        dataset.colorEncoding === COLOR_ENCODINGS.OBS || dataset.sliceBy.obs;
 
-      if (values) {
+      if (values && obsSlice) {
         if (isCategorical) {
-          if (
-            dataset.colorEncoding === COLOR_ENCODINGS.OBS ||
-            dataset.sliceBy.obs
-          ) {
-            inSlice &= isInValues(
-              dataset.selectedObs?.omit,
-              data.values[index]
-            );
-          }
+          inSlice &= isInValues(dataset.selectedObs?.omit, values[index]);
         } else if (isContinuous) {
           if (isNaN(values[index])) {
             inSlice &= isInValues(dataset.selectedObs?.omit, -1);
@@ -90,7 +84,6 @@ export const useFilter = (data) => {
       return inSlice;
     },
     [
-      data.values,
       dataset.colorEncoding,
       dataset.polygons,
       dataset.selectedObs?.bins?.binEdges,
@@ -123,7 +116,6 @@ export const useFilter = (data) => {
         slicedLength: filtered.length,
       };
     } else if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
-      const isContinuous = dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS;
       const { filtered, filteredIndices } = _.reduce(
         data.values,
         (acc, v, i) => {
@@ -154,7 +146,7 @@ export const useFilter = (data) => {
     data.sliceValues,
     data.values,
     dataset.colorEncoding,
-    dataset.selectedObs?.type,
+    isContinuous,
     isInSlice,
   ]);
 
