@@ -2,8 +2,11 @@ import React, { useState, useRef, useLayoutEffect } from "react";
 
 import { Navbar, Nav, Card } from "react-bootstrap";
 
-import { SELECTION_MODES } from "../../constants/constants";
+import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
+import { Dotplot } from "../dotplot/Dotplot";
+import { Heatmap } from "../heatmap/Heatmap";
+import { Matrixplot } from "../matrixplot/Matrixplot";
 import { ObsColsList } from "../obs-list/ObsList";
 import {
   OffcanvasObs,
@@ -19,8 +22,13 @@ import { Scatterplot } from "../scatterplot/Scatterplot";
 import { ScatterplotControls } from "../scatterplot/ScatterplotControls";
 import { SearchBar } from "../search-bar/SearchBar";
 import { VarNamesList } from "../var-list/VarList";
+import { Violin } from "../violin/Violin";
 
-export function FullPage({ children, ...props }) {
+export function FullPage({
+  children,
+  varMode = SELECTION_MODES.SINGLE,
+  ...props
+}) {
   const targetRef = useRef();
 
   const [showObs, setShowObs] = useState(false);
@@ -89,7 +97,7 @@ export function FullPage({ children, ...props }) {
             <Card className="cherita-app-features">
               <Card.Body>
                 <SearchBar searchDiseases={true} searchVar={true} />
-                <VarNamesList mode={SELECTION_MODES.SINGLE} />
+                <VarNamesList mode={varMode} />
               </Card.Body>
             </Card>
           </div>
@@ -148,6 +156,27 @@ export function FullPagePseudospatial(props) {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </FullPage>
+  );
+}
+
+export function FullPagePlots(props) {
+  return (
+    <FullPage {...props} varMode={SELECTION_MODES.MULTIPLE}>
+      <div className="container-fluid w-100 h-100 d-flex flex-column overflow-y-auto">
+        <div className="row flex-grow-1">
+          <Heatmap />
+        </div>
+        <div className="row flex-grow-1">
+          <Matrixplot />
+        </div>
+        <div className="row flex-grow-1">
+          <Dotplot />
+        </div>
+        <div className="row flex-grow-1">
+          <Violin mode={VIOLIN_MODES.GROUPBY} />
         </div>
       </div>
     </FullPage>

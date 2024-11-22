@@ -28,4 +28,5 @@ export {
   FullPage,
   FullPageScatterplot,
   FullPagePseudospatial,
+  FullPagePlots,
 } from "./components/full-page/FullPage";
