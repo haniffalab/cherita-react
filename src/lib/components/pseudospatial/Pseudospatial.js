@@ -246,6 +246,15 @@ export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
             <Legend
               min={layout?.coloraxis?.cmin}
               max={layout?.coloraxis?.cmax}
+              addText={
+                plotType === PLOT_TYPES.GENE
+                  ? " - Mean expression"
+                  : plotType === PLOT_TYPES.CATEGORICAL
+                    ? " - %"
+                    : plotType === PLOT_TYPES.CONTINUOUS
+                      ? " - Mean value"
+                      : ""
+              }
             />
           )}
         </>

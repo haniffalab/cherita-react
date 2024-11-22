@@ -328,7 +328,7 @@ export function Scatterplot({ radius = 30 }) {
   };
 
   const getTooltip = ({ object, index }) => {
-    if (!object) return;
+    if (!object || object?.type === "Feature") return;
     const text = [];
 
     if (
