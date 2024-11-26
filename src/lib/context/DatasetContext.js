@@ -6,6 +6,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import _ from "lodash";
 
 import { FilterProvider } from "./FilterContext";
+import { ZarrDataProvider } from "./ZarrDataContext";
 import {
   COLOR_ENCODINGS,
   DOTPLOT_SCALES,
@@ -158,7 +159,9 @@ export function DatasetProvider({ dataset_url, children, ...dataset_params }) {
           client={queryClient}
           persistOptions={persistOptions}
         >
-          <FilterProvider>{children}</FilterProvider>
+          <ZarrDataProvider>
+            <FilterProvider>{children}</FilterProvider>
+          </ZarrDataProvider>
         </PersistQueryClientProvider>
       </DatasetDispatchContext.Provider>
     </DatasetContext.Provider>

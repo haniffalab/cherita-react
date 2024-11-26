@@ -32,24 +32,31 @@ const fetchDataFromZarr = async (url, path, s, opts) => {
 };
 
 export const useZarr = ({ url, path }, s = null, opts = {}) => {
+  const { enabled = true } = opts;
   const [data, setData] = useState(null);
   const [isPending, setIsPending] = useState(true);
   const [serverError, setServerError] = useState(null);
 
   useEffect(() => {
-    setIsPending(true);
-    setServerError(null);
-    fetchDataFromZarr(url, path, s, opts)
-      .then((data) => {
-        setData(data);
-      })
-      .catch((error) => {
-        setServerError(error.message);
-      })
-      .finally(() => {
-        setIsPending(false);
-      });
-  }, [opts, path, s, url]);
+    if (enabled) {
+      setIsPending(true);
+      setServerError(null);
+      fetchDataFromZarr(url, path, s, opts)
+        .then((data) => {
+          setData(data);
+        })
+        .catch((error) => {
+          setServerError(error.message);
+        })
+        .finally(() => {
+          setIsPending(false);
+        });
+    } else {
+      setIsPending(false);
+      setData(null);
+      setServerError(null);
+    }
+  }, [enabled, opts, path, s, url]);
 
   return { data, isPending, serverError };
 };
@@ -78,24 +85,31 @@ const aggregateData = (inputs, data) => {
 
 // @TODO: return response of successfully fetched data when error occurs
 export const useMultipleZarr = (inputs, opts = {}, agg = aggregateData) => {
+  const { enabled = true } = opts;
   const [data, setData] = useState(null);
   const [isPending, setIsPending] = useState(true);
   const [serverError, setServerError] = useState(null);
 
   useEffect(() => {
-    setIsPending(true);
-    setServerError(null);
-    fetchDataFromZarrs(inputs, opts)
-      .then((data) => {
-        setData(agg(inputs, data));
-      })
-      .catch((error) => {
-        setServerError(error.message);
-      })
-      .finally(() => {
-        setIsPending(false);
-      });
-  }, [agg, inputs, opts]);
+    if (enabled) {
+      setIsPending(true);
+      setServerError(null);
+      fetchDataFromZarrs(inputs, opts)
+        .then((data) => {
+          setData(agg(inputs, data));
+        })
+        .catch((error) => {
+          setServerError(error.message);
+        })
+        .finally(() => {
+          setIsPending(false);
+        });
+    } else {
+      setData(null);
+      setIsPending(false);
+      setServerError(null);
+    }
+  }, [agg, enabled, inputs, opts]);
 
   return { data, isPending, serverError };
 };

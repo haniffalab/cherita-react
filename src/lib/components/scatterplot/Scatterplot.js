@@ -25,18 +25,15 @@ import {
   UNSELECTED_POLYGON_FILLCOLOR,
 } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useZarrData } from "../../context/ZarrDataContext";
 import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
 import { useFilter } from "../../utils/Filter";
 import { Legend } from "../../utils/Legend";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { formatNumerical } from "../../utils/string";
-import {
-  useObsmData,
-  useXData,
-  useObsData,
-  useLabelObsData,
-} from "../../utils/zarrData";
+import { useLabelObsData } from "../../utils/zarrData";
+import { useFilteredData } from "../../context/FilterContext";
 
 window.deck.log.level = 1;
 
@@ -51,6 +48,7 @@ const INITIAL_VIEW_STATE = {
 
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
+  const { obsIndices } = useFilteredData();
   const dispatch = useDatasetDispatch();
   const { getColor } = useColor();
   const deckRef = useRef(null);
@@ -71,13 +69,11 @@ export function Scatterplot({ radius = 30 }) {
   });
   const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
 
-  const obsmData = useObsmData();
-  const xData = useXData();
-  const obsData = useObsData();
+  const { obsmData, xData, obsData } = useZarrData();
   const labelObsData = useLabelObsData();
   // @TODO: assert length of obsmData, xData, obsData is equal
 
-  const { filteredIndices, valueMin, valueMax, slicedLength } = useFilter(data);
+  const { valueMin, valueMax, slicedLength } = useFilter();
 
   useEffect(() => {
     if (!obsmData.isPending && !obsmData.serverError) {
@@ -204,23 +200,23 @@ export function Scatterplot({ radius = 30 }) {
 
   const getFillColor = useCallback(
     (_d, { index }) => {
-      const grayOut = filteredIndices && !filteredIndices.has(index);
+      const grayOut = obsIndices && !obsIndices.has(index);
       return getColor({
         value: (data.values[index] - min) / (max - min),
         categorical: isCategorical,
         grayOut: grayOut,
       });
     },
-    [data.values, filteredIndices, getColor, isCategorical, max, min]
+    [data.values, obsIndices, getColor, isCategorical, max, min]
   );
 
   // @TODO: add support for pseudospatial hover to reflect in radius
   const getRadius = useCallback(
     (_d, { index }) => {
-      const grayOut = filteredIndices && !filteredIndices.has(index);
+      const grayOut = obsIndices && !obsIndices.has(index);
       return grayOut ? 1 : 3;
     },
-    [filteredIndices]
+    [obsIndices]
   );
 
   const memoizedLayers = useMemo(() => {
@@ -354,7 +350,7 @@ export function Scatterplot({ radius = 30 }) {
 
     if (!text.length) return;
 
-    const grayOut = filteredIndices && !filteredIndices.has(index);
+    const grayOut = obsIndices && !obsIndices.has(index);
 
     return {
       text: text.length ? _.compact(text).join("\n") : null,
