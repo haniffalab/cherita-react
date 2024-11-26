@@ -46,7 +46,7 @@ function getContinuousLabel(code, binEdges) {
 const useObsHistogram = (obs) => {
   const ENDPOINT = "obs/histograms";
   const dataset = useDataset();
-  const filteredData = useFilteredData();
+  const { obsIndices } = useFilteredData();
   const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
   const [params, setParams] = useState({
     url: dataset.url,
@@ -57,7 +57,7 @@ const useObsHistogram = (obs) => {
           indices: dataset.selectedVar?.vars.map((v) => v.index),
         }
       : dataset.selectedVar?.index,
-    obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
+    obsIndices: isSliced ? [...(obsIndices || [])] : null,
   });
 
   useEffect(() => {
@@ -71,7 +71,7 @@ const useObsHistogram = (obs) => {
               indices: dataset.selectedVar?.vars.map((v) => v.index),
             }
           : dataset.selectedVar?.index,
-        obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
+        obsIndices: isSliced ? [...(obsIndices || [])] : null,
       };
     });
   }, [
@@ -79,7 +79,7 @@ const useObsHistogram = (obs) => {
     dataset.selectedVar?.isSet,
     dataset.selectedVar?.name,
     dataset.selectedVar?.vars,
-    filteredData.obsIndices,
+    obsIndices,
     isSliced,
     obs,
   ]);

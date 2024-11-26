@@ -15,7 +15,7 @@ import { useDebouncedFetch } from "../../utils/requests";
 export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
   const ENDPOINT = "violin";
   const dataset = useDataset();
-  const filteredData = useFilteredData();
+  const { obsIndices } = useFilteredData();
   const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
@@ -48,7 +48,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
               _.values(dataset.selectedObs?.codes),
               dataset.selectedObs?.omit
             ).map((c) => dataset.selectedObs?.codesMap[c]),
-        obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
+        obsIndices: isSliced ? [...(obsIndices || [])] : null,
       },
     }[mode],
   });
@@ -99,7 +99,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
                 _.values(dataset.selectedObs?.codes),
                 dataset.selectedObs?.omit
               ).map((c) => dataset.selectedObs?.codesMap[c]),
-          obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
+          obsIndices: isSliced ? [...(obsIndices || [])] : null,
           scale: dataset.controls.scale.violinplot.value,
           varNamesCol: dataset.varNamesCol,
         };
@@ -112,7 +112,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     dataset.selectedVar,
     dataset.url,
     dataset.varNamesCol,
-    filteredData.obsIndices,
+    obsIndices,
     isSliced,
     mode,
   ]);

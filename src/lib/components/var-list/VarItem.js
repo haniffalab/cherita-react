@@ -16,22 +16,22 @@ import { VirtualizedList } from "../../utils/VirtualizedList";
 function VarHistogram({ item }) {
   const ENDPOINT = "var/histograms";
   const dataset = useDataset();
-  const filteredData = useFilteredData();
+  const { obsIndices } = useFilteredData();
   const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
   const [params, setParams] = useState({
     url: dataset.url,
     varKey: item.matrix_index,
-    obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
+    obsIndices: isSliced ? [...(obsIndices || [])] : null,
   });
 
   useEffect(() => {
     setParams((p) => {
       return {
         ...p,
-        obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
+        obsIndices: isSliced ? [...(obsIndices || [])] : null,
       };
     });
-  }, [filteredData.obsIndices, isSliced]);
+  }, [obsIndices, isSliced]);
 
   const { fetchedData, isPending, serverError } = useDebouncedFetch(
     ENDPOINT,

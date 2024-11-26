@@ -27,7 +27,7 @@ import { useDebouncedFetch } from "../../utils/requests";
 function usePseudospatialData(plotType) {
   const ENDPOINT = "pseudospatial";
   const dataset = useDataset();
-  const filteredData = useFilteredData();
+  const { obsIndices } = useFilteredData();
   const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
 
   const baseParams = useMemo(() => {
@@ -35,7 +35,7 @@ function usePseudospatialData(plotType) {
       url: dataset.url,
       maskSet: dataset.pseudospatial.maskSet,
       maskValues: dataset.pseudospatial.maskValues,
-      obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
+      obsIndices: isSliced ? [...(obsIndices || [])] : null,
       varNamesCol: dataset.varNamesCol,
       showColorbar: false,
       format: "json",
@@ -46,7 +46,7 @@ function usePseudospatialData(plotType) {
     dataset.pseudospatial.maskValues,
     dataset.varNamesCol,
     isSliced,
-    filteredData.obsIndices,
+    obsIndices,
   ]);
 
   const getPlotParams = useCallback(() => {

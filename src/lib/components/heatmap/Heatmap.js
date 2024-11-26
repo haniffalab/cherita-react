@@ -12,7 +12,7 @@ import { useDebouncedFetch } from "../../utils/requests";
 export function Heatmap() {
   const ENDPOINT = "heatmap";
   const dataset = useDataset();
-  const filteredData = useFilteredData();
+  const { obsIndices } = useFilteredData();
   const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
   const colorscale = useRef(dataset.controls.colorScale);
   const [data, setData] = useState([]);
@@ -30,7 +30,7 @@ export function Heatmap() {
     varKeys: dataset.selectedMultiVar.map((i) =>
       i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
     ),
-    obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
+    obsIndices: isSliced ? [...(obsIndices || [])] : null,
     varNamesCol: dataset.varNamesCol,
   });
 
@@ -56,7 +56,7 @@ export function Heatmap() {
             ? { name: i.name, indices: i.vars.map((v) => v.index) }
             : i.index
         ),
-        obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
+        obsIndices: isSliced ? [...(obsIndices || [])] : null,
         varNamesCol: dataset.varNamesCol,
       };
     });
@@ -65,7 +65,7 @@ export function Heatmap() {
     dataset.selectedObs,
     dataset.url,
     dataset.varNamesCol,
-    filteredData.obsIndices,
+    obsIndices,
     isSliced,
   ]);
 
