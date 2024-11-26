@@ -4,8 +4,10 @@ export const FilteredDataContext = createContext(null);
 export const FilteredDataDispatchContext = createContext(null);
 
 const initialFilterData = {
-  obsIndices: null, // @TODO: split to byObs and byPolygons ?
-  varIndices: null,
+  obsIndices: null,
+  valueMin: null,
+  valueMax: null,
+  slicedLength: null,
 };
 
 export function FilterProvider({ children }) {
@@ -36,24 +38,9 @@ function filterReducer(filteredData, action) {
       return {
         ...filteredData,
         obsIndices: action.indices,
-      };
-    }
-    case "reset.obs.indices": {
-      return {
-        ...filteredData,
-        obsIndices: null,
-      };
-    }
-    case "set.var.indices": {
-      return {
-        ...filteredData,
-        varIndices: action.indices,
-      };
-    }
-    case "reset.var.indices": {
-      return {
-        ...filteredData,
-        varIndices: null,
+        valueMin: action.valueMin,
+        valueMax: action.valueMax,
+        slicedLength: action.slicedLength,
       };
     }
     default: {

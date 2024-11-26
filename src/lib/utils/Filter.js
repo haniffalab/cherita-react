@@ -6,7 +6,6 @@ import _ from "lodash";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../constants/constants";
 import { useDataset } from "../context/DatasetContext";
 import { useFilteredDataDispatch } from "../context/FilterContext";
-import { useZarrData } from "../context/ZarrDataContext";
 
 const EPSILON = 1e-6;
 
@@ -42,11 +41,11 @@ const isInValues = (omit, value) => {
   return !_.includes(omit, value);
 };
 
-export const useFilter = () => {
+export const useFilter = (data) => {
   const dataset = useDataset();
   const filterDataDispatch = useFilteredDataDispatch();
 
-  const { obsmData, xData, obsData, isPending, serverError } = useZarrData();
+  const { obsmData, xData, obsData, isPending, serverError } = data;
 
   const isCategorical =
     dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
@@ -184,6 +183,9 @@ export const useFilter = () => {
       filterDataDispatch({
         type: "set.obs.indices",
         indices: isSliced ? filteredIndices : null,
+        valueMin: valueMin,
+        valueMax: valueMax,
+        slicedLength: slicedLength,
       });
     }
   }, [
@@ -194,7 +196,8 @@ export const useFilter = () => {
     isPending,
     isSliced,
     serverError,
+    slicedLength,
+    valueMax,
+    valueMin,
   ]);
-
-  return { valueMin, valueMax, slicedLength };
 };

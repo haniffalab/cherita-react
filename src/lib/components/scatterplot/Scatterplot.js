@@ -29,7 +29,6 @@ import { useFilteredData } from "../../context/FilterContext";
 import { useZarrData } from "../../context/ZarrDataContext";
 import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
-import { useFilter } from "../../utils/Filter";
 import { Legend } from "../../utils/Legend";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { formatNumerical } from "../../utils/string";
@@ -48,7 +47,7 @@ const INITIAL_VIEW_STATE = {
 
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
-  const { obsIndices } = useFilteredData();
+  const { obsIndices, valueMin, valueMax, slicedLength } = useFilteredData();
   const dispatch = useDatasetDispatch();
   const { getColor } = useColor();
   const deckRef = useRef(null);
@@ -72,8 +71,6 @@ export function Scatterplot({ radius = 30 }) {
   const { obsmData, xData, obsData } = useZarrData();
   const labelObsData = useLabelObsData();
   // @TODO: assert length of obsmData, xData, obsData is equal
-
-  const { valueMin, valueMax, slicedLength } = useFilter();
 
   useEffect(() => {
     if (!obsmData.isPending && !obsmData.serverError) {

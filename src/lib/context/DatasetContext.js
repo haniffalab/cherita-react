@@ -159,9 +159,9 @@ export function DatasetProvider({ dataset_url, children, ...dataset_params }) {
           client={queryClient}
           persistOptions={persistOptions}
         >
-          <ZarrDataProvider>
-            <FilterProvider>{children}</FilterProvider>
-          </ZarrDataProvider>
+          <FilterProvider>
+            <ZarrDataProvider>{children}</ZarrDataProvider>
+          </FilterProvider>
         </PersistQueryClientProvider>
       </DatasetDispatchContext.Provider>
     </DatasetContext.Provider>
