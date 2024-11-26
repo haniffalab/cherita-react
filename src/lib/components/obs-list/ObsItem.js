@@ -46,8 +46,7 @@ function getContinuousLabel(code, binEdges) {
 const useObsHistogram = (obs) => {
   const ENDPOINT = "obs/histograms";
   const dataset = useDataset();
-  const { obsIndices } = useFilteredData();
-  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
+  const { obsIndices, isSliced } = useFilteredData();
   const [params, setParams] = useState({
     url: dataset.url,
     obsCol: _.omit(obs, "omit"), // avoid re-rendering when toggling unselected obs
@@ -190,12 +189,11 @@ export function CategoricalObs({
   showColor = true,
 }) {
   const dataset = useDataset();
+  const { isSliced } = useFilteredData();
   const dispatch = useDatasetDispatch();
   const totalCounts = _.sum(_.values(obs.value_counts));
   const min = _.min(_.values(obs.codes));
   const max = _.max(_.values(obs.codes));
-
-  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
 
   const obsHistograms = useObsHistogram(obs);
 

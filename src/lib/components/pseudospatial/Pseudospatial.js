@@ -27,8 +27,7 @@ import { useDebouncedFetch } from "../../utils/requests";
 function usePseudospatialData(plotType) {
   const ENDPOINT = "pseudospatial";
   const dataset = useDataset();
-  const { obsIndices } = useFilteredData();
-  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
+  const { obsIndices, isSliced } = useFilteredData();
 
   const baseParams = useMemo(() => {
     return {

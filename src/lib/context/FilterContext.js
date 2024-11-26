@@ -8,6 +8,7 @@ const initialFilterData = {
   valueMin: null,
   valueMax: null,
   slicedLength: null,
+  isSliced: false,
 };
 
 export function FilterProvider({ children }) {
@@ -41,6 +42,7 @@ function filterReducer(filteredData, action) {
         valueMin: action.valueMin,
         valueMax: action.valueMax,
         slicedLength: action.slicedLength,
+        isSliced: action.isSliced,
       };
     }
     default: {

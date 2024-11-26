@@ -53,13 +53,16 @@ export const useFilter = (data) => {
 
   const isContinuous = dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS;
 
+  const sliceByObs =
+    (dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+      !!dataset.selectedObs?.omit.length) ||
+    dataset.sliceBy.obs;
+
   const isInObsSlice = useCallback(
     (index, values) => {
       let inSlice = true;
-      const shouldSlice =
-        dataset.colorEncoding === COLOR_ENCODINGS.OBS || dataset.sliceBy.obs;
 
-      if (values && shouldSlice) {
+      if (values && sliceByObs) {
         if (isCategorical) {
           inSlice &= isInValues(dataset.selectedObs?.omit, values[index]);
         } else if (isContinuous) {
@@ -77,12 +80,11 @@ export const useFilter = (data) => {
       return inSlice;
     },
     [
-      dataset.colorEncoding,
       dataset.selectedObs?.bins?.binEdges,
       dataset.selectedObs?.omit,
-      dataset.sliceBy.obs,
       isCategorical,
       isContinuous,
+      sliceByObs,
     ]
   );
 
@@ -173,10 +175,8 @@ export const useFilter = (data) => {
     xData.data,
   ]);
 
-  const isSliced =
-    dataset.colorEncoding === COLOR_ENCODINGS.OBS ||
-    dataset.sliceBy.obs ||
-    dataset.sliceBy.polygons;
+  const isSliced = sliceByObs || dataset.sliceBy.polygons;
+  // const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
 
   useEffect(() => {
     if (!isPending && !serverError) {
@@ -186,6 +186,7 @@ export const useFilter = (data) => {
         valueMin: valueMin,
         valueMax: valueMax,
         slicedLength: slicedLength,
+        isSliced: isSliced,
       });
     }
   }, [

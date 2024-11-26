@@ -15,8 +15,7 @@ import { useDebouncedFetch } from "../../utils/requests";
 export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
   const ENDPOINT = "violin";
   const dataset = useDataset();
-  const { obsIndices } = useFilteredData();
-  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
+  const { obsIndices, isSliced } = useFilteredData();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);

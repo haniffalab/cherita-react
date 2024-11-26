@@ -12,8 +12,7 @@ import { useDebouncedFetch } from "../../utils/requests";
 export function Matrixplot() {
   const ENDPOINT = "matrixplot";
   const dataset = useDataset();
-  const { obsIndices } = useFilteredData();
-  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
+  const { obsIndices, isSliced } = useFilteredData();
   const colorscale = useRef(dataset.controls.colorScale);
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});

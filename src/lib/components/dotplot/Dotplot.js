@@ -12,8 +12,7 @@ import { useDebouncedFetch } from "../../utils/requests";
 export function Dotplot() {
   const ENDPOINT = "dotplot";
   const dataset = useDataset();
-  const { obsIndices } = useFilteredData();
-  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
+  const { obsIndices, isSliced } = useFilteredData();
   const dispatch = useDatasetDispatch();
   const colorscale = useRef(dataset.controls.colorScale);
   const [data, setData] = useState([]);

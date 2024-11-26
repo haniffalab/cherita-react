@@ -17,6 +17,8 @@ function VarHistogram({ item }) {
   const ENDPOINT = "var/histograms";
   const dataset = useDataset();
   const { obsIndices } = useFilteredData();
+  // @TODO: consider using Filter's isSliced; would trigger more re-renders/requests
+  // const { obsIndices, isSliced } = useFilteredData();
   const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
   const [params, setParams] = useState({
     url: dataset.url,
