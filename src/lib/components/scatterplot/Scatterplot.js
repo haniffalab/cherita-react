@@ -25,6 +25,7 @@ import {
   UNSELECTED_POLYGON_FILLCOLOR,
 } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useFilteredData } from "../../context/FilterContext";
 import { useZarrData } from "../../context/ZarrDataContext";
 import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
@@ -33,7 +34,6 @@ import { Legend } from "../../utils/Legend";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { formatNumerical } from "../../utils/string";
 import { useLabelObsData } from "../../utils/zarrData";
-import { useFilteredData } from "../../context/FilterContext";
 
 window.deck.log.level = 1;
 

@@ -174,14 +174,16 @@ export const useFilter = () => {
     xData.data,
   ]);
 
+  const isSliced =
+    dataset.colorEncoding === COLOR_ENCODINGS.OBS ||
+    dataset.sliceBy.obs ||
+    dataset.sliceBy.polygons;
+
   useEffect(() => {
     if (!isPending && !serverError) {
       filterDataDispatch({
         type: "set.obs.indices",
-        indices:
-          dataset.sliceBy.obs || dataset.sliceBy.polygons
-            ? filteredIndices
-            : null,
+        indices: isSliced ? filteredIndices : null,
       });
     }
   }, [
@@ -190,8 +192,9 @@ export const useFilter = () => {
     filterDataDispatch,
     filteredIndices,
     isPending,
+    isSliced,
     serverError,
   ]);
 
-  return { filteredIndices, valueMin, valueMax, slicedLength };
+  return { valueMin, valueMax, slicedLength };
 };
