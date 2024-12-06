@@ -40,6 +40,16 @@ input[type="checkbox"],
   cursor: pointer;
 }
 
+$alt-color: #173A5E;
+
+// .w-60 {
+//   width: 60% !important;
+// }
+
+// .w-40 {
+//   width: 40% !important;
+// }
+
 .loading-spinner {
   @extend .bg-light;
 
@@ -250,12 +260,30 @@ input[type="checkbox"],
 .value-count-badge {
   color: #000000 !important;
   background-color: #dedede !important;
+  font-weight: lighter;
 }
 
+.filtered-value-count-badge {
+  color: #ffffff !important;
+  // background-color: $alt-color !important;
+  font-weight: normal;
+}
+
+$gauge-padding: 0.15rem;
+
 .value-pct-gauge-container {
+  position: relative;
   width: 1.5rem;
   height: 1.5rem;
-  padding: 0.2rem;
+  padding: $gauge-padding;
+}
+
+.pct-gauge {
+  position: absolute !important;
+  top: $gauge-padding;
+  left: $gauge-padding;
+  width: calc(100% - $gauge-padding * 2) !important;
+  height: calc(100% - $gauge-padding * 2) !important;
 }
 
 .feature-histogram-container {
@@ -393,4 +421,8 @@ input[type="checkbox"],
 
 .deck-tooltip {
   z-index: 100 !important;
+}
+
+.filtered-pct-gauge .MuiGauge-valueArc {
+  fill: $alt-color !important;
 }
