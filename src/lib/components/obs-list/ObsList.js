@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 
+import {
+  faDroplet,
+  faFilter,
+  faMessage,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { Accordion, Alert } from "react-bootstrap";
+import { Accordion, Alert, Badge } from "react-bootstrap";
 
 import { CategoricalObs, ContinuousObs } from "./ObsItem";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
@@ -163,6 +169,12 @@ export function ObsColsList({ showColor = true }) {
     if (item.type === OBS_TYPES.DISCRETE) {
       return null;
     }
+    const inLabelObs = _.some(dataset.labelObs, (i) => i.name === item.name);
+    const inSliceObs =
+      dataset.sliceBy.obs && dataset.selectedObs?.name === item.name;
+    const isColorEncoding =
+      dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+      dataset.selectedObs?.name === item.name;
     return (
       <Accordion.Item
         key={item.name}
@@ -174,7 +186,32 @@ export function ObsColsList({ showColor = true }) {
         }
       >
         <Accordion.Header onClick={() => handleAccordionToggle(item.name)}>
-          {item.name}
+          <div className="d-flex justify-content-between w-100 me-2 mr-2">
+            <div>{item.name}</div>
+            <Badge pill>
+              {inLabelObs && (
+                <FontAwesomeIcon
+                  className="mx-1"
+                  icon={faMessage}
+                  title="In tooltip"
+                />
+              )}
+              {inSliceObs && (
+                <FontAwesomeIcon
+                  className="mx-1"
+                  icon={faFilter}
+                  title="Filter applied"
+                />
+              )}
+              {isColorEncoding && (
+                <FontAwesomeIcon
+                  className="mx-1"
+                  icon={faDroplet}
+                  title="Is color encoding"
+                />
+              )}
+            </Badge>
+          </div>
         </Accordion.Header>
         <Accordion.Body>
           {expandedItems[item.name] &&

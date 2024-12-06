@@ -1,6 +1,10 @@
 import React from "react";
 
-import { faDroplet, faEye, faFont } from "@fortawesome/free-solid-svg-icons";
+import {
+  faDroplet,
+  faFilter,
+  faMessage,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 import { Form, ButtonGroup, Button } from "react-bootstrap";
@@ -51,7 +55,7 @@ export function ObsToolbar({
               onClick={onToggleLabel}
               title="Add to tooltip"
             >
-              <FontAwesomeIcon icon={faFont} />
+              <FontAwesomeIcon icon={faMessage} />
             </Button>
           )}
           {showSlice && (
@@ -59,9 +63,9 @@ export function ObsToolbar({
               variant={inSliceObs ? "primary" : "outline-primary"}
               size="sm"
               onClick={onToggleSlice}
-              title="Slice to selected"
+              title="Filter to selected"
             >
-              <FontAwesomeIcon icon={faEye} />
+              <FontAwesomeIcon icon={faFilter} />
             </Button>
           )}
           {showColor && (
