@@ -36,7 +36,7 @@ import {
   useZarr,
 } from "../../helpers/zarr-helper";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
-import { prettyNumerical } from "../../utils/string";
+import { formatNumerical } from "../../utils/string";
 
 window.deck.log.level = 1;
 
@@ -86,20 +86,20 @@ export function Scatterplot({ radius = 30 }) {
     !dataset.selectedVar
       ? []
       : !dataset.selectedVar?.isSet
-      ? [
-          {
-            url: dataset.url,
-            path: "X",
-            s: [null, dataset.selectedVar?.matrix_index],
-          },
-        ]
-      : _.map(dataset.selectedVar?.vars, (v) => {
-          return {
-            url: dataset.url,
-            path: "X",
-            s: [null, v.matrix_index],
-          };
-        })
+        ? [
+            {
+              url: dataset.url,
+              path: "X",
+              s: [null, dataset.selectedVar?.matrix_index],
+            },
+          ]
+        : _.map(dataset.selectedVar?.vars, (v) => {
+            return {
+              url: dataset.url,
+              path: "X",
+              s: [null, v.matrix_index],
+            };
+          })
   );
   const [obsParams, setObsParams] = useState({
     url: dataset.url,
@@ -130,20 +130,20 @@ export function Scatterplot({ radius = 30 }) {
       !dataset.selectedVar
         ? []
         : !dataset.selectedVar?.isSet
-        ? [
-            {
-              url: dataset.url,
-              path: "X",
-              s: [null, dataset.selectedVar?.matrix_index],
-            },
-          ]
-        : _.map(dataset.selectedVar?.vars, (v) => {
-            return {
-              url: dataset.url,
-              path: "X",
-              s: [null, v.matrix_index],
-            };
-          })
+          ? [
+              {
+                url: dataset.url,
+                path: "X",
+                s: [null, dataset.selectedVar?.matrix_index],
+              },
+            ]
+          : _.map(dataset.selectedVar?.vars, (v) => {
+              return {
+                url: dataset.url,
+                path: "X",
+                s: [null, v.matrix_index],
+              };
+            })
     );
   }, [dataset.selectedVar, dataset.url]);
 
@@ -331,7 +331,7 @@ export function Scatterplot({ radius = 30 }) {
         if (dataset.selectedObs.type === OBS_TYPES.CATEGORICAL) {
           inSlice &= !_.includes(dataset.selectedObs.omit, values[index]);
         } else if (dataset.selectedObs.type === OBS_TYPES.CONTINUOUS) {
-          if (Number.isNaN(values[index])) {
+          if (isNaN(values[index])) {
             inSlice &= !_.includes(dataset.selectedObs.omit, -1);
           } else {
             inSlice &= isInBins(
@@ -547,7 +547,7 @@ export function Scatterplot({ radius = 30 }) {
 
   const getLabel = (o, v, isVar = false) => {
     if (isVar || o.type === OBS_TYPES.CONTINUOUS) {
-      return `${o.name}: ${prettyNumerical(parseFloat(v))}`;
+      return `${o.name}: ${formatNumerical(parseFloat(v))}`;
     } else {
       return `${o.name}: ${o.codesMap[v]}`;
     }
@@ -640,8 +640,8 @@ export function Scatterplot({ radius = 30 }) {
               dataset.colorEncoding === COLOR_ENCODINGS.VAR
                 ? dataset.selectedVar.name
                 : dataset.colorEncoding === COLOR_ENCODINGS.OBS
-                ? dataset.selectedObs.name
-                : null
+                  ? dataset.selectedObs.name
+                  : null
             }
             obsLength={parseInt(obsmData.data?.length)}
             slicedLength={parseInt(slicedLength)}

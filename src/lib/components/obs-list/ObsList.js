@@ -4,7 +4,7 @@ import _ from "lodash";
 import { Accordion, Alert } from "react-bootstrap";
 
 import { CategoricalObs, ContinuousObs } from "./ObsItem";
-import { OBS_TYPES } from "../../constants/constants";
+import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
@@ -140,7 +140,11 @@ export function ObsColsList({ showColor = true }) {
       <Accordion.Item
         key={item.name}
         eventKey={item.name}
-        className={active === item.name && "cherita-accordion-active"}
+        className={
+          active === item.name &&
+          dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+          "cherita-accordion-active"
+        }
       >
         <Accordion.Header>{item.name}</Accordion.Header>
         <Accordion.Body>

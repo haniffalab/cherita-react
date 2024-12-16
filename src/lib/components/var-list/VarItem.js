@@ -16,7 +16,7 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
 import { useFetch, useDebouncedFetch } from "../../utils/requests";
-import { prettyNumerical } from "../../utils/string";
+import { formatNumerical, FORMATS } from "../../utils/string";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 
 function VarHistogram({ item }) {
@@ -66,14 +66,15 @@ function VarHistogram({ item }) {
             showHighlight={true}
             showTooltip={true}
             valueFormatter={(v, { dataIndex }) =>
-              `${prettyNumerical(fetchedData.hist[dataIndex])}`
+              `${formatNumerical(fetchedData.hist[dataIndex])}`
             }
             xAxis={{
               data: _.range(fetchedData.bin_edges?.length) || null,
               valueFormatter: (v) =>
-                `Bin [${prettyNumerical(
-                  fetchedData.bin_edges[v][0]
-                )}, ${prettyNumerical(fetchedData.bin_edges[v][1])}${
+                `Bin [${formatNumerical(
+                  fetchedData.bin_edges[v][0],
+                  FORMATS.EXPONENTIAL
+                )}, ${formatNumerical(fetchedData.bin_edges[v][1], FORMATS.EXPONENTIAL)}${
                   v === fetchedData.bin_edges.length - 1 ? "]" : ")"
                 }`,
             }}
@@ -184,8 +185,8 @@ export function SingleSelectionItem({
                   isActive
                     ? "primary"
                     : isNotInData
-                    ? "outline-secondary"
-                    : "outline-primary"
+                      ? "outline-secondary"
+                      : "outline-primary"
                 }
                 className="m-0 p-0 px-1"
                 onClick={(e) => {
