@@ -3,20 +3,14 @@ import React, { useEffect, useState } from "react";
 import { faDroplet, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MoreVert } from "@mui/icons-material";
-import { SparkLineChart } from "@mui/x-charts";
-import {
-  blueberryTwilightPalette,
-  mangoFusionPalette,
-} from "@mui/x-charts/colorPalettes";
 import _ from "lodash";
 import { Button, Collapse, ListGroup, Table } from "react-bootstrap";
 
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
-import { LoadingLinear } from "../../utils/LoadingIndicators";
+import { Histogram } from "../../utils/Histogram";
 import { useFetch, useDebouncedFetch } from "../../utils/requests";
-import { formatNumerical, FORMATS } from "../../utils/string";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 
 function VarHistogram({ item }) {
@@ -27,14 +21,14 @@ function VarHistogram({ item }) {
   const [params, setParams] = useState({
     url: dataset.url,
     varKey: item.matrix_index,
-    obsIndices: isSliced && Array.from(filteredData.obsIndices || []),
+    obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
   });
 
   useEffect(() => {
     setParams((p) => {
       return {
         ...p,
-        obsIndices: isSliced && Array.from(filteredData.obsIndices || []),
+        obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
       };
     });
   }, [filteredData.obsIndices, isSliced]);
@@ -48,45 +42,9 @@ function VarHistogram({ item }) {
   );
 
   return (
-    <div className="feature-histogram-container">
-      {isPending ? (
-        <LoadingLinear />
-      ) : !serverError && fetchedData ? (
-        <div className="feature-histogram m-1">
-          <SparkLineChart
-            plotType="bar"
-            data={fetchedData.log10}
-            margin={{
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-            }}
-            colors={isSliced ? mangoFusionPalette : blueberryTwilightPalette}
-            showHighlight={true}
-            showTooltip={true}
-            valueFormatter={(v, { dataIndex }) =>
-              `${formatNumerical(fetchedData.hist[dataIndex])}`
-            }
-            xAxis={{
-              data: _.range(fetchedData.bin_edges?.length) || null,
-              valueFormatter: (v) =>
-                `Bin [${formatNumerical(
-                  fetchedData.bin_edges[v][0],
-                  FORMATS.EXPONENTIAL
-                )}, ${formatNumerical(fetchedData.bin_edges[v][1], FORMATS.EXPONENTIAL)}${
-                  v === fetchedData.bin_edges.length - 1 ? "]" : ")"
-                }`,
-            }}
-            slotProps={{
-              popper: {
-                className: "feature-histogram-tooltip",
-              },
-            }}
-          />
-        </div>
-      ) : null}
-    </div>
+    !serverError && (
+      <Histogram data={fetchedData} isPending={isPending} altColor={isSliced} />
+    )
   );
 }
 
@@ -171,7 +129,9 @@ export function SingleSelectionItem({
   };
   const isNotInData = item.matrix_index === -1;
 
-  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params);
+  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
+    refetchOnMount: false,
+  });
 
   const hasDiseaseInfo = !isPending && !serverError && !!fetchedData.length;
 

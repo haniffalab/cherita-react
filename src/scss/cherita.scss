@@ -128,6 +128,10 @@
   background-color: #cce3ed;
 }
 
+.obs-item {
+  box-sizing: border-box;
+}
+
 .obs-value-list-check {
   padding-right: 1rem;
   word-break: auto-phrase;
@@ -268,6 +272,7 @@
   @extend .col-xxl-6;
 
   position: relative;
+  max-height: 100%;
 }
 
 .cherita-app-obs {

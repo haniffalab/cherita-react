@@ -47,7 +47,12 @@ export async function fetchData(
   return await response.json();
 }
 
-export const useFetch = (endpoint, params, opts = {}, apiUrl = null) => {
+export const useFetch = (
+  endpoint,
+  params,
+  opts = { refetchOnMount: false, refetchOnWindowFocus: false },
+  apiUrl = null
+) => {
   const { enabled = true } = opts;
   const {
     data: fetchedData = null,
@@ -72,7 +77,7 @@ export const useDebouncedFetch = (
   endpoint,
   params,
   delay = 500,
-  opts = {},
+  opts = { refetchOnMount: false, refetchOnWindowFocus: false },
   apiUrl = null
 ) => {
   const { enabled = true } = opts;

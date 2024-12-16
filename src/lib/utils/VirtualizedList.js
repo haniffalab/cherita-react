@@ -6,7 +6,7 @@ export function VirtualizedList({
   getDataAtIndex,
   count,
   ItemComponent,
-  estimateSize = 44,
+  estimateSize = 45,
   overscan = 25,
   maxHeight = "80vh",
   ...props
@@ -28,7 +28,7 @@ export function VirtualizedList({
 
   useEffect(() => {
     itemVirtualizer.measure();
-  }, [itemVirtualizer, parentNode?.clientHeight]);
+  }, [itemVirtualizer, parentNode?.clientHeight, getDataAtIndex]);
 
   return (
     <div

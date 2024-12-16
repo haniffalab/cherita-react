@@ -37,7 +37,10 @@ const useVarMean = (varKeys, enabled = false) => {
     });
   }, [varKeys]);
 
-  return useFetch(ENDPOINT, params, { enabled: enabled });
+  return useFetch(ENDPOINT, params, {
+    enabled: enabled,
+    refetchOnMount: false,
+  });
 };
 
 // @TODO: display where disease data comes from
@@ -63,6 +66,7 @@ function DiseaseVarList({ makeListItem }) {
 
   const diseaseData = useFetch(ENDPOINT, params, {
     enabled: !!params.diseaseId,
+    refetchOnMount: false,
   });
 
   useEffect(() => {

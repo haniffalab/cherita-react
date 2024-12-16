@@ -8,6 +8,7 @@ import DotplotDemo from "./containers/DotplotDemo";
 import { FullPageDemo } from "./containers/FullPageDemo";
 import HeatmapDemo from "./containers/HeatmapDemo";
 import MatrixplotDemo from "./containers/MatrixplotDemo";
+import { PlotsDemo } from "./containers/PlotsDemo";
 import { PseudospatialDemo } from "./containers/PseudospatialDemo";
 import ScatterplotDemo from "./containers/ScatterplotDemo";
 import ViolinDemo from "./containers/ViolinDemo";
@@ -41,6 +42,7 @@ export default function App(props) {
           path="/full-page"
           element={<FullPageDemo {...props} />}
         ></Route>
+        <Route exact path="/plots" element={<PlotsDemo {...props} />}></Route>
       </Routes>
       <Footer />
     </div>
