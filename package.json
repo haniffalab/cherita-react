@@ -64,7 +64,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build:babel": "babel src/lib --out-dir dist --copy-files",
-    "build:scss": "sass --load-path=node_modules src/scss/cherita.scss dist/css/cherita.css",
+    "build:scss": "sass --load-path=node_modules src/scss/cherita-bootstrap.scss dist/css/cherita.css",
     "copy:scss": "cpx src/scss/**/* scss",
     "build": "npm run build:babel && npm run build:scss && npm run copy:scss",
     "test": "react-scripts test",
