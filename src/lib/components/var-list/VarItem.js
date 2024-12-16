@@ -3,41 +3,37 @@ import React, { useEffect, useState } from "react";
 import { faDroplet, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MoreVert } from "@mui/icons-material";
-import { SparkLineChart } from "@mui/x-charts";
-import {
-  blueberryTwilightPalette,
-  mangoFusionPalette,
-} from "@mui/x-charts/colorPalettes";
 import _ from "lodash";
 import { Button, Collapse, ListGroup, Table } from "react-bootstrap";
 
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
-import { LoadingLinear } from "../../utils/LoadingIndicators";
+import { Histogram } from "../../utils/Histogram";
 import { useFetch, useDebouncedFetch } from "../../utils/requests";
-import { prettyNumerical } from "../../utils/string";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 
 function VarHistogram({ item }) {
   const ENDPOINT = "var/histograms";
   const dataset = useDataset();
-  const filteredData = useFilteredData();
+  const { obsIndices } = useFilteredData();
+  // @TODO: consider using Filter's isSliced; would trigger more re-renders/requests
+  // const { obsIndices, isSliced } = useFilteredData();
   const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
   const [params, setParams] = useState({
     url: dataset.url,
-    var_index: item.matrix_index,
-    obs_indices: isSliced && Array.from(filteredData.obsIndices || []),
+    varKey: item.matrix_index,
+    obsIndices: isSliced ? [...(obsIndices || [])] : null,
   });
 
   useEffect(() => {
     setParams((p) => {
       return {
         ...p,
-        obs_indices: isSliced && Array.from(filteredData.obsIndices || []),
+        obsIndices: isSliced ? [...(obsIndices || [])] : null,
       };
     });
-  }, [filteredData.obsIndices, isSliced]);
+  }, [obsIndices, isSliced]);
 
   const { fetchedData, isPending, serverError } = useDebouncedFetch(
     ENDPOINT,
@@ -48,52 +44,31 @@ function VarHistogram({ item }) {
   );
 
   return (
-    <div className="feature-histogram-container">
-      {isPending ? (
-        <LoadingLinear />
-      ) : !serverError && fetchedData ? (
-        <div className="feature-histogram m-1">
-          <SparkLineChart
-            plotType="bar"
-            data={fetchedData.log10}
-            margin={{
-              top: 0,
-              right: 0,
-              bottom: 0,
-              left: 0,
-            }}
-            colors={isSliced ? mangoFusionPalette : blueberryTwilightPalette}
-            showHighlight={true}
-            showTooltip={true}
-            valueFormatter={(v, { dataIndex }) =>
-              `${prettyNumerical(fetchedData.hist[dataIndex])}`
-            }
-            xAxis={{
-              data: _.range(fetchedData.bin_edges?.length) || null,
-              valueFormatter: (v) =>
-                `Bin [${prettyNumerical(
-                  fetchedData.bin_edges[v][0]
-                )}, ${prettyNumerical(fetchedData.bin_edges[v][1])}${
-                  v === fetchedData.bin_edges.length - 1 ? "]" : ")"
-                }`,
-            }}
-            slotProps={{
-              popper: {
-                className: "feature-histogram-tooltip",
-              },
-            }}
-          />
-        </div>
-      ) : null}
-    </div>
+    !serverError && (
+      <Histogram data={fetchedData} isPending={isPending} altColor={isSliced} />
+    )
   );
 }
 
 function VarDiseaseInfoItem(item) {
+  const dispatch = useDatasetDispatch();
   return (
-    <ListGroup.Item className="feature-disease-info">
+    <ListGroup.Item key={item.disease_name} className="feature-disease-info">
       <div>
-        {item.disease_name} <br />
+        <button
+          type="button"
+          className="btn btn-link"
+          onClick={() => {
+            dispatch({
+              type: "select.disease",
+              id: item.disease_id,
+              name: item.disease_name,
+            });
+          }}
+        >
+          {item.disease_name}
+        </button>
+        <br />
         <Table striped>
           <tbody>
             <tr>
@@ -129,8 +104,8 @@ function VarDiseaseInfo({ data }) {
         <VirtualizedList
           getDataAtIndex={(index) => data[index]}
           count={data.length}
-          estimateSize={70}
-          maxHeight="40vh"
+          estimateSize={140}
+          maxHeight="100%"
           ItemComponent={VarDiseaseInfoItem}
         />
       </ListGroup>
@@ -156,7 +131,9 @@ export function SingleSelectionItem({
   };
   const isNotInData = item.matrix_index === -1;
 
-  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params);
+  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
+    refetchOnMount: false,
+  });
 
   const hasDiseaseInfo = !isPending && !serverError && !!fetchedData.length;
 
@@ -184,8 +161,8 @@ export function SingleSelectionItem({
                   isActive
                     ? "primary"
                     : isNotInData
-                    ? "outline-secondary"
-                    : "outline-primary"
+                      ? "outline-secondary"
+                      : "outline-primary"
                 }
                 className="m-0 p-0 px-1"
                 onClick={(e) => {
@@ -219,7 +196,7 @@ export function SingleSelectionItem({
       </div>
       {hasDiseaseInfo && (
         <Collapse in={openInfo}>
-          <div className="mt-2">
+          <div className="mt-2 var-disease-info-collapse">
             <VarDiseaseInfo data={fetchedData} />
           </div>
         </Collapse>

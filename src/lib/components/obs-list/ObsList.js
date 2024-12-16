@@ -4,7 +4,7 @@ import _ from "lodash";
 import { Accordion, Alert } from "react-bootstrap";
 
 import { CategoricalObs, ContinuousObs } from "./ObsItem";
-import { OBS_TYPES } from "../../constants/constants";
+import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
@@ -15,6 +15,13 @@ export function ObsColsList({ showColor = true }) {
   const dispatch = useDatasetDispatch();
   const [obsCols, setObsCols] = useState(null);
   const [active, setActive] = useState(dataset.selectedObs?.name);
+  const [expandedItems, setExpandedItems] = useState(
+    active
+      ? {
+          [active]: true,
+        }
+      : {}
+  );
   const [params, setParams] = useState({
     url: dataset.url,
   });
@@ -34,16 +41,24 @@ export function ObsColsList({ showColor = true }) {
 
   useEffect(() => {
     if (!isPending && !serverError) {
+      let filteredData = fetchedData;
+
+      if (dataset.obsCols) {
+        filteredData = _.filter(filteredData, (d) => {
+          return _.includes(dataset.obsCols, d.name);
+        });
+      }
+
       setObsCols(
         _.keyBy(
-          _.map(fetchedData, (d) => {
+          _.map(filteredData, (d) => {
             return { ...d, codesMap: _.invert(d.codes), omit: [] };
           }),
           "name"
         )
       );
     }
-  }, [fetchedData, isPending, serverError]);
+  }, [dataset.obsCols, fetchedData, isPending, serverError]);
 
   // @TODO: fix re-rendering performance issue
   useEffect(() => {
@@ -60,6 +75,18 @@ export function ObsColsList({ showColor = true }) {
     setObsCols((o) => {
       return { ...o, [updatedObs.name]: updatedObs };
     });
+  };
+
+  const handleAccordionToggle = (itemName) => {
+    _.delay(
+      // to avoid contents of accordion disappearing while closing
+      () => {
+        setExpandedItems((prev) => {
+          return { ...prev, [itemName]: !prev[itemName] };
+        });
+      },
+      expandedItems[itemName] ? 250 : 0
+    );
   };
 
   const toggleAll = (item) => {
@@ -140,35 +167,42 @@ export function ObsColsList({ showColor = true }) {
       <Accordion.Item
         key={item.name}
         eventKey={item.name}
-        className={active === item.name && "cherita-accordion-active"}
+        className={
+          active === item.name &&
+          dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+          "cherita-accordion-active"
+        }
       >
-        <Accordion.Header>{item.name}</Accordion.Header>
+        <Accordion.Header onClick={() => handleAccordionToggle(item.name)}>
+          {item.name}
+        </Accordion.Header>
         <Accordion.Body>
-          {item.type === OBS_TYPES.CATEGORICAL ||
-          item.type === OBS_TYPES.BOOLEAN ? (
-            <CategoricalObs
-              key={item.name}
-              obs={item}
-              updateObs={updateObs}
-              toggleAll={() => toggleAll(item)}
-              toggleObs={(value) => toggleObs(item, value)}
-              toggleLabel={() => toggleLabel(item)}
-              toggleSlice={() => toggleSlice(item)}
-              toggleColor={() => toggleColor(item)}
-              showColor={showColor}
-            />
-          ) : (
-            <ContinuousObs
-              key={item.name}
-              obs={item}
-              updateObs={updateObs}
-              toggleAll={() => toggleAll(item)}
-              toggleObs={(value) => toggleObs(item, value)}
-              toggleLabel={() => toggleLabel(item)}
-              toggleSlice={() => toggleSlice(item)}
-              toggleColor={() => toggleColor(item)}
-            />
-          )}
+          {expandedItems[item.name] &&
+            (item.type === OBS_TYPES.CATEGORICAL ||
+            item.type === OBS_TYPES.BOOLEAN ? (
+              <CategoricalObs
+                key={item.name}
+                obs={item}
+                updateObs={updateObs}
+                toggleAll={() => toggleAll(item)}
+                toggleObs={(value) => toggleObs(item, value)}
+                toggleLabel={() => toggleLabel(item)}
+                toggleSlice={() => toggleSlice(item)}
+                toggleColor={() => toggleColor(item)}
+                showColor={showColor}
+              />
+            ) : (
+              <ContinuousObs
+                key={item.name}
+                obs={item}
+                updateObs={updateObs}
+                toggleAll={() => toggleAll(item)}
+                toggleObs={(value) => toggleObs(item, value)}
+                toggleLabel={() => toggleLabel(item)}
+                toggleSlice={() => toggleSlice(item)}
+                toggleColor={() => toggleColor(item)}
+              />
+            ))}
         </Accordion.Body>
       </Accordion.Item>
     );
@@ -179,7 +213,7 @@ export function ObsColsList({ showColor = true }) {
       <div className="position-relative h-100">
         <div className="list-group overflow-auto h-100">
           {isPending && <LoadingSpinner />}
-          <Accordion flush defaultActiveKey={active} alwaysOpen>
+          <Accordion flush defaultActiveKey={[active]} alwaysOpen>
             {obsList}
           </Accordion>
         </div>

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
+import _ from "lodash";
 
 import { parseError } from "./errors";
 
@@ -46,12 +47,17 @@ export async function fetchData(
   return await response.json();
 }
 
-export const useFetch = (endpoint, params, opts = {}, apiUrl = null) => {
+export const useFetch = (
+  endpoint,
+  params,
+  opts = { refetchOnMount: false, refetchOnWindowFocus: false },
+  apiUrl = null
+) => {
   const { enabled = true } = opts;
   const {
-    data: fetchedData,
-    isLoading: isPending,
-    error: serverError,
+    data: fetchedData = null,
+    isLoading: isPending = false,
+    error: serverError = null,
   } = useQuery({
     queryKey: [endpoint, params],
     queryFn: ({ signal }) => {
@@ -71,16 +77,16 @@ export const useDebouncedFetch = (
   endpoint,
   params,
   delay = 500,
-  opts = {},
+  opts = { refetchOnMount: false, refetchOnWindowFocus: false },
   apiUrl = null
 ) => {
   const { enabled = true } = opts;
   const debouncedParams = useDebounce(params, delay);
 
   const {
-    data: fetchedData,
-    isLoading: isPending,
-    error: serverError,
+    data: fetchedData = null,
+    isLoading: isPending = false,
+    error: serverError = null,
   } = useQuery({
     queryKey: [endpoint, debouncedParams],
     queryFn: ({ signal }) => {

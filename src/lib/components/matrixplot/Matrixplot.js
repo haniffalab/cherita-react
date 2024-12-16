@@ -5,12 +5,14 @@ import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
 import { useDataset } from "../../context/DatasetContext";
+import { useFilteredData } from "../../context/FilterContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 
 export function Matrixplot() {
   const ENDPOINT = "matrixplot";
   const dataset = useDataset();
+  const { obsIndices, isSliced } = useFilteredData();
   const colorscale = useRef(dataset.controls.colorScale);
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
@@ -27,6 +29,7 @@ export function Matrixplot() {
     varKeys: dataset.selectedMultiVar.map((i) =>
       i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
     ),
+    obsIndices: isSliced ? [...(obsIndices || [])] : null,
     standardScale: dataset.controls.standardScale,
     varNamesCol: dataset.varNamesCol,
   });
@@ -53,6 +56,7 @@ export function Matrixplot() {
             ? { name: i.name, indices: i.vars.map((v) => v.index) }
             : i.index
         ),
+        obsIndices: isSliced ? [...(obsIndices || [])] : null,
         standardScale: dataset.controls.standardScale,
         varNamesCol: dataset.varNamesCol,
       };
@@ -63,6 +67,8 @@ export function Matrixplot() {
     dataset.selectedObs,
     dataset.url,
     dataset.varNamesCol,
+    obsIndices,
+    isSliced,
   ]);
 
   const updateColorscale = useCallback((colorscale) => {

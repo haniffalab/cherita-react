@@ -5,12 +5,14 @@ import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
 import { useDataset } from "../../context/DatasetContext";
+import { useFilteredData } from "../../context/FilterContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 
 export function Heatmap() {
   const ENDPOINT = "heatmap";
   const dataset = useDataset();
+  const { obsIndices, isSliced } = useFilteredData();
   const colorscale = useRef(dataset.controls.colorScale);
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
@@ -27,6 +29,7 @@ export function Heatmap() {
     varKeys: dataset.selectedMultiVar.map((i) =>
       i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
     ),
+    obsIndices: isSliced ? [...(obsIndices || [])] : null,
     varNamesCol: dataset.varNamesCol,
   });
 
@@ -52,6 +55,7 @@ export function Heatmap() {
             ? { name: i.name, indices: i.vars.map((v) => v.index) }
             : i.index
         ),
+        obsIndices: isSliced ? [...(obsIndices || [])] : null,
         varNamesCol: dataset.varNamesCol,
       };
     });
@@ -60,6 +64,8 @@ export function Heatmap() {
     dataset.selectedObs,
     dataset.url,
     dataset.varNamesCol,
+    obsIndices,
+    isSliced,
   ]);
 
   const updateColorscale = useCallback((colorscale) => {

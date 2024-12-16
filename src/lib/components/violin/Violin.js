@@ -8,12 +8,14 @@ import Plot from "react-plotly.js";
 
 import { VIOLIN_MODES } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
+import { useFilteredData } from "../../context/FilterContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 
 export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
   const ENDPOINT = "violin";
   const dataset = useDataset();
+  const { obsIndices, isSliced } = useFilteredData();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
@@ -45,6 +47,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
               _.values(dataset.selectedObs?.codes),
               dataset.selectedObs?.omit
             ).map((c) => dataset.selectedObs?.codesMap[c]),
+        obsIndices: isSliced ? [...(obsIndices || [])] : null,
       },
     }[mode],
   });
@@ -95,6 +98,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
                 _.values(dataset.selectedObs?.codes),
                 dataset.selectedObs?.omit
               ).map((c) => dataset.selectedObs?.codesMap[c]),
+          obsIndices: isSliced ? [...(obsIndices || [])] : null,
           scale: dataset.controls.scale.violinplot.value,
           varNamesCol: dataset.varNamesCol,
         };
@@ -107,6 +111,8 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     dataset.selectedVar,
     dataset.url,
     dataset.varNamesCol,
+    obsIndices,
+    isSliced,
     mode,
   ]);
 

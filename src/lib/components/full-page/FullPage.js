@@ -2,8 +2,11 @@ import React, { useState, useRef, useLayoutEffect } from "react";
 
 import { Navbar, Nav, Card } from "react-bootstrap";
 
-import { SELECTION_MODES } from "../../constants/constants";
+import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
+import { Dotplot } from "../dotplot/Dotplot";
+import { Heatmap } from "../heatmap/Heatmap";
+import { Matrixplot } from "../matrixplot/Matrixplot";
 import { ObsColsList } from "../obs-list/ObsList";
 import {
   OffcanvasObs,
@@ -11,12 +14,21 @@ import {
   OffcanvasVars,
   OffcanvasControls,
 } from "../offcanvas";
+import {
+  Pseudospatial,
+  PseudospatialImage,
+} from "../pseudospatial/Pseudospatial";
 import { Scatterplot } from "../scatterplot/Scatterplot";
 import { ScatterplotControls } from "../scatterplot/ScatterplotControls";
 import { SearchBar } from "../search-bar/SearchBar";
 import { VarNamesList } from "../var-list/VarList";
+import { Violin } from "../violin/Violin";
 
-export function FullPage(props) {
+export function FullPage({
+  children,
+  varMode = SELECTION_MODES.SINGLE,
+  ...props
+}) {
   const targetRef = useRef();
 
   const [showObs, setShowObs] = useState(false);
@@ -79,15 +91,13 @@ export function FullPage(props) {
                 </div>
               </Navbar>
             </div>
-            <div className="cherita-container-scatterplot">
-              <Scatterplot />
-            </div>
+            {children}
           </div>
           <div className="cherita-app-var">
             <Card className="cherita-app-features">
               <Card.Body>
-                <SearchBar searchDiseases={true} />
-                <VarNamesList mode={SELECTION_MODES.SINGLE} />
+                <SearchBar searchDiseases={true} searchVar={true} />
+                <VarNamesList mode={varMode} />
               </Card.Body>
             </Card>
           </div>
@@ -113,5 +123,62 @@ export function FullPage(props) {
         </div>
       </DatasetProvider>
     </div>
+  );
+}
+
+export function FullPageScatterplot(props) {
+  return (
+    <FullPage {...props}>
+      <Scatterplot />
+    </FullPage>
+  );
+}
+
+export function FullPagePseudospatial(props) {
+  return (
+    <FullPage {...props}>
+      <div className="container-fluid h-100">
+        <div className="row">
+          <div className="col-12 col-lg-7">
+            <Scatterplot />
+          </div>
+          <div className="col-12 col-lg-5">
+            <div className="container-fluid h-100 d-flex align-itemms-center justify-content-center">
+              <div className="row w-100 py-3">
+                <div className="col-12">
+                  <div className="p-2">
+                    <Pseudospatial />
+                  </div>
+                </div>
+                <div className="col-12">
+                  <PseudospatialImage />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </FullPage>
+  );
+}
+
+export function FullPagePlots(props) {
+  return (
+    <FullPage {...props} varMode={SELECTION_MODES.MULTIPLE}>
+      <div className="container-fluid w-100 h-100 d-flex flex-column overflow-y-auto">
+        <div className="row flex-grow-1">
+          <Heatmap />
+        </div>
+        <div className="row flex-grow-1">
+          <Matrixplot />
+        </div>
+        <div className="row flex-grow-1">
+          <Dotplot />
+        </div>
+        <div className="row flex-grow-1">
+          <Violin mode={VIOLIN_MODES.GROUPBY} />
+        </div>
+      </div>
+    </FullPage>
   );
 }

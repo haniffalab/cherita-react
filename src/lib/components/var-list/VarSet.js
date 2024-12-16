@@ -21,6 +21,8 @@ import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { SearchBar } from "../search-bar/SearchBar";
 
+// @TODO: add button to score genes and plot
+
 const addVarToSet = (dispatch, set, v) => {
   dispatch({
     type: "add.varSet.var",

@@ -6,12 +6,16 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import _ from "lodash";
 
 import { FilterProvider } from "./FilterContext";
+import { ZarrDataProvider } from "./ZarrDataContext";
 import {
   COLOR_ENCODINGS,
   DOTPLOT_SCALES,
   LOCAL_STORAGE_KEY,
   MATRIXPLOT_SCALES,
   OBS_TYPES,
+  PSEUDOSPATIAL_CATEGORICAL_MODES,
+  VAR_SORT,
+  VAR_SORT_ORDER,
   VIOLINPLOT_SCALES,
 } from "../constants/constants";
 
@@ -87,6 +91,24 @@ const initialDataset = {
   },
   diseaseDatasets: [],
   selectedDisease: null,
+  varSort: {
+    var: {
+      sort: VAR_SORT.NONE,
+      sortOrder: VAR_SORT_ORDER.ASC,
+    },
+    disease: {
+      sort: VAR_SORT.NONE,
+      sortOrder: VAR_SORT_ORDER.ASC,
+    },
+  },
+  obsCols: null, // @TODO: implement specifying groups/categories for dropdowns
+  imageUrl: null,
+  pseudospatial: {
+    maskSet: null,
+    maskValues: null,
+    categoricalMode: PSEUDOSPATIAL_CATEGORICAL_MODES.ACROSS.value,
+  },
+  polygons: {},
 };
 
 const initializer = (initialState) => {
@@ -99,11 +121,7 @@ const initializer = (initialState) => {
   return _.assign(initialState, localValues);
 };
 
-export function DatasetProvider({
-  dataset_url,
-  dataset_params = null,
-  children,
-}) {
+export function DatasetProvider({ dataset_url, children, ...dataset_params }) {
   const [dataset, dispatch] = useReducer(
     datasetReducer,
     _.assign(
@@ -141,7 +159,9 @@ export function DatasetProvider({
           client={queryClient}
           persistOptions={persistOptions}
         >
-          <FilterProvider>{children}</FilterProvider>
+          <FilterProvider>
+            <ZarrDataProvider>{children}</ZarrDataProvider>
+          </FilterProvider>
         </PersistQueryClientProvider>
       </DatasetDispatchContext.Provider>
     </DatasetContext.Provider>
@@ -475,6 +495,78 @@ function datasetReducer(dataset, action) {
       return {
         ...dataset,
         labelObs: [],
+      };
+    }
+    case "set.varSort": {
+      return {
+        ...dataset,
+        varSort: {
+          ...dataset.varSort,
+          [action.var]: {
+            sort: action.sort,
+            sortOrder: action.sortOrder,
+          },
+        },
+      };
+    }
+    case "set.varSort.sort": {
+      return {
+        ...dataset,
+        varSort: {
+          ...dataset.varSort,
+          [action.var]: {
+            ...dataset.varSort[action.var],
+            sort: action.sort,
+          },
+        },
+      };
+    }
+    case "set.varSort.sortOrder": {
+      return {
+        ...dataset,
+        varSort: {
+          ...dataset.varSort,
+          [action.var]: {
+            ...dataset.varSort[action.var],
+            sortOrder: action.sortOrder,
+          },
+        },
+      };
+    }
+    case "set.polygons": {
+      return {
+        ...dataset,
+        polygons: {
+          ...dataset.polygons,
+          [action.obsm]: action.polygons,
+        },
+      };
+    }
+    case "set.pseudospatial.maskSet": {
+      return {
+        ...dataset,
+        pseudospatial: {
+          ...dataset.pseudospatial,
+          maskSet: action.maskSet,
+        },
+      };
+    }
+    case "set.pseudospatial.maskValues": {
+      return {
+        ...dataset,
+        pseudospatial: {
+          ...dataset.pseudospatial,
+          maskValues: action.maskValues,
+        },
+      };
+    }
+    case "set.pseudospatial.categoricalMode": {
+      return {
+        ...dataset,
+        pseudospatial: {
+          ...dataset.pseudospatial,
+          categoricalMode: action.categoricalMode,
+        },
       };
     }
     default: {
