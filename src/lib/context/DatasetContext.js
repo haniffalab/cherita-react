@@ -12,6 +12,8 @@ import {
   LOCAL_STORAGE_KEY,
   MATRIXPLOT_SCALES,
   OBS_TYPES,
+  VAR_SORT,
+  VAR_SORT_ORDER,
   VIOLINPLOT_SCALES,
 } from "../constants/constants";
 
@@ -87,6 +89,16 @@ const initialDataset = {
   },
   diseaseDatasets: [],
   selectedDisease: null,
+  varSort: {
+    var: {
+      sort: VAR_SORT.NONE,
+      sortOrder: VAR_SORT_ORDER.ASC,
+    },
+    disease: {
+      sort: VAR_SORT.NONE,
+      sortOrder: VAR_SORT_ORDER.ASC,
+    },
+  },
 };
 
 const initializer = (initialState) => {
@@ -475,6 +487,42 @@ function datasetReducer(dataset, action) {
       return {
         ...dataset,
         labelObs: [],
+      };
+    }
+    case "set.varSort": {
+      return {
+        ...dataset,
+        varSort: {
+          ...dataset.varSort,
+          [action.var]: {
+            sort: action.sort,
+            sortOrder: action.sortOrder,
+          },
+        },
+      };
+    }
+    case "set.varSort.sort": {
+      return {
+        ...dataset,
+        varSort: {
+          ...dataset.varSort,
+          [action.var]: {
+            ...dataset.varSort[action.var],
+            sort: action.sort,
+          },
+        },
+      };
+    }
+    case "set.varSort.sortOrder": {
+      return {
+        ...dataset,
+        varSort: {
+          ...dataset.varSort,
+          [action.var]: {
+            ...dataset.varSort[action.var],
+            sortOrder: action.sortOrder,
+          },
+        },
       };
     }
     default: {

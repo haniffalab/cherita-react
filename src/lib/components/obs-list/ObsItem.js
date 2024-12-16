@@ -204,7 +204,7 @@ function ObsContinuousStats({ obs }) {
   const dataset = useDataset();
   const params = {
     url: dataset.url,
-    obs_colname: obs.name,
+    obsColname: obs.name,
   };
 
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params);
@@ -294,7 +294,7 @@ export function ContinuousObs({
   const binnedObs = binContinuous(obs);
   const params = {
     url: dataset.url,
-    obs_col: binnedObs.name,
+    obsCol: binnedObs.name,
     thresholds: binnedObs.bins.thresholds,
     nBins: binnedObs.bins.nBins,
   };

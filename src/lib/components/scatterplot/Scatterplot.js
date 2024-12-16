@@ -30,13 +30,14 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredDataDispatch } from "../../context/FilterContext";
 import { useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
-import {
-  GET_OPTIONS,
-  useMultipleZarr,
-  useZarr,
-} from "../../helpers/zarr-helper";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { formatNumerical } from "../../utils/string";
+import {
+  useObsmData,
+  useXData,
+  useObsData,
+  useLabelObsData,
+} from "../../utils/zarrData";
 
 window.deck.log.level = 1;
 
@@ -50,10 +51,6 @@ const INITIAL_VIEW_STATE = {
 };
 
 const EPSILON = 1e-6;
-
-const meanData = (_i, data) => {
-  return _.zipWith(...data, (...values) => _.mean(values));
-};
 
 export function Scatterplot({ radius = 30 }) {
   const dataset = useDataset();
@@ -78,117 +75,10 @@ export function Scatterplot({ radius = 30 }) {
   });
   const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
 
-  const [obsmParams, setObsmParams] = useState({
-    url: dataset.url,
-    path: "obsm/" + dataset.selectedObsm,
-  });
-  const [xParams, setXParams] = useState(
-    !dataset.selectedVar
-      ? []
-      : !dataset.selectedVar?.isSet
-        ? [
-            {
-              url: dataset.url,
-              path: "X",
-              s: [null, dataset.selectedVar?.matrix_index],
-            },
-          ]
-        : _.map(dataset.selectedVar?.vars, (v) => {
-            return {
-              url: dataset.url,
-              path: "X",
-              s: [null, v.matrix_index],
-            };
-          })
-  );
-  const [obsParams, setObsParams] = useState({
-    url: dataset.url,
-    path:
-      "obs/" +
-      dataset.selectedObs?.name +
-      (dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
-  });
-
-  const [labelObsParams, setLabelObsParams] = useState([]);
-
-  const obsmData = useZarr(obsmParams, null, GET_OPTIONS);
-  const xData = useMultipleZarr(xParams, GET_OPTIONS, meanData);
-  const obsData = useZarr(obsParams, null, GET_OPTIONS);
-  const labelObsData = useMultipleZarr(labelObsParams, GET_OPTIONS);
-
-  useEffect(() => {
-    setObsmParams((p) => {
-      return {
-        ...p,
-        path: "obsm/" + dataset.selectedObsm,
-      };
-    });
-  }, [dataset.selectedObsm]);
-
-  useEffect(() => {
-    setXParams(
-      !dataset.selectedVar
-        ? []
-        : !dataset.selectedVar?.isSet
-          ? [
-              {
-                url: dataset.url,
-                path: "X",
-                s: [null, dataset.selectedVar?.matrix_index],
-              },
-            ]
-          : _.map(dataset.selectedVar?.vars, (v) => {
-              return {
-                url: dataset.url,
-                path: "X",
-                s: [null, v.matrix_index],
-              };
-            })
-    );
-  }, [dataset.selectedVar, dataset.url]);
-
-  useEffect(() => {
-    setObsParams((p) => {
-      return {
-        ...p,
-        path:
-          "obs/" +
-          dataset.selectedObs?.name +
-          (dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
-      };
-    });
-  }, [dataset.selectedObs]);
-
-  useEffect(() => {
-    setLabelObsParams(
-      _.map(dataset.labelObs, (obs) => {
-        return {
-          url: dataset.url,
-          path:
-            "obs/" +
-            obs.name +
-            (obs.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
-          key: obs.name,
-        };
-      })
-    );
-  }, [dataset.labelObs, dataset.url]);
-
-  useEffect(() => {
-    setObsmParams((p) => {
-      return {
-        ...p,
-        url: dataset.url,
-      };
-    });
-    setObsParams((p) => {
-      return {
-        ...p,
-        url: dataset.url,
-      };
-    });
-  }, [dataset.url]);
-
+  const obsmData = useObsmData();
+  const xData = useXData();
+  const obsData = useObsData();
+  const labelObsData = useLabelObsData();
   // @TODO: assert length of obsmData, xData, obsData is equal
 
   useEffect(() => {
@@ -365,6 +255,7 @@ export function Scatterplot({ radius = 30 }) {
     ]
   );
 
+  // @TODO: abstract filtering out of this component, maybe in FilterContext ?
   const { filteredIndices, valueMin, valueMax, slicedLength } = useMemo(() => {
     if (dataset.colorEncoding === COLOR_ENCODINGS.VAR) {
       const { filtered, filteredIndices } = _.reduce(

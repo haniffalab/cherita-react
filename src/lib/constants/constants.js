@@ -12,6 +12,17 @@ export const OBS_TYPES = {
   BOOLEAN: "boolean",
 };
 
+export const VAR_SORT = {
+  NONE: null,
+  NAME: "name",
+  MATRIX: "matrix",
+};
+
+export const VAR_SORT_ORDER = {
+  ASC: "asc",
+  DESC: "desc",
+};
+
 export const SELECTED_POLYGON_FILLCOLOR = [107, 170, 209, 255 / 2];
 export const UNSELECTED_POLYGON_FILLCOLOR = [167, 191, 211, 255 / 3];
 

@@ -26,15 +26,15 @@ function VarHistogram({ item }) {
   const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
   const [params, setParams] = useState({
     url: dataset.url,
-    var_index: item.matrix_index,
-    obs_indices: isSliced && Array.from(filteredData.obsIndices || []),
+    varKey: item.matrix_index,
+    obsIndices: isSliced && Array.from(filteredData.obsIndices || []),
   });
 
   useEffect(() => {
     setParams((p) => {
       return {
         ...p,
-        obs_indices: isSliced && Array.from(filteredData.obsIndices || []),
+        obsIndices: isSliced && Array.from(filteredData.obsIndices || []),
       };
     });
   }, [filteredData.obsIndices, isSliced]);
