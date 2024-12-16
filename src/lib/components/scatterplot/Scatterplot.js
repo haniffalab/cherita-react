@@ -31,13 +31,13 @@ import { useFilteredDataDispatch } from "../../context/FilterContext";
 import { useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
+import { formatNumerical } from "../../utils/string";
 import {
   useObsmData,
   useXData,
   useObsData,
   useLabelObsData,
 } from "../../utils/zarrData";
-import { formatNumerical } from "../../utils/string";
 
 window.deck.log.level = 1;
 
