@@ -76,6 +76,7 @@ const aggregateData = (inputs, data) => {
   return dataObject;
 };
 
+// @TODO: return response of successfully fetched data when error occurs
 export const useMultipleZarr = (inputs, opts = {}, agg = aggregateData) => {
   const [data, setData] = useState(null);
   const [isPending, setIsPending] = useState(true);

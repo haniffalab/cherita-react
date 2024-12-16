@@ -91,10 +91,24 @@ function VarHistogram({ item }) {
 }
 
 function VarDiseaseInfoItem(item) {
+  const dispatch = useDatasetDispatch();
   return (
-    <ListGroup.Item className="feature-disease-info">
+    <ListGroup.Item key={item.disease_name} className="feature-disease-info">
       <div>
-        {item.disease_name} <br />
+        <button
+          type="button"
+          className="btn btn-link"
+          onClick={() => {
+            dispatch({
+              type: "select.disease",
+              id: item.disease_id,
+              name: item.disease_name,
+            });
+          }}
+        >
+          {item.disease_name}
+        </button>
+        <br />
         <Table striped>
           <tbody>
             <tr>
@@ -130,8 +144,8 @@ function VarDiseaseInfo({ data }) {
         <VirtualizedList
           getDataAtIndex={(index) => data[index]}
           count={data.length}
-          estimateSize={70}
-          maxHeight="40vh"
+          estimateSize={140}
+          maxHeight="100%"
           ItemComponent={VarDiseaseInfoItem}
         />
       </ListGroup>
@@ -220,7 +234,7 @@ export function SingleSelectionItem({
       </div>
       {hasDiseaseInfo && (
         <Collapse in={openInfo}>
-          <div className="mt-2">
+          <div className="mt-2 var-disease-info-collapse">
             <VarDiseaseInfo data={fetchedData} />
           </div>
         </Collapse>

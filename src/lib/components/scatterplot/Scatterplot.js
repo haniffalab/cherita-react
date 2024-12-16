@@ -17,7 +17,6 @@ import { booleanPointInPolygon, point } from "@turf/turf";
 import _ from "lodash";
 import { Alert } from "react-bootstrap";
 
-import { Legend } from "./Legend";
 import { SpatialControls } from "./SpatialControls";
 import { Toolbox } from "./Toolbox";
 import {
@@ -28,8 +27,9 @@ import {
 } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredDataDispatch } from "../../context/FilterContext";
-import { useColor } from "../../helpers/color-helper";
+import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
+import { Legend } from "../../utils/Legend";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { formatNumerical } from "../../utils/string";
 import {
@@ -341,13 +341,22 @@ export function Scatterplot({ radius = 30 }) {
   const getFillColor = useCallback(
     (_d, { index }) => {
       const grayOut = filteredIndices && !filteredIndices.has(index);
-      return getColor(
-        (data.values[index] - min) / (max - min),
-        isCategorical,
-        grayOut
-      );
+      return getColor({
+        value: (data.values[index] - min) / (max - min),
+        categorical: isCategorical,
+        grayOut: grayOut,
+      });
     },
     [data.values, filteredIndices, getColor, isCategorical, max, min]
+  );
+
+  // @TODO: add support for pseudospatial hover to reflect in radius
+  const getRadius = useCallback(
+    (_d, { index }) => {
+      const grayOut = filteredIndices && !filteredIndices.has(index);
+      return grayOut ? 1 : 3;
+    },
+    [filteredIndices]
   );
 
   const memoizedLayers = useMemo(() => {
@@ -360,9 +369,10 @@ export function Scatterplot({ radius = 30 }) {
         radiusMinPixels: 1,
         getPosition: (d) => d,
         getFillColor: getFillColor,
-        getRadius: 1,
+        getRadius: getRadius,
         updateTriggers: {
           getFillColor: getFillColor,
+          getRadius: getRadius,
         },
       }),
       new EditableGeoJsonLayer({
@@ -404,6 +414,7 @@ export function Scatterplot({ radius = 30 }) {
     data.positions,
     features,
     getFillColor,
+    getRadius,
     mode,
     radius,
     selectedFeatureIndexes,
@@ -471,8 +482,16 @@ export function Scatterplot({ radius = 30 }) {
 
     if (!text.length) return;
 
+    const grayOut = filteredIndices && !filteredIndices.has(index);
+
     return {
       text: text.length ? _.compact(text).join("\n") : null,
+      className: grayOut ? "tooltip-grayout" : "deck-tooltip",
+      style: !grayOut
+        ? {
+            "border-left": `3px solid ${rgbToHex(getFillColor(null, { index }))}`,
+          }
+        : { "border-left": "none" },
     };
   };
 
@@ -489,56 +508,58 @@ export function Scatterplot({ radius = 30 }) {
     (dataset.labelObs.lengh && labelObsData.serverError?.length);
 
   return (
-    <div className="cherita-scatterplot">
-      {obsmData.isPending && <LoadingSpinner disableShrink={true} />}
-      {isPending && <LoadingLinear />}
-      <DeckGL
-        viewState={viewState}
-        onViewStateChange={(e) => setViewState(e.viewState)}
-        controller={{ doubleClickZoom: mode === ViewMode }}
-        layers={layers}
-        onClick={onLayerClick}
-        getTooltip={getTooltip}
-        onAfterRender={() => {
-          setIsRendering(false);
-        }}
-        useDevicePixels={false}
-        getCursor={({ isDragging }) =>
-          mode !== ViewMode ? "crosshair" : isDragging ? "grabbing" : "grab"
-        }
-        ref={deckRef}
-      ></DeckGL>
-      <SpatialControls
-        mode={mode}
-        setMode={setMode}
-        features={features}
-        setFeatures={setFeatures}
-        selectedFeatureIndexes={selectedFeatureIndexes}
-        resetBounds={() => setViewState(getBounds())}
-        increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
-        decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
-      />
-      <div className="cherita-spatial-footer">
-        <div className="cherita-toolbox-footer">
-          {error && !isPending && (
-            <Alert variant="danger">
-              <FontAwesomeIcon icon={faTriangleExclamation} />
-              &nbsp;Error loading data
-            </Alert>
-          )}
-          <Toolbox
-            mode={
-              dataset.colorEncoding === COLOR_ENCODINGS.VAR
-                ? dataset.selectedVar.name
-                : dataset.colorEncoding === COLOR_ENCODINGS.OBS
-                  ? dataset.selectedObs.name
-                  : null
-            }
-            obsLength={parseInt(obsmData.data?.length)}
-            slicedLength={parseInt(slicedLength)}
-          />
+    <div className="cherita-container-scatterplot">
+      <div className="cherita-scatterplot">
+        {obsmData.isPending && <LoadingSpinner disableShrink={true} />}
+        {isPending && <LoadingLinear />}
+        <DeckGL
+          viewState={viewState}
+          onViewStateChange={(e) => setViewState(e.viewState)}
+          controller={{ doubleClickZoom: mode === ViewMode }}
+          layers={layers}
+          onClick={onLayerClick}
+          getTooltip={getTooltip}
+          onAfterRender={() => {
+            setIsRendering(false);
+          }}
+          useDevicePixels={false}
+          getCursor={({ isDragging }) =>
+            mode !== ViewMode ? "crosshair" : isDragging ? "grabbing" : "grab"
+          }
+          ref={deckRef}
+        ></DeckGL>
+        <SpatialControls
+          mode={mode}
+          setMode={setMode}
+          features={features}
+          setFeatures={setFeatures}
+          selectedFeatureIndexes={selectedFeatureIndexes}
+          resetBounds={() => setViewState(getBounds())}
+          increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
+          decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
+        />
+        <div className="cherita-spatial-footer">
+          <div className="cherita-toolbox-footer">
+            {error && !isPending && (
+              <Alert variant="danger">
+                <FontAwesomeIcon icon={faTriangleExclamation} />
+                &nbsp;Error loading data
+              </Alert>
+            )}
+            <Toolbox
+              mode={
+                dataset.colorEncoding === COLOR_ENCODINGS.VAR
+                  ? dataset.selectedVar.name
+                  : dataset.colorEncoding === COLOR_ENCODINGS.OBS
+                    ? dataset.selectedObs.name
+                    : null
+              }
+              obsLength={parseInt(obsmData.data?.length)}
+              slicedLength={parseInt(slicedLength)}
+            />
+          </div>
+          <Legend isCategorical={isCategorical} min={min} max={max} />
         </div>
-        <Legend isCategorical={isCategorical} min={min} max={max} />
       </div>
     </div>
   );

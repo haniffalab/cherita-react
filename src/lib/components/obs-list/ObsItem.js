@@ -114,13 +114,13 @@ function CategoricalItem({
                   y="0"
                   width="10"
                   height="10"
-                  fill={`rgb(${getColor(
-                    (code - min) / (max - min),
-                    true,
-                    isOmitted,
-                    { alpha: 1 },
-                    "obs"
-                  )})`}
+                  fill={`rgb(${getColor({
+                    value: (code - min) / (max - min),
+                    categorical: true,
+                    grayOut: isOmitted,
+                    grayParams: { alpha: 1 },
+                    colorEncoding: "obs",
+                  })})`}
                 />
               </svg>
             </div>

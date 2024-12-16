@@ -47,14 +47,16 @@ export const useColor = () => {
   const dataset = useDataset();
 
   const getColor = useCallback(
-    (
+    ({
       value,
       categorical = false,
       grayOut = false,
-      { alpha = 0.75, gray = 0.95 } = {},
-      colorEncoding = dataset.colorEncoding
-    ) => {
+      grayParams: { alpha = 0.75, gray = 0.95 } = {},
+      colorEncoding = dataset.colorEncoding,
+      colorscale = null,
+    }) => {
       const colormap =
+        colorscale ||
         COLORSCALES[categorical ? "Accent" : dataset.controls.colorScale];
       if (colorEncoding) {
         if (grayOut) {

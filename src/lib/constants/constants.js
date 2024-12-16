@@ -52,3 +52,15 @@ export const VIOLINPLOT_SCALES = {
   WIDTH: { value: "width", name: "Width" },
   COUNT: { value: "count", name: "Count" },
 };
+
+export const PSEUDOSPATIAL_PLOT_TYPES = {
+  GENE: "gene",
+  CATEGORICAL: "categorical",
+  CONTINUOUS: "continuous",
+  MASKS: "masks",
+};
+
+export const PSEUDOSPATIAL_CATEGORICAL_MODES = {
+  ACROSS: { value: "across", name: "% across sections" },
+  WITHIN: { value: "within", name: "% within section" },
+};

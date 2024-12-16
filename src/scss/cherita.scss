@@ -308,3 +308,42 @@
 .caret-off .dropdown-toggle::after {
   display: none;
 }
+
+.cherita-pseudospatial {
+  width: 100%;
+}
+
+.cherita-pseudospatial-plot {
+  width: 100%;
+  height: 100%;
+}
+
+.cherita-pseudospatial-toolbar {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Add a bottom border to the last item in the Accordion */
+.accordion-flush .accordion-item:last-child {
+  border-bottom: 1px solid #dee2e6; /* Adjust the color and width as needed */
+}
+
+.var-disease-info-collapse {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.cherita-scatterplot #deckgl-wrapper {
+  z-index: 1 !important;
+}
+
+.tooltip-grayout {
+  color: #a0a7b4 !important;
+  background-color: #3a424b !important;
+  opacity: 0.8;
+  z-index: 100 !important;
+}
+
+.deck-tooltip {
+  z-index: 100 !important;
+}
