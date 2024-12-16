@@ -1,3 +1,13 @@
+/// Core styles for the Cherita project
+///
+/// @purpose
+///   Contains the core layout and component-specific styles for Cherita, 
+///   extending and customizing Bootstrap's design system.
+///
+/// @note
+///   This file depends on Bootstrap 5 for styling. Ensure Bootstrap is 
+///   loaded before this file to guarantee proper styling.
+/// 
 .loading-spinner {
   @extend .bg-light;
 

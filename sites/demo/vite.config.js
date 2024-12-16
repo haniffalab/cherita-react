@@ -24,6 +24,13 @@ export default defineConfig(({ mode }) => {
         ),
       },
     },
+    css: {
+      preprocessorOptions: {
+        scss: {
+          api: "modern-compiler"
+        }
+      }
+    },
     optimizeDeps: {
       esbuildOptions: {
         loader: { ".js": "jsx" },
@@ -31,6 +38,6 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       "process.env": { ...process.env, ...loadEnv(mode, process.cwd(), "") },
-    },
+    }
   };
 });

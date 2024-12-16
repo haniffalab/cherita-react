@@ -1,2 +1,20 @@
-@use "bootstrap/scss/bootstrap";
+/// Customizes Bootstrap and imports `cherita.scss`.
+///
+/// @purpose
+///   Use this file to compile Cherita with Bootstrap. If Bootstrap is already 
+///   included, import `cherita.scss` directly.
+///
+@use "bootstrap/scss/bootstrap" with (
+  $primary: #0071a7,
+  $secondary: #061826,
+  $body-bg: #fff,
+  $body-color: #333,
+  $breadcrumb-divider: quote(">"),
+  $breadcrumb-padding-y: 3px,
+  $breadcrumb-padding-x: 10px,
+  $breadcrumb-margin-bottom: 0,
+  $breadcrumb-bg: #f8f9fa,
+  $accordion-button-active-bg: #e7edf0,
+  $dropdown-border-color: none
+);
 @import "cherita";
