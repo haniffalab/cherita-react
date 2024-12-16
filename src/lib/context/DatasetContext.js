@@ -6,6 +6,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import _ from "lodash";
 
 import { FilterProvider } from "./FilterContext";
+import { ZarrDataProvider } from "./ZarrDataContext";
 import {
   COLOR_ENCODINGS,
   DOTPLOT_SCALES,
@@ -107,6 +108,7 @@ const initialDataset = {
     maskValues: null,
     categoricalMode: PSEUDOSPATIAL_CATEGORICAL_MODES.ACROSS.value,
   },
+  polygons: {},
 };
 
 const initializer = (initialState) => {
@@ -157,7 +159,9 @@ export function DatasetProvider({ dataset_url, children, ...dataset_params }) {
           client={queryClient}
           persistOptions={persistOptions}
         >
-          <FilterProvider>{children}</FilterProvider>
+          <FilterProvider>
+            <ZarrDataProvider>{children}</ZarrDataProvider>
+          </FilterProvider>
         </PersistQueryClientProvider>
       </DatasetDispatchContext.Provider>
     </DatasetContext.Provider>
@@ -526,6 +530,15 @@ function datasetReducer(dataset, action) {
             ...dataset.varSort[action.var],
             sortOrder: action.sortOrder,
           },
+        },
+      };
+    }
+    case "set.polygons": {
+      return {
+        ...dataset,
+        polygons: {
+          ...dataset.polygons,
+          [action.obsm]: action.polygons,
         },
       };
     }

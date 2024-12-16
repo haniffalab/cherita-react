@@ -27,15 +27,14 @@ import { useDebouncedFetch } from "../../utils/requests";
 function usePseudospatialData(plotType) {
   const ENDPOINT = "pseudospatial";
   const dataset = useDataset();
-  const filteredData = useFilteredData();
-  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
+  const { obsIndices, isSliced } = useFilteredData();
 
   const baseParams = useMemo(() => {
     return {
       url: dataset.url,
       maskSet: dataset.pseudospatial.maskSet,
       maskValues: dataset.pseudospatial.maskValues,
-      obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
+      obsIndices: isSliced ? [...(obsIndices || [])] : null,
       varNamesCol: dataset.varNamesCol,
       showColorbar: false,
       format: "json",
@@ -46,7 +45,7 @@ function usePseudospatialData(plotType) {
     dataset.pseudospatial.maskValues,
     dataset.varNamesCol,
     isSliced,
-    filteredData.obsIndices,
+    obsIndices,
   ]);
 
   const getPlotParams = useCallback(() => {
@@ -246,6 +245,15 @@ export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
             <Legend
               min={layout?.coloraxis?.cmin}
               max={layout?.coloraxis?.cmax}
+              addText={
+                plotType === PLOT_TYPES.GENE
+                  ? " - Mean expression"
+                  : plotType === PLOT_TYPES.CATEGORICAL
+                    ? " - %"
+                    : plotType === PLOT_TYPES.CONTINUOUS
+                      ? " - Mean value"
+                      : ""
+              }
             />
           )}
         </>

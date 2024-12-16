@@ -1,4 +1,4 @@
-import { React, useMemo, useRef } from "react";
+import { React, useMemo } from "react";
 
 import _ from "lodash";
 
@@ -12,6 +12,7 @@ export function Legend({
   min = 0,
   max = 1,
   colorscale = null,
+  addText = "",
 }) {
   const dataset = useDataset();
   const { getColor } = useColor();
@@ -40,9 +41,9 @@ export function Legend({
       <div className="cherita-legend">
         <div className="gradient">
           <p className="small m-0 p-0">
-            {dataset.colorEncoding === COLOR_ENCODINGS.VAR
+            {(dataset.colorEncoding === COLOR_ENCODINGS.VAR
               ? dataset.selectedVar?.name
-              : dataset.selectedObs?.name}
+              : dataset.selectedObs?.name) + addText}
           </p>
           {spanList}
           <span className="domain-min">

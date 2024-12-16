@@ -12,8 +12,7 @@ import { useDebouncedFetch } from "../../utils/requests";
 export function Dotplot() {
   const ENDPOINT = "dotplot";
   const dataset = useDataset();
-  const filteredData = useFilteredData();
-  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
+  const { obsIndices, isSliced } = useFilteredData();
   const dispatch = useDatasetDispatch();
   const colorscale = useRef(dataset.controls.colorScale);
   const [data, setData] = useState([]);
@@ -31,7 +30,7 @@ export function Dotplot() {
     varKeys: dataset.selectedMultiVar.map((i) =>
       i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
     ),
-    obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
+    obsIndices: isSliced ? [...(obsIndices || [])] : null,
     standardScale: dataset.controls.standardScale,
     meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
     expressionCutoff: dataset.controls.expressionCutoff,
@@ -61,7 +60,7 @@ export function Dotplot() {
             ? { name: i.name, indices: i.vars.map((v) => v.index) }
             : i.index
         ),
-        obsIndices: isSliced ? [...(filteredData.obsIndices || [])] : null,
+        obsIndices: isSliced ? [...(obsIndices || [])] : null,
         standardScale: dataset.controls.standardScale,
         meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
         expressionCutoff: dataset.controls.expressionCutoff,
@@ -77,7 +76,7 @@ export function Dotplot() {
     dataset.controls.expressionCutoff,
     dataset.varNamesCol,
     isSliced,
-    filteredData.obsIndices,
+    obsIndices,
   ]);
 
   const updateColorscale = useCallback((colorscale) => {
