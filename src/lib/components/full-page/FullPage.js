@@ -1,6 +1,6 @@
-import React, { useState, useRef, useLayoutEffect } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 
-import { Navbar, Nav, Card } from "react-bootstrap";
+import { Card, Nav, Navbar } from "react-bootstrap";
 
 import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
@@ -9,10 +9,10 @@ import { Heatmap } from "../heatmap/Heatmap";
 import { Matrixplot } from "../matrixplot/Matrixplot";
 import { ObsColsList } from "../obs-list/ObsList";
 import {
+  OffcanvasControls,
   OffcanvasObs,
   OffcanvasObsm,
   OffcanvasVars,
-  OffcanvasControls,
 } from "../offcanvas";
 import {
   Pseudospatial,
@@ -40,14 +40,28 @@ export function FullPage({
   useLayoutEffect(() => {
     function updateDimensions() {
       if (targetRef.current) {
+        // Log the full viewport height
+        console.log("Full viewport height:", window.innerHeight);
+
+        // Get the distance from the top of the page to the target element
+        const rect = targetRef.current.getBoundingClientRect();
+        const distanceFromTop = rect.top + window.scrollY;
+        console.log("Distance from top of the page:", distanceFromTop);
+
+        // Calculate the available height for the Cherita app
+        const availableHeight = window.innerHeight - distanceFromTop;
+        console.log("Available height for Cherita app:", availableHeight);
+
+        // Update the dimensions to fit the viewport minus the navbar height
         setDimensions({
           width: targetRef.current.offsetWidth,
-          height: window.innerHeight - targetRef.current.offsetTop,
+          height: availableHeight,
         });
       }
     }
+
     window.addEventListener("resize", updateDimensions);
-    updateDimensions();
+    updateDimensions(); // Initial update
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
@@ -64,7 +78,11 @@ export function FullPage({
           </div>
           <div className="cherita-app-plot">
             <div className="position-relative">
-              <Navbar expand="sm" bg="primary" className="cherita-navbar">
+              <Navbar
+                expand="sm"
+                bg="primary"
+                className="cherita-navbar"
+              >
                 <div className="container-fluid">
                   <Navbar.Toggle aria-controls="navbarScroll" />
                   <Navbar.Collapse id="navbarScroll">
