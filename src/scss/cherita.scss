@@ -1,0 +1,354 @@
+.loading-spinner {
+  @extend .bg-light;
+
+  height: 100%;
+  width: 100%;
+  display: flex;
+  z-index: 1;
+  opacity: 0.75;
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+}
+
+.cherita-container {
+  margin: 40px auto;
+  background-color: #fff;
+  border-radius: 0.25rem;
+  box-shadow:
+    0 0.5em 1em 0.3em #0a0a0a26,
+    0 0 0 1px #0a0a0a05;
+  color: #4a4a4a;
+  max-width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.cherita-navbar {
+  @extend .mx-1;
+  @extend .my-2;
+  @extend .d-block;
+  @extend .d-xl-none;
+
+  position: absolute;
+  z-index: 11;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-radius: 0.25rem;
+}
+
+.cherita-container .cherita-navbar-item > .dropdown-menu {
+  height: var(--dropdown-height);
+  overflow: hidden scroll;
+}
+
+/* Scrollbar styling */
+
+/* Works on Firefox */
+.cherita-container * {
+  scrollbar-width: thin;
+  scrollbar-color: #464646 auto;
+}
+
+/* Works on Chrome, Edge, and Safari */
+.cherita-container *::-webkit-scrollbar {
+  width: 7px;
+}
+
+.cherita-container *::-webkit-scrollbar-track {
+  background: #212529;
+}
+
+.cherita-container *::-webkit-scrollbar-thumb {
+  background-color: #464646;
+}
+
+/* End scrollbar styling */
+
+.cherita-container-plot {
+  margin-top: 76px;
+  padding: 20px;
+  position: relative;
+  min-height: 400px;
+}
+
+.cherita-container-scatterplot {
+  position: relative;
+  min-height: 400px;
+  height: 100%;
+}
+
+.cherita-spatial-controls {
+  position: absolute;
+  z-index: 10;
+  top: 1rem;
+  left: 1rem;
+  width: 3rem;
+}
+
+.cherita-spatial-footer {
+  position: absolute;
+  z-index: 10;
+  bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  width: 100%;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 1rem;
+  pointer-events: none;
+
+  > * {
+    pointer-events: auto;
+  }
+}
+
+.cherita-toolbox-footer {
+  display: flex;
+  flex-direction: column;
+}
+
+.cherita-toolbox-footer .alert {
+  width: fit-content;
+}
+
+.cherita-toolbox {
+  order: 1;
+}
+
+.cherita-legend {
+  order: 2;
+  width: 12rem;
+}
+
+.cherita-accordion-active .accordion-button {
+  background-color: #cce3ed;
+}
+
+.obs-item {
+  box-sizing: border-box;
+}
+
+.obs-value-list-check {
+  padding-right: 1rem;
+  word-break: auto-phrase;
+  overflow-wrap: anywhere;
+}
+
+.grad-step {
+  display: inline-block;
+  height: 20px;
+  width: 1%;
+}
+
+.gradient {
+  width: 100%;
+  white-space: nowrap;
+  position: relative;
+  display: inline-block;
+  top: 4px;
+  padding-bottom: 15px;
+}
+
+.gradient .domain-min {
+  position: absolute;
+  left: 0;
+  font-size: 11px;
+  bottom: 3px;
+}
+
+.gradient .domain-med {
+  position: absolute;
+  right: 25%;
+  left: 25%;
+  text-align: center;
+  font-size: 11px;
+  bottom: 3px;
+}
+
+.gradient .domain-max {
+  position: absolute;
+  right: 0;
+  font-size: 11px;
+  bottom: 3px;
+}
+
+.cm-string {
+  padding: 0 4px;
+  display: inline-block;
+  min-width: 13px;
+  min-height: 13px;
+  border-radius: 3px;
+  box-sizing: border-box;
+  vertical-align: middle;
+  margin-left: 2px;
+  margin-bottom: 2px;
+  position: relative;
+  top: 1px;
+}
+
+.cm-small {
+  height: 15px;
+  width: 15px;
+}
+
+.obs-distribution {
+  width: 100%;
+  height: 4rem;
+}
+
+.obs-continuous-stats {
+  font-weight: lighter;
+  margin: 0;
+}
+
+.value-count-badge {
+  color: #000000 !important;
+  background-color: #dedede !important;
+}
+
+.value-pct-gauge-container {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0.2rem;
+}
+
+.feature-histogram-container {
+  height: 1.25rem;
+  width: 5rem;
+  display: flex;
+  align-items: center;
+}
+
+.feature-histogram {
+  @extend .feature-histogram-container;
+
+  background-color: #dedede;
+}
+
+.feature-histogram-tooltip .MuiChartsTooltip-markCell,
+.MuiChartsTooltip-labelCell {
+  display: none;
+}
+
+.feature-histogram-tooltip .MuiChartsTooltip-valueCell {
+  padding: 0.5rem !important;
+}
+
+.feature-histogram-tooltip .MuiChartsTooltip-valueCell > p {
+  font-size: 0.85rem !important;
+}
+
+.feature-histogram-tooltip td > p {
+  font-size: 0.85rem !important;
+}
+
+.feature-disease-info {
+  font-weight: lighter;
+  border-top: 1px solid var(list-group-border-color);
+  border-right: 0;
+  border-left: 0;
+  border-bottom: 0;
+}
+
+.feature-disease-info table {
+  margin: 0;
+}
+
+.cherita-app {
+  @extend .container-fluid;
+
+  position: relative;
+}
+
+.cherita-app-plot {
+  @extend .col;
+  @extend .col-12;
+  @extend .col-lg-8;
+  @extend .col-xl-6;
+  @extend .col-xxl-6;
+
+  position: relative;
+  max-height: 100%;
+}
+
+.cherita-app-obs {
+  @extend .col;
+  @extend .d-none;
+  @extend .d-lg-block;
+  @extend .col-lg-4;
+  @extend .col-xl-3;
+  @extend .col-xxl-3;
+
+  border-right: 5px solid #f5f5f5;
+  overflow-y: scroll;
+  height: 100%;
+}
+
+.cherita-app-var {
+  @extend .p-3;
+  @extend .col;
+  @extend .d-none;
+  @extend .d-lg-block;
+  @extend .col-xl-3;
+  @extend .col-xxl-3;
+
+  max-height: 100%;
+}
+
+.cherita-app div.row {
+  height: 100%;
+}
+
+.cherita-app-features {
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+}
+
+.caret-off .dropdown-toggle::after {
+  display: none;
+}
+
+.cherita-pseudospatial {
+  width: 100%;
+}
+
+.cherita-pseudospatial-plot {
+  width: 100%;
+  height: 100%;
+}
+
+.cherita-pseudospatial-toolbar {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Add a bottom border to the last item in the Accordion */
+.accordion-flush .accordion-item:last-child {
+  border-bottom: 1px solid #dee2e6; /* Adjust the color and width as needed */
+}
+
+.var-disease-info-collapse {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.cherita-scatterplot #deckgl-wrapper {
+  z-index: 1 !important;
+}
+
+.tooltip-grayout {
+  color: #a0a7b4 !important;
+  background-color: #3a424b !important;
+  opacity: 0.8;
+  z-index: 100 !important;
+}
+
+.deck-tooltip {
+  z-index: 100 !important;
+}

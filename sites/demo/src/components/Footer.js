@@ -1,7 +1,11 @@
 export default function Footer() {
-    return (
-        <>
-            test footer
-        </>
-    );
+  return (
+    <>
+      <footer className="footer">
+        <div className="container">
+          <span className="text-muted">Footer</span>
+        </div>
+      </footer>
+    </>
+  );
 }

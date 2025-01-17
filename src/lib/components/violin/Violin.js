@@ -1,163 +1,188 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import Dropdown from "react-bootstrap/Dropdown";
-import React, { useEffect, useState, useMemo } from "react";
-import Plot from "react-plotly.js";
+import React, { useEffect, useState } from "react";
+
+import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import {
-  VIOLIN_MODES,
-  VIOLINPLOT_STANDARDSCALES,
-} from "../../constants/constants";
-import { ButtonGroup, ButtonToolbar, InputGroup } from "react-bootstrap";
-import { fetchData } from "../../utils/requests";
+import { Alert, OverlayTrigger, Tooltip } from "react-bootstrap";
+import Plot from "react-plotly.js";
 
-export function ViolinControls() {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
-  const [activeStandardScale, setActiveStandardScale] = useState(
-    dataset.controls.standardScale
-  );
-
-  useEffect(() => {
-    if (dataset.controls.standardScale) {
-      setActiveStandardScale(
-        VIOLINPLOT_STANDARDSCALES.find(
-          (obs) => obs.value === dataset.controls.standardScale
-        ).name
-      );
-    }
-  }, [dataset.controls.standardScale]);
-
-  const standardScaleList = VIOLINPLOT_STANDARDSCALES.map((item) => (
-    <Dropdown.Item
-      key={item.value}
-      active={activeStandardScale === item.value}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.standardScale",
-          standardScale: item.value,
-        });
-      }}
-    >
-      {item.name}
-    </Dropdown.Item>
-  ));
-
-  return (
-    <ButtonToolbar>
-      <ButtonGroup>
-        <InputGroup>
-          <InputGroup.Text>Standard scale</InputGroup.Text>
-          <Dropdown>
-            <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {activeStandardScale}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
-          </Dropdown>
-        </InputGroup>
-      </ButtonGroup>
-    </ButtonToolbar>
-  );
-}
+import { VIOLIN_MODES } from "../../constants/constants";
+import { useDataset } from "../../context/DatasetContext";
+import { useFilteredData } from "../../context/FilterContext";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useDebouncedFetch } from "../../utils/requests";
 
 export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
+  const ENDPOINT = "violin";
   const dataset = useDataset();
+  const { obsIndices, isSliced } = useFilteredData();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
+  const [params, setParams] = useState({
+    url: dataset.url,
+    mode: mode,
+    scale: dataset.controls.scale.violinplot.value,
+    varNamesCol: dataset.varNamesCol,
+    ...{
+      [VIOLIN_MODES.MULTIKEY]: {
+        varKeys: dataset.selectedMultiVar.map((i) =>
+          i.isSet
+            ? { name: i.name, indices: i.vars.map((v) => v.index) }
+            : i.index
+        ),
+        obsKeys: [], // @TODO: implement
+      },
+      [VIOLIN_MODES.GROUPBY]: {
+        varKey: dataset.selectedVar?.isSet
+          ? {
+              name: dataset.selectedVar?.name,
+              indices: dataset.selectedVar?.vars.map((v) => v.index),
+            }
+          : dataset.selectedVar?.index,
+        obsCol: dataset.selectedObs,
+        obsValues: !dataset.selectedObs?.omit.length
+          ? null
+          : _.difference(
+              _.values(dataset.selectedObs?.codes),
+              dataset.selectedObs?.omit
+            ).map((c) => dataset.selectedObs?.codesMap[c]),
+        obsIndices: isSliced ? [...(obsIndices || [])] : null,
+      },
+    }[mode],
+  });
   // @TODO: set default scale
 
-  const update = useMemo(() => {
-    const func = (abortController) => {
-      if (mode === VIOLIN_MODES.MULTIKEY) {
-        if (dataset.selectedMultiVar.length) {
-          setHasSelections(true);
-          fetchData(
-            "violin",
-            {
-              url: dataset.url,
-              keys: dataset.selectedMultiVar.map((i) => i.name),
-              scale: dataset.controls.standardScale,
-            },
-            abortController.signal
-          )
-            .then((data) => {
-              setData(data.data);
-              setLayout(data.layout);
-            })
-            .catch((response) => {
-              if (response.name !== "AbortError") {
-                response.json().then((json) => {
-                  console.log(json.message);
-                });
-              }
-            });
-        } else {
-          setHasSelections(false);
-        }
-      } else if (mode === VIOLIN_MODES.GROUPBY) {
-        if (dataset.selectedObs && dataset.selectedVar) {
-          setHasSelections(true);
-          fetchData("violin", {
-            url: dataset.url,
-            keys: dataset.selectedVar.name,
-            selectedObs: dataset.selectedObs,
-            scale: dataset.controls.standardScale,
-          })
-            .then((data) => {
-              setData(data.data);
-              setLayout(data.layout);
-            })
-            .catch((response) => {
-              if (response.name !== "AbortError") {
-                response.json().then((json) => {
-                  console.log(json.message);
-                });
-              }
-            });
-        } else {
-          setHasSelections(false);
-        }
+  useEffect(() => {
+    if (mode === VIOLIN_MODES.MULTIKEY) {
+      if (dataset.selectedMultiVar.length) {
+        setHasSelections(true);
+      } else {
+        setHasSelections(false);
       }
-    };
-    // delay invoking the fetch function to avoid firing requests
-    // while dependencies might still be getting updated by the user
-    return _.debounce(func, 500);
+      setParams((p) => {
+        return {
+          ...p,
+          url: dataset.url,
+          mode: mode,
+          varKeys: dataset.selectedMultiVar.map((i) =>
+            i.isSet
+              ? { name: i.name, indices: i.vars.map((v) => v.index) }
+              : i.index
+          ),
+          scale: dataset.controls.scale.violinplot.value,
+          varNamesCol: dataset.varNamesCol,
+        };
+      });
+    } else if (mode === VIOLIN_MODES.GROUPBY) {
+      if (dataset.selectedObs && dataset.selectedVar) {
+        setHasSelections(true);
+      } else {
+        setHasSelections(false);
+      }
+      setParams((p) => {
+        return {
+          ...p,
+          url: dataset.url,
+          mode: mode,
+          varKey: dataset.selectedVar?.isSet
+            ? {
+                name: dataset.selectedVar?.name,
+                indices: dataset.selectedVar?.vars.map((v) => v.index),
+              }
+            : dataset.selectedVar?.index,
+          obsCol: dataset.selectedObs,
+          obsValues: !dataset.selectedObs?.omit.length
+            ? null
+            : _.difference(
+                _.values(dataset.selectedObs?.codes),
+                dataset.selectedObs?.omit
+              ).map((c) => dataset.selectedObs?.codesMap[c]),
+          obsIndices: isSliced ? [...(obsIndices || [])] : null,
+          scale: dataset.controls.scale.violinplot.value,
+          varNamesCol: dataset.varNamesCol,
+        };
+      });
+    }
   }, [
-    mode,
-    dataset.url,
+    dataset.controls.scale.violinplot.value,
+    dataset.selectedMultiVar,
     dataset.selectedObs,
     dataset.selectedVar,
-    dataset.selectedMultiVar,
-    dataset.controls.standardScale,
+    dataset.url,
+    dataset.varNamesCol,
+    obsIndices,
+    isSliced,
+    mode,
   ]);
 
-  useEffect(() => {
-    // create an abort controller to pass into each fetch function
-    // to abort previous incompleted requests when a new request is fired
-    const abortController = new AbortController();
-    update(abortController);
-    return () => {
-      abortController.abort();
-    };
-  }, [update]);
+  const { fetchedData, isPending, serverError } = useDebouncedFetch(
+    ENDPOINT,
+    params,
+    500,
+    {
+      enabled:
+        (mode === VIOLIN_MODES.MULTIKEY &&
+          (!!params.varKeys.length || !!params.obsKeys.length)) ||
+        (mode === VIOLIN_MODES.GROUPBY && !!params.varKey && !!params.obsCol),
+    }
+  );
 
-  if (hasSelections) {
+  useEffect(() => {
+    if (hasSelections && !isPending && !serverError) {
+      setData(fetchedData.data);
+      setLayout(fetchedData.layout);
+    }
+  }, [fetchedData, hasSelections, isPending, serverError]);
+
+  if (!serverError) {
+    if (hasSelections) {
+      return (
+        <div className="cherita-violin position-relative">
+          {isPending && <LoadingSpinner />}
+          <Plot
+            data={data}
+            layout={layout}
+            useResizeHandler={true}
+            style={{ maxWidth: "100%", maxHeight: "100%" }}
+          />
+          {fetchedData?.resampled && (
+            <Alert variant="warning">
+              <b>Warning:</b> For performance reasons this plot was generated
+              with resampled data. It will not be exactly the same as one
+              produced with the entire dataset. &nbsp;
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip>
+                    Resampled to 100K values following a Monte Carlo style
+                    approach to help ensure resampled data is a good
+                    representation of the original dataset's distribution.
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faCircleInfo}></FontAwesomeIcon>
+              </OverlayTrigger>
+            </Alert>
+          )}
+        </div>
+      );
+    }
     return (
       <div className="cherita-violin">
-        <h5>{mode}</h5>
-        <Plot
-          data={data}
-          layout={layout}
-          useResizeHandler={true}
-          style={{ maxWidth: "100%", maxHeight: "100%" }}
-        />
+        {mode === VIOLIN_MODES.MULTIKEY && (
+          <Alert variant="light">Select features</Alert>
+        )}
+        {mode === VIOLIN_MODES.GROUPBY && (
+          <Alert variant="light">Select categories and a feature</Alert>
+        )}
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <Alert variant="danger">{serverError.message}</Alert>
       </div>
     );
   }
-  return (
-    <div className="cherita-violin">
-      <p>Select variables to plot</p>
-    </div>
-  );
 }

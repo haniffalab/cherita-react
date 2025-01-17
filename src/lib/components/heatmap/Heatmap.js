@@ -1,53 +1,72 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import Dropdown from "react-bootstrap/Dropdown";
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import Plot from "react-plotly.js";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+
 import _ from "lodash";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { PLOTLY_COLORSCALES } from "../../constants/constants";
-import { fetchData } from "../../utils/requests";
+import { Alert } from "react-bootstrap";
+import Plot from "react-plotly.js";
 
-export function HeatmapControls() {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
-
-  const colormapList = PLOTLY_COLORSCALES.map((item) => (
-    <Dropdown.Item
-      key={item}
-      active={dataset.controls.colorScale === item}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.colorScale",
-          colorScale: item,
-        });
-      }}
-    >
-      {item}
-    </Dropdown.Item>
-  ));
-
-  return (
-    <Dropdown>
-      <Dropdown.Toggle id="dropdownColorscale" variant="light">
-        {dataset.controls.colorScale}
-      </Dropdown.Toggle>
-      <Dropdown.Menu>{colormapList}</Dropdown.Menu>
-    </Dropdown>
-  );
-}
+import { useDataset } from "../../context/DatasetContext";
+import { useFilteredData } from "../../context/FilterContext";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useDebouncedFetch } from "../../utils/requests";
 
 export function Heatmap() {
+  const ENDPOINT = "heatmap";
   const dataset = useDataset();
+  const { obsIndices, isSliced } = useFilteredData();
   const colorscale = useRef(dataset.controls.colorScale);
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
+  const [params, setParams] = useState({
+    url: dataset.url,
+    obsCol: dataset.selectedObs,
+    obsValues: !dataset.selectedObs?.omit.length
+      ? null
+      : _.difference(
+          _.values(dataset.selectedObs?.codes),
+          dataset.selectedObs?.omit
+        ).map((c) => dataset.selectedObs?.codesMap[c]),
+    varKeys: dataset.selectedMultiVar.map((i) =>
+      i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
+    ),
+    obsIndices: isSliced ? [...(obsIndices || [])] : null,
+    varNamesCol: dataset.varNamesCol,
+  });
+
+  useEffect(() => {
+    if (dataset.selectedObs && dataset.selectedMultiVar.length) {
+      setHasSelections(true);
+    } else {
+      setHasSelections(false);
+    }
+    setParams((p) => {
+      return {
+        ...p,
+        url: dataset.url,
+        obsCol: dataset.selectedObs,
+        obsValues: !dataset.selectedObs?.omit.length
+          ? null
+          : _.difference(
+              _.values(dataset.selectedObs?.codes),
+              dataset.selectedObs?.omit
+            ).map((c) => dataset.selectedObs?.codesMap[c]),
+        varKeys: dataset.selectedMultiVar.map((i) =>
+          i.isSet
+            ? { name: i.name, indices: i.vars.map((v) => v.index) }
+            : i.index
+        ),
+        obsIndices: isSliced ? [...(obsIndices || [])] : null,
+        varNamesCol: dataset.varNamesCol,
+      };
+    });
+  }, [
+    dataset.selectedMultiVar,
+    dataset.selectedObs,
+    dataset.url,
+    dataset.varNamesCol,
+    obsIndices,
+    isSliced,
+  ]);
 
   const updateColorscale = useCallback((colorscale) => {
     setLayout((l) => {
@@ -58,75 +77,50 @@ export function Heatmap() {
     });
   }, []);
 
-  const update = useMemo(() => {
-    const func = (abortController) => {
-      if (dataset.selectedObs && dataset.selectedMultiVar.length) {
-        setHasSelections(true);
-        fetchData(
-          "heatmap",
-          {
-            url: dataset.url,
-            selectedObs: dataset.selectedObs,
-            selectedMultiVar: dataset.selectedMultiVar.map((i) => i.name),
-          },
-          abortController.signal
-        )
-          .then((data) => {
-            setData(data.data);
-            setLayout(data.layout);
-            updateColorscale(colorscale.current);
-          })
-          .catch((response) => {
-            if (response.name !== "AbortError") {
-              response.json().then((json) => {
-                console.log(json.message);
-              });
-            }
-          });
-      } else {
-        setHasSelections(false);
-      }
-    };
-    // delay invoking the fetch function to avoid firing requests
-    // while dependencies might still be getting updated by the user
-    return _.debounce(func, 500);
-  }, [
-    dataset.selectedMultiVar,
-    dataset.selectedObs,
-    dataset.url,
-    updateColorscale,
-  ]);
+  const { fetchedData, isPending, serverError } = useDebouncedFetch(
+    ENDPOINT,
+    params,
+    500,
+    { enabled: !!params.obsCol && !!params.varKeys.length }
+  );
 
   useEffect(() => {
-    // create an abort controller to pass into each fetch function
-    // to abort previous incompleted requests when a new request is fired
-    const abortController = new AbortController();
-    update(abortController);
-    return () => {
-      abortController.abort();
-    };
-  }, [update]);
+    if (hasSelections && !isPending && !serverError) {
+      setData(fetchedData.data);
+      setLayout(fetchedData.layout);
+      updateColorscale(colorscale.current);
+    }
+  }, [fetchedData, hasSelections, isPending, serverError, updateColorscale]);
 
   useEffect(() => {
     colorscale.current = dataset.controls.colorScale;
     updateColorscale(colorscale.current);
   }, [dataset.controls.colorScale, updateColorscale]);
 
-  if (hasSelections) {
+  if (!serverError) {
+    if (hasSelections) {
+      return (
+        <div className="cherita-heatmap position-relative">
+          {isPending && <LoadingSpinner />}
+          <Plot
+            data={data}
+            layout={layout}
+            useResizeHandler={true}
+            style={{ maxWidth: "100%", maxHeight: "100%" }}
+          />
+        </div>
+      );
+    }
     return (
       <div className="cherita-heatmap">
-        <Plot
-          data={data}
-          layout={layout}
-          useResizeHandler={true}
-          style={{ maxWidth: "100%", maxHeight: "100%" }}
-        />
+        <Alert variant="light">Select features and a category</Alert>
+      </div>
+    );
+  } else {
+    return (
+      <div>
+        <Alert variant="danger">{serverError.message}</Alert>
       </div>
     );
   }
-  return (
-    <div className="cherita-heatmap">
-      <p>Select OBS and VAR</p>
-    </div>
-  );
 }
