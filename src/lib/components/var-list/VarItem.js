@@ -133,6 +133,7 @@ export function SingleSelectionItem({
 
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
     refetchOnMount: false,
+    enabled: !!dataset.diseaseDatasets.length,
   });
 
   const hasDiseaseInfo = !isPending && !serverError && !!fetchedData.length;
