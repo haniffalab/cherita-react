@@ -12,7 +12,6 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 
-// @TODO: optimize
 const useVarMean = (varKeys, enabled = false) => {
   const ENDPOINT = "matrix/mean";
   const dataset = useDataset();
@@ -204,11 +203,13 @@ export function VarNamesList({
 
   useEffect(() => {
     setVarButtons((v) => {
-      const updated = _.map(v, (i) => {
-        if (i.isSet) {
-          return dataset.varSets.find((s) => s.name === i.name);
-        } else return i;
-      });
+      const updated = _.compact(
+        _.map(v, (i) => {
+          if (i.isSet) {
+            return dataset.varSets.find((s) => s.name === i.name);
+          } else return i;
+        })
+      );
       const newSets = _.difference(dataset.varSets, updated);
       return [...updated, ...newSets];
     });
