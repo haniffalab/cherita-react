@@ -75,6 +75,7 @@
     "copy:scss": "cpx src/scss/**/* scss",
     "build": "npm run build:babel && npm run build:scss && npm run copy:scss",
     "test": "jest --watchAll",
+    "test:ci": "jest --coverage --ci --no-watch",
     "lint:scss": "stylelint 'src/**/*.scss' --fix",
     "lint:js": "eslint 'src/**/*.js' --fix",
     "lint": "npm run lint:scss && npm run lint:js",
