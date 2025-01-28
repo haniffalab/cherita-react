@@ -1,137 +1,229 @@
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import React, { useEffect, useState } from "react";
+
 import _ from "lodash";
-import React, { useEffect, useState, useMemo } from "react";
+import { Accordion, Alert } from "react-bootstrap";
+
+import { CategoricalObs, ContinuousObs } from "./ObsItem";
+import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { fetchData } from "../../utils/requests";
-import { Accordion, ListGroup } from "react-bootstrap";
+import { LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useFetch } from "../../utils/requests";
 
-const N_BINS = 5;
-
-function binContinuous(data, nBins = N_BINS) {
-  const binSize = (data.max - data.min) * (1 / nBins);
-  const thresholds = _.range(nBins + 1).map((b) => {
-    return data.min + binSize * b;
-  });
-  data.bins = {
-    nBins: nBins,
-    binSize: binSize,
-    thresholds: thresholds,
-  };
-  return data;
-}
-
-function binDiscrete(data, nBins = N_BINS){
-  const binSize = _.round((data.n_values) * (1/nBins));
-  data.bins = {
-    nBins: nBins,
-    binSize: binSize
-  };
-  return data;
-}
-
-export function ObsColsList() {
+export function ObsColsList({ showColor = true }) {
+  const ENDPOINT = "obs/cols";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
-  const [obsColsList, setObsColsList] = useState([]);
-  const [active, setActive] = useState(null);
+  const [obsCols, setObsCols] = useState(null);
+  const [active, setActive] = useState(dataset.selectedObs?.name);
+  const [expandedItems, setExpandedItems] = useState(
+    active
+      ? {
+          [active]: true,
+        }
+      : {}
+  );
+  const [params, setParams] = useState({
+    url: dataset.url,
+  });
 
   useEffect(() => {
-    fetchData("obs/cols", { url: dataset.url })
-      .then((data) => {
-        setObsColsList(
-          data.map((d) => {
-            if (d.type === "continuous") {
-              d = binContinuous(d);
-            }
-            if (d.type === "discrete") {
-              d = binDiscrete(d);
-            }
-            return d;
-          })
-        );
-      })
-      .catch((response) => {
-        response.json().then((json) => {
-          console.log(json.message);
-        });
-      });
+    setParams((p) => {
+      return {
+        ...p,
+        url: dataset.url,
+      };
+    });
   }, [dataset.url]);
 
+  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
+    refetchOnMount: false,
+  });
+
   useEffect(() => {
-    if (dataset.selectedObs) {
-      setActive(dataset.selectedObs.name);
+    if (!isPending && !serverError) {
+      let filteredData = fetchedData;
+
+      if (dataset.obsCols) {
+        filteredData = _.filter(filteredData, (d) => {
+          return _.includes(dataset.obsCols, d.name);
+        });
+      }
+
+      setObsCols(
+        _.keyBy(
+          _.map(filteredData, (d) => {
+            return { ...d, codesMap: _.invert(d.codes), omit: [] };
+          }),
+          "name"
+        )
+      );
     }
-  }, [dataset.selectedObs]);
+  }, [dataset.obsCols, fetchedData, isPending, serverError]);
 
-  function categoricalList(item) {
-    return (
-      <Accordion.Item key={item.name} eventKey={item.name}>
-        <Accordion.Header>{item.name}</Accordion.Header>
-        <Accordion.Body>
-          <ListGroup>
-            {item.values.map((val) => (
-              <ListGroup.Item key={val}>{val}</ListGroup.Item>
-            ))}
-          </ListGroup>
-        </Accordion.Body>
-      </Accordion.Item>
+  // @TODO: fix re-rendering performance issue
+  useEffect(() => {
+    if (obsCols) {
+      if (obsCols[dataset.selectedObs?.name]) {
+        setActive(dataset.selectedObs?.name);
+      } else {
+        setActive(null);
+      }
+    }
+  }, [dataset.selectedObs, obsCols]);
+
+  const updateObs = (updatedObs) => {
+    setObsCols((o) => {
+      return { ...o, [updatedObs.name]: updatedObs };
+    });
+  };
+
+  const handleAccordionToggle = (itemName) => {
+    _.delay(
+      // to avoid contents of accordion disappearing while closing
+      () => {
+        setExpandedItems((prev) => {
+          return { ...prev, [itemName]: !prev[itemName] };
+        });
+      },
+      expandedItems[itemName] ? 250 : 0
     );
-  }
+  };
 
-  function continuousList(item) {
+  const toggleAll = (item) => {
+    const omit = item.omit.length
+      ? []
+      : _.map(item.values, (v) => item.codes[v]);
+    setObsCols((o) => {
+      return { ...o, [item.name]: { ...item, omit: omit } };
+    });
+    if (active === item.name) {
+      dispatch({
+        type: "select.obs",
+        obs: { ...item, omit: omit },
+      });
+    }
+  };
+
+  const toggleLabel = (item) => {
+    const inLabelObs = _.some(dataset.labelObs, (i) => i.name === item.name);
+    if (inLabelObs) {
+      dispatch({
+        type: "remove.label.obs",
+        obsName: item.name,
+      });
+    } else {
+      dispatch({
+        type: "add.label.obs",
+        obs: {
+          name: item.name,
+          type: item.type,
+          codesMap: item.codesMap,
+        },
+      });
+    }
+  };
+
+  const toggleSlice = (item) => {
+    dispatch({
+      type: "toggle.slice.obs",
+      obs: item,
+    });
+  };
+
+  const toggleColor = (item) => {
+    dispatch({
+      type: "select.obs",
+      obs: item,
+    });
+    dispatch({
+      type: "set.colorEncoding",
+      value: "obs",
+    });
+  };
+
+  const toggleObs = (item, value) => {
+    let omit;
+    if (_.includes(item.omit, item.codes[value])) {
+      omit = item.omit.filter((i) => i !== item.codes[value]);
+    } else {
+      omit = [...item.omit, item.codes[value]];
+    }
+    setObsCols((o) => {
+      return { ...o, [item.name]: { ...item, omit: omit } };
+    });
+    if (active === item.name) {
+      dispatch({
+        type: "select.obs",
+        obs: { ...item, omit: omit },
+      });
+    }
+  };
+
+  const obsList = _.map(obsCols, (item) => {
+    if (item.type === OBS_TYPES.DISCRETE) {
+      return null;
+    }
     return (
-      <Accordion.Item key={item.name} eventKey={item.name}>
-        <Accordion.Header>{item.name}</Accordion.Header>
-        <Accordion.Body>
-          <p>Min: {item.min}</p>
-          <p>Max: {item.max}</p>
-          <p>Mean: {item.mean}</p>
-          <p>Median: {item.median}</p>
-          <p>NBins: {item.bins.nBins}</p>
-        </Accordion.Body>
-      </Accordion.Item>
-    );
-  }
-
-  function otherList(item) {
-    return (
-      <Accordion.Item key={item.name} eventKey={item.name}>
-        <Accordion.Header>{item.name}</Accordion.Header>
-        <Accordion.Body>{item.type}</Accordion.Body>
-      </Accordion.Item>
-    );
-  }
-
-  const obsList = useMemo(
-    () =>
-      obsColsList.map((item) => {
-        if (item.type === "categorical") {
-          return categoricalList(item);
-        } else if (item.type === "continuous") {
-          return continuousList(item);
-        } else {
-          return otherList(item);
+      <Accordion.Item
+        key={item.name}
+        eventKey={item.name}
+        className={
+          active === item.name &&
+          dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+          "cherita-accordion-active"
         }
-      }),
-    [obsColsList]
-  );
+      >
+        <Accordion.Header onClick={() => handleAccordionToggle(item.name)}>
+          {item.name}
+        </Accordion.Header>
+        <Accordion.Body>
+          {expandedItems[item.name] &&
+            (item.type === OBS_TYPES.CATEGORICAL ||
+            item.type === OBS_TYPES.BOOLEAN ? (
+              <CategoricalObs
+                key={item.name}
+                obs={item}
+                updateObs={updateObs}
+                toggleAll={() => toggleAll(item)}
+                toggleObs={(value) => toggleObs(item, value)}
+                toggleLabel={() => toggleLabel(item)}
+                toggleSlice={() => toggleSlice(item)}
+                toggleColor={() => toggleColor(item)}
+                showColor={showColor}
+              />
+            ) : (
+              <ContinuousObs
+                key={item.name}
+                obs={item}
+                updateObs={updateObs}
+                toggleAll={() => toggleAll(item)}
+                toggleObs={(value) => toggleObs(item, value)}
+                toggleLabel={() => toggleLabel(item)}
+                toggleSlice={() => toggleSlice(item)}
+                toggleColor={() => toggleColor(item)}
+              />
+            ))}
+        </Accordion.Body>
+      </Accordion.Item>
+    );
+  });
 
-  return (
-    <div className="">
-      <div className="list-group overflow-auto">
-        <Accordion
-          activeKey={active}
-          onSelect={(key) => {
-            dispatch({
-              type: "obsSelected",
-              obs: obsColsList.find((obs) => obs.name === key),
-            });
-          }}
-        >
-          {obsList}
-        </Accordion>
+  if (!serverError) {
+    return (
+      <div className="position-relative h-100">
+        <div className="list-group overflow-auto h-100">
+          {isPending && <LoadingSpinner />}
+          <Accordion flush defaultActiveKey={[active]} alwaysOpen>
+            {obsList}
+          </Accordion>
+        </div>
       </div>
-    </div>
-  );
+    );
+  } else {
+    return (
+      <div>
+        <Alert variant="danger">{serverError.message}</Alert>
+      </div>
+    );
+  }
 }

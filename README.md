@@ -1,3 +1,8 @@
+[![build](https://github.com/haniffalab/cherita-react/actions/workflows/npm-publish.yml/badge.svg)](https://github.com/haniffalab/cherita-react/actions/workflows/npm-publish.yml)
+[![build-dev](https://github.com/haniffalab/cherita-react/actions/workflows/npm-publish-dev.yml/badge.svg)](https://github.com/haniffalab/cherita-react/actions/workflows/npm-publish-dev.yml)
+[![npm](https://img.shields.io/npm/v/@haniffalab/cherita-react)](https://www.npmjs.com/package/@haniffalab/cherita-react)
+[![codecov](https://codecov.io/gh/haniffalab/cherita-react/graph/badge.svg?token=8RLSQP1FFB)](https://codecov.io/gh/haniffalab/cherita-react)
+
 # Cherita
 
 ## Development

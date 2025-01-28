@@ -1,4 +1,5 @@
-name: Publish package to npmjs
+name: publish
+# This workflow publishes the package to npmjs.org whenever a release is published.
 on:
   release:
     types: [published]
