@@ -1,0 +1,16 @@
+name: publish
+# This workflow tests the package.
+on:
+  push:
+    branches: [dev]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18.x"
+      - run: npm ci
+      - run: npm install react@18.2.0 react-dom@18.2.0
+      - run: npm test
