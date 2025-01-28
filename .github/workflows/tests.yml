@@ -20,7 +20,7 @@ jobs:
       - run: npm ci
       - run: npm install react@18.2.0 react-dom@18.2.0
       # Run tests with coverage
-      - run: npm test -- --coverage
+      - run: npm test -- --coverage --ci --no-watch
       # Upload coverage to Codecov
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
