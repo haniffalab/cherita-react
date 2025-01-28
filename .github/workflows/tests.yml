@@ -18,7 +18,7 @@ jobs:
           node-version: "18.x"
       # Install dependencies
       - run: npm ci
-      - run: npm install react@18.2.0 react-dom@18.2.0 --no-save
+      - run: npm install react@18.2.0 react-dom@18.2.0
       # Run tests with coverage
       - run: npm run test:ci
       # Upload coverage to Codecov
