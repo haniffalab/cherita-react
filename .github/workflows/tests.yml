@@ -17,9 +17,7 @@ jobs:
         with:
           node-version: "18.x"
       # Install dependencies, bypassing peer dependency check
-      - run: npm ci --legacy-peer-deps
-      # Temporarily install react and react-dom for testing
-      - run: npm install react@18.2.0 react-dom@18.2.0 --legacy-peer-deps
+      - run: npm ci
       # Run tests with coverage
       - run: npm run test:ci
       # Upload coverage to Codecov
