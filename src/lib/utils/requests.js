@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@uidotdev/usehooks";
-import _ from "lodash";
 
 import { parseError } from "./errors";
 
