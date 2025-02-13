@@ -1,0 +1,47 @@
+.cherita-app {
+  position: relative;
+}
+
+.cherita-app .cherita-navbar {
+  @extend .m-3;
+  @extend .d-block;
+  @extend .d-xl-none;
+
+  position: absolute;
+  z-index: 11;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-radius: 0.25rem;
+  @media (min-width: 992px) and (max-width: 1199px) {
+    margin-left: calc(33.33333333% + 1rem) !important;
+  }
+}
+
+.cherita-app-canvas {
+  position: relative;
+}
+
+.cherita-app-obs {
+  @extend .col;
+  @extend .d-none;
+  @extend .d-lg-block;
+  @extend .col-lg-4;
+  @extend .col-xl-3;
+  @extend .col-xxl-3;
+
+  overflow-y: scroll;
+}
+
+.cherita-app-sidebar {
+  @extend .d-none;
+  @extend .d-xl-flex;
+  overflow-y: hidden;
+  width: 20%;
+  min-width: 300px;
+
+  .sidebar-card-features {
+    overflow-y: scroll;
+    transition: "height 0.3s ease-in-out";
+  }
+}
