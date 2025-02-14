@@ -1,6 +1,15 @@
-import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useLayoutEffect, useRef, useState } from "react";
+
+import {
+  faChartArea,
+  faChartLine,
+  faChartPie,
+  faChartSimple,
+  faChevronDown,
+  faChevronUp,
+  faSliders,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Button,
   Card,
@@ -10,6 +19,7 @@ import {
   Nav,
   Navbar,
 } from "react-bootstrap";
+
 import { SELECTION_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
 import { ObsColsList } from "../obs-list/ObsList";
@@ -20,6 +30,7 @@ import {
   OffcanvasVars,
 } from "../offcanvas";
 import { Pseudospatial } from "../pseudospatial/Pseudospatial";
+import { PseudospatialToolbar } from "../pseudospatial/PseudospatialToolbar";
 import { Scatterplot } from "../scatterplot/Scatterplot";
 import { ScatterplotControls } from "../scatterplot/ScatterplotControls";
 import { SearchBar } from "../search-bar/SearchBar";
@@ -36,6 +47,8 @@ export function FullPage({
   const [showObsm, setShowObsm] = useState(false);
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [showPseudospatialControls, setShowPseudospatialControls] =
+    useState(false);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [showModal, setShowModal] = useState(false);
   useLayoutEffect(() => {
@@ -107,12 +120,29 @@ export function FullPage({
           <div className="cherita-app-canvas flex-grow-1">{children}</div>
           <div className="cherita-app-sidebar p-3 border-end d-flex flex-column h-100">
             <Card className="sidebar-card-features flex-grow-1 mb-3">
+              <Card.Header className="d-flex justify-content-evenly align-items-center">
+                <Button variant="link" onClick={() => setShowModal(true)}>
+                  <FontAwesomeIcon icon={faChartSimple} />
+                </Button>
+                <Button variant="link" onClick={() => setShowModal(true)}>
+                  <FontAwesomeIcon icon={faChartLine} />
+                </Button>
+                <Button variant="link" onClick={() => setShowModal(true)}>
+                  <FontAwesomeIcon icon={faChartPie} />
+                </Button>
+                <Button variant="link" onClick={() => setShowModal(true)}>
+                  <FontAwesomeIcon icon={faChartArea} />
+                </Button>
+              </Card.Header>
               <Card.Body>
                 <SearchBar searchDiseases={true} searchVar={true} />
                 <VarNamesList mode={varMode} />
               </Card.Body>
             </Card>
-            <Card>
+            <Card
+              className="sidebar-card-pseudospatial"
+              style={{ height: isCollapsed ? "auto" : "500px" }}
+            >
               <Card.Header className="d-flex justify-content-between align-items-center">
                 Pseudospatial
                 <Button
@@ -124,16 +154,17 @@ export function FullPage({
                     icon={isCollapsed ? faChevronUp : faChevronDown}
                   />
                 </Button>
-                <Button
-                  variant="link"
-                  onClick={() => setShowModal(true)}
-                  className="ms-auto"
-                >
-                  Open Modal
-                </Button>
+                {!isCollapsed && (
+                  <Button
+                    variant="link"
+                    onClick={() => setShowPseudospatialControls(!isCollapsed)}
+                  >
+                    <FontAwesomeIcon icon={faSliders} />
+                  </Button>
+                )}
               </Card.Header>
               <Collapse in={!isCollapsed}>
-                <Card.Body className="sidebar-card-pseudospatial">
+                <Card.Body>
                   <Pseudospatial />
                 </Card.Body>
               </Collapse>
@@ -159,6 +190,11 @@ export function FullPage({
             show={showControls}
             handleClose={() => setShowControls(false)}
             Controls={ScatterplotControls}
+          />
+          <OffcanvasControls
+            show={showPseudospatialControls}
+            handleClose={() => setShowPseudospatialControls(false)}
+            Controls={PseudospatialToolbar}
           />
           <OffcanvasObsm
             show={showObsm}

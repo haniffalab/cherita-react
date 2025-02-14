@@ -1,20 +1,19 @@
 import React, {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  useCallback,
 } from "react";
 
 import _ from "lodash";
 import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
-import { PseudospatialToolbar } from "./PseudospatialToolbar";
 import {
-  PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
   COLOR_ENCODINGS,
   OBS_TYPES,
+  PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
 } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
@@ -103,10 +102,7 @@ function usePseudospatialData(plotType) {
   ]);
 
   const params = useMemo(() => {
-    return {
-      ...baseParams,
-      ...getPlotParams(),
-    };
+    return { ...baseParams, ...getPlotParams() };
   }, [baseParams, getPlotParams]);
 
   return useDebouncedFetch(ENDPOINT + "/" + plotType, params, 500, {
@@ -134,10 +130,7 @@ export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
   const updateColorscale = useCallback(
     (colorscale) => {
       setLayout((l) => {
-        return {
-          ...l,
-          coloraxis: { ...l.coloraxis, colorscale: colorscale },
-        };
+        return { ...l, coloraxis: { ...l.coloraxis, colorscale: colorscale } };
       });
 
       setData((d) => {
@@ -205,14 +198,7 @@ export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
       });
 
       setLayout((l) => {
-        return {
-          ...l,
-          coloraxis: {
-            ...l.coloraxis,
-            cmin: min,
-            cmax: max,
-          },
-        };
+        return { ...l, coloraxis: { ...l.coloraxis, cmin: min, cmax: max } };
       });
     }
   }, [
@@ -228,14 +214,17 @@ export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
 
   if (!serverError) {
     return (
-      <div className="cherita-pseudospatial position-relative">
-        <PseudospatialToolbar plotType={plotType} />
+      <div className="cherita-pseudospatial">
+        {/* <PseudospatialToolbar plotType={plotType} /> */}
         <>
           {hasSelections && isPending && <LoadingSpinner />}
           {hasSelections && (
             <Plot
               data={data}
-              layout={layout}
+              layout={{
+                ...layout,
+                height: Math.min(layout?.height || 234, 234),
+              }}
               useResizeHandler={true}
               className="cherita-pseudospatial-plot"
               config={{ displaylogo: false }}

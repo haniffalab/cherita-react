@@ -338,11 +338,15 @@
 }
 
 .obs-accordion-header {
+  @extend .btn;
+  @extend .btn-light-primary !optional;
+  @extend .btn-light;
+  @extend .text-primary;
+
   display: flex;
   align-items: center; /* Center the content vertically */
   margin: 10px 10px 0 10px;
   padding: 8px 12px; /* Adjust padding for spacing */
-  background-color: rgba(0, 0, 0, 0.05);
   border-radius: 8px; /* Optional: rounded corners */
   transition: background-color 0.3s ease; /* Smooth transition for background change */
   cursor: pointer;
@@ -358,12 +362,20 @@
   .obs-accordion-header-title {
     font-size: 1rem;
   }
+
+  &.active {
+    @extend .btn-primary;
+    @extend .text-light;
+  }
   &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: var(--geeks-btn-hover-bg);
+    border-color: var(--geeks-btn-hover-border-color);
   }
 }
 
 .obs-accordion-body {
+  @extend .card;
+
   margin: 10px;
   position: relative;
 }

@@ -39,9 +39,15 @@
   overflow-y: hidden;
   width: 20%;
   min-width: 300px;
+  position: relative;
 
   .sidebar-card-features {
-    overflow-y: scroll;
+    overflow-y: auto;
     transition: "height 0.3s ease-in-out";
+  }
+
+  .sidebar-card-pseudospatial {
+    overflow-y: auto;
+    max-height: 60%;
   }
 }

@@ -6,9 +6,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { Accordion, Alert } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
+import Accordion from "react-bootstrap/Accordion";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
 import AccordionContext from "react-bootstrap/AccordionContext";
+
 import { OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
@@ -136,15 +138,15 @@ export function ObsColsList({ showColor = true }) {
 
   const PINK = "rgba(255, 192, 203, 0.6)";
   const BLUE = "rgba(0, 0, 255, 0.6)";
-  function ContextAwareToggle({ children, eventKey, callback }) {
-    const activeEventKey = useContext(AccordionContext);
-    console.log(activeEventKey);
-    const decoratedOnClick = useAccordionButton(
-      eventKey,
-      () => callback && callback(eventKey)
-    );
+  function ObsAccordionToggle({ children, eventKey, callback }) {
+    const { activeEventKey } = useContext(AccordionContext);
+    console.log("activeEventKey:", activeEventKey);
 
-    // Check if the current eventKey is in the activeEventKey array
+    const decoratedOnClick = useAccordionButton(eventKey, () => {
+      console.log("Clicked accordion:", eventKey);
+      handleAccordionToggle(eventKey);
+    });
+
     const isCurrentEventKey = Array.isArray(activeEventKey)
       ? activeEventKey.includes(eventKey)
       : activeEventKey === eventKey;
@@ -157,7 +159,6 @@ export function ObsColsList({ showColor = true }) {
         <span className="obs-accordion-header-chevron">
           <FontAwesomeIcon
             icon={isCurrentEventKey ? faChevronDown : faChevronRight}
-            style={{ backgroundColor: isCurrentEventKey ? PINK : BLUE }}
           />
         </span>
         <span className="obs-accordion-header-title">{children}</span>
@@ -171,37 +172,37 @@ export function ObsColsList({ showColor = true }) {
     }
     return (
       <div className="obs-accordion">
-        <ContextAwareToggle eventKey={index}>{item.name}</ContextAwareToggle>
-        <Accordion.Collapse eventKey={index}>
+        <ObsAccordionToggle eventKey={item.name}>
+          {item.name}
+        </ObsAccordionToggle>
+        <Accordion.Collapse eventKey={item.name}>
           <div className="obs-accordion-body">
-            {/* {expandedItems[item.name] &&
-                (item.type === OBS_TYPES.CATEGORICAL ||
-                item.type === OBS_TYPES.BOOLEAN ? ( */}
-            {item.type === OBS_TYPES.CATEGORICAL ||
-            item.type === OBS_TYPES.BOOLEAN ? (
-              <CategoricalObs
-                key={item.name}
-                obs={item}
-                updateObs={updateObs}
-                toggleAll={() => toggleAll(item)}
-                toggleObs={(value) => toggleObs(item, value)}
-                toggleLabel={() => toggleLabel(item)}
-                toggleSlice={() => toggleSlice(item)}
-                toggleColor={() => toggleColor(item)}
-                showColor={showColor}
-              />
-            ) : (
-              <ContinuousObs
-                key={item.name}
-                obs={item}
-                updateObs={updateObs}
-                toggleAll={() => toggleAll(item)}
-                toggleObs={(value) => toggleObs(item, value)}
-                toggleLabel={() => toggleLabel(item)}
-                toggleSlice={() => toggleSlice(item)}
-                toggleColor={() => toggleColor(item)}
-              />
-            )}
+            {expandedItems[item.name] &&
+              (item.type === OBS_TYPES.CATEGORICAL ||
+              item.type === OBS_TYPES.BOOLEAN ? (
+                <CategoricalObs
+                  key={item.name}
+                  obs={item}
+                  updateObs={updateObs}
+                  toggleAll={() => toggleAll(item)}
+                  toggleObs={(value) => toggleObs(item, value)}
+                  toggleLabel={() => toggleLabel(item)}
+                  toggleSlice={() => toggleSlice(item)}
+                  toggleColor={() => toggleColor(item)}
+                  showColor={showColor}
+                />
+              ) : (
+                <ContinuousObs
+                  key={item.name}
+                  obs={item}
+                  updateObs={updateObs}
+                  toggleAll={() => toggleAll(item)}
+                  toggleObs={(value) => toggleObs(item, value)}
+                  toggleLabel={() => toggleLabel(item)}
+                  toggleSlice={() => toggleSlice(item)}
+                  toggleColor={() => toggleColor(item)}
+                />
+              ))}
           </div>
         </Accordion.Collapse>
       </div>

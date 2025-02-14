@@ -245,7 +245,7 @@ export function CategoricalObs({
   showColor &= dataset.colorEncoding === COLOR_ENCODINGS.OBS;
 
   return (
-    <ListGroup>
+    <ListGroup variant="flush">
       <ListGroup.Item>
         <ObsToolbar
           item={obs}
@@ -410,7 +410,7 @@ export function ContinuousObs({
       {isPending && <LoadingLinear />}
       {!serverError && updatedObs && (
         <>
-          <ListGroup>
+          <ListGroup variant="flush">
             <ListGroup.Item>
               <ObsToolbar
                 item={obs}
