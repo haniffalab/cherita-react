@@ -1,20 +1,21 @@
 import React, {
+  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
-  useCallback,
 } from "react";
 
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faSliders } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
-import { PseudospatialToolbar } from "./PseudospatialToolbar";
 import {
-  PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
   COLOR_ENCODINGS,
   OBS_TYPES,
+  PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
 } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
@@ -23,6 +24,8 @@ import { ImageViewer } from "../../utils/ImageViewer";
 import { Legend } from "../../utils/Legend";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
+
+library.add(faSliders);
 
 function usePseudospatialData(plotType) {
   const ENDPOINT = "pseudospatial";
@@ -103,10 +106,7 @@ function usePseudospatialData(plotType) {
   ]);
 
   const params = useMemo(() => {
-    return {
-      ...baseParams,
-      ...getPlotParams(),
-    };
+    return { ...baseParams, ...getPlotParams() };
   }, [baseParams, getPlotParams]);
 
   return useDebouncedFetch(ENDPOINT + "/" + plotType, params, 500, {
@@ -114,7 +114,11 @@ function usePseudospatialData(plotType) {
   });
 }
 
-export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
+export function Pseudospatial({
+  showLegend = true,
+  sharedScaleRange = false,
+  setShowPseudospatialControls,
+}) {
   const dataset = useDataset();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
@@ -134,10 +138,7 @@ export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
   const updateColorscale = useCallback(
     (colorscale) => {
       setLayout((l) => {
-        return {
-          ...l,
-          coloraxis: { ...l.coloraxis, colorscale: colorscale },
-        };
+        return { ...l, coloraxis: { ...l.coloraxis, colorscale: colorscale } };
       });
 
       setData((d) => {
@@ -205,14 +206,7 @@ export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
       });
 
       setLayout((l) => {
-        return {
-          ...l,
-          coloraxis: {
-            ...l.coloraxis,
-            cmin: min,
-            cmax: max,
-          },
-        };
+        return { ...l, coloraxis: { ...l.coloraxis, cmin: min, cmax: max } };
       });
     }
   }, [
@@ -225,20 +219,41 @@ export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
   ]);
 
   const hasSelections = !!plotType && !!dataset.pseudospatial.maskSet;
+  const faSlidersPath = faSliders.icon[4];
 
   if (!serverError) {
     return (
-      <div className="cherita-pseudospatial position-relative">
-        <PseudospatialToolbar plotType={plotType} />
+      <div className="cherita-pseudospatial">
+        {/* <PseudospatialToolbar plotType={plotType} /> */}
         <>
           {hasSelections && isPending && <LoadingSpinner />}
           {hasSelections && (
             <Plot
               data={data}
-              layout={layout}
+              layout={{
+                ...layout,
+                autosize: true,
+                height: "200",
+              }}
               useResizeHandler={true}
               className="cherita-pseudospatial-plot"
-              config={{ displaylogo: false }}
+              config={{
+                displaylogo: false,
+                displayModeBar: true,
+                modeBarButtonsToAdd: [
+                  {
+                    name: "Open plot controls",
+                    icon: {
+                      width: 512,
+                      height: 512,
+                      path: faSlidersPath,
+                      ascent: 512,
+                      descent: 0,
+                    },
+                    click: () => setShowPseudospatialControls((prev) => !prev),
+                  },
+                ],
+              }}
             />
           )}
           {hasSelections && showLegend && (
