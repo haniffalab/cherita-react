@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import { useVirtualizer } from "@tanstack/react-virtual";
 
@@ -33,10 +33,8 @@ export function VirtualizedList({
   return (
     <div
       ref={refCallback}
-      style={{
-        overflowY: "auto",
-        maxHeight: maxHeight,
-      }}
+      style={{ overflowY: "auto", maxHeight: maxHeight }}
+      className="modern-scrollbars"
     >
       <div
         style={{
