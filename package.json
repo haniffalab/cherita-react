@@ -70,7 +70,7 @@
   "scripts": {
     "build:babel": "babel src/lib --out-dir dist --copy-files",
     "build:scss": "sass --load-path=node_modules src/scss/cherita-bootstrap.scss dist/css/cherita.css",
-    "copy:scss": "cpx src/scss/**/* scss",
+    "copy:scss": "cpx 'src/scss/**/*' 'dist/scss'",
     "build": "npm run build:babel && npm run build:scss && npm run copy:scss",
     "test": "jest --watchAll",
     "test:ci": "jest --coverage --ci --no-watch",
