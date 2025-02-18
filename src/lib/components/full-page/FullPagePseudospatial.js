@@ -1,24 +1,16 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useContext, useLayoutEffect, useRef, useState } from "react";
 
 import {
   faChartArea,
   faChartLine,
   faChartPie,
   faChartSimple,
-  faChevronDown,
-  faChevronUp,
-  faSliders,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  Button,
-  Card,
-  Collapse,
-  Container,
-  Modal,
-  Nav,
-  Navbar,
-} from "react-bootstrap";
+import { Button, Card, Container, Modal, Nav, Navbar } from "react-bootstrap";
+import { useAccordionButton } from "react-bootstrap/AccordionButton";
+import AccordionContext from "react-bootstrap/AccordionContext";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 
 import { SELECTION_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
@@ -41,7 +33,8 @@ export function FullPage({
   varMode = SELECTION_MODES.SINGLE,
   ...props
 }) {
-  const targetRef = useRef();
+  const appRef = useRef();
+  const [appDimensions, setAppDimensions] = useState({ width: 0, height: 0 });
 
   const [showObs, setShowObs] = useState(false);
   const [showObsm, setShowObsm] = useState(false);
@@ -49,44 +42,86 @@ export function FullPage({
   const [showControls, setShowControls] = useState(false);
   const [showPseudospatialControls, setShowPseudospatialControls] =
     useState(false);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [showModal, setShowModal] = useState(false);
   useLayoutEffect(() => {
     function updateDimensions() {
-      if (targetRef.current) {
+      if (appRef.current) {
         // Get the distance from the top of the page to the target element
-        const rect = targetRef.current.getBoundingClientRect();
+        const rect = appRef.current.getBoundingClientRect();
         const distanceFromTop = rect.top + window.scrollY;
 
         // Calculate the available height for the Cherita app
         const availableHeight = window.innerHeight - distanceFromTop;
 
         // Update the dimensions to fit the viewport minus the navbar height
-        setDimensions({
-          width: targetRef.current.offsetWidth,
+        setAppDimensions({
+          width: appRef.current.offsetWidth,
           height: availableHeight,
         });
       }
     }
 
+    // Initial calculation
+    updateDimensions();
+
+    // Event listener for resize
     window.addEventListener("resize", updateDimensions);
-    updateDimensions(); // Initial update
-    return () => window.removeEventListener("resize", updateDimensions);
-  }, []);
+
+    // Handle dimension recalculation when accordion expands/collapses
+    const accordionItems = document.querySelectorAll(".accordion-item");
+    accordionItems.forEach((item) => {
+      item.addEventListener("transitionend", updateDimensions);
+    });
+
+    // Clean up event listeners
+    return () => {
+      window.removeEventListener("resize", updateDimensions);
+      accordionItems.forEach((item) => {
+        item.removeEventListener("transitionend", updateDimensions);
+      });
+    };
+  }, []); // Dependency array to run only on mount/unmount
+
   const [open, setOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  function ObsAccordionToggle({ title, eventKey, buttons }) {
+    const { activeEventKey } = useContext(AccordionContext);
+    // console.log("activeEventKey:", activeEventKey);
+
+    const decoratedOnClick = useAccordionButton(eventKey, () => {
+      console.log("Clicked accordion:", eventKey);
+    });
+
+    const isCurrentEventKey = Array.isArray(activeEventKey)
+      ? activeEventKey.includes(eventKey)
+      : activeEventKey === eventKey;
+
+    return (
+      <div className="accordion-header" onClick={decoratedOnClick}>
+        <div
+          className={`accordion-header-wrapper d-flex align-items-center ${isCurrentEventKey ? "" : "collapsed"}`}
+        >
+          <span className="accordion-title flex-grow-1">{title}</span>
+          <div className="accordion-buttons ms-auto">
+            <ButtonGroup>{buttons}</ButtonGroup>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
-      ref={targetRef}
+      ref={appRef}
       className="cherita-app"
-      style={{ height: dimensions.height }}
+      style={{ height: appDimensions.height }}
     >
       <DatasetProvider {...props}>
         <Container
           fluid
           className="d-flex g-0"
-          style={{ height: dimensions.height }}
+          style={{ height: appDimensions.height }}
         >
           <Navbar expand="sm" bg="primary" className="cherita-navbar">
             <div className="container-fluid">
@@ -114,12 +149,12 @@ export function FullPage({
               </Navbar.Collapse>
             </div>
           </Navbar>
-          <div className="cherita-app-obs modern-scrollbars border-end d-flex flex-column h-100">
+          <div className="cherita-app-obs modern-scrollbars border-end h-100">
             <ObsColsList />
           </div>
           <div className="cherita-app-canvas flex-grow-1">{children}</div>
-          <div className="cherita-app-sidebar p-3 border-end d-flex flex-column h-100">
-            <Card className="sidebar-card-features flex-grow-1 mb-3">
+          <div className="cherita-app-sidebar p-3">
+            <Card>
               <Card.Header className="d-flex justify-content-evenly align-items-center">
                 <Button variant="link" onClick={() => setShowModal(true)}>
                   <FontAwesomeIcon icon={faChartSimple} />
@@ -134,40 +169,58 @@ export function FullPage({
                   <FontAwesomeIcon icon={faChartArea} />
                 </Button>
               </Card.Header>
-              <Card.Body>
-                <SearchBar searchDiseases={true} searchVar={true} />
-                <VarNamesList mode={varMode} />
-              </Card.Body>
-            </Card>
-            <Card
-              className="sidebar-card-pseudospatial"
-              style={{ height: isCollapsed ? "auto" : "500px" }}
-            >
-              <Card.Header className="d-flex justify-content-between align-items-center">
-                Pseudospatial
-                <Button
-                  variant="link"
-                  onClick={() => setIsCollapsed(!isCollapsed)}
-                  className="ms-auto"
-                >
-                  <FontAwesomeIcon
-                    icon={isCollapsed ? faChevronUp : faChevronDown}
+              <Card.Body className="d-flex flex-column p-0">
+                <div className="sidebar-pseudospatial">
+                  <Pseudospatial
+                    className="sidebar-pseudospatial"
+                    setShowPseudospatialControls={setShowPseudospatialControls}
                   />
-                </Button>
-                {!isCollapsed && (
-                  <Button
-                    variant="link"
-                    onClick={() => setShowPseudospatialControls(!isCollapsed)}
+                </div>
+
+                <div className="sidebar-features modern-scrollbars">
+                  <SearchBar searchDiseases={true} searchVar={true} />
+                  <VarNamesList mode={varMode} />
+                </div>
+
+                {/* <Accordion
+                  defaultActiveKey={["features"]}
+                  flush
+                  alwaysOpen
+                  className="flex-grow-1 flex-shrink-1 modern-scrollbars"
+                  style={{ overflowY: "auto" }}
+                >
+                  <Accordion.Item
+                    as="div"
+                    eventKey="features"
+                    className="sidebar-features"
                   >
-                    <FontAwesomeIcon icon={faSliders} />
-                  </Button>
-                )}
-              </Card.Header>
-              <Collapse in={!isCollapsed}>
-                <Card.Body>
-                  <Pseudospatial />
-                </Card.Body>
-              </Collapse>
+                    <ObsAccordionToggle
+                      eventKey="features"
+                      title="Features"
+                      buttons={
+                        !isCollapsed && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowVars(!isCollapsed);
+                            }}
+                          >
+                            <FontAwesomeIcon icon={faSearch} />
+                          </Button>
+                        )
+                      }
+                    />
+                    <Accordion.Collapse eventKey="features">
+                      <Accordion.Body>
+                        <SearchBar searchDiseases={true} searchVar={true} />
+                        <VarNamesList mode={varMode} />
+                      </Accordion.Body>
+                    </Accordion.Collapse>
+                  </Accordion.Item>
+                </Accordion> */}
+              </Card.Body>
             </Card>
           </div>
         </Container>

@@ -6,6 +6,8 @@ import React, {
   useState,
 } from "react";
 
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faSliders } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
@@ -22,6 +24,8 @@ import { ImageViewer } from "../../utils/ImageViewer";
 import { Legend } from "../../utils/Legend";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
+
+library.add(faSliders);
 
 function usePseudospatialData(plotType) {
   const ENDPOINT = "pseudospatial";
@@ -110,7 +114,11 @@ function usePseudospatialData(plotType) {
   });
 }
 
-export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
+export function Pseudospatial({
+  showLegend = true,
+  sharedScaleRange = false,
+  setShowPseudospatialControls,
+}) {
   const dataset = useDataset();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
@@ -211,6 +219,7 @@ export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
   ]);
 
   const hasSelections = !!plotType && !!dataset.pseudospatial.maskSet;
+  const faSlidersPath = faSliders.icon[4];
 
   if (!serverError) {
     return (
@@ -223,11 +232,28 @@ export function Pseudospatial({ showLegend = true, sharedScaleRange = false }) {
               data={data}
               layout={{
                 ...layout,
-                height: Math.min(layout?.height || 234, 234),
+                autosize: true,
+                height: "200",
               }}
               useResizeHandler={true}
               className="cherita-pseudospatial-plot"
-              config={{ displaylogo: false }}
+              config={{
+                displaylogo: false,
+                displayModeBar: true,
+                modeBarButtonsToAdd: [
+                  {
+                    name: "Open plot controls",
+                    icon: {
+                      width: 512,
+                      height: 512,
+                      path: faSlidersPath,
+                      ascent: 512,
+                      descent: 0,
+                    },
+                    click: () => setShowPseudospatialControls((prev) => !prev),
+                  },
+                ],
+              }}
             />
           )}
           {hasSelections && showLegend && (

@@ -1,6 +1,7 @@
 @import "components/layouts";
 @import "components/plots";
 @import "components/scrollbars";
+@import "components/plotly";
 
 .loading-spinner {
   @extend .bg-light;
@@ -322,14 +323,6 @@
   z-index: 10;
   bottom: 1rem;
   left: 1rem;
-}
-
-#example-collapse-text {
-  position: absolute;
-  z-index: 9;
-  bottom: 1rem;
-  left: 1rem;
-  width: 100%;
 }
 
 /* Styling the obs-accordion-header */

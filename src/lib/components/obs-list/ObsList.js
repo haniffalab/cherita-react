@@ -136,11 +136,9 @@ export function ObsColsList({ showColor = true }) {
     }
   };
 
-  const PINK = "rgba(255, 192, 203, 0.6)";
-  const BLUE = "rgba(0, 0, 255, 0.6)";
-  function ObsAccordionToggle({ children, eventKey, callback }) {
+  function ObsAccordionToggle({ children, eventKey }) {
     const { activeEventKey } = useContext(AccordionContext);
-    console.log("activeEventKey:", activeEventKey);
+    // console.log("activeEventKey:", activeEventKey);
 
     const decoratedOnClick = useAccordionButton(eventKey, () => {
       console.log("Clicked accordion:", eventKey);
@@ -171,7 +169,7 @@ export function ObsColsList({ showColor = true }) {
       return null;
     }
     return (
-      <div className="obs-accordion">
+      <div>
         <ObsAccordionToggle eventKey={item.name}>
           {item.name}
         </ObsAccordionToggle>
@@ -213,7 +211,12 @@ export function ObsColsList({ showColor = true }) {
     return (
       <div>
         {isPending && <LoadingSpinner />}
-        <Accordion flush defaultActiveKey={[active]} alwaysOpen>
+        <Accordion
+          flush
+          defaultActiveKey={[active]}
+          alwaysOpen
+          className="obs-accordion"
+        >
           {obsList}
         </Accordion>
       </div>

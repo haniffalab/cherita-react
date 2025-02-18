@@ -1,0 +1,30 @@
+.js-plotly-plot .plotly .modebar {
+  border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 0 4px !important;
+
+  .modebar-group {
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: transparent !important;
+
+    .modebar-btn {
+      fill: white !important; /* Ensures white icons */
+      color: white !important; /* Ensures text/icons are visible */
+      position: relative;
+      font-size: 16px;
+      padding: 4px;
+      height: auto;
+      cursor: pointer;
+      line-height: normal;
+
+      svg {
+        position: relative;
+        top: auto;
+        bottom: auto;
+        left: auto;
+        right: auto;
+      }
+    }
+  }
+}
