@@ -1,5 +1,4 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-
 import { Card, Nav, Navbar } from "react-bootstrap";
 
 import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
@@ -14,10 +13,6 @@ import {
   OffcanvasObsm,
   OffcanvasVars,
 } from "../offcanvas";
-import {
-  Pseudospatial,
-  PseudospatialImage,
-} from "../pseudospatial/Pseudospatial";
 import { Scatterplot } from "../scatterplot/Scatterplot";
 import { ScatterplotControls } from "../scatterplot/ScatterplotControls";
 import { SearchBar } from "../search-bar/SearchBar";
@@ -139,34 +134,6 @@ export function FullPageScatterplot(props) {
   return (
     <FullPage {...props}>
       <Scatterplot />
-    </FullPage>
-  );
-}
-
-export function FullPagePseudospatial(props) {
-  return (
-    <FullPage {...props}>
-      <div className="container-fluid h-100">
-        <div className="row">
-          <div className="col-12 col-lg-7">
-            <Scatterplot />
-          </div>
-          <div className="col-12 col-lg-5">
-            <div className="container-fluid h-100 d-flex align-itemms-center justify-content-center">
-              <div className="row w-100 py-3">
-                <div className="col-12">
-                  <div className="p-2">
-                    <Pseudospatial />
-                  </div>
-                </div>
-                <div className="col-12">
-                  <PseudospatialImage />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </FullPage>
   );
 }

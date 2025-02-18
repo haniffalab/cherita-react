@@ -10,7 +10,10 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <App dataset_url="https://storage.googleapis.com/haniffalab/test/tmp-breast_cancer-visium-extended.zarr" />
+      <App
+        dataset_url="***REMOVED***"
+        imageUrl="***REMOVED***"
+      />
     </BrowserRouter>
   </React.StrictMode>
 );
