@@ -1,0 +1,18 @@
+.modern-scrollbars::-webkit-scrollbar {
+  width: 20px;
+}
+
+.modern-scrollbars::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.modern-scrollbars::-webkit-scrollbar-thumb {
+  background-color: #d6dee1;
+  border-radius: 20px;
+  border: 6px solid transparent;
+  background-clip: content-box;
+}
+
+.modern-scrollbars::-webkit-scrollbar-thumb:hover {
+  background-color: #a8bbbf;
+}

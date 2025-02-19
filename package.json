@@ -28,9 +28,9 @@
     "@tanstack/react-virtual": "^3.7.0",
     "@turf/turf": "^7.0.0",
     "@uidotdev/usehooks": "^2.4.1",
-    "bootstrap": "^5.3.0",
-    "deck.gl": "^8.9.19",
-    "jquery": "^3.7.0",
+    "bootstrap": "^5.3.3",
+    "deck.gl": "^8.9.36",
+    "jquery": "^3.7.1",
     "nebula.gl": "^1.0.4",
     "numbro": "^2.5.0",
     "plotly.js": "^2.23.2",
@@ -62,7 +62,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "eslint-plugin-import": "^2.29.1",
     "prettier": "^3.3.3",
-    "sass": "^1.79.5",
+    "sass": "1.77.6",
     "stylelint": "^16.10.0",
     "stylelint-config-prettier": "^9.0.5",
     "stylelint-config-standard-scss": "^13.1.0"
@@ -70,14 +70,15 @@
   "scripts": {
     "build:babel": "babel src/lib --out-dir dist --copy-files",
     "build:scss": "sass --load-path=node_modules src/scss/cherita-bootstrap.scss dist/css/cherita.css",
-    "copy:scss": "cpx src/scss/**/* scss",
+    "copy:scss": "cpx 'src/scss/**/*' 'scss'",
     "build": "npm run build:babel && npm run build:scss && npm run copy:scss",
     "test": "jest --watchAll",
     "test:ci": "jest --coverage --ci --no-watch",
     "lint:scss": "stylelint 'src/**/*.scss' --fix",
     "lint:js": "eslint 'src/**/*.js' --fix",
     "lint": "npm run lint:scss && npm run lint:js",
-    "start-demo": "npm run dev --prefix sites/demo"
+    "start-demo": "npm run dev --prefix sites/demo",
+    "reinstall": "rm -rf node_modules package-lock.json && npm install"
   },
   "eslintConfig": {
     "extends": [

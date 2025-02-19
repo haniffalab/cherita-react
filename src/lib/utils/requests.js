@@ -20,10 +20,7 @@ export async function fetchData(
   const response = await fetch(new URL(endpoint, apiUrl), {
     method: "POST",
     mode: "cors",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify(params),
     signal: controller.signal,
   })
@@ -66,6 +63,10 @@ export const useFetch = (
         return;
       }
     },
+    retry: (failureCount, { error }) => {
+      if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
+      return failureCount < 3;
+    },
     ...opts,
   });
 
@@ -94,6 +95,10 @@ export const useDebouncedFetch = (
       } else {
         return;
       }
+    },
+    retry: (failureCount, { error }) => {
+      if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
+      return failureCount < 3;
     },
     ...opts,
   });

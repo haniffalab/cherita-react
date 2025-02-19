@@ -1,0 +1,101 @@
+.cherita-app {
+  position: relative;
+}
+
+.cherita-app .cherita-navbar {
+  @extend .m-3;
+  @extend .d-block;
+  @extend .d-xl-none;
+
+  position: absolute;
+  z-index: 11;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-radius: 0.25rem;
+  @media (min-width: 992px) and (max-width: 1199px) {
+    margin-left: calc(33.33333333% + 1rem) !important;
+  }
+}
+
+.cherita-app-canvas {
+  position: relative;
+}
+
+.cherita-app-obs {
+  @extend .col;
+  @extend .d-none;
+  @extend .d-lg-block;
+  @extend .col-lg-4;
+  @extend .col-xl-3;
+  @extend .col-xxl-3;
+
+  overflow-y: scroll;
+}
+
+.cherita-app-sidebar {
+  @extend .d-none;
+  @extend .d-xl-flex;
+
+  width: 20%;
+  position: relative;
+
+  .card {
+    width: 100%;
+  }
+
+  .card-body {
+    overflow-y: hidden;
+  }
+
+  .sidebar-pseudospatial {
+    padding: 10px;
+    border-bottom: 1px solid #dee2e6;
+
+    .cherita-legend {
+      margin: 0 auto;
+    }
+  }
+
+  .sidebar-features {
+    padding: 10px;
+    margin-bottom: 10px;
+    overflow-y: auto;
+  }
+
+  .accordion-header-wrapper {
+    cursor: pointer;
+    padding: var(--geeks-accordion-btn-padding-y)
+      var(--geeks-accordion-btn-padding-x);
+    color: var(--geeks-accordion-btn-color);
+    background-color: var(--geeks-accordion-btn-bg);
+    border: 0;
+    border-radius: 0;
+    transition: var(--geeks-accordion-transition);
+    display: flex;
+    align-items: center;
+    width: 100%;
+
+    &:after {
+      content: "";
+      flex-shrink: 0;
+      width: var(--geeks-accordion-btn-icon-width);
+      height: var(--geeks-accordion-btn-icon-width);
+      margin-left: 8px;
+      background-image: var(--geeks-accordion-btn-icon);
+      background-repeat: no-repeat;
+      background-size: var(--geeks-accordion-btn-icon-width);
+      transition: var(--geeks-accordion-btn-icon-transition);
+    }
+  }
+
+  .accordion-header-wrapper:not(.collapsed) {
+    color: var(--geeks-accordion-active-color);
+    background-color: var(--geeks-accordion-active-bg);
+
+    &:after {
+      background-image: var(--geeks-accordion-btn-active-icon);
+      transform: var(--geeks-accordion-btn-icon-transform);
+    }
+  }
+}
