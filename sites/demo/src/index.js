@@ -10,10 +10,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
-      <App
-        dataset_url="https://storage.googleapis.com/haniffalab/whole-embryo/zarr/WE_n3_scRNAseq_filt_cells_filt_genes_lognorm_counts_with_QC_and_annots_lvl5_and_scVI_20240404-elmer.zarr"
-        imageUrl="https://storage.googleapis.com/haniffalab/whole-embryo/ref_imgs/ref.png"
-      />
+      <App dataset_url="https://storage.googleapis.com/haniffalab/test/tmp-breast_cancer-visium-extended.zarr" />
     </BrowserRouter>
   </React.StrictMode>
 );
