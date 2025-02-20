@@ -158,7 +158,7 @@ function CategoricalItem({
 
   return (
     <ListGroup.Item key={value} className="obs-item">
-      <div className="d-flex align-items-start">
+      <div className="d-flex align-items-center">
         <div className="flex-grow-1">
           <Form.Check
             className="obs-value-list-check"
@@ -168,7 +168,7 @@ function CategoricalItem({
             onChange={() => onChange(value)}
           />
         </div>
-        <div className="w-40 d-flex align-items-center">
+        <div className="d-flex align-items-center">
           <div className="pl-1 m-0 flex-grow-1">
             <Histogram
               data={histogramData.data}
@@ -198,13 +198,7 @@ function CategoricalItem({
                   {" "}
                   {isSliced && (
                     <>
-                      <Badge
-                        pill
-                        bg="primary"
-                        className="filtered-value-count-badge"
-                      >
-                        {formatNumerical(parseInt(filteredStats.value_counts))}
-                      </Badge>{" "}
+                      {formatNumerical(parseInt(filteredStats.value_counts))}{" "}
                       out of{" "}
                     </>
                   )}
