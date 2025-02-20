@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 
 import {
   faDroplet,
-  faFilter,
-  faMessage,
+  faListOl,
+  faScissors,
   faChevronDown,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
@@ -141,10 +141,8 @@ export function ObsColsList({ showColor = true }) {
 
   function ObsAccordionToggle({ children, eventKey }) {
     const { activeEventKey } = useContext(AccordionContext);
-    // console.log("activeEventKey:", activeEventKey);
 
     const decoratedOnClick = useAccordionButton(eventKey, () => {
-      console.log("Clicked accordion:", eventKey);
       handleAccordionToggle(eventKey);
     });
 
@@ -178,33 +176,31 @@ export function ObsColsList({ showColor = true }) {
       dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
       dataset.selectedObs?.name === item.name;
     return (
-      <div>
+      <div key={item.name}>
         <ObsAccordionToggle eventKey={item.name}>
-          <div className="d-flex justify-content-between w-100 me-2 mr-2">
-            <div>{item.name}</div>
-            <Badge pill>
-              {inLabelObs && (
-                <FontAwesomeIcon
-                  className="mx-1"
-                  icon={faMessage}
-                  title="In tooltip"
-                />
-              )}
-              {inSliceObs && (
-                <FontAwesomeIcon
-                  className="mx-1"
-                  icon={faFilter}
-                  title="Filter applied"
-                />
-              )}
-              {isColorEncoding && (
-                <FontAwesomeIcon
-                  className="mx-1"
-                  icon={faDroplet}
-                  title="Is color encoding"
-                />
-              )}
-            </Badge>
+          <div>{item.name}</div>
+          <div>
+            {inLabelObs && (
+              <FontAwesomeIcon
+                className="mx-1"
+                icon={faListOl}
+                title="In tooltip"
+              />
+            )}
+            {inSliceObs && (
+              <FontAwesomeIcon
+                className="mx-1"
+                icon={faScissors}
+                title="Filter applied"
+              />
+            )}
+            {isColorEncoding && (
+              <FontAwesomeIcon
+                className="mx-1"
+                icon={faDroplet}
+                title="Is color encoding"
+              />
+            )}
           </div>
         </ObsAccordionToggle>
         <Accordion.Collapse eventKey={item.name}>

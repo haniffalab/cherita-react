@@ -372,6 +372,10 @@ $gauge-padding: 0.15rem;
   }
   .obs-accordion-header-title {
     font-size: 1rem;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   &.active {
