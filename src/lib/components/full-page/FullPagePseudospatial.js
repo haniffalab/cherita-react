@@ -1,4 +1,4 @@
-import React, { useContext, useLayoutEffect, useRef, useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 
 import {
   faChartArea,
@@ -8,9 +8,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Card, Container, Modal, Nav, Navbar } from "react-bootstrap";
-import { useAccordionButton } from "react-bootstrap/AccordionButton";
-import AccordionContext from "react-bootstrap/AccordionContext";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
 
 import { SELECTION_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
@@ -82,35 +79,6 @@ export function FullPage({
     };
   }, []); // Dependency array to run only on mount/unmount
 
-  const [open, setOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  function ObsAccordionToggle({ title, eventKey, buttons }) {
-    const { activeEventKey } = useContext(AccordionContext);
-    // console.log("activeEventKey:", activeEventKey);
-
-    const decoratedOnClick = useAccordionButton(eventKey, () => {
-      console.log("Clicked accordion:", eventKey);
-    });
-
-    const isCurrentEventKey = Array.isArray(activeEventKey)
-      ? activeEventKey.includes(eventKey)
-      : activeEventKey === eventKey;
-
-    return (
-      <div className="accordion-header" onClick={decoratedOnClick}>
-        <div
-          className={`accordion-header-wrapper d-flex align-items-center ${isCurrentEventKey ? "" : "collapsed"}`}
-        >
-          <span className="accordion-title flex-grow-1">{title}</span>
-          <div className="accordion-buttons ms-auto">
-            <ButtonGroup>{buttons}</ButtonGroup>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       ref={appRef}
@@ -181,45 +149,6 @@ export function FullPage({
                   <SearchBar searchDiseases={true} searchVar={true} />
                   <VarNamesList mode={varMode} />
                 </div>
-
-                {/* <Accordion
-                  defaultActiveKey={["features"]}
-                  flush
-                  alwaysOpen
-                  className="flex-grow-1 flex-shrink-1 modern-scrollbars"
-                  style={{ overflowY: "auto" }}
-                >
-                  <Accordion.Item
-                    as="div"
-                    eventKey="features"
-                    className="sidebar-features"
-                  >
-                    <ObsAccordionToggle
-                      eventKey="features"
-                      title="Features"
-                      buttons={
-                        !isCollapsed && (
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowVars(!isCollapsed);
-                            }}
-                          >
-                            <FontAwesomeIcon icon={faSearch} />
-                          </Button>
-                        )
-                      }
-                    />
-                    <Accordion.Collapse eventKey="features">
-                      <Accordion.Body>
-                        <SearchBar searchDiseases={true} searchVar={true} />
-                        <VarNamesList mode={varMode} />
-                      </Accordion.Body>
-                    </Accordion.Collapse>
-                  </Accordion.Item>
-                </Accordion> */}
               </Card.Body>
             </Card>
           </div>
