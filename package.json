@@ -1,6 +1,6 @@
 {
   "name": "@haniffalab/cherita-react",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "author": "",
   "license": "",
   "main": "dist/index.js",
@@ -28,9 +28,9 @@
     "@tanstack/react-virtual": "^3.7.0",
     "@turf/turf": "^7.0.0",
     "@uidotdev/usehooks": "^2.4.1",
-    "bootstrap": "^5.3.0",
-    "deck.gl": "^8.9.19",
-    "jquery": "^3.7.0",
+    "bootstrap": "^5.3.3",
+    "deck.gl": "^8.9.36",
+    "jquery": "^3.7.1",
     "nebula.gl": "^1.0.4",
     "numbro": "^2.5.0",
     "plotly.js": "^2.23.2",
@@ -45,6 +45,10 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "babel-jest": "^29.7.0",
     "@babel/cli": "^7.22.5",
     "@babel/core": "^7.22.5",
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
@@ -54,25 +58,27 @@
     "eslint": "^8.42.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-config-react-app": "^7.0.1",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
     "eslint-plugin-import": "^2.29.1",
     "prettier": "^3.3.3",
-    "sass": "^1.79.5",
+    "sass": "1.77.6",
     "stylelint": "^16.10.0",
     "stylelint-config-prettier": "^9.0.5",
     "stylelint-config-standard-scss": "^13.1.0"
   },
   "scripts": {
-    "start": "react-scripts start",
     "build:babel": "babel src/lib --out-dir dist --copy-files",
     "build:scss": "sass --load-path=node_modules src/scss/cherita-bootstrap.scss dist/css/cherita.css",
-    "copy:scss": "cpx src/scss/**/* scss",
+    "copy:scss": "cpx 'src/scss/**/*' 'scss'",
     "build": "npm run build:babel && npm run build:scss && npm run copy:scss",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
+    "test": "jest --watchAll",
+    "test:ci": "jest --coverage --ci --no-watch",
     "lint:scss": "stylelint 'src/**/*.scss' --fix",
     "lint:js": "eslint 'src/**/*.js' --fix",
     "lint": "npm run lint:scss && npm run lint:js",
-    "start-demo": "npm run dev --prefix sites/demo"
+    "start-demo": "npm run dev --prefix sites/demo",
+    "reinstall": "rm -rf node_modules package-lock.json && npm install"
   },
   "eslintConfig": {
     "extends": [

@@ -2,12 +2,12 @@ import React from "react";
 
 import {
   faDroplet,
-  faFilter,
-  faMessage,
+  faListOl,
+  faScissors,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { Form, ButtonGroup, Button } from "react-bootstrap";
+import { Button, ButtonGroup, Form } from "react-bootstrap";
 
 import { COLOR_ENCODINGS } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
@@ -34,7 +34,7 @@ export function ObsToolbar({
     dataset.selectedObs?.name === item.name;
 
   return (
-    <div className="d-flex">
+    <div className="d-flex align-items-center">
       <div className="flex-grow-1">
         {showToggleAllObs && (
           <Form.Check // prettier-ignore
@@ -55,7 +55,7 @@ export function ObsToolbar({
               onClick={onToggleLabel}
               title="Add to tooltip"
             >
-              <FontAwesomeIcon icon={faMessage} />
+              <FontAwesomeIcon icon={faListOl} />
             </Button>
           )}
           {showSlice && (
@@ -65,7 +65,7 @@ export function ObsToolbar({
               onClick={onToggleSlice}
               title="Filter to selected"
             >
-              <FontAwesomeIcon icon={faFilter} />
+              <FontAwesomeIcon icon={faScissors} />
             </Button>
           )}
           {showColor && (

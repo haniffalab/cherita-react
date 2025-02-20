@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { Tooltip } from "@mui/material";
 import { Gauge, SparkLineChart } from "@mui/x-charts";
 import _ from "lodash";
-import { ListGroup, Form, Badge, Table } from "react-bootstrap";
+import { Badge, Form, ListGroup, Table } from "react-bootstrap";
 
 import { ObsToolbar } from "./ObsToolbar";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
@@ -137,10 +137,7 @@ const useFilteredObsData = (obs) => {
     obsIndices,
   ]);
 
-  return {
-    value_counts: valueCounts,
-    pct: pct,
-  };
+  return { value_counts: valueCounts, pct: pct };
 };
 
 function CategoricalItem({
@@ -161,8 +158,8 @@ function CategoricalItem({
 
   return (
     <ListGroup.Item key={value} className="obs-item">
-      <div className="d-flex align-items-center justify-content-between">
-        <div className="w-60">
+      <div className="d-flex align-items-start">
+        <div className="flex-grow-1">
           <Form.Check
             className="obs-value-list-check"
             type="switch"
@@ -304,10 +301,7 @@ export function CategoricalObs({
       const obsData = _.omit(obs, ["omit"]);
       if (!_.isEqual(selectedObsData, obsData)) {
         // outdated selectedObs
-        dispatch({
-          type: "select.obs",
-          obs: obs,
-        });
+        dispatch({ type: "select.obs", obs: obs });
       } else if (!_.isEqual(dataset.selectedObs.omit, obs.omit)) {
         updateObs({ ...obs, omit: dataset.selectedObs.omit });
       }
@@ -358,7 +352,7 @@ export function CategoricalObs({
   showColor &= dataset.colorEncoding === COLOR_ENCODINGS.OBS;
 
   return (
-    <ListGroup>
+    <ListGroup variant="flush">
       <ListGroup.Item>
         <ObsToolbar
           item={obs}
@@ -385,10 +379,7 @@ export function CategoricalObs({
 function ObsContinuousStats({ obs }) {
   const ENDPOINT = "obs/distribution";
   const dataset = useDataset();
-  const params = {
-    url: dataset.url,
-    obsColname: obs.name,
-  };
+  const params = { url: dataset.url, obsColname: obs.name };
 
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params);
 
@@ -435,12 +426,7 @@ function ObsContinuousStats({ obs }) {
               data={fetchedData.kde_values[1]}
               showHighlight={true}
               showTooltip={true} // throws Maximum update depth exceeded error. Documented here: https://github.com/mui/mui-x/issues/13450
-              margin={{
-                top: 10,
-                right: 20,
-                bottom: 10,
-                left: 20,
-              }}
+              margin={{ top: 10, right: 20, bottom: 10, left: 20 }}
               xAxis={{
                 data: fetchedData.kde_values[0],
                 valueFormatter: (v) =>
@@ -449,11 +435,7 @@ function ObsContinuousStats({ obs }) {
               valueFormatter={(v) =>
                 `${formatNumerical(v, FORMATS.EXPONENTIAL)}`
               }
-              slotProps={{
-                popper: {
-                  className: "feature-histogram-tooltip",
-                },
-              }}
+              slotProps={{ popper: { className: "feature-histogram-tooltip" } }}
             />
           </div>
         )}
@@ -509,10 +491,7 @@ export function ContinuousObs({
       const obsData = _.omit(obs, ["omit"]);
       if (!_.isEqual(selectedObsData, obsData)) {
         // outdated selectedObs
-        dispatch({
-          type: "select.obs",
-          obs: obs,
-        });
+        dispatch({ type: "select.obs", obs: obs });
       } else if (!_.isEqual(dataset.selectedObs.omit, obs.omit)) {
         updateObs({ ...obs, omit: dataset.selectedObs.omit });
       }
@@ -548,7 +527,7 @@ export function ContinuousObs({
       {isPending && <LoadingLinear />}
       {!serverError && updatedObs && (
         <>
-          <ListGroup>
+          <ListGroup variant="flush">
             <ListGroup.Item>
               <ObsToolbar
                 item={obs}
