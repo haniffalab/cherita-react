@@ -63,7 +63,7 @@ export function ObsToolbar({
               variant={inSliceObs ? "primary" : "outline-primary"}
               size="sm"
               onClick={onToggleSlice}
-              title="Slice to selected"
+              title="Filter to selected"
             >
               <FontAwesomeIcon icon={faScissors} />
             </Button>

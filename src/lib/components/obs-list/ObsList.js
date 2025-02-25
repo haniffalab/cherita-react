@@ -1,21 +1,24 @@
 import React, { useContext, useEffect, useState } from "react";
 
 import {
+  faDroplet,
+  faListOl,
+  faScissors,
   faChevronDown,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { Alert } from "react-bootstrap";
+import { Alert, Badge } from "react-bootstrap";
 import Accordion from "react-bootstrap/Accordion";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
 import AccordionContext from "react-bootstrap/AccordionContext";
 
-import { OBS_TYPES } from "../../constants/constants";
+import { CategoricalObs, ContinuousObs } from "./ObsItem";
+import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
-import { CategoricalObs, ContinuousObs } from "./ObsItem";
 
 export function ObsColsList({ showColor = true }) {
   const ENDPOINT = "obs/cols";
@@ -138,10 +141,8 @@ export function ObsColsList({ showColor = true }) {
 
   function ObsAccordionToggle({ children, eventKey }) {
     const { activeEventKey } = useContext(AccordionContext);
-    // console.log("activeEventKey:", activeEventKey);
 
     const decoratedOnClick = useAccordionButton(eventKey, () => {
-      console.log("Clicked accordion:", eventKey);
       handleAccordionToggle(eventKey);
     });
 
@@ -168,10 +169,39 @@ export function ObsColsList({ showColor = true }) {
     if (item.type === OBS_TYPES.DISCRETE) {
       return null;
     }
+    const inLabelObs = _.some(dataset.labelObs, (i) => i.name === item.name);
+    const inSliceObs =
+      dataset.sliceBy.obs && dataset.selectedObs?.name === item.name;
+    const isColorEncoding =
+      dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+      dataset.selectedObs?.name === item.name;
     return (
-      <div>
+      <div key={item.name}>
         <ObsAccordionToggle eventKey={item.name}>
-          {item.name}
+          <div>{item.name}</div>
+          <div>
+            {inLabelObs && (
+              <FontAwesomeIcon
+                className="mx-1"
+                icon={faListOl}
+                title="In tooltip"
+              />
+            )}
+            {inSliceObs && (
+              <FontAwesomeIcon
+                className="mx-1"
+                icon={faScissors}
+                title="Filter applied"
+              />
+            )}
+            {isColorEncoding && (
+              <FontAwesomeIcon
+                className="mx-1"
+                icon={faDroplet}
+                title="Is color encoding"
+              />
+            )}
+          </div>
         </ObsAccordionToggle>
         <Accordion.Collapse eventKey={item.name}>
           <div className="obs-accordion-body">
