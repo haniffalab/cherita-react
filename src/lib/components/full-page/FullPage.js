@@ -1,4 +1,5 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+
 import { Card, Nav, Navbar } from "react-bootstrap";
 
 import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
@@ -24,31 +25,31 @@ export function FullPage({
   varMode = SELECTION_MODES.SINGLE,
   ...props
 }) {
-  const targetRef = useRef();
+  const appRef = useRef();
+  const [appDimensions, setAppDimensions] = useState({ width: 0, height: 0 });
 
   const [showObs, setShowObs] = useState(false);
   const [showObsm, setShowObsm] = useState(false);
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  useLayoutEffect(() => {
-    function updateDimensions() {
-      if (targetRef.current) {
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (appRef.current) {
         // Get the distance from the top of the page to the target element
-        const rect = targetRef.current.getBoundingClientRect();
+        const rect = appRef.current.getBoundingClientRect();
         const distanceFromTop = rect.top + window.scrollY;
 
         // Calculate the available height for the Cherita app
         const availableHeight = window.innerHeight - distanceFromTop;
 
         // Update the dimensions to fit the viewport minus the navbar height
-        setDimensions({
-          width: targetRef.current.offsetWidth,
+        setAppDimensions({
+          width: appRef.current.offsetWidth,
           height: availableHeight,
         });
       }
-    }
+    };
 
     window.addEventListener("resize", updateDimensions);
     updateDimensions(); // Initial update
@@ -57,9 +58,9 @@ export function FullPage({
 
   return (
     <div
-      ref={targetRef}
+      ref={appRef}
       className="cherita-app"
-      style={{ height: dimensions.height }}
+      style={{ height: appDimensions.height }}
     >
       <DatasetProvider {...props}>
         <div className="row g-0">

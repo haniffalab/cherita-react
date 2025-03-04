@@ -1,11 +1,6 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
-import {
-  faChartArea,
-  faChartLine,
-  faChartPie,
-  faChartSimple,
-} from "@fortawesome/free-solid-svg-icons";
+import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Card, Container, Modal, Nav, Navbar } from "react-bootstrap";
 
@@ -40,8 +35,10 @@ export function FullPage({
   const [showPseudospatialControls, setShowPseudospatialControls] =
     useState(false);
   const [showModal, setShowModal] = useState(false);
-  useLayoutEffect(() => {
-    function updateDimensions() {
+  const [pseudospatialPlotType, setpseudospatialPlotType] = useState(null);
+
+  useEffect(() => {
+    const updateDimensions = () => {
       if (appRef.current) {
         // Get the distance from the top of the page to the target element
         const rect = appRef.current.getBoundingClientRect();
@@ -56,28 +53,12 @@ export function FullPage({
           height: availableHeight,
         });
       }
-    }
-
-    // Initial calculation
-    updateDimensions();
-
-    // Event listener for resize
-    window.addEventListener("resize", updateDimensions);
-
-    // Handle dimension recalculation when accordion expands/collapses
-    const accordionItems = document.querySelectorAll(".accordion-item");
-    accordionItems.forEach((item) => {
-      item.addEventListener("transitionend", updateDimensions);
-    });
-
-    // Clean up event listeners
-    return () => {
-      window.removeEventListener("resize", updateDimensions);
-      accordionItems.forEach((item) => {
-        item.removeEventListener("transitionend", updateDimensions);
-      });
     };
-  }, []); // Dependency array to run only on mount/unmount
+
+    window.addEventListener("resize", updateDimensions);
+    updateDimensions(); // Initial update
+    return () => window.removeEventListener("resize", updateDimensions);
+  }, []);
 
   return (
     <div
@@ -125,23 +106,16 @@ export function FullPage({
             <Card>
               <Card.Header className="d-flex justify-content-evenly align-items-center">
                 <Button variant="link" onClick={() => setShowModal(true)}>
-                  <FontAwesomeIcon icon={faChartSimple} />
-                </Button>
-                <Button variant="link" onClick={() => setShowModal(true)}>
-                  <FontAwesomeIcon icon={faChartLine} />
-                </Button>
-                <Button variant="link" onClick={() => setShowModal(true)}>
-                  <FontAwesomeIcon icon={faChartPie} />
-                </Button>
-                <Button variant="link" onClick={() => setShowModal(true)}>
-                  <FontAwesomeIcon icon={faChartArea} />
+                  <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
                 </Button>
               </Card.Header>
               <Card.Body className="d-flex flex-column p-0">
                 <div className="sidebar-pseudospatial">
                   <Pseudospatial
                     className="sidebar-pseudospatial"
-                    setShowPseudospatialControls={setShowPseudospatialControls}
+                    plotType={pseudospatialPlotType}
+                    setPlotType={setpseudospatialPlotType}
+                    setShowControls={setShowPseudospatialControls}
                   />
                 </div>
 
@@ -156,11 +130,15 @@ export function FullPage({
         <div>
           {/* Modal Component */}
           <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-            <Modal.Header closeButton>
-              <Modal.Title>My Modal</Modal.Title>
-            </Modal.Header>
+            <Modal.Header closeButton></Modal.Header>
             <Modal.Body>
-              <Pseudospatial />
+              {/* @TODO: controls are inaccessible from modal */}
+              <Pseudospatial
+                plotType={pseudospatialPlotType}
+                setPlotType={setpseudospatialPlotType}
+                setShowControls={setShowPseudospatialControls}
+                height={500}
+              />
             </Modal.Body>
           </Modal>
           <OffcanvasObs show={showObs} handleClose={() => setShowObs(false)} />
@@ -177,6 +155,7 @@ export function FullPage({
             show={showPseudospatialControls}
             handleClose={() => setShowPseudospatialControls(false)}
             Controls={PseudospatialToolbar}
+            plotType={pseudospatialPlotType}
           />
           <OffcanvasObsm
             show={showObsm}

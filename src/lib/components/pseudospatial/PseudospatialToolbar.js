@@ -178,20 +178,3 @@ export function PseudospatialToolbar({ plotType }) {
     </div>
   );
 }
-
-// @TODO: add colormap, colorbar slider
-export function PseudospatialToolbarLite({ plotType }) {
-  return (
-    <Dropdown>
-      <Dropdown.Toggle variant="success" id="dropdown-basic">
-        <FontAwesomeIcon icon={faChevronDown} />
-      </Dropdown.Toggle>
-
-      <Dropdown.Menu>
-        <MaskSet />
-        <Dropdown.Item href="#/action-2">Another action</Dropdown.Item>
-        <Dropdown.Item href="#/action-3">Something else</Dropdown.Item>
-      </Dropdown.Menu>
-    </Dropdown>
-  );
-}

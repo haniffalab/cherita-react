@@ -13,20 +13,19 @@ export { SearchBar } from "./components/search-bar/SearchBar";
 export { VarNamesList } from "./components/var-list/VarList";
 export { Violin } from "./components/violin/Violin";
 export { ViolinControls } from "./components/violin/ViolinControls";
-// export { PseudospatiaControls } from "./components/pseudospatial/PseudospatialControls";
 export {
-  FullPage, FullPagePlots, FullPageScatterplot
+  FullPage,
+  FullPagePlots,
+  FullPageScatterplot,
 } from "./components/full-page/FullPage";
+export { FullPagePseudospatial } from "./components/full-page/FullPagePseudospatial";
 export {
-  FullPagePseudospatial
-} from "./components/full-page/FullPagePseudospatial";
-export {
-  OffcanvasControls, OffcanvasObs,
+  OffcanvasControls,
+  OffcanvasObs,
   OffcanvasObsm,
-  OffcanvasVars
+  OffcanvasVars,
 } from "./components/offcanvas";
 export { COLORSCALES } from "./constants/colorscales";
 export { SELECTION_MODES, VIOLIN_MODES } from "./constants/constants";
 export { DatasetProvider } from "./context/DatasetContext";
 export { FilterProvider } from "./context/FilterContext";
-

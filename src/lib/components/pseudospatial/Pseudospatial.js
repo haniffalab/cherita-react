@@ -117,7 +117,10 @@ function usePseudospatialData(plotType) {
 export function Pseudospatial({
   showLegend = true,
   sharedScaleRange = false,
-  setShowPseudospatialControls,
+  height = 200,
+  setShowControls,
+  plotType,
+  setPlotType,
 }) {
   const dataset = useDataset();
   const [data, setData] = useState([]);
@@ -125,15 +128,18 @@ export function Pseudospatial({
   const { getColor } = useColor();
   const colorscale = useRef(dataset.controls.colorScale);
 
-  const plotType =
-    dataset.colorEncoding === COLOR_ENCODINGS.VAR
-      ? PLOT_TYPES.GENE
-      : dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-          dataset.selectedObs?.type === OBS_TYPES.BOOLEAN
-        ? PLOT_TYPES.CATEGORICAL
-        : dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS
-          ? PLOT_TYPES.CONTINUOUS
-          : PLOT_TYPES.MASKS;
+  useEffect(() => {
+    setPlotType(
+      dataset.colorEncoding === COLOR_ENCODINGS.VAR
+        ? PLOT_TYPES.GENE
+        : dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+            dataset.selectedObs?.type === OBS_TYPES.BOOLEAN
+          ? PLOT_TYPES.CATEGORICAL
+          : dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS
+            ? PLOT_TYPES.CONTINUOUS
+            : PLOT_TYPES.MASKS
+    );
+  }, [dataset.colorEncoding, dataset.selectedObs?.type, setPlotType]);
 
   const updateColorscale = useCallback(
     (colorscale) => {
@@ -230,11 +236,7 @@ export function Pseudospatial({
           {hasSelections && (
             <Plot
               data={data}
-              layout={{
-                ...layout,
-                autosize: true,
-                height: "200",
-              }}
+              layout={{ ...layout, autosize: true, height: height }}
               useResizeHandler={true}
               className="cherita-pseudospatial-plot"
               config={{
@@ -250,7 +252,7 @@ export function Pseudospatial({
                       ascent: 512,
                       descent: 0,
                     },
-                    click: () => setShowPseudospatialControls((prev) => !prev),
+                    click: () => setShowControls((prev) => !prev),
                   },
                 ],
               }}
