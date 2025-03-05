@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { openArray } from "zarr";
+import { useQuery } from "@tanstack/react-query";
+import { ArrayNotFoundError, GroupNotFoundError, openArray } from "zarr";
 
 export const GET_OPTIONS = {
   concurrencyLimit: 10, // max number of concurrent requests (default 10)
@@ -11,11 +12,7 @@ export const GET_OPTIONS = {
 
 export class ZarrHelper {
   async open(url, path) {
-    const z = await openArray({
-      store: url,
-      path: path,
-      mode: "r",
-    });
+    const z = await openArray({ store: url, path: path, mode: "r" });
     return z;
   }
 }
@@ -27,36 +24,42 @@ const fetchDataFromZarr = async (url, path, s, opts) => {
     const result = await z.get(s, opts);
     return result.data;
   } catch (error) {
-    throw new Error(error.message);
+    if (
+      error instanceof ArrayNotFoundError ||
+      error instanceof GroupNotFoundError
+    ) {
+      error.status = 404;
+    }
+    throw error;
   }
 };
 
-export const useZarr = ({ url, path }, s = null, opts = {}) => {
+export const useZarr = (
+  { url, path },
+  s = null,
+  options = GET_OPTIONS,
+  opts = {}
+) => {
   const { enabled = true } = opts;
-  const [data, setData] = useState(null);
-  const [isPending, setIsPending] = useState(true);
-  const [serverError, setServerError] = useState(null);
-
-  useEffect(() => {
-    if (enabled) {
-      setIsPending(true);
-      setServerError(null);
-      fetchDataFromZarr(url, path, s, opts)
-        .then((data) => {
-          setData(data);
-        })
-        .catch((error) => {
-          setServerError(error.message);
-        })
-        .finally(() => {
-          setIsPending(false);
-        });
-    } else {
-      setIsPending(false);
-      setData(null);
-      setServerError(null);
-    }
-  }, [enabled, opts, path, s, url]);
+  const {
+    data = null,
+    isLoading: isPending = false,
+    error: serverError = null,
+  } = useQuery({
+    queryKey: ["zarr", url, path, s],
+    queryFn: () => {
+      if (enabled) {
+        return fetchDataFromZarr(url, path, s, options);
+      } else {
+        return;
+      }
+    },
+    retry: (failureCount, { error }) => {
+      if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
+      return failureCount < 3;
+    },
+    ...opts,
+  });
 
   return { data, isPending, serverError };
 };

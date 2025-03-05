@@ -24,7 +24,11 @@ export const DatasetDispatchContext = createContext(null);
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      gcTime: 1000 * 60 * 60 * 24 * 7, // store for a week
+      gcTime: 1000 * 60 * 60, // garbage collect after 1 hour of inactive
+      staleTime: 1000 * 60 * 60,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
     },
   },
   queryCache: new QueryCache({
@@ -38,14 +42,11 @@ const persistKeys = [
   "obs/cols",
   "var/names",
   "obsm/keys",
-  "var/histograms",
   "obs/bins",
   "obs/distribution",
 ];
 const persistOptions = {
-  persister: createSyncStoragePersister({
-    storage: window.localStorage,
-  }),
+  persister: createSyncStoragePersister({ storage: window.localStorage }),
   dehydrateOptions: {
     shouldDehydrateQuery: ({ queryKey, state }) => {
       if (state.status === "success") {
@@ -67,20 +68,12 @@ const initialDataset = {
   colorEncoding: null,
   labelObs: [],
   varSets: [],
-  sliceBy: {
-    obs: false,
-    polygons: false,
-  },
+  sliceBy: { obs: false, polygons: false },
   controls: {
     colorScale: "Viridis",
     valueRange: [0, 1],
     range: [0, 1],
-    colorAxis: {
-      dmin: 0,
-      dmax: 1,
-      cmin: 0,
-      cmax: 1,
-    },
+    colorAxis: { dmin: 0, dmax: 1, cmin: 0, cmax: 1 },
     scale: {
       dotplot: DOTPLOT_SCALES.NONE,
       matrixplot: MATRIXPLOT_SCALES.NONE,
@@ -92,14 +85,8 @@ const initialDataset = {
   diseaseDatasets: [],
   selectedDisease: null,
   varSort: {
-    var: {
-      sort: VAR_SORT.NONE,
-      sortOrder: VAR_SORT_ORDER.ASC,
-    },
-    disease: {
-      sort: VAR_SORT.NONE,
-      sortOrder: VAR_SORT_ORDER.ASC,
-    },
+    var: { sort: VAR_SORT.NONE, sortOrder: VAR_SORT_ORDER.ASC },
+    disease: { sort: VAR_SORT.NONE, sortOrder: VAR_SORT_ORDER.ASC },
   },
   obsCols: null, // @TODO: implement specifying groups/categories for dropdowns
   imageUrl: null,
@@ -266,10 +253,7 @@ function datasetReducer(dataset, action) {
       };
     }
     case "add.varSet": {
-      return {
-        ...dataset,
-        varSets: [...dataset.varSets, action.varSet],
-      };
+      return { ...dataset, varSets: [...dataset.varSets, action.varSet] };
     }
     case "remove.varSet": {
       return {
@@ -278,10 +262,7 @@ function datasetReducer(dataset, action) {
       };
     }
     case "reset.varSets": {
-      return {
-        ...dataset,
-        varSets: [],
-      };
+      return { ...dataset, varSets: [] };
     }
     case "add.varSet.var": {
       const varSet = dataset.varSets.find((s) => s.name === action.varSet.name);
@@ -292,10 +273,7 @@ function datasetReducer(dataset, action) {
           ...dataset,
           varSets: dataset.varSets.map((s) => {
             if (s.name === varSet.name) {
-              return {
-                ...s,
-                vars: [...s.vars, action.var],
-              };
+              return { ...s, vars: [...s.vars, action.var] };
             } else {
               return s;
             }
@@ -322,52 +300,34 @@ function datasetReducer(dataset, action) {
     case "select.disease": {
       return {
         ...dataset,
-        selectedDisease: {
-          id: action.id,
-          name: action.name,
-        },
+        selectedDisease: { id: action.id, name: action.name },
       };
     }
     case "reset.disease": {
-      return {
-        ...dataset,
-        selectedDisease: null,
-      };
+      return { ...dataset, selectedDisease: null };
     }
     case "set.controls.colorScale": {
       return {
         ...dataset,
-        controls: {
-          ...dataset.controls,
-          colorScale: action.colorScale,
-        },
+        controls: { ...dataset.controls, colorScale: action.colorScale },
       };
     }
     case "set.controls.valueRange": {
       return {
         ...dataset,
-        controls: {
-          ...dataset.controls,
-          valueRange: action.valueRange,
-        },
+        controls: { ...dataset.controls, valueRange: action.valueRange },
       };
     }
     case "set.controls.range": {
       return {
         ...dataset,
-        controls: {
-          ...dataset.controls,
-          range: action.range,
-        },
+        controls: { ...dataset.controls, range: action.range },
       };
     }
     case "set.controls.colorAxis": {
       return {
         ...dataset,
-        controls: {
-          ...dataset.controls,
-          colorAxis: action.colorAxis,
-        },
+        controls: { ...dataset.controls, colorAxis: action.colorAxis },
       };
     }
     case "set.controls.colorAxis.crange": {
@@ -388,10 +348,7 @@ function datasetReducer(dataset, action) {
         ...dataset,
         controls: {
           ...dataset.controls,
-          colorAxis: {
-            ...dataset.controls.colorAxis,
-            cmin: action.cmin,
-          },
+          colorAxis: { ...dataset.controls.colorAxis, cmin: action.cmin },
         },
       };
     }
@@ -400,10 +357,7 @@ function datasetReducer(dataset, action) {
         ...dataset,
         controls: {
           ...dataset.controls,
-          colorAxis: {
-            ...dataset.controls.colorAxis,
-            cmax: action.cmax,
-          },
+          colorAxis: { ...dataset.controls.colorAxis, cmax: action.cmax },
         },
       };
     }
@@ -412,10 +366,7 @@ function datasetReducer(dataset, action) {
         ...dataset,
         controls: {
           ...dataset.controls,
-          scale: {
-            ...dataset.controls.scale,
-            [action.plot]: action.scale,
-          },
+          scale: { ...dataset.controls.scale, [action.plot]: action.scale },
         },
       };
     }
@@ -441,48 +392,30 @@ function datasetReducer(dataset, action) {
       if (_.isEqual(dataset.selectedObs, action.obs)) {
         return {
           ...dataset,
-          sliceBy: {
-            ...dataset.sliceBy,
-            obs: !dataset.sliceBy.obs,
-          },
+          sliceBy: { ...dataset.sliceBy, obs: !dataset.sliceBy.obs },
         };
       } else {
         return {
           ...dataset,
           selectedObs: action.obs,
-          sliceBy: {
-            ...dataset.sliceBy,
-            obs: true,
-          },
+          sliceBy: { ...dataset.sliceBy, obs: true },
         };
       }
     }
     case "toggle.slice.polygons": {
       return {
         ...dataset,
-        sliceBy: {
-          ...dataset.sliceBy,
-          polygons: !dataset.sliceBy.polygons,
-        },
+        sliceBy: { ...dataset.sliceBy, polygons: !dataset.sliceBy.polygons },
       };
     }
     case "disable.slice.polygons": {
-      return {
-        ...dataset,
-        sliceBy: {
-          ...dataset.sliceBy,
-          polygons: false,
-        },
-      };
+      return { ...dataset, sliceBy: { ...dataset.sliceBy, polygons: false } };
     }
     case "add.label.obs": {
       if (dataset.labelObs.find((i) => _.isEqual(i, action.obs))) {
         return dataset;
       } else {
-        return {
-          ...dataset,
-          labelObs: [...dataset.labelObs, action.obs],
-        };
+        return { ...dataset, labelObs: [...dataset.labelObs, action.obs] };
       }
     }
     case "remove.label.obs": {
@@ -492,20 +425,14 @@ function datasetReducer(dataset, action) {
       };
     }
     case "reset.label.obs": {
-      return {
-        ...dataset,
-        labelObs: [],
-      };
+      return { ...dataset, labelObs: [] };
     }
     case "set.varSort": {
       return {
         ...dataset,
         varSort: {
           ...dataset.varSort,
-          [action.var]: {
-            sort: action.sort,
-            sortOrder: action.sortOrder,
-          },
+          [action.var]: { sort: action.sort, sortOrder: action.sortOrder },
         },
       };
     }
@@ -514,10 +441,7 @@ function datasetReducer(dataset, action) {
         ...dataset,
         varSort: {
           ...dataset.varSort,
-          [action.var]: {
-            ...dataset.varSort[action.var],
-            sort: action.sort,
-          },
+          [action.var]: { ...dataset.varSort[action.var], sort: action.sort },
         },
       };
     }
@@ -536,19 +460,13 @@ function datasetReducer(dataset, action) {
     case "set.polygons": {
       return {
         ...dataset,
-        polygons: {
-          ...dataset.polygons,
-          [action.obsm]: action.polygons,
-        },
+        polygons: { ...dataset.polygons, [action.obsm]: action.polygons },
       };
     }
     case "set.pseudospatial.maskSet": {
       return {
         ...dataset,
-        pseudospatial: {
-          ...dataset.pseudospatial,
-          maskSet: action.maskSet,
-        },
+        pseudospatial: { ...dataset.pseudospatial, maskSet: action.maskSet },
       };
     }
     case "set.pseudospatial.maskValues": {
