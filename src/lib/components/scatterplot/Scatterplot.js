@@ -84,12 +84,7 @@ export function Scatterplot({ radius = 30 }) {
         height: deckRef?.current?.deck?.height,
       });
       setViewState((v) => {
-        return {
-          ...v,
-          longitude: longitude,
-          latitude: latitude,
-          zoom: zoom,
-        };
+        return { ...v, longitude: longitude, latitude: latitude, zoom: zoom };
       });
     } else if (!obsmData.isPending && obsmData.serverError) {
       setIsRendering(true);
@@ -198,11 +193,13 @@ export function Scatterplot({ radius = 30 }) {
   const getFillColor = useCallback(
     (_d, { index }) => {
       const grayOut = obsIndices && !obsIndices.has(index);
-      return getColor({
-        value: (data.values[index] - min) / (max - min),
-        categorical: isCategorical,
-        grayOut: grayOut,
-      });
+      return (
+        getColor({
+          value: (data.values[index] - min) / (max - min),
+          categorical: isCategorical,
+          grayOut: grayOut,
+        }) || [0, 0, 0, 100]
+      );
     },
     [data.values, obsIndices, getColor, isCategorical, max, min]
   );
@@ -227,10 +224,7 @@ export function Scatterplot({ radius = 30 }) {
         getPosition: (d) => d,
         getFillColor: getFillColor,
         getRadius: getRadius,
-        updateTriggers: {
-          getFillColor: getFillColor,
-          getRadius: getRadius,
-        },
+        updateTriggers: { getFillColor: getFillColor, getRadius: getRadius },
       }),
       new EditableGeoJsonLayer({
         id: "cherita-layer-draw",
@@ -283,9 +277,7 @@ export function Scatterplot({ radius = 30 }) {
 
   useEffect(() => {
     if (!features?.features?.length) {
-      dispatch({
-        type: "disable.slice.polygons",
-      });
+      dispatch({ type: "disable.slice.polygons" });
     }
   }, [dispatch, features?.features?.length]);
 
