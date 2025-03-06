@@ -17,13 +17,10 @@ export const useObsmData = (obsm = null) => {
   });
 
   useEffect(() => {
-    setObsmParams({
-      url: dataset.url,
-      path: "obsm/" + obsm,
-    });
+    setObsmParams({ url: dataset.url, path: "obsm/" + obsm });
   }, [dataset.url, obsm]);
 
-  return useZarr(obsmParams, null, GET_OPTIONS);
+  return useZarr(obsmParams, null, GET_OPTIONS, { enabled: !!obsm });
 };
 
 const meanData = (_i, data) => {
@@ -45,11 +42,7 @@ export const useXData = (agg = meanData) => {
             },
           ]
         : _.map(dataset.selectedVar?.vars, (v) => {
-            return {
-              url: dataset.url,
-              path: "X",
-              s: [null, v.matrix_index],
-            };
+            return { url: dataset.url, path: "X", s: [null, v.matrix_index] };
           })
   );
 
@@ -66,16 +59,17 @@ export const useXData = (agg = meanData) => {
               },
             ]
           : _.map(dataset.selectedVar?.vars, (v) => {
-              return {
-                url: dataset.url,
-                path: "X",
-                s: [null, v.matrix_index],
-              };
+              return { url: dataset.url, path: "X", s: [null, v.matrix_index] };
             })
     );
   }, [dataset.url, dataset.selectedVar]);
 
-  return useMultipleZarr(xParams, GET_OPTIONS, agg);
+  return useMultipleZarr(
+    xParams,
+    GET_OPTIONS,
+    { enabled: !!xParams.length },
+    agg
+  );
 };
 
 export const useObsData = (obs = null) => {
@@ -101,7 +95,7 @@ export const useObsData = (obs = null) => {
     });
   }, [dataset.url, obs]);
 
-  return useZarr(obsParams, null, GET_OPTIONS);
+  return useZarr(obsParams, null, GET_OPTIONS, { enabled: !!obs });
 };
 
 export const useLabelObsData = () => {
@@ -135,5 +129,7 @@ export const useLabelObsData = () => {
     );
   }, [dataset.labelObs, dataset.url]);
 
-  return useMultipleZarr(labelObsParams, GET_OPTIONS);
+  return useMultipleZarr(labelObsParams, GET_OPTIONS, {
+    enabled: !!labelObsParams.length,
+  });
 };

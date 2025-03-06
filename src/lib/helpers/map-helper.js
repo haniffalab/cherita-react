@@ -1,4 +1,5 @@
 import { WebMercatorViewport } from "@deck.gl/core";
+import _ from "lodash";
 
 export class MapHelper {
   fitBounds(
@@ -12,26 +13,36 @@ export class MapHelper {
       latitude: 0,
       zoom: 12,
     });
-    let latMin = Infinity;
-    let latMax = -Infinity;
-    let lonMin = Infinity;
-    let lonMax = -Infinity;
 
-    const RECT_LON_INDEX = 0;
-    const RECT_LAT_INDEX = 1;
-    coords.forEach(function (coord) {
-      if (coord[RECT_LAT_INDEX] < latMin) latMin = coord[RECT_LAT_INDEX];
-      if (coord[RECT_LAT_INDEX] > latMax) latMax = coord[RECT_LAT_INDEX];
-      if (coord[RECT_LON_INDEX] < lonMin) lonMin = coord[RECT_LON_INDEX];
-      if (coord[RECT_LON_INDEX] > lonMax) lonMax = coord[RECT_LON_INDEX];
-    });
+    let latMin;
+    let latMax;
+    let lonMin;
+    let lonMax;
+
+    if (coords) {
+      latMin = _.minBy(coords, (c) => c[1])[1];
+      latMax = _.maxBy(coords, (c) => c[1])[1];
+      lonMin = _.minBy(coords, (c) => c[0])[0];
+      lonMax = _.maxBy(coords, (c) => c[0])[0];
+    } else {
+      latMin = 0;
+      latMax = 1;
+      lonMin = 0;
+      lonMax = 1;
+    }
 
     const bounds = [
       [lonMin, latMin],
       [lonMax, latMax],
     ];
+
     const { longitude, latitude, zoom } = view.fitBounds(bounds, {
-      padding: { top: 50, bottom: 70, left: 50, right: 50 },
+      padding: {
+        top: height * 0.05,
+        bottom: height * 0.075,
+        left: width * 0.05,
+        right: width * 0.05,
+      },
     });
 
     return { longitude, latitude, zoom };
