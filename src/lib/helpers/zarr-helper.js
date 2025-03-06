@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useCallback } from "react";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { ArrayNotFoundError, GroupNotFoundError, openArray } from "zarr";
 
 export const GET_OPTIONS = {
   concurrencyLimit: 10, // max number of concurrent requests (default 10)
   progressCallback: ({ progress, queueSize }) => {
-    console.log(`${(progress / queueSize) * 100}% complete.`);
+    console.debug(`${(progress / queueSize) * 100}% complete.`);
   }, // callback executed after each request
 };
 
@@ -43,7 +43,7 @@ export const useZarr = (
   const { enabled = true } = opts;
   const {
     data = null,
-    isLoading: isPending = false,
+    isPending = false,
     error: serverError = null,
   } = useQuery({
     queryKey: ["zarr", url, path, s],
@@ -64,55 +64,59 @@ export const useZarr = (
   return { data, isPending, serverError };
 };
 
-const fetchDataFromZarrs = async (inputs, opts) => {
-  try {
-    const results = await Promise.all(
-      inputs.map((input) =>
-        fetchDataFromZarr(input.url, input.path, input.s, opts)
-      )
-    );
-    return results;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
 const aggregateData = (inputs, data) => {
   const dataObject = {};
-  data.forEach((result, index) => {
-    const key = inputs[index].key;
-    dataObject[key] = result;
+  inputs.forEach((input, index) => {
+    const key = input.key;
+    dataObject[key] = data?.[index];
   });
   return dataObject;
 };
 
-// @TODO: return response of successfully fetched data when error occurs
-export const useMultipleZarr = (inputs, opts = {}, agg = aggregateData) => {
+export const useMultipleZarr = (
+  inputs,
+  options = GET_OPTIONS,
+  opts = {},
+  agg = aggregateData
+) => {
   const { enabled = true } = opts;
-  const [data, setData] = useState(null);
-  const [isPending, setIsPending] = useState(true);
-  const [serverError, setServerError] = useState(null);
 
-  useEffect(() => {
-    if (enabled) {
-      setIsPending(true);
-      setServerError(null);
-      fetchDataFromZarrs(inputs, opts)
-        .then((data) => {
-          setData(agg(inputs, data));
-        })
-        .catch((error) => {
-          setServerError(error.message);
-        })
-        .finally(() => {
-          setIsPending(false);
-        });
-    } else {
-      setData(null);
-      setIsPending(false);
-      setServerError(null);
-    }
-  }, [agg, enabled, inputs, opts]);
+  const combine = useCallback(
+    (results) => {
+      return {
+        data: agg(
+          inputs,
+          results.map((result) => result.data)
+        ),
+        isPending: results.some((result) => result.isPending),
+        serverError: results.find((result) => result.error),
+      };
+    },
+    [agg, inputs]
+  );
+
+  const {
+    data = null,
+    isPending = false,
+    serverError = null,
+  } = useQueries({
+    queries: inputs.map((input) => ({
+      queryKey: ["zarr", input.url, input.path, input.s],
+      queryFn: () => {
+        if (enabled) {
+          return fetchDataFromZarr(input.url, input.path, input.s, options);
+        } else {
+          return;
+        }
+      },
+      retry: (failureCount, { error }) => {
+        if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
+        return failureCount < 3;
+      },
+      ...opts,
+    })),
+    combine,
+  });
 
   return { data, isPending, serverError };
 };

@@ -52,7 +52,7 @@ export const useFetch = (
   const { enabled = true } = opts;
   const {
     data: fetchedData = null,
-    isLoading: isPending = false,
+    isPending = false,
     error: serverError = null,
   } = useQuery({
     queryKey: [endpoint, params],
@@ -85,7 +85,7 @@ export const useDebouncedFetch = (
 
   const {
     data: fetchedData = null,
-    isLoading: isPending = false,
+    isPending = false,
     error: serverError = null,
   } = useQuery({
     queryKey: [endpoint, debouncedParams],

@@ -64,7 +64,12 @@ export const useXData = (agg = meanData) => {
     );
   }, [dataset.url, dataset.selectedVar]);
 
-  return useMultipleZarr(xParams, GET_OPTIONS, agg);
+  return useMultipleZarr(
+    xParams,
+    GET_OPTIONS,
+    { enabled: !!xParams.length },
+    agg
+  );
 };
 
 export const useObsData = (obs = null) => {
@@ -124,5 +129,7 @@ export const useLabelObsData = () => {
     );
   }, [dataset.labelObs, dataset.url]);
 
-  return useMultipleZarr(labelObsParams, GET_OPTIONS);
+  return useMultipleZarr(labelObsParams, GET_OPTIONS, {
+    enabled: !!labelObsParams.length,
+  });
 };

@@ -24,7 +24,7 @@ export const DatasetDispatchContext = createContext(null);
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      gcTime: 1000 * 60 * 60, // garbage collect after 1 hour of inactive
+      gcTime: 1000 * 60 * 15, // garbage collect after 15min of inactive
       staleTime: 1000 * 60 * 60,
       refetchOnMount: false,
       refetchOnReconnect: false,
@@ -32,8 +32,8 @@ const queryClient = new QueryClient({
     },
   },
   queryCache: new QueryCache({
-    onError: (error, query) => {
-      console.error(error, query);
+    onError: (error) => {
+      console.error(error);
     },
   }),
 });
@@ -132,9 +132,9 @@ export function DatasetProvider({ dataset_url, children, ...dataset_params }) {
         err.name === "QuotaExceededError" ||
         err.name === "NS_ERROR_DOM_QUOTA_REACHED"
       ) {
-        console.log("Browser storage quota exceeded");
+        console.err("Browser storage quota exceeded");
       } else {
-        console.log(err);
+        console.err(err);
       }
     }
   }, [dataset]);
