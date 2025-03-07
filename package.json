@@ -1,8 +1,13 @@
 {
   "name": "@haniffalab/cherita-react",
-  "version": "0.2.1",
-  "author": "",
-  "license": "",
+  "version": "1.0.0",
+  "author": "Haniffa Lab",
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "bioinformatics",
+    "visualization"
+  ],
   "main": "dist/index.js",
   "module": "dist/index.js",
   "style": "dist/css/cherita.css",
@@ -98,7 +103,7 @@
       "last 1 safari version"
     ]
   },
-  "description": "",
+  "description": "React component library designed for data visualisation and analysis of single-cell and spatial multi-omics data.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/haniffalab/cherita-react.git"

@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+type: software
+message: "If you use this repo, please cite it"
+title: "@haniffalab/cherita-react"
+url: "https://github.com/haniffalab/cherita-react"
+doi: 10.5281/zenodo.14244809
+authors:
+  - family-names: "Basurto-Lozada"
+    given-names: "Daniela"
+    orcid: "https://orcid.org/0000-0003-3943-8424"
+  - family-names: "Horsfall"
+    given-names: "David"
+    orcid: "https://orcid.org/0000-0002-8086-812X"
