@@ -52,14 +52,14 @@ export function OffcanvasVars({
   );
 }
 
-export function OffcanvasControls({ show, handleClose, Controls }) {
+export function OffcanvasControls({ show, handleClose, Controls, ...props }) {
   return (
     <Offcanvas show={show} onHide={handleClose}>
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Controls</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
-        <Controls />
+        <Controls {...props} />
       </Offcanvas.Body>
     </Offcanvas>
   );

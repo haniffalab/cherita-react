@@ -1,12 +1,12 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 
 import { Tooltip } from "@mui/material";
 import { Gauge, SparkLineChart } from "@mui/x-charts";
 import _ from "lodash";
-import { ListGroup, Form, Badge, Table } from "react-bootstrap";
+import { Badge, Form, ListGroup, Table } from "react-bootstrap";
 
 import { ObsToolbar } from "./ObsToolbar";
-import { COLOR_ENCODINGS } from "../../constants/constants";
+import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { useColor } from "../../helpers/color-helper";
@@ -15,6 +15,7 @@ import { LoadingLinear } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 import { formatNumerical, FORMATS } from "../../utils/string";
 import { VirtualizedList } from "../../utils/VirtualizedList";
+import { useObsData } from "../../utils/zarrData";
 
 const N_BINS = 5;
 
@@ -90,17 +91,67 @@ const useObsHistogram = (obs) => {
   });
 };
 
+const getBinIndex = (v, binEdges) => {
+  const EPSILON = 1e-6;
+  const lastEdge = _.last(binEdges);
+  const allButLastEdges = _.initial(binEdges);
+  const modifiedBinEdges = [
+    ...allButLastEdges,
+    [lastEdge[0], lastEdge[1] + EPSILON],
+  ];
+
+  return _.findIndex(modifiedBinEdges, (range) => _.inRange(v, ...range));
+};
+
+const useFilteredObsData = (obs) => {
+  const { obsIndices } = useFilteredData();
+  const obsData = useObsData(obs);
+
+  const isCategorical =
+    obs.type === OBS_TYPES.CATEGORICAL || obs.type === OBS_TYPES.BOOLEAN;
+
+  const { valueCounts, pct } = useMemo(() => {
+    const filteredObsValues = _.at(obsData.data, [...(obsIndices || [])]);
+    let valueCounts = {};
+    if (isCategorical) {
+      valueCounts = _.countBy(filteredObsValues);
+    } else {
+      valueCounts = _.countBy(filteredObsValues, (v) => {
+        return getBinIndex(v, obs.bins?.binEdges || [[null, null]]);
+      });
+    }
+
+    valueCounts = _.mapKeys(valueCounts, (_v, i) => {
+      return obs.codesMap[i];
+    });
+
+    const totalCounts = obsIndices?.size;
+    const pct = _.mapValues(valueCounts, (v) => (v / totalCounts) * 100);
+
+    return { valueCounts, pct };
+  }, [
+    isCategorical,
+    obs.bins?.binEdges,
+    obs.codesMap,
+    obsData.data,
+    obsIndices,
+  ]);
+
+  return { value_counts: valueCounts, pct: pct };
+};
+
 function CategoricalItem({
   value,
   label,
   code,
-  value_counts,
-  pct,
+  stats = { value_counts: null, pct: null },
   isOmitted,
   min,
   max,
   onChange,
   histogramData = { data: null, isPending: false, altColor: false },
+  filteredStats = { value_counts: null, pct: null },
+  isSliced,
   showColor = true,
 }) {
   const { getColor } = useColor();
@@ -118,31 +169,71 @@ function CategoricalItem({
           />
         </div>
         <div className="d-flex align-items-center">
-          <Histogram
-            data={histogramData.data}
-            isPending={histogramData.isPending}
-            altColor={histogramData.altColor}
-          />
+          <div className="pl-1 m-0 flex-grow-1">
+            <Histogram
+              data={histogramData.data}
+              isPending={histogramData.isPending}
+              altColor={histogramData.altColor}
+            />
+          </div>
           <div className="pl-1 m-0">
             <Tooltip
-              title={`${formatNumerical(pct, FORMATS.EXPONENTIAL)}%`}
+              title={
+                isSliced ? (
+                  <>
+                    Filtered:{" "}
+                    {formatNumerical(filteredStats.pct, FORMATS.EXPONENTIAL)}%
+                    <br />
+                    Total: {formatNumerical(stats.pct, FORMATS.EXPONENTIAL)}%
+                  </>
+                ) : (
+                  `${formatNumerical(stats.pct, FORMATS.EXPONENTIAL)}%`
+                )
+              }
               placement="left"
               arrow
             >
               <div className="d-flex align-items-center">
-                <Badge
-                  className="value-count-badge"
-                  style={{ fontWeight: "lighter" }}
-                >
-                  {formatNumerical(parseInt(value_counts), FORMATS.EXPONENTIAL)}
+                <Badge className="value-count-badge">
+                  {" "}
+                  {isSliced && (
+                    <>
+                      {formatNumerical(parseInt(filteredStats.value_counts))}{" "}
+                      out of{" "}
+                    </>
+                  )}
+                  {formatNumerical(
+                    parseInt(stats.value_counts),
+                    FORMATS.EXPONENTIAL
+                  )}
                 </Badge>
                 <div className="value-pct-gauge-container">
-                  <Gauge
-                    value={pct}
-                    text={null}
-                    innerRadius={"50%"}
-                    margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-                  />
+                  {isSliced ? (
+                    <>
+                      <Gauge
+                        className="pct-gauge filtered-pct-gauge"
+                        value={filteredStats.pct}
+                        text={null}
+                        innerRadius={"50%"}
+                        outerRadius={"75%"}
+                        margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                      />
+                      <Gauge
+                        className="pct-gauge"
+                        value={stats.pct}
+                        text={null}
+                        innerRadius={"75%"}
+                        margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                      />
+                    </>
+                  ) : (
+                    <Gauge
+                      value={stats.pct}
+                      text={null}
+                      innerRadius={"50%"}
+                      margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                    />
+                  )}
                 </div>
               </div>
             </Tooltip>
@@ -196,6 +287,7 @@ export function CategoricalObs({
   const max = _.max(_.values(obs.codes));
 
   const obsHistograms = useObsHistogram(obs);
+  const filteredObsData = useFilteredObsData(obs);
 
   useEffect(() => {
     if (dataset.selectedObs?.name === obs.name) {
@@ -203,10 +295,7 @@ export function CategoricalObs({
       const obsData = _.omit(obs, ["omit"]);
       if (!_.isEqual(selectedObsData, obsData)) {
         // outdated selectedObs
-        dispatch({
-          type: "select.obs",
-          obs: obs,
-        });
+        dispatch({ type: "select.obs", obs: obs });
       } else if (!_.isEqual(dataset.selectedObs.omit, obs.omit)) {
         updateObs({ ...obs, omit: dataset.selectedObs.omit });
       }
@@ -218,8 +307,10 @@ export function CategoricalObs({
       return {
         value: obs.values[index],
         code: obs.codes[obs.values[index]],
-        value_counts: obs.value_counts[obs.values[index]],
-        pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
+        stats: {
+          value_counts: obs.value_counts[obs.values[index]],
+          pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
+        },
         isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
         label: obs.values[index],
         histogramData:
@@ -230,10 +321,17 @@ export function CategoricalObs({
                 altColor: isSliced,
               }
             : { data: null, isPending: false },
+        filteredStats: {
+          value_counts: filteredObsData?.value_counts[obs.values[index]] || 0,
+          pct: filteredObsData?.pct[obs.values[index]] || 0,
+        },
+        isSliced: isSliced,
       };
     },
     [
       dataset.colorEncoding,
+      filteredObsData?.pct,
+      filteredObsData?.value_counts,
       isSliced,
       obs.codes,
       obs.omit,
@@ -248,7 +346,7 @@ export function CategoricalObs({
   showColor &= dataset.colorEncoding === COLOR_ENCODINGS.OBS;
 
   return (
-    <ListGroup>
+    <ListGroup variant="flush">
       <ListGroup.Item>
         <ObsToolbar
           item={obs}
@@ -275,10 +373,7 @@ export function CategoricalObs({
 function ObsContinuousStats({ obs }) {
   const ENDPOINT = "obs/distribution";
   const dataset = useDataset();
-  const params = {
-    url: dataset.url,
-    obsColname: obs.name,
-  };
+  const params = { url: dataset.url, obsColname: obs.name };
 
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params);
 
@@ -325,12 +420,7 @@ function ObsContinuousStats({ obs }) {
               data={fetchedData.kde_values[1]}
               showHighlight={true}
               showTooltip={true} // throws Maximum update depth exceeded error. Documented here: https://github.com/mui/mui-x/issues/13450
-              margin={{
-                top: 10,
-                right: 20,
-                bottom: 10,
-                left: 20,
-              }}
+              margin={{ top: 10, right: 20, bottom: 10, left: 20 }}
               xAxis={{
                 data: fetchedData.kde_values[0],
                 valueFormatter: (v) =>
@@ -339,11 +429,7 @@ function ObsContinuousStats({ obs }) {
               valueFormatter={(v) =>
                 `${formatNumerical(v, FORMATS.EXPONENTIAL)}`
               }
-              slotProps={{
-                popper: {
-                  className: "feature-histogram-tooltip",
-                },
-              }}
+              slotProps={{ popper: { className: "feature-histogram-tooltip" } }}
             />
           </div>
         )}
@@ -363,6 +449,7 @@ export function ContinuousObs({
 }) {
   const ENDPOINT = "obs/bins";
   const dataset = useDataset();
+  const { isSliced } = useFilteredData();
   const dispatch = useDatasetDispatch();
   const binnedObs = binContinuous(obs, _.min([N_BINS, obs.n_unique]));
   const params = {
@@ -375,6 +462,8 @@ export function ContinuousObs({
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
     refetchOnMount: false,
   });
+
+  const filteredObsData = useFilteredObsData(obs);
 
   const updatedObs = fetchedData && _.isMatch(obs, fetchedData);
 
@@ -396,10 +485,7 @@ export function ContinuousObs({
       const obsData = _.omit(obs, ["omit"]);
       if (!_.isEqual(selectedObsData, obsData)) {
         // outdated selectedObs
-        dispatch({
-          type: "select.obs",
-          obs: obs,
-        });
+        dispatch({ type: "select.obs", obs: obs });
       } else if (!_.isEqual(dataset.selectedObs.omit, obs.omit)) {
         updateObs({ ...obs, omit: dataset.selectedObs.omit });
       }
@@ -414,12 +500,19 @@ export function ContinuousObs({
     return {
       value: obs.values[index],
       code: obs.codes[obs.values[index]],
-      value_counts: obs.value_counts[obs.values[index]],
-      pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
+      stats: {
+        value_counts: obs.value_counts[obs.values[index]],
+        pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
+      },
       isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
       label: isNaN(obs.values[index])
         ? "NaN"
         : getContinuousLabel(obs.codes[obs.values[index]], obs.bins.binEdges),
+      filteredStats: {
+        value_counts: filteredObsData?.value_counts[obs.values[index]] || 0,
+        pct: filteredObsData?.pct[obs.values[index]] || 0,
+      },
+      isSliced: isSliced,
     };
   };
 
@@ -428,7 +521,7 @@ export function ContinuousObs({
       {isPending && <LoadingLinear />}
       {!serverError && updatedObs && (
         <>
-          <ListGroup>
+          <ListGroup variant="flush">
             <ListGroup.Item>
               <ObsToolbar
                 item={obs}

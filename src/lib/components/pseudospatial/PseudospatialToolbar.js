@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { Form, ButtonGroup, Dropdown } from "react-bootstrap";
-
+import { ButtonGroup, Dropdown, Form } from "react-bootstrap";
 import {
   PSEUDOSPATIAL_CATEGORICAL_MODES as MODES,
   PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
@@ -46,16 +47,11 @@ function MaskSet() {
   const dispatch = useDatasetDispatch();
   const [maskSets, setMaskSets] = useState(null);
 
-  const [params, setParams] = useState({
-    url: dataset.url,
-  });
+  const [params, setParams] = useState({ url: dataset.url });
 
   useEffect(() => {
     setParams((p) => {
-      return {
-        ...p,
-        url: dataset.url,
-      };
+      return { ...p, url: dataset.url };
     });
   }, [dataset.url]);
 
@@ -74,10 +70,7 @@ function MaskSet() {
       key={key}
       active={dataset.pseudospatial.maskSet === key}
       onClick={() => {
-        dispatch({
-          type: "set.pseudospatial.maskSet",
-          maskSet: key,
-        });
+        dispatch({ type: "set.pseudospatial.maskSet", maskSet: key });
       }}
     >
       {_.capitalize(key)}
@@ -99,10 +92,7 @@ function MaskSet() {
       newMasks = null;
     }
 
-    dispatch({
-      type: "set.pseudospatial.maskValues",
-      maskValues: newMasks,
-    });
+    dispatch({ type: "set.pseudospatial.maskValues", maskValues: newMasks });
   };
 
   const toggleMasks = () => {
@@ -111,15 +101,9 @@ function MaskSet() {
       dataset.pseudospatial.maskValues?.length ===
         maskSets?.[dataset.pseudospatial?.maskSet]?.length
     ) {
-      dispatch({
-        type: "set.pseudospatial.maskValues",
-        maskValues: [],
-      });
+      dispatch({ type: "set.pseudospatial.maskValues", maskValues: [] });
     } else {
-      dispatch({
-        type: "set.pseudospatial.maskValues",
-        maskValues: null,
-      });
+      dispatch({ type: "set.pseudospatial.maskValues", maskValues: null });
     }
   };
 
