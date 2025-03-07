@@ -4,12 +4,12 @@
 [![tests](https://github.com/haniffalab/cherita-react/actions/workflows/tests.yml/badge.svg)](https://github.com/haniffalab/cherita-react/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/haniffalab/cherita-react/graph/badge.svg?token=8RLSQP1FFB)](https://codecov.io/gh/haniffalab/cherita-react)
 
-# @haniffalab/cherita-react
+# Cherita React
 
 [![demo](https://img.shields.io/badge/Demo-view-blue)](https://default-dot-haniffa-lab.nw.r.appspot.com/)
 [![doi](https://zenodo.org/badge/DOI/10.5281/zenodo.14244809.svg)](https://doi.org/10.5281/zenodo.14244809)
 
-React component library designed for data visualisation and analysis of single-cell and spatial multi-omics data. This library provides a set of reusable and customisable components that can be used to used to build study narratives.
+A React component library designed for data visualisation and analysis of single-cell and spatial multi-omics data. This library provides a set of reusable and customisable components that can be used to used to build study narratives.
 
 ## Development
 
