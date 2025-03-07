@@ -4,7 +4,7 @@
 [![tests](https://github.com/haniffalab/cherita-react/actions/workflows/tests.yml/badge.svg)](https://github.com/haniffalab/cherita-react/actions/workflows/tests.yml)
 [![codecov](https://codecov.io/gh/haniffalab/cherita-react/graph/badge.svg?token=8RLSQP1FFB)](https://codecov.io/gh/haniffalab/cherita-react)
 
-# Cherita React
+# @haniffalab/cherita-react
 
 [![demo](https://img.shields.io/badge/Demo-view-blue)](https://default-dot-haniffa-lab.nw.r.appspot.com/)
 [![doi](https://zenodo.org/badge/DOI/10.5281/zenodo.14244809.svg)](https://doi.org/10.5281/zenodo.14244809)
