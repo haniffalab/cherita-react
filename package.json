@@ -103,7 +103,7 @@
       "last 1 safari version"
     ]
   },
-  "description": "React component library designed for data visualisation and analysis of single-cell and spatial multi-omics data.",
+  "description": "A React component library designed for data visualisation and analysis of single-cell and spatial multi-omics data.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/haniffalab/cherita-react.git"
