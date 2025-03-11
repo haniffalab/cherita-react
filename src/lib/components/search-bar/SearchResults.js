@@ -66,7 +66,7 @@ export function VarSearchResults({ text, setShowSuggestions, handleSelect }) {
   return (
     <div>
       <Dropdown.Header>Features</Dropdown.Header>
-      <div style={{ maxHeight: "25vh", overflowY: "scroll" }}>
+      <div className="search-results">
         {deferredData?.length ? (
           suggestionsList
         ) : (
@@ -146,7 +146,7 @@ export function DiseasesSearchResults({ text, setShowSuggestions }) {
   return (
     <div>
       <Dropdown.Header>Diseases</Dropdown.Header>
-      <div style={{ maxHeight: "25vh", overflowY: "scroll" }}>
+      <div className="search-results">
         {deferredData?.length ? (
           suggestionsList
         ) : (
