@@ -8,14 +8,23 @@
     "bioinformatics",
     "visualization"
   ],
-  "main": "dist/index.js",
-  "module": "dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "style": "dist/css/cherita.css",
   "sass": "scss/cherita.scss",
   "files": [
     "dist",
     "scss"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./scss/cherita": "./scss/cherita.scss",
+    "./scss/*.scss": "./scss/*.scss",
+    "./dist/*.css": "./dist/css/*.css"
+  },
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
@@ -73,7 +82,9 @@
     "stylelint-config-standard-scss": "^13.1.0"
   },
   "scripts": {
-    "build:babel": "babel src/lib --out-dir dist --copy-files",
+    "build:esm": "babel src/lib --out-dir dist/esm --copy-files --env-name esm",
+    "build:cjs": "babel src/lib --out-dir dist/cjs --copy-files --env-name cjs",
+    "build:babel": "npm run build:esm && npm run build:cjs",
     "build:scss": "sass --load-path=node_modules src/scss/cherita-bootstrap.scss dist/css/cherita.css",
     "copy:scss": "cpx 'src/scss/**/*' 'scss'",
     "build": "npm run build:babel && npm run build:scss && npm run copy:scss",
