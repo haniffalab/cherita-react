@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 
 import {
   faDroplet,
@@ -9,16 +9,46 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { Alert, Badge } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
 import Accordion from "react-bootstrap/Accordion";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
 import AccordionContext from "react-bootstrap/AccordionContext";
 
 import { CategoricalObs, ContinuousObs } from "./ObsItem";
-import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
+import {
+  COLOR_ENCODINGS,
+  DEFAULT_OBS_GROUP,
+  OBS_TYPES,
+} from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
+
+const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
+  const { activeEventKey } = useContext(AccordionContext);
+
+  const decoratedOnClick = useAccordionButton(eventKey, () => {
+    handleAccordionToggle(eventKey);
+  });
+
+  const isCurrentEventKey = Array.isArray(activeEventKey)
+    ? activeEventKey.includes(eventKey)
+    : activeEventKey === eventKey;
+
+  return (
+    <div
+      className={`obs-accordion-header ${isCurrentEventKey ? "active" : ""}`}
+      onClick={decoratedOnClick}
+    >
+      <span className="obs-accordion-header-chevron">
+        <FontAwesomeIcon
+          icon={isCurrentEventKey ? faChevronDown : faChevronRight}
+        />
+      </span>
+      <span className="obs-accordion-header-title">{children}</span>
+    </div>
+  );
+};
 
 export function ObsColsList({ showColor = true }) {
   const ENDPOINT = "obs/cols";
@@ -30,6 +60,13 @@ export function ObsColsList({ showColor = true }) {
     active ? { [active]: true } : {}
   );
   const [params, setParams] = useState({ url: dataset.url });
+  const obsGroups = useMemo(
+    () => ({
+      default: _.union(DEFAULT_OBS_GROUP, dataset.obsGroups?.default),
+      ..._.omit(dataset.obsGroups, "default"),
+    }),
+    [dataset.obsGroups]
+  );
 
   useEffect(() => {
     setParams((p) => {
@@ -45,11 +82,10 @@ export function ObsColsList({ showColor = true }) {
     if (!isPending && !serverError) {
       let filteredData = fetchedData;
 
-      if (dataset.obsCols) {
-        filteredData = _.filter(filteredData, (d) => {
-          return _.includes(dataset.obsCols, d.name);
-        });
-      }
+      // filter to only obs within an obsGroup
+      filteredData = _.filter(filteredData, (d) => {
+        return _.some(obsGroups, (g) => _.includes(g, d.name));
+      });
 
       setObsCols(
         _.keyBy(
@@ -60,7 +96,7 @@ export function ObsColsList({ showColor = true }) {
         )
       );
     }
-  }, [dataset.obsCols, fetchedData, isPending, serverError]);
+  }, [fetchedData, isPending, obsGroups, serverError]);
 
   // @TODO: fix re-rendering performance issue
   useEffect(() => {
@@ -139,33 +175,10 @@ export function ObsColsList({ showColor = true }) {
     }
   };
 
-  function ObsAccordionToggle({ children, eventKey }) {
-    const { activeEventKey } = useContext(AccordionContext);
-
-    const decoratedOnClick = useAccordionButton(eventKey, () => {
-      handleAccordionToggle(eventKey);
-    });
-
-    const isCurrentEventKey = Array.isArray(activeEventKey)
-      ? activeEventKey.includes(eventKey)
-      : activeEventKey === eventKey;
-
-    return (
-      <div
-        className={`obs-accordion-header ${isCurrentEventKey ? "active" : ""}`}
-        onClick={decoratedOnClick}
-      >
-        <span className="obs-accordion-header-chevron">
-          <FontAwesomeIcon
-            icon={isCurrentEventKey ? faChevronDown : faChevronRight}
-          />
-        </span>
-        <span className="obs-accordion-header-title">{children}</span>
-      </div>
-    );
-  }
-
-  const obsList = _.map(obsCols, (item, index) => {
+  const obsItem = (item) => {
+    if (!item) {
+      return null;
+    }
     if (item.type === OBS_TYPES.DISCRETE) {
       return null;
     }
@@ -177,7 +190,10 @@ export function ObsColsList({ showColor = true }) {
       dataset.selectedObs?.name === item.name;
     return (
       <div key={item.name}>
-        <ObsAccordionToggle eventKey={item.name}>
+        <ObsAccordionToggle
+          eventKey={item.name}
+          handleAccordionToggle={handleAccordionToggle}
+        >
           <div>{item.name}</div>
           <div>
             {inLabelObs && (
@@ -235,7 +251,31 @@ export function ObsColsList({ showColor = true }) {
         </Accordion.Collapse>
       </div>
     );
+  };
+
+  const groupList = _.map(_.keys(obsGroups), (group) => {
+    const groupItems = _.compact(
+      _.map(obsGroups[group], (item) => {
+        return obsItem(obsCols?.[item]);
+      })
+    );
+    if (group === "default") {
+      return groupItems;
+    } else {
+      return (
+        <Accordion.Item key={group} eventKey={group}>
+          <Accordion.Header>{group}</Accordion.Header>
+          <Accordion.Body className="p-0">{groupItems}</Accordion.Body>
+        </Accordion.Item>
+      );
+    }
   });
+
+  const obsList = (
+    <Accordion flush alwaysOpen>
+      {groupList}
+    </Accordion>
+  );
 
   if (!serverError) {
     return (
