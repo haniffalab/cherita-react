@@ -107,9 +107,10 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
         setActive(dataset.selectedObs?.name);
       } else {
         setActive(null);
+        dispatch({ type: "select.obs", obs: null });
       }
     }
-  }, [dataset.selectedObs, obsCols]);
+  }, [dataset.selectedObs, dispatch, obsCols]);
 
   const updateObs = (updatedObs) => {
     setObsCols((o) => {
