@@ -56,9 +56,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
   const dispatch = useDatasetDispatch();
   const [obsCols, setObsCols] = useState(null);
   const [active, setActive] = useState(dataset.selectedObs?.name);
-  const [expandedItems, setExpandedItems] = useState(
-    active ? { [active]: true } : {}
-  );
+  const [expandedItems, setExpandedItems] = useState({});
   const [params, setParams] = useState({ url: dataset.url });
   const obsGroups = useMemo(
     () => ({
