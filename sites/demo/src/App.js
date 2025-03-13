@@ -1,6 +1,6 @@
 import React from "react";
 
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 
 import Footer from "./components/Footer";
 import Header from "./components/Header";
@@ -18,7 +18,7 @@ export default function App(props) {
     <div className="App">
       <Header />
       <Routes>
-        <Route exact path="/" element={<h1>Home Page</h1>} />
+        <Route exact path="/" element={<p className="m-3">Demo website for @haniffalab/cherita-react</p>} />
         <Route exact path="/dotplot" element={<DotplotDemo {...props} />} />
         <Route exact path="/heatmap" element={<HeatmapDemo {...props} />} />
         <Route
