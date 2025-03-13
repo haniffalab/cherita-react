@@ -395,7 +395,7 @@ $gauge-padding: 0.15rem;
   position: relative;
 }
 
-.obs-group-accordion-header .accordion-button{
+.obs-group-accordion-header .accordion-button {
   @extend .mt-2;
   text-transform: capitalize;
 }
@@ -407,4 +407,14 @@ $gauge-padding: 0.15rem;
 
 .obs-group-accordion-body {
   @extend .p-0;
+}
+
+.search-results {
+  max-height: 25vh;
+  overflow-y: scroll;
+
+  .dropdown-item {
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
 }
