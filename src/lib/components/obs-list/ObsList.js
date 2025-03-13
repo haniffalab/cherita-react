@@ -254,6 +254,7 @@ export function ObsColsList({ showColor = true }) {
   };
 
   const groupList = _.map(_.keys(obsGroups), (group) => {
+    const key = `group-${group}`;
     const groupItems = _.compact(
       _.map(obsGroups[group], (item) => {
         return obsItem(obsCols?.[item]);
@@ -263,7 +264,7 @@ export function ObsColsList({ showColor = true }) {
       return groupItems;
     } else {
       return (
-        <Accordion.Item key={group} eventKey={group}>
+        <Accordion.Item key={key} eventKey={key}>
           <Accordion.Header>{group}</Accordion.Header>
           <Accordion.Body className="p-0">{groupItems}</Accordion.Body>
         </Accordion.Item>
