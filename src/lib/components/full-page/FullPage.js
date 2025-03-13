@@ -65,7 +65,7 @@ export function FullPage({
       <DatasetProvider {...props}>
         <div className="row g-0">
           <div className="cherita-app-obs modern-scrollbars border-end h-100">
-            <ObsColsList />
+            <ObsColsList {...props} />
           </div>
           <div className="cherita-app-plot">
             <div className="position-relative">
