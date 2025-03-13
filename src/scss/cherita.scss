@@ -394,3 +394,17 @@ $gauge-padding: 0.15rem;
   margin: 10px;
   position: relative;
 }
+
+.obs-group-accordion-header .accordion-button{
+  @extend .mt-2;
+  text-transform: capitalize;
+}
+
+.obs-group-accordion-item {
+  border: none !important;
+  border-bottom: 0 !important;
+}
+
+.obs-group-accordion-body {
+  @extend .p-0;
+}

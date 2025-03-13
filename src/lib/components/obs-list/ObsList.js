@@ -24,6 +24,8 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 
+// @TODO: integrate ObsAccordionToggle with ObsColsList active, expandedItems, etc. to avoid duplication
+
 const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
   const { activeEventKey } = useContext(AccordionContext);
 
@@ -254,37 +256,45 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     );
   };
 
-  const groupList = enableObsGroups
-    ? _.map(_.keys(obsGroups), (group) => {
-        const key = `group-${group}`;
-        const groupItems = _.compact(
-          _.map(
-            _.sortBy(obsGroups[group], (o) => _.lowerCase(o.name)),
-            (item) => {
-              return obsItem(obsCols?.[item]);
-            }
-          )
-        );
-        if (group === "default") {
-          return groupItems;
-        } else {
-          return (
-            <Accordion.Item key={key} eventKey={key}>
-              <Accordion.Header>{group}</Accordion.Header>
-              <Accordion.Body className="p-0">{groupItems}</Accordion.Body>
-            </Accordion.Item>
-          );
+  const groupList = _.map(_.keys(obsGroups), (group) => {
+    const key = `group-${group}`;
+    const groupItems = _.compact(
+      _.map(
+        _.sortBy(obsGroups[group], (o) => _.lowerCase(o.name)),
+        (item) => {
+          return obsItem(obsCols?.[item]);
         }
-      })
-    : _.map(
-        _.sortBy(obsCols, (o) => _.lowerCase(o.name)),
-        (item) => obsItem(item)
+      )
+    );
+    if (group === "default") {
+      return groupItems;
+    } else {
+      return (
+        <Accordion.Item
+          key={key}
+          eventKey={key}
+          className="obs-group-accordion-item"
+        >
+          <Accordion.Header className="obs-group-accordion-header">
+            {group}
+          </Accordion.Header>
+          <Accordion.Body className="obs-group-accordion-body">
+            {groupItems}
+          </Accordion.Body>
+        </Accordion.Item>
       );
+    }
+  });
 
-  const obsList = (
-    <Accordion flush alwaysOpen>
+  const obsList = enableObsGroups ? (
+    <Accordion className="obs-group-accordion" flush alwaysOpen>
       {groupList}
     </Accordion>
+  ) : (
+    _.map(
+      _.sortBy(obsCols, (o) => _.lowerCase(o.name)),
+      (item) => obsItem(item)
+    )
   );
 
   if (!serverError) {
