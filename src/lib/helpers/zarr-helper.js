@@ -43,7 +43,7 @@ export const useZarr = (
   const { enabled = true } = opts;
   const {
     data = null,
-    isPending = false,
+    isLoading: isPending = false,
     error: serverError = null,
   } = useQuery({
     queryKey: ["zarr", url, path, s],
@@ -88,7 +88,7 @@ export const useMultipleZarr = (
           inputs,
           results.map((result) => result.data)
         ),
-        isPending: results.some((result) => result.isPending),
+        isLoading: results.some((result) => result.isLoading),
         serverError: results.find((result) => result.error),
       };
     },
@@ -97,7 +97,7 @@ export const useMultipleZarr = (
 
   const {
     data = null,
-    isPending = false,
+    isLoading: isPending = false,
     serverError = null,
   } = useQueries({
     queries: inputs.map((input) => ({
