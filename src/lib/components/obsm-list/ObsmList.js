@@ -37,7 +37,7 @@ export function ObsmKeysList() {
   });
 
   useEffect(() => {
-    if (!isPending && !serverError) {
+    if (!isPending && !serverError && fetchedData) {
       setObsmKeysList(fetchedData);
     }
   }, [fetchedData, isPending, serverError]);

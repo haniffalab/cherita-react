@@ -43,6 +43,11 @@ const useVarMean = (varKeys, enabled = false) => {
   });
 };
 
+// ensure nulls are lowest values
+const sortMeans = (i, means) => {
+  return means[i.name] || _.min(_.values(means)) - 1;
+};
+
 // @TODO: display where disease data comes from
 // add to disease dataset metadata
 function DiseaseVarList({ makeListItem }) {
@@ -77,7 +82,7 @@ function DiseaseVarList({ makeListItem }) {
 
   const varMeans = useVarMean(
     diseaseVars,
-    diseaseVars && dataset.varSort.disease.sort === VAR_SORT.MATRIX
+    !!diseaseVars?.length && dataset.varSort.disease.sort === VAR_SORT.MATRIX
   );
 
   useEffect(() => {
@@ -87,7 +92,7 @@ function DiseaseVarList({ makeListItem }) {
           _.orderBy(
             diseaseVars,
             (o) => {
-              return varMeans.fetchedData[o.name];
+              return sortMeans(o, varMeans.fetchedData);
             },
             dataset.varSort.disease.sortOrder
           )
@@ -246,12 +251,16 @@ export function VarNamesList({
   // @TODO: deferr sortedVarButtons ?
   useEffect(() => {
     if (dataset.varSort.var.sort === VAR_SORT.MATRIX) {
-      if (!varMeans.isPending && !varMeans.serverError) {
+      if (
+        !varMeans.isPending &&
+        !varMeans.serverError &&
+        varMeans.fetchedData
+      ) {
         setSortedVarButtons(
           _.orderBy(
             varButtons,
             (o) => {
-              return varMeans.fetchedData[o.name];
+              return sortMeans(o, varMeans.fetchedData);
             },
             dataset.varSort.var.sortOrder
           )

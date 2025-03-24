@@ -136,7 +136,7 @@ export function SingleSelectionItem({
     enabled: !!dataset.diseaseDatasets.length,
   });
 
-  const hasDiseaseInfo = !isPending && !serverError && !!fetchedData.length;
+  const hasDiseaseInfo = !isPending && !serverError && !!fetchedData?.length;
 
   return (
     <>
@@ -247,12 +247,16 @@ export function VarItem({
       });
       dispatch({
         type: "set.colorEncoding",
-        value: "var",
+        value: COLOR_ENCODINGS.VAR,
       });
     } else if (mode === SELECTION_MODES.MULTIPLE) {
       dispatch({
         type: "select.multivar",
         var: item,
+      });
+      dispatch({
+        type: "set.colorEncoding",
+        value: COLOR_ENCODINGS.VAR,
       });
     }
   };
