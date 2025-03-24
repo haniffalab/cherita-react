@@ -171,7 +171,7 @@ export function Pseudospatial({
     usePseudospatialData(plotType);
 
   useEffect(() => {
-    if (!isPending && !serverError) {
+    if (!isPending && !serverError && fetchedData) {
       setData(fetchedData.data);
       setLayout(fetchedData.layout);
       updateColorscale(colorscale.current);

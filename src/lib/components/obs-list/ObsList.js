@@ -121,7 +121,7 @@ export function ObsColsList({ showColor = true }) {
 
   const toggleColor = (item) => {
     dispatch({ type: "select.obs", obs: item });
-    dispatch({ type: "set.colorEncoding", value: "obs" });
+    dispatch({ type: "set.colorEncoding", value: COLOR_ENCODINGS.OBS });
   };
 
   const toggleObs = (item, value) => {

@@ -82,7 +82,7 @@ function DiseaseVarList({ makeListItem }) {
 
   const varMeans = useVarMean(
     diseaseVars,
-    diseaseVars && dataset.varSort.disease.sort === VAR_SORT.MATRIX
+    !!diseaseVars?.length && dataset.varSort.disease.sort === VAR_SORT.MATRIX
   );
 
   useEffect(() => {
@@ -251,7 +251,11 @@ export function VarNamesList({
   // @TODO: deferr sortedVarButtons ?
   useEffect(() => {
     if (dataset.varSort.var.sort === VAR_SORT.MATRIX) {
-      if (!varMeans.isPending && !varMeans.serverError) {
+      if (
+        !varMeans.isPending &&
+        !varMeans.serverError &&
+        varMeans.fetchedData
+      ) {
         setSortedVarButtons(
           _.orderBy(
             varButtons,
