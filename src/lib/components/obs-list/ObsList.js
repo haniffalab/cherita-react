@@ -56,6 +56,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
   const ENDPOINT = "obs/cols";
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
+  const [enableGroups, setEnableGroups] = useState(enableObsGroups);
   const [obsCols, setObsCols] = useState(null);
   const [active, setActive] = useState(dataset.selectedObs?.name);
   const [expandedItems, setExpandedItems] = useState({});
@@ -83,11 +84,24 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
       let filteredData = fetchedData;
 
       // filter to only obs within an obsGroup
-      if (enableObsGroups) {
-        filteredData = _.filter(filteredData, (d) => {
+      if (enableGroups) {
+        const groupFiltered = _.filter(filteredData, (d) => {
           return _.some(obsGroups, (g) => _.includes(g, d.name));
         });
+        if (!!filteredData.length && !groupFiltered.length) {
+          setEnableGroups(false);
+          console.warn(
+            `No obs found in obsGroups ${JSON.stringify(obsGroups)}, disabling obsGroups`
+          );
+        } else {
+          filteredData = groupFiltered;
+        }
       }
+
+      // filter out discrete obs
+      filteredData = _.filter(filteredData, (d) => {
+        return d.type !== OBS_TYPES.DISCRETE;
+      });
 
       setObsCols(
         _.keyBy(
@@ -98,7 +112,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
         )
       );
     }
-  }, [fetchedData, isPending, obsGroups, serverError, enableObsGroups]);
+  }, [fetchedData, isPending, obsGroups, serverError, enableGroups]);
 
   // @TODO: fix re-rendering performance issue
   useEffect(() => {
@@ -286,7 +300,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     }
   });
 
-  const obsList = enableObsGroups ? (
+  const obsList = enableGroups ? (
     <Accordion className="obs-group-accordion" flush alwaysOpen>
       {groupList}
     </Accordion>
@@ -301,14 +315,18 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     return (
       <div>
         {isPending && <LoadingSpinner />}
-        <Accordion
-          flush
-          defaultActiveKey={[active]}
-          alwaysOpen
-          className="obs-accordion"
-        >
-          {obsList}
-        </Accordion>
+        {!isPending && !!obsCols && !_.size(obsCols) ? (
+          <Alert variant="danger">No observations found.</Alert>
+        ) : (
+          <Accordion
+            flush
+            defaultActiveKey={[active]}
+            alwaysOpen
+            className="obs-accordion"
+          >
+            {obsList}
+          </Accordion>
+        )}
       </div>
     );
   } else {
