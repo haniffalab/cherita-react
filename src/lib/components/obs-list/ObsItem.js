@@ -1,11 +1,10 @@
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Tooltip } from "@mui/material";
 import { Gauge, SparkLineChart } from "@mui/x-charts";
 import _ from "lodash";
-import { Badge, Form, ListGroup, Table } from "react-bootstrap";
+import { Badge, Form, ListGroup } from "react-bootstrap";
 
-import { ObsToolbar } from "./ObsToolbar";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
@@ -16,6 +15,7 @@ import { useFetch } from "../../utils/requests";
 import { formatNumerical, FORMATS } from "../../utils/string";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 import { useObsData } from "../../utils/zarrData";
+import { ObsToolbar } from "./ObsToolbar";
 
 const N_BINS = 5;
 
@@ -346,15 +346,9 @@ export function CategoricalObs({
   showColor &= dataset.colorEncoding === COLOR_ENCODINGS.OBS;
 
   return (
-    <ListGroup variant="flush">
-      <ListGroup.Item>
-        <ObsToolbar
-          item={obs}
-          onToggleAllObs={toggleAll}
-          onToggleLabel={toggleLabel}
-          onToggleSlice={toggleSlice}
-          onToggleColor={toggleColor}
-        />
+    <ListGroup variant="flush" className="cherita-list">
+      <ListGroup.Item className="cherita-list-item-unstyled">
+        <ObsToolbar item={obs} onToggleAllObs={toggleAll} />
       </ListGroup.Item>
       <VirtualizedList
         getDataAtIndex={getDataAtIndex}
@@ -379,62 +373,56 @@ function ObsContinuousStats({ obs }) {
 
   // @TODO: fix width issue when min/max/etc values are too large
   return (
-    <>
-      <div className="d-flex justify-content-between mt-3 align-items-center">
-        <Table size="sm" className="obs-continuous-stats" striped>
-          <tbody>
-            <tr>
-              <td>Min</td>
-              <td className="text-end">
-                {formatNumerical(obs.min, FORMATS.EXPONENTIAL)}
-              </td>
-            </tr>
-            <tr>
-              <td>Max</td>
-              <td className="text-end">
-                {formatNumerical(obs.max, FORMATS.EXPONENTIAL)}
-              </td>
-            </tr>
-          </tbody>
-        </Table>
-        <Table size="sm" className="obs-continuous-stats" striped>
-          <tbody>
-            <tr>
-              <td>Mean</td>
-              <td className="text-end">
-                {formatNumerical(obs.mean, FORMATS.EXPONENTIAL)}
-              </td>
-            </tr>
-            <tr>
-              <td>Median</td>
-              <td className="text-end">
-                {formatNumerical(obs.median, FORMATS.EXPONENTIAL)}
-              </td>
-            </tr>
-          </tbody>
-        </Table>
-        {isPending && <LoadingLinear />}
-        {!isPending && !serverError && (
-          <div className="obs-distribution">
-            <SparkLineChart
-              data={fetchedData.kde_values[1]}
-              showHighlight={true}
-              showTooltip={true} // throws Maximum update depth exceeded error. Documented here: https://github.com/mui/mui-x/issues/13450
-              margin={{ top: 10, right: 20, bottom: 10, left: 20 }}
-              xAxis={{
-                data: fetchedData.kde_values[0],
-                valueFormatter: (v) =>
-                  `${formatNumerical(v, FORMATS.EXPONENTIAL)}`,
-              }}
-              valueFormatter={(v) =>
-                `${formatNumerical(v, FORMATS.EXPONENTIAL)}`
-              }
-              slotProps={{ popper: { className: "feature-histogram-tooltip" } }}
-            />
+    <ListGroup variant="flush" className="cherita-list">
+      <ListGroup.Item className="obs-item">
+        <h5 className="mb-2">Statistics</h5>
+        <div className="row">
+          <div className="col-md-7">
+            <p className="mb-1 small">Distribution of continuous values</p>
+            {isPending && <LoadingLinear />}
+            {!isPending && !serverError && (
+              <div className="obs-distribution">
+                <SparkLineChart
+                  data={fetchedData.kde_values[1]}
+                  showHighlight={true}
+                  showTooltip={true}
+                  margin={{ top: 10, right: 20, bottom: 10, left: 20 }}
+                  xAxis={{
+                    data: fetchedData.kde_values[0],
+                    valueFormatter: (v) =>
+                      `${formatNumerical(v, FORMATS.EXPONENTIAL)}`,
+                  }}
+                  valueFormatter={(v) =>
+                    `${formatNumerical(v, FORMATS.EXPONENTIAL)}`
+                  }
+                  slotProps={{
+                    popper: { className: "feature-histogram-tooltip" },
+                  }}
+                />
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </>
+          <div className="col-md-5 d-flex flex-column text-end">
+            <div className="d-flex justify-content-between">
+              <span>Min</span>{" "}
+              <span>{formatNumerical(obs.min, FORMATS.EXPONENTIAL)}</span>
+            </div>
+            <div className="d-flex justify-content-between">
+              <span>Max</span>{" "}
+              <span>{formatNumerical(obs.max, FORMATS.EXPONENTIAL)}</span>
+            </div>
+            <div className="d-flex justify-content-between">
+              <span>Mean</span>{" "}
+              <span>{formatNumerical(obs.mean, FORMATS.EXPONENTIAL)}</span>
+            </div>
+            <div className="d-flex justify-content-between">
+              <span>Median</span>{" "}
+              <span>{formatNumerical(obs.median, FORMATS.EXPONENTIAL)}</span>
+            </div>
+          </div>
+        </div>
+      </ListGroup.Item>
+    </ListGroup>
   );
 }
 
@@ -521,8 +509,8 @@ export function ContinuousObs({
       {isPending && <LoadingLinear />}
       {!serverError && updatedObs && (
         <>
-          <ListGroup variant="flush">
-            <ListGroup.Item>
+          <ListGroup variant="flush" className="cherita-list">
+            <ListGroup.Item className="cherita-list-item-unstyled">
               <ObsToolbar
                 item={obs}
                 onToggleAllObs={toggleAll}

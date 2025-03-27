@@ -120,8 +120,7 @@ export function FullPage({
         <div>
           <Modal show={showModal} onHide={() => setShowModal(false)} centered>
             <Modal.Header closeButton></Modal.Header>
-            <Modal.Body>
-            </Modal.Body>
+            <Modal.Body></Modal.Body>
           </Modal>
           <OffcanvasObs show={showObs} handleClose={() => setShowObs(false)} />
           <OffcanvasVars

@@ -1,0 +1,32 @@
+.obs-accordion-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  cursor: pointer;
+
+  &.active {
+    color: #0c63e4;
+    background-color: var(--#{$prefix}tertiary-bg);
+    border-bottom: var(--#{$prefix}accordion-border-width) solid
+      var(--#{$prefix}accordion-border-color);
+  }
+
+  .obs-accordion-header-chevron {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+  }
+  .obs-accordion-header-title {
+    font-size: 1rem;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .active-icon {
+    color: #0c63e4;
+  }
+}

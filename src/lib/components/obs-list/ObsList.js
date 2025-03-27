@@ -1,24 +1,24 @@
 import React, { useContext, useEffect, useState } from "react";
 
 import {
-  faDroplet,
-  faListOl,
-  faScissors,
   faChevronDown,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import CommentIcon from "@mui/icons-material/Comment";
+import JoinInnerIcon from "@mui/icons-material/JoinInner";
+import WaterDropIcon from "@mui/icons-material/WaterDrop";
 import _ from "lodash";
-import { Alert, Badge } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
 import Accordion from "react-bootstrap/Accordion";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
 import AccordionContext from "react-bootstrap/AccordionContext";
 
-import { CategoricalObs, ContinuousObs } from "./ObsItem";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
+import { CategoricalObs, ContinuousObs } from "./ObsItem";
 
 export function ObsColsList({ showColor = true }) {
   const ENDPOINT = "obs/cols";
@@ -176,31 +176,40 @@ export function ObsColsList({ showColor = true }) {
       dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
       dataset.selectedObs?.name === item.name;
     return (
-      <div key={item.name}>
+      <div className="accordion-item" key={item.name}>
         <ObsAccordionToggle eventKey={item.name}>
           <div>{item.name}</div>
           <div>
-            {inLabelObs && (
-              <FontAwesomeIcon
-                className="mx-1"
-                icon={faListOl}
-                title="In tooltip"
-              />
-            )}
-            {inSliceObs && (
-              <FontAwesomeIcon
-                className="mx-1"
-                icon={faScissors}
-                title="Filter applied"
-              />
-            )}
-            {isColorEncoding && (
-              <FontAwesomeIcon
-                className="mx-1"
-                icon={faDroplet}
-                title="Is color encoding"
-              />
-            )}
+            <span
+              className={`mx-1 cursor-pointer ${inLabelObs ? "active-icon" : "text-muted opacity-50"}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                toggleLabel(item);
+              }}
+              title="Add to tooltip"
+            >
+              <CommentIcon />
+            </span>
+            <span
+              className={`mx-1 cursor-pointer ${inSliceObs ? "active-icon" : "text-muted opacity-50"}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                toggleSlice(item);
+              }}
+              title="Filter applied"
+            >
+              <JoinInnerIcon />
+            </span>
+            <span
+              className={`mx-1 cursor-pointer ${isColorEncoding ? "active-icon" : "text-muted opacity-50"}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                toggleColor(item);
+              }}
+              title="Is color encoding"
+            >
+              <WaterDropIcon />
+            </span>
           </div>
         </ObsAccordionToggle>
         <Accordion.Collapse eventKey={item.name}>
@@ -239,16 +248,19 @@ export function ObsColsList({ showColor = true }) {
 
   if (!serverError) {
     return (
-      <div>
-        {isPending && <LoadingSpinner />}
-        <Accordion
-          flush
-          defaultActiveKey={[active]}
-          alwaysOpen
-          className="obs-accordion"
-        >
-          {obsList}
-        </Accordion>
+      <div className="position-relative h-100">
+        {isPending ? (
+          <LoadingSpinner />
+        ) : (
+          <Accordion
+            flush
+            defaultActiveKey={[active]}
+            alwaysOpen
+            className="obs-accordion"
+          >
+            {obsList}
+          </Accordion>
+        )}
       </div>
     );
   } else {
