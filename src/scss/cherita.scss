@@ -395,6 +395,20 @@ $gauge-padding: 0.15rem;
   position: relative;
 }
 
+.obs-group-accordion-header .accordion-button {
+  @extend .mt-2;
+  text-transform: capitalize;
+}
+
+.obs-group-accordion-item {
+  border: none !important;
+  border-bottom: 0 !important;
+}
+
+.obs-group-accordion-body {
+  @extend .p-0;
+}
+
 .search-results {
   max-height: 25vh;
   overflow-y: scroll;

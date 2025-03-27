@@ -64,3 +64,19 @@ export const PSEUDOSPATIAL_CATEGORICAL_MODES = {
   ACROSS: { value: "across", name: "% across sections" },
   WITHIN: { value: "within", name: "% within section" },
 };
+
+// `default` cols to be shown out of accordion, at top of obslist
+// default values from cellxgene schema
+export const DEFAULT_OBS_GROUP = [
+  "assay",
+  "cell_type",
+  "development_stage",
+  "disease",
+  "donor_id",
+  "organism",
+  "self_reported_ethnicity",
+  "sex",
+  "suspension_type",
+  "tissue",
+  "tissue_type",
+];
