@@ -80,7 +80,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
   });
 
   useEffect(() => {
-    if (!isPending && !serverError) {
+    if (!isPending && !serverError && fetchedData) {
       let filteredData = fetchedData;
 
       // filter to only obs within an obsGroup
