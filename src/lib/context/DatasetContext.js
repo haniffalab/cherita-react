@@ -88,7 +88,7 @@ const initialDataset = {
     var: { sort: VAR_SORT.NONE, sortOrder: VAR_SORT_ORDER.ASC },
     disease: { sort: VAR_SORT.NONE, sortOrder: VAR_SORT_ORDER.ASC },
   },
-  obsCols: null, // @TODO: implement specifying groups/categories for dropdowns
+  obsGroups: null,
   imageUrl: null,
   pseudospatial: {
     maskSet: null,

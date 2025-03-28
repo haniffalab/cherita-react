@@ -99,7 +99,7 @@ export function FullPage({
             </div>
           </Navbar>
           <div className="cherita-app-obs modern-scrollbars border-end h-100">
-            <ObsColsList />
+            <ObsColsList {...props} />
           </div>
           <div className="cherita-app-canvas flex-grow-1">{children}</div>
           <div className="cherita-app-sidebar p-3">
