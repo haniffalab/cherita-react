@@ -1,8 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Card, Container, Modal, Nav, Navbar } from "react-bootstrap";
+import { Card, Container, Modal, Nav, Navbar } from "react-bootstrap";
 
 import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
@@ -103,11 +101,6 @@ export function FullPage({
           <div className="cherita-app-canvas flex-grow-1">{children}</div>
           <div className="cherita-app-sidebar p-3">
             <Card>
-              <Card.Header className="d-flex justify-content-evenly align-items-center">
-                <Button variant="link" onClick={() => setShowModal(true)}>
-                  <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
-                </Button>
-              </Card.Header>
               <Card.Body className="d-flex flex-column p-0">
                 <div className="sidebar-features modern-scrollbars">
                   <SearchBar searchDiseases={true} searchVar={true} />
