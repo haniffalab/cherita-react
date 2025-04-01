@@ -49,20 +49,13 @@ export const useFetch = (
   opts = { refetchOnMount: false, refetchOnWindowFocus: false },
   apiUrl = null
 ) => {
-  const { enabled = true } = opts;
   const {
     data: fetchedData = null,
-    isPending = false,
+    isLoading: isPending = false,
     error: serverError = null,
   } = useQuery({
     queryKey: [endpoint, params],
-    queryFn: ({ signal }) => {
-      if (enabled) {
-        return fetchData(endpoint, params, signal, apiUrl);
-      } else {
-        return;
-      }
-    },
+    queryFn: ({ signal }) => fetchData(endpoint, params, signal, apiUrl),
     retry: (failureCount, { error }) => {
       if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
       return failureCount < 3;
@@ -80,22 +73,16 @@ export const useDebouncedFetch = (
   opts = { refetchOnMount: false, refetchOnWindowFocus: false },
   apiUrl = null
 ) => {
-  const { enabled = true } = opts;
   const debouncedParams = useDebounce(params, delay);
 
   const {
     data: fetchedData = null,
-    isPending = false,
+    isLoading: isPending = false,
     error: serverError = null,
   } = useQuery({
     queryKey: [endpoint, debouncedParams],
-    queryFn: ({ signal }) => {
-      if (enabled) {
-        return fetchData(endpoint, debouncedParams, signal, apiUrl);
-      } else {
-        return;
-      }
-    },
+    queryFn: ({ signal }) =>
+      fetchData(endpoint, debouncedParams, signal, apiUrl),
     retry: (failureCount, { error }) => {
       if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
       return failureCount < 3;

@@ -2,8 +2,7 @@ import React from "react";
 
 import { faDroplet } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Button from "react-bootstrap/Button";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
+import { Button, ButtonGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 
 import { formatNumerical } from "../../utils/string";
 import { ObsmKeysList } from "../obsm-list/ObsmList";
@@ -13,19 +12,67 @@ export function Toolbox({ mode, obsLength, slicedLength }) {
     <div className="cherita-toolbox">
       <ButtonGroup>
         <ObsmKeysList />
-        <Button size="sm">
-          <FontAwesomeIcon icon={faDroplet} /> {mode}
-        </Button>
+        {mode && (
+          <OverlayTrigger
+            placement="top"
+            overlay={
+              <Tooltip id="tooltip-dropped-mode">
+                The color scale is currently set to {mode}
+              </Tooltip>
+            }
+          >
+            <Button
+              size="sm"
+              variant="primary"
+              style={{ cursor: "default" }}
+              aria-disabled="true"
+            >
+              <FontAwesomeIcon icon={faDroplet} className="me-1" /> {mode}
+            </Button>
+          </OverlayTrigger>
+        )}
+
         {(mode || !isNaN(obsLength)) &&
           (mode !== null &&
           !isNaN(slicedLength) &&
           slicedLength !== obsLength ? (
-            <Button size="sm">
-              {formatNumerical(slicedLength)} out of{" "}
-              {formatNumerical(obsLength)} cells
-            </Button>
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                <Tooltip id="tooltip-dropped-mode">
+                  You have selected {formatNumerical(slicedLength)} out of{" "}
+                  {formatNumerical(obsLength)} cells
+                </Tooltip>
+              }
+            >
+              <Button
+                size="sm"
+                variant="primary"
+                style={{ cursor: "default" }}
+                aria-disabled="true"
+              >
+                {formatNumerical(slicedLength)} of {formatNumerical(obsLength)}{" "}
+                cells
+              </Button>
+            </OverlayTrigger>
           ) : (
-            <Button size="sm">{formatNumerical(obsLength)} cells</Button>
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                <Tooltip id="tooltip-dropped-mode">
+                  You are viewing {formatNumerical(obsLength)} cells
+                </Tooltip>
+              }
+            >
+              <Button
+                size="sm"
+                variant="primary"
+                style={{ cursor: "default" }}
+                aria-disabled="true"
+              >
+                {formatNumerical(obsLength)} cells
+              </Button>
+            </OverlayTrigger>
           ))}
       </ButtonGroup>
     </div>

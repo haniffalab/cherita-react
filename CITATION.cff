@@ -2,8 +2,8 @@ cff-version: 1.2.0
 type: software
 message: "If you use this repo, please cite it"
 title: "Cherita React"
-abstract: "React component library designed for data visualisation and analysis of single-cell and spatial multi-omics data."
-version: "1.0.0"
+abstract: "A React component library designed for data visualisation and analysis of single-cell and spatial multi-omics data."
+version: "1.1.0"
 url: "https://github.com/haniffalab/cherita-react"
 repository-code: "git@github.com:haniffalab/cherita-react.git"
 doi: 10.5281/zenodo.14244809

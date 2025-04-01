@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 
 import {
-  Dropdown,
   Button,
-  DropdownButton,
   ButtonGroup,
+  Dropdown,
+  DropdownButton,
   OverlayTrigger,
   Tooltip,
 } from "react-bootstrap";
 
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
-import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
+import { ObsmKeysListBtn } from "../../utils/Skeleton";
 
 export function ObsmKeysList() {
   const ENDPOINT = "obsm/keys";
@@ -37,7 +37,7 @@ export function ObsmKeysList() {
   });
 
   useEffect(() => {
-    if (!isPending && !serverError) {
+    if (!isPending && !serverError && fetchedData) {
       setObsmKeysList(fetchedData);
     }
   }, [fetchedData, isPending, serverError]);
@@ -66,19 +66,21 @@ export function ObsmKeysList() {
   });
 
   if (!serverError) {
+    if (isPending) {
+      return <ObsmKeysListBtn />;
+    }
+
     return (
-      <>
-        {isPending && <LoadingSpinner />}
-        <DropdownButton
-          as={ButtonGroup}
-          title={dataset.selectedObsm || "Select an embedding"}
-          variant={dataset.selectedObsm ? "primary" : "outline-primary"}
-          id="bg-nested-dropdown"
-          size="sm"
-        >
-          {obsmList}
-        </DropdownButton>
-      </>
+      <DropdownButton
+        as={ButtonGroup}
+        title={dataset.selectedObsm || "Select an embedding"}
+        variant={dataset.selectedObsm ? "primary" : "warning"}
+        id="bg-nested-dropdown"
+        size="sm"
+      >
+        <Dropdown.Header>Embeddings</Dropdown.Header>
+        {obsmList}
+      </DropdownButton>
     );
   } else {
     return (

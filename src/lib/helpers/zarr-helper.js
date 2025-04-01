@@ -40,20 +40,13 @@ export const useZarr = (
   options = GET_OPTIONS,
   opts = {}
 ) => {
-  const { enabled = true } = opts;
   const {
     data = null,
-    isPending = false,
+    isLoading: isPending = false,
     error: serverError = null,
   } = useQuery({
     queryKey: ["zarr", url, path, s],
-    queryFn: () => {
-      if (enabled) {
-        return fetchDataFromZarr(url, path, s, options);
-      } else {
-        return;
-      }
-    },
+    queryFn: () => fetchDataFromZarr(url, path, s, options),
     retry: (failureCount, { error }) => {
       if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
       return failureCount < 3;
@@ -79,8 +72,6 @@ export const useMultipleZarr = (
   opts = {},
   agg = aggregateData
 ) => {
-  const { enabled = true } = opts;
-
   const combine = useCallback(
     (results) => {
       return {
@@ -88,7 +79,7 @@ export const useMultipleZarr = (
           inputs,
           results.map((result) => result.data)
         ),
-        isPending: results.some((result) => result.isPending),
+        isLoading: results.some((result) => result.isLoading),
         serverError: results.find((result) => result.error),
       };
     },
@@ -97,18 +88,12 @@ export const useMultipleZarr = (
 
   const {
     data = null,
-    isPending = false,
+    isLoading: isPending = false,
     serverError = null,
   } = useQueries({
     queries: inputs.map((input) => ({
       queryKey: ["zarr", input.url, input.path, input.s],
-      queryFn: () => {
-        if (enabled) {
-          return fetchDataFromZarr(input.url, input.path, input.s, options);
-        } else {
-          return;
-        }
-      },
+      queryFn: () => fetchDataFromZarr(input.url, input.path, input.s, options),
       retry: (failureCount, { error }) => {
         if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
         return failureCount < 3;

@@ -161,7 +161,7 @@ export const useFilter = (data) => {
         filteredIndices: null,
         valueMin: _.min(obsData.data),
         valueMax: _.max(obsData.data),
-        slicedLength: obsData.data.length,
+        slicedLength: obsData.data?.length,
       };
     }
   }, [

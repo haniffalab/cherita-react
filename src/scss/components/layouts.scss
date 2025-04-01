@@ -30,7 +30,7 @@
   @extend .col-xl-3;
   @extend .col-xxl-3;
 
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 
 .cherita-app-sidebar {
@@ -60,6 +60,7 @@
   .sidebar-features {
     padding: 10px;
     margin-bottom: 10px;
+    height: 100%;
     overflow-y: auto;
   }
 

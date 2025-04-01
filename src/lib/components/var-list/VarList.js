@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 
-import { Add } from "@mui/icons-material";
+import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { ListGroup, Button, Alert } from "react-bootstrap";
+import { Alert, Button, ListGroup } from "react-bootstrap";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 
-import { VarItem } from "./VarItem";
-import { VarListToolbar } from "./VarListToolbar";
-import { VarSet } from "./VarSet";
 import { SELECTION_MODES, VAR_SORT } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
+import { VarItem } from "./VarItem";
+import { VarListToolbar } from "./VarListToolbar";
+import { VarSet } from "./VarSet";
 
 const useVarMean = (varKeys, enabled = false) => {
   const ENDPOINT = "matrix/mean";
@@ -41,6 +43,11 @@ const useVarMean = (varKeys, enabled = false) => {
     enabled: enabled,
     refetchOnMount: false,
   });
+};
+
+// ensure nulls are lowest values
+const sortMeans = (i, means) => {
+  return means[i.name] || _.min(_.values(means)) - 1;
 };
 
 // @TODO: display where disease data comes from
@@ -77,7 +84,7 @@ function DiseaseVarList({ makeListItem }) {
 
   const varMeans = useVarMean(
     diseaseVars,
-    diseaseVars && dataset.varSort.disease.sort === VAR_SORT.MATRIX
+    !!diseaseVars?.length && dataset.varSort.disease.sort === VAR_SORT.MATRIX
   );
 
   useEffect(() => {
@@ -87,7 +94,7 @@ function DiseaseVarList({ makeListItem }) {
           _.orderBy(
             diseaseVars,
             (o) => {
-              return varMeans.fetchedData[o.name];
+              return sortMeans(o, varMeans.fetchedData);
             },
             dataset.varSort.disease.sortOrder
           )
@@ -129,24 +136,29 @@ function DiseaseVarList({ makeListItem }) {
           </>
         ) : (
           <>
-            <div className="d-flex justify-content-between mt-3">
+            <div className="d-flex justify-content-between my-2">
               <h5>Disease genes</h5>
-              <Button
-                variant="link"
-                onClick={() => {
-                  dispatch({
-                    type: "reset.disease",
-                  });
-                }}
-              >
-                clear
-              </Button>
+              <ButtonGroup aria-label="Feature options" size="sm">
+                <Button
+                  variant="info"
+                  onClick={() => {
+                    dispatch({
+                      type: "reset.disease",
+                    });
+                  }}
+                >
+                  <FontAwesomeIcon icon={faTimes} className="me-1" />
+                  Clear
+                </Button>
+              </ButtonGroup>
             </div>
             <p>{dataset.selectedDisease?.name}</p>
             <VarListToolbar varType="disease" />
             <div className="position-relative">
               {isPending && <LoadingSpinner />}
-              <ListGroup>{diseaseVarList}</ListGroup>
+              <ListGroup variant="flush" className="cherita-list">
+                {diseaseVarList}
+              </ListGroup>
             </div>
           </>
         ))}
@@ -246,12 +258,16 @@ export function VarNamesList({
   // @TODO: deferr sortedVarButtons ?
   useEffect(() => {
     if (dataset.varSort.var.sort === VAR_SORT.MATRIX) {
-      if (!varMeans.isPending && !varMeans.serverError) {
+      if (
+        !varMeans.isPending &&
+        !varMeans.serverError &&
+        varMeans.fetchedData
+      ) {
         setSortedVarButtons(
           _.orderBy(
             varButtons,
             (o) => {
-              return varMeans.fetchedData[o.name];
+              return sortMeans(o, varMeans.fetchedData);
             },
             dataset.varSort.var.sortOrder
           )
@@ -322,12 +338,11 @@ export function VarNamesList({
   return (
     <div className="position-relative">
       <div className="overflow-auto mt-3">
-        <div className="d-flex justify-content-between">
+        <div className="d-flex justify-content-between mb-2">
           <h5>{_.capitalize(displayName)}</h5>
-          <div>
+          <ButtonGroup aria-label="Feature options" size="sm">
             <Button
-              variant="light"
-              className="p-1"
+              variant="info"
               onClick={() => {
                 dispatch({
                   type: "add.varSet",
@@ -339,11 +354,10 @@ export function VarNamesList({
                 });
               }}
             >
-              <Add />
               New set
             </Button>
             <Button
-              variant="link"
+              variant="info"
               onClick={() => {
                 setVarButtons([]);
                 dispatch({
@@ -357,9 +371,10 @@ export function VarNamesList({
                 });
               }}
             >
-              clear
+              <FontAwesomeIcon icon={faTimes} className="me-1" />
+              Clear
             </Button>
-          </div>
+          </ButtonGroup>
         </div>
         <>
           {!varList.length ? (
@@ -369,7 +384,9 @@ export function VarNamesList({
               <VarListToolbar />
               <div className="position-relative">
                 {isPending && <LoadingSpinner />}
-                <ListGroup>{varList}</ListGroup>
+                <ListGroup variant="flush" className="cherita-list">
+                  {varList}
+                </ListGroup>
               </div>
             </>
           )}

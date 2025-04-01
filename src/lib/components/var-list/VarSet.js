@@ -1,25 +1,25 @@
 import React, { useState } from "react";
 
 import {
+  faCircleInfo,
   faDroplet,
   faTrash,
-  faCircleInfo,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { List } from "@mui/icons-material";
 import _ from "lodash";
 import {
-  ListGroup,
   Button,
   Collapse,
+  ListGroup,
   OverlayTrigger,
   Tooltip,
 } from "react-bootstrap";
 
-import { SingleSelectionItem } from "./VarItem";
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { SearchBar } from "../search-bar/SearchBar";
+import { SingleSelectionItem } from "./VarItem";
 
 // @TODO: add button to score genes and plot
 
@@ -118,7 +118,9 @@ function SingleSelectionSet({
             <SearchBar handleSelect={(d, i) => addVarToSet(d, set, i)} />
           )}
           <div className="mx-2">
-            <ListGroup variant="flush">{varList}</ListGroup>
+            <ListGroup variant="flush" className="cherita-list">
+              {varList}
+            </ListGroup>
           </div>
         </div>
       </Collapse>

@@ -1,15 +1,14 @@
 import React, { useState } from "react";
 
 import {
-  faArrowDownAZ,
-  faArrowUpZA,
   faArrowDown19,
+  faArrowDownAZ,
   faArrowUp91,
+  faArrowUpZA,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
-import { Navbar, InputGroup } from "react-bootstrap";
+import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
 
 import { VAR_SORT, VAR_SORT_ORDER } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
@@ -51,63 +50,62 @@ export function VarListToolbar({ varType = "var" }) {
   };
 
   return (
-    <Navbar className="var-list-toolbar">
-      <InputGroup>
-        <InputGroup.Text>Sort by:</InputGroup.Text>
-
-        <ToggleButtonGroup
-          aria-label="Sort feature by"
-          size="small"
-          className="mh-100"
+    <div className="d-flex justify-content-end align-items-center mb-2">
+      <ToggleButtonGroup
+        name="sortfeatures"
+        aria-label="Sort features by"
+        size="sm"
+        type="radio"
+      >
+        <ToggleButton
+          id={VAR_SORT.NAME}
+          value={VAR_SORT.NAME}
+          aria-label="alphabetical"
+          title="Sort alphabetically"
+          selected={sort === VAR_SORT.NAME}
+          onChange={() => {
+            handleSort(VAR_SORT.NAME, nameSortOrder, setNameSortOrder);
+          }}
         >
-          <ToggleButton
-            value={VAR_SORT.NAME}
-            aria-label="alphabetical"
-            title="Sort alphabetically"
-            selected={sort === VAR_SORT.NAME}
-            onChange={() => {
-              handleSort(VAR_SORT.NAME, nameSortOrder, setNameSortOrder);
-            }}
-          >
-            {nameSortOrder === VAR_SORT_ORDER.ASC ? (
-              <FontAwesomeIcon icon={faArrowDownAZ} />
-            ) : (
-              <FontAwesomeIcon icon={faArrowUpZA} />
-            )}
-          </ToggleButton>
-
-          <ToggleButton
-            value={VAR_SORT.MATRIX}
-            aria-label="matrix value"
-            title="Sort by matrix value"
-            selected={sort === VAR_SORT.MATRIX}
-            onChange={() => {
-              handleSort(VAR_SORT.MATRIX, matrixSortOrder, setMatrixSortOrder);
-            }}
-          >
-            {matrixSortOrder === VAR_SORT_ORDER.ASC ? (
-              <FontAwesomeIcon icon={faArrowDown19} />
-            ) : (
-              <FontAwesomeIcon icon={faArrowUp91} />
-            )}
-          </ToggleButton>
-          <ToggleButton
-            value="none"
-            aria-label="none"
-            title="No sorting"
-            onClick={() => {
-              setSort(VAR_SORT.NONE);
-              dispatch({
-                type: "set.varSort.sort",
-                var: varType,
-                sort: VAR_SORT.NONE,
-              });
-            }}
-          >
-            <FontAwesomeIcon icon={faXmark} />
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </InputGroup>
-    </Navbar>
+          {nameSortOrder === VAR_SORT_ORDER.ASC ? (
+            <FontAwesomeIcon icon={faArrowDownAZ} />
+          ) : (
+            <FontAwesomeIcon icon={faArrowUpZA} />
+          )}
+        </ToggleButton>
+        <ToggleButton
+          id={VAR_SORT.MATRIX}
+          value={VAR_SORT.MATRIX}
+          aria-label="matrix value"
+          title="Sort by matrix value"
+          selected={sort === VAR_SORT.MATRIX}
+          onChange={() => {
+            handleSort(VAR_SORT.MATRIX, matrixSortOrder, setMatrixSortOrder);
+          }}
+        >
+          {matrixSortOrder === VAR_SORT_ORDER.ASC ? (
+            <FontAwesomeIcon icon={faArrowDown19} />
+          ) : (
+            <FontAwesomeIcon icon={faArrowUp91} />
+          )}
+        </ToggleButton>
+        <ToggleButton
+          id="none"
+          value="none"
+          aria-label="none"
+          title="No sorting"
+          onClick={() => {
+            setSort(VAR_SORT.NONE);
+            dispatch({
+              type: "set.varSort.sort",
+              var: varType,
+              sort: VAR_SORT.NONE,
+            });
+          }}
+        >
+          <FontAwesomeIcon icon={faXmark} />
+        </ToggleButton>
+      </ToggleButtonGroup>
+    </div>
   );
 }
