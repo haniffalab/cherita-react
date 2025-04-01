@@ -115,7 +115,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
   }, [fetchedData, isPending, obsGroups, serverError, enableGroups]);
 
   useEffect(() => {
-    if (obsCols) {
+    if (obsCols && Object.keys(expandedItems).length === 0) {
       const initialExpanded = Object.keys(obsCols).reduce((acc, key) => {
         acc[key] = false;
         return acc;
@@ -124,11 +124,10 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
       if (active && obsCols[active]) {
         initialExpanded[active] = true;
       }
-      console.log(initialExpanded); // Logs the updated state
 
       setExpandedItems(initialExpanded);
     }
-  }, [obsCols]);
+  }, [obsCols, expandedItems, active]);
 
   // @TODO: fix re-rendering performance issue
   useEffect(() => {
