@@ -1,7 +1,12 @@
+// Define $prefix only if it hasn't been set already
+$prefix: "bs-" !default;
+
+@import "components/accordions";
+@import "components/lists";
 @import "components/layouts";
+@import "components/plotly";
 @import "components/plots";
 @import "components/scrollbars";
-@import "components/plotly";
 
 .loading-spinner {
   @extend .bg-light;
@@ -74,8 +79,8 @@
   align-items: flex-end;
   flex-wrap: wrap;
   width: 100%;
-  padding-left: 2rem;
-  padding-right: 2rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
   padding-bottom: 1rem;
   pointer-events: none;
 
@@ -213,7 +218,7 @@ $gauge-padding: 0.15rem;
 }
 
 .feature-histogram-container {
-  height: 1.25rem;
+  height: 1.31rem;
   width: 5rem;
   display: flex;
   align-items: center;
@@ -221,6 +226,7 @@ $gauge-padding: 0.15rem;
 
 .feature-histogram {
   @extend .feature-histogram-container;
+  border-radius: 5px;
 
   background-color: #dedede;
 }
@@ -343,72 +349,6 @@ $gauge-padding: 0.15rem;
   left: 1rem;
 }
 
-/* Styling the obs-accordion-header */
-.obs-accordion {
-  margin-bottom: 10px; /* Space between each accordion */
-}
-
-.obs-accordion-header {
-  @extend .btn;
-  @extend .btn-light-primary !optional;
-  @extend .btn-light;
-  @extend .text-primary;
-
-  display: flex;
-  align-items: center; /* Center the content vertically */
-  margin: 10px 10px 0 10px;
-  padding: 8px 12px; /* Adjust padding for spacing */
-  border-radius: 8px; /* Optional: rounded corners */
-  transition: background-color 0.3s ease; /* Smooth transition for background change */
-  cursor: pointer;
-
-  .obs-accordion-header-chevron {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 20px; /* Fixed width to prevent layout shifts */
-    height: 20px; /* Ensures a consistent square */
-    margin-right: 10px;
-  }
-  .obs-accordion-header-title {
-    font-size: 1rem;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  &.active {
-    @extend .btn-primary;
-    @extend .text-light;
-  }
-  &:hover {
-    background-color: var(--geeks-btn-hover-bg);
-    border-color: var(--geeks-btn-hover-border-color);
-  }
-}
-
-.obs-accordion-body {
-  @extend .card;
-
-  margin: 10px;
-  position: relative;
-}
-
-.obs-group-accordion-header .accordion-button {
-  @extend .mt-2;
-  text-transform: capitalize;
-}
-
-.obs-group-accordion-item {
-  border: none !important;
-  border-bottom: 0 !important;
-}
-
-.obs-group-accordion-body {
-  @extend .p-0;
-}
-
 .search-results {
   max-height: 25vh;
   overflow-y: scroll;
@@ -417,4 +357,9 @@ $gauge-padding: 0.15rem;
     white-space: normal;
     overflow-wrap: break-word;
   }
+}
+
+.nav-icon {
+  margin-right: 0.4rem;
+  width: 1rem;
 }

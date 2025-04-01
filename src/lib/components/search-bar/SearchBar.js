@@ -1,7 +1,8 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
+import SearchIcon from "@mui/icons-material/Search";
 import _ from "lodash";
-import { Form, FormGroup, Dropdown } from "react-bootstrap";
+import { Dropdown, Form, FormGroup, InputGroup } from "react-bootstrap";
 
 import { DiseasesSearchResults, VarSearchResults } from "./SearchResults";
 
@@ -39,6 +40,7 @@ export function SearchBar({
     }
   }, [text]);
 
+  //@TODO: Abstract styles
   return (
     <div>
       <Form
@@ -47,23 +49,41 @@ export function SearchBar({
         }}
       >
         <FormGroup>
-          <Form.Control
-            ref={inputRef}
-            onFocus={() => {
-              setShowSuggestions(text.length > 0);
-            }}
-            onBlur={() => {
-              _.delay(() => {
-                setShowSuggestions(false);
-              }, 150);
-            }}
-            type="text"
-            placeholder={"Search " + displayText}
-            value={text}
-            onChange={(e) => {
-              setText(e.target.value);
-            }}
-          />
+          <InputGroup>
+            <Form.Control
+              ref={inputRef}
+              onFocus={() => {
+                setShowSuggestions(text.length > 0);
+              }}
+              onBlur={() => {
+                _.delay(() => {
+                  setShowSuggestions(false);
+                }, 150);
+              }}
+              type="text"
+              placeholder={"Search " + displayText}
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+              }}
+              style={{
+                paddingLeft: "2.5rem",
+                borderRadius: "5px",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                left: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                pointerEvents: "none",
+                zIndex: 10,
+              }}
+            >
+              <SearchIcon />
+            </div>
+          </InputGroup>
           <Dropdown
             show={showSuggestions}
             onMouseDown={(e) => {

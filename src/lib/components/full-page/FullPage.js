@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Card, Nav, Navbar } from "react-bootstrap";
+import { Card, Container, Modal, Nav, Navbar } from "react-bootstrap";
 
 import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
@@ -32,6 +32,7 @@ export function FullPage({
   const [showObsm, setShowObsm] = useState(false);
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -63,68 +64,71 @@ export function FullPage({
       style={{ height: appDimensions.height }}
     >
       <DatasetProvider {...props}>
-        <div className="row g-0">
+        <Container
+          fluid
+          className="d-flex g-0"
+          style={{ height: appDimensions.height }}
+        >
+          <Navbar expand="sm" bg="primary" className="cherita-navbar">
+            <div className="container-fluid">
+              <Navbar.Toggle aria-controls="navbarScroll" />
+              <Navbar.Collapse id="navbarScroll">
+                <Nav className="me-auto my-0" navbarScroll>
+                  <Nav.Item className="d-block d-lg-none">
+                    <Nav.Link onClick={() => setShowObs(true)}>
+                      Observations
+                    </Nav.Link>
+                  </Nav.Item>
+                  <Nav.Item>
+                    <Nav.Link onClick={() => setShowVars(true)}>
+                      Features
+                    </Nav.Link>
+                  </Nav.Item>
+                </Nav>
+                <Nav className="d-flex">
+                  <Nav.Item>
+                    <Nav.Link onClick={() => setShowControls(true)}>
+                      Controls
+                    </Nav.Link>
+                  </Nav.Item>
+                </Nav>
+              </Navbar.Collapse>
+            </div>
+          </Navbar>
           <div className="cherita-app-obs modern-scrollbars border-end h-100">
             <ObsColsList {...props} />
           </div>
-          <div className="cherita-app-plot">
-            <div className="position-relative">
-              <Navbar expand="sm" bg="primary" className="cherita-navbar">
-                <div className="container-fluid">
-                  <Navbar.Toggle aria-controls="navbarScroll" />
-                  <Navbar.Collapse id="navbarScroll">
-                    <Nav className="me-auto my-0" navbarScroll>
-                      <Nav.Item className="d-block d-lg-none">
-                        <Nav.Link onClick={() => setShowObs(true)}>
-                          Observations
-                        </Nav.Link>
-                      </Nav.Item>
-                      <Nav.Item>
-                        <Nav.Link onClick={() => setShowVars(true)}>
-                          Features
-                        </Nav.Link>
-                      </Nav.Item>
-                    </Nav>
-                    <Nav className="d-flex">
-                      <Nav.Item>
-                        <Nav.Link onClick={() => setShowControls(true)}>
-                          Controls
-                        </Nav.Link>
-                      </Nav.Item>
-                    </Nav>
-                  </Navbar.Collapse>
+          <div className="cherita-app-canvas flex-grow-1">{children}</div>
+          <div className="cherita-app-sidebar p-3">
+            <Card>
+              <Card.Body className="d-flex flex-column p-0">
+                <div className="sidebar-features modern-scrollbars">
+                  <SearchBar searchDiseases={true} searchVar={true} />
+                  <VarNamesList mode={varMode} />
                 </div>
-              </Navbar>
-            </div>
-            {children}
-          </div>
-          <div className="cherita-app-var">
-            <Card className="cherita-app-features">
-              <Card.Body>
-                <SearchBar searchDiseases={true} searchVar={true} />
-                <VarNamesList mode={varMode} />
               </Card.Body>
             </Card>
           </div>
-          <div className="col">
-            <OffcanvasObs
-              show={showObs}
-              handleClose={() => setShowObs(false)}
-            />
-            <OffcanvasVars
-              show={showVars}
-              handleClose={() => setShowVars(false)}
-            />
-            <OffcanvasControls
-              show={showControls}
-              handleClose={() => setShowControls(false)}
-              Controls={ScatterplotControls}
-            />
-            <OffcanvasObsm
-              show={showObsm}
-              handleClose={() => setShowObsm(false)}
-            />
-          </div>
+        </Container>
+        <div>
+          <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+            <Modal.Header closeButton></Modal.Header>
+            <Modal.Body></Modal.Body>
+          </Modal>
+          <OffcanvasObs show={showObs} handleClose={() => setShowObs(false)} />
+          <OffcanvasVars
+            show={showVars}
+            handleClose={() => setShowVars(false)}
+          />
+          <OffcanvasControls
+            show={showControls}
+            handleClose={() => setShowControls(false)}
+            Controls={ScatterplotControls}
+          />
+          <OffcanvasObsm
+            show={showObsm}
+            handleClose={() => setShowObsm(false)}
+          />
         </div>
       </DatasetProvider>
     </div>
