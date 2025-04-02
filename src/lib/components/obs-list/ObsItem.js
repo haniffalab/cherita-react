@@ -5,6 +5,7 @@ import { Gauge, SparkLineChart } from "@mui/x-charts";
 import _ from "lodash";
 import { Badge, Form, ListGroup } from "react-bootstrap";
 
+import { ObsToolbar } from "./ObsToolbar";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
@@ -15,7 +16,6 @@ import { useFetch } from "../../utils/requests";
 import { formatNumerical, FORMATS } from "../../utils/string";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 import { useObsData } from "../../utils/zarrData";
-import { ObsToolbar } from "./ObsToolbar";
 
 const N_BINS = 5;
 
@@ -274,9 +274,6 @@ export function CategoricalObs({
   updateObs,
   toggleAll,
   toggleObs,
-  toggleLabel,
-  toggleSlice,
-  toggleColor,
   showColor = true,
 }) {
   const dataset = useDataset();
@@ -359,6 +356,7 @@ export function CategoricalObs({
         max={max}
         onChange={toggleObs}
         showColor={showColor}
+        estimateSize={40}
       />
     </ListGroup>
   );
@@ -426,15 +424,7 @@ function ObsContinuousStats({ obs }) {
   );
 }
 
-export function ContinuousObs({
-  obs,
-  updateObs,
-  toggleAll,
-  toggleObs,
-  toggleLabel,
-  toggleSlice,
-  toggleColor,
-}) {
+export function ContinuousObs({ obs, updateObs, toggleAll, toggleObs }) {
   const ENDPOINT = "obs/bins";
   const dataset = useDataset();
   const { isSliced } = useFilteredData();
@@ -511,13 +501,7 @@ export function ContinuousObs({
         <>
           <ListGroup variant="flush" className="cherita-list">
             <ListGroup.Item className="cherita-list-item-unstyled">
-              <ObsToolbar
-                item={obs}
-                onToggleAllObs={toggleAll}
-                onToggleLabel={toggleLabel}
-                onToggleSlice={toggleSlice}
-                onToggleColor={toggleColor}
-              />
+              <ObsToolbar item={obs} onToggleAllObs={toggleAll} />
             </ListGroup.Item>
             <VirtualizedList
               getDataAtIndex={getDataAtIndex}
