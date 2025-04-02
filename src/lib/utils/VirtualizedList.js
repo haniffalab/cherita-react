@@ -8,7 +8,7 @@ export function VirtualizedList({
   ItemComponent,
   estimateSize = 45,
   overscan = 25,
-  maxHeight = "80vh",
+  maxHeight = "65vh",
   ...props
 }) {
   const [parentNode, setParentNode] = useState(null);
