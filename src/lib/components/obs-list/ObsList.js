@@ -274,7 +274,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
                   toggleLabel={() => toggleLabel(item)}
                   toggleSlice={() => toggleSlice(item)}
                   toggleColor={() => toggleColor(item)}
-                  showColor={showColor}
+                  showColor={showColor && isColorEncoding}
                 />
               ) : (
                 <ContinuousObs
