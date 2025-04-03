@@ -27,11 +27,11 @@ import { useFetch } from "../../utils/requests";
 const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
   const { activeEventKey } = useContext(AccordionContext);
 
-  const decoratedOnClick = useAccordionButton(eventKey, () => {
-    handleAccordionToggle(eventKey);
-  });
-
   const isCurrentEventKey = (activeEventKey || []).includes(eventKey);
+
+  const decoratedOnClick = useAccordionButton(eventKey, () => {
+    handleAccordionToggle(eventKey, isCurrentEventKey);
+  });
 
   return (
     <div
@@ -54,7 +54,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
   const dispatch = useDatasetDispatch();
   const [enableGroups, setEnableGroups] = useState(enableObsGroups);
   const [obsCols, setObsCols] = useState(null);
-  const [active, setActive] = useState([]);
+  const [active, setActive] = useState([...[dataset.selectedObs?.name]]);
   const [params, setParams] = useState({ url: dataset.url });
   const obsGroups = useMemo(
     () => ({
@@ -124,13 +124,11 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     });
   };
 
-  const handleAccordionToggle = (itemName) => {
-    if (active.includes(itemName)) {
+  const handleAccordionToggle = (itemName, isCurrentEventKey) => {
+    if (isCurrentEventKey) {
       _.delay(() => setActive((prev) => _.without(prev, itemName)), 250);
     } else {
-      setActive((prev) => {
-        return [...prev, itemName];
-      });
+      setActive((prev) => [...prev, itemName]);
     }
   };
 
@@ -320,7 +318,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
         ) : (
           <Accordion
             flush
-            defaultActiveKey={[active]}
+            defaultActiveKey={active}
             alwaysOpen
             className="obs-accordion"
           >
