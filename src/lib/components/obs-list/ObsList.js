@@ -298,9 +298,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
   });
 
   const obsList = enableGroups ? (
-    <Accordion className="obs-group-accordion" flush alwaysOpen>
-      {groupList}
-    </Accordion>
+    <>{groupList}</>
   ) : (
     _.map(
       _.sortBy(obsCols, (o) => _.lowerCase(o.name)),
