@@ -50,7 +50,6 @@ export function VirtualizedList({
             top: 0,
             left: 0,
             width: "100%",
-            height: `${itemVirtualizer.getTotalSize() - (virtualItems[0]?.start ?? 0)}px`,
             transform: `translateY(${virtualItems[0]?.start ?? 0}px)`,
           }}
         >

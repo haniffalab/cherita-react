@@ -5,6 +5,7 @@ import { Gauge, SparkLineChart } from "@mui/x-charts";
 import _ from "lodash";
 import { Badge, Form, ListGroup } from "react-bootstrap";
 
+import { ObsToolbar } from "./ObsToolbar";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
@@ -15,7 +16,6 @@ import { useFetch } from "../../utils/requests";
 import { formatNumerical, FORMATS } from "../../utils/string";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 import { useObsData } from "../../utils/zarrData";
-import { ObsToolbar } from "./ObsToolbar";
 
 const N_BINS = 5;
 
