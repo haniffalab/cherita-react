@@ -30,3 +30,8 @@
     color: #0c63e4;
   }
 }
+
+.obs-group-accordion-body {
+  @extend .accordion-flush;
+  padding: 0;
+}
