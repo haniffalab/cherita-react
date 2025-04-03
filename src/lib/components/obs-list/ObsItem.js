@@ -5,6 +5,7 @@ import { Gauge, SparkLineChart } from "@mui/x-charts";
 import _ from "lodash";
 import { Badge, Form, ListGroup } from "react-bootstrap";
 
+import { ObsToolbar } from "./ObsToolbar";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
@@ -15,7 +16,6 @@ import { useFetch } from "../../utils/requests";
 import { formatNumerical, FORMATS } from "../../utils/string";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 import { useObsData } from "../../utils/zarrData";
-import { ObsToolbar } from "./ObsToolbar";
 
 const N_BINS = 5;
 
@@ -157,115 +157,117 @@ function CategoricalItem({
   const { getColor } = useColor();
 
   return (
-    <ListGroup.Item key={value} className="obs-item">
-      <div className="d-flex align-items-center">
-        <div className="flex-grow-1">
-          <Form.Check
-            className="obs-value-list-check"
-            type="switch"
-            label={label}
-            checked={!isOmitted}
-            onChange={() => onChange(value)}
-          />
-        </div>
+    <div className="virtualized-list-wrapper">
+      <ListGroup.Item key={value} className="obs-item">
         <div className="d-flex align-items-center">
-          <div className="pl-1 m-0 flex-grow-1">
-            <Histogram
-              data={histogramData.data}
-              isPending={histogramData.isPending}
-              altColor={histogramData.altColor}
+          <div className="flex-grow-1">
+            <Form.Check
+              className="obs-value-list-check"
+              type="switch"
+              label={label}
+              checked={!isOmitted}
+              onChange={() => onChange(value)}
             />
           </div>
-          <div className="pl-1 m-0">
-            <Tooltip
-              title={
-                isSliced ? (
-                  <>
-                    Filtered:{" "}
-                    {formatNumerical(filteredStats.pct, FORMATS.EXPONENTIAL)}%
-                    <br />
-                    Total: {formatNumerical(stats.pct, FORMATS.EXPONENTIAL)}%
-                  </>
-                ) : (
-                  `${formatNumerical(stats.pct, FORMATS.EXPONENTIAL)}%`
-                )
-              }
-              placement="left"
-              arrow
-            >
-              <div className="d-flex align-items-center">
-                <Badge className="value-count-badge">
-                  {" "}
-                  {isSliced && (
+          <div className="d-flex align-items-center">
+            <div className="pl-1 m-0 flex-grow-1">
+              <Histogram
+                data={histogramData.data}
+                isPending={histogramData.isPending}
+                altColor={histogramData.altColor}
+              />
+            </div>
+            <div className="pl-1 m-0">
+              <Tooltip
+                title={
+                  isSliced ? (
                     <>
-                      {formatNumerical(parseInt(filteredStats.value_counts))}{" "}
-                      out of{" "}
-                    </>
-                  )}
-                  {formatNumerical(
-                    parseInt(stats.value_counts),
-                    FORMATS.EXPONENTIAL
-                  )}
-                </Badge>
-                <div className="value-pct-gauge-container">
-                  {isSliced ? (
-                    <>
-                      <Gauge
-                        className="pct-gauge filtered-pct-gauge"
-                        value={filteredStats.pct}
-                        text={null}
-                        innerRadius={"50%"}
-                        outerRadius={"75%"}
-                        margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-                      />
-                      <Gauge
-                        className="pct-gauge"
-                        value={stats.pct}
-                        text={null}
-                        innerRadius={"75%"}
-                        margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-                      />
+                      Filtered:{" "}
+                      {formatNumerical(filteredStats.pct, FORMATS.EXPONENTIAL)}%
+                      <br />
+                      Total: {formatNumerical(stats.pct, FORMATS.EXPONENTIAL)}%
                     </>
                   ) : (
-                    <Gauge
-                      value={stats.pct}
-                      text={null}
-                      innerRadius={"50%"}
-                      margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-                    />
-                  )}
-                </div>
-              </div>
-            </Tooltip>
-          </div>
-          {showColor ? (
-            <div className="pl-1">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width={24}
-                height={24}
-                fill="currentColor"
-                viewBox="0 0 10 10"
+                    `${formatNumerical(stats.pct, FORMATS.EXPONENTIAL)}%`
+                  )
+                }
+                placement="left"
+                arrow
               >
-                <rect
-                  x="0"
-                  y="0"
-                  width="10"
-                  height="10"
-                  fill={`rgb(${getColor({
-                    value: (code - min) / (max - min),
-                    categorical: true,
-                    grayOut: isOmitted,
-                    grayParams: { alpha: 1 },
-                    colorEncoding: "obs",
-                  })})`}
-                />
-              </svg>
+                <div className="d-flex align-items-center">
+                  <Badge className="value-count-badge">
+                    {" "}
+                    {isSliced && (
+                      <>
+                        {formatNumerical(parseInt(filteredStats.value_counts))}{" "}
+                        out of{" "}
+                      </>
+                    )}
+                    {formatNumerical(
+                      parseInt(stats.value_counts),
+                      FORMATS.EXPONENTIAL
+                    )}
+                  </Badge>
+                  <div className="value-pct-gauge-container">
+                    {isSliced ? (
+                      <>
+                        <Gauge
+                          className="pct-gauge filtered-pct-gauge"
+                          value={filteredStats.pct}
+                          text={null}
+                          innerRadius={"50%"}
+                          outerRadius={"75%"}
+                          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                        />
+                        <Gauge
+                          className="pct-gauge"
+                          value={stats.pct}
+                          text={null}
+                          innerRadius={"75%"}
+                          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                        />
+                      </>
+                    ) : (
+                      <Gauge
+                        value={stats.pct}
+                        text={null}
+                        innerRadius={"50%"}
+                        margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </Tooltip>
             </div>
-          ) : null}
+            {showColor ? (
+              <div className="pl-1">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={24}
+                  height={24}
+                  fill="currentColor"
+                  viewBox="0 0 10 10"
+                >
+                  <rect
+                    x="0"
+                    y="0"
+                    width="10"
+                    height="10"
+                    fill={`rgb(${getColor({
+                      value: (code - min) / (max - min),
+                      categorical: true,
+                      grayOut: isOmitted,
+                      grayParams: { alpha: 1 },
+                      colorEncoding: "obs",
+                    })})`}
+                  />
+                </svg>
+              </div>
+            ) : null}
+          </div>
         </div>
-      </div>
-    </ListGroup.Item>
+      </ListGroup.Item>
+    </div>
   );
 }
 
@@ -274,9 +276,6 @@ export function CategoricalObs({
   updateObs,
   toggleAll,
   toggleObs,
-  toggleLabel,
-  toggleSlice,
-  toggleColor,
   showColor = true,
 }) {
   const dataset = useDataset();
@@ -347,7 +346,7 @@ export function CategoricalObs({
 
   return (
     <ListGroup variant="flush" className="cherita-list">
-      <ListGroup.Item className="cherita-list-item-unstyled">
+      <ListGroup.Item className="unstyled">
         <ObsToolbar item={obs} onToggleAllObs={toggleAll} />
       </ListGroup.Item>
       <VirtualizedList
@@ -359,6 +358,7 @@ export function CategoricalObs({
         max={max}
         onChange={toggleObs}
         showColor={showColor}
+        estimateSize={42}
       />
     </ListGroup>
   );
@@ -373,68 +373,58 @@ function ObsContinuousStats({ obs }) {
 
   // @TODO: fix width issue when min/max/etc values are too large
   return (
-    <ListGroup variant="flush" className="cherita-list">
-      <ListGroup.Item className="obs-item">
-        <h5 className="mb-2">Statistics</h5>
-        <div className="row">
-          <div className="col-md-7">
-            <p className="mb-1 small">Distribution of continuous values</p>
-            {isPending && <LoadingLinear />}
-            {!isPending && !serverError && (
-              <div className="obs-distribution">
-                <SparkLineChart
-                  data={fetchedData.kde_values[1]}
-                  showHighlight={true}
-                  showTooltip={true}
-                  margin={{ top: 10, right: 20, bottom: 10, left: 20 }}
-                  xAxis={{
-                    data: fetchedData.kde_values[0],
-                    valueFormatter: (v) =>
-                      `${formatNumerical(v, FORMATS.EXPONENTIAL)}`,
-                  }}
-                  valueFormatter={(v) =>
-                    `${formatNumerical(v, FORMATS.EXPONENTIAL)}`
-                  }
-                  slotProps={{
-                    popper: { className: "feature-histogram-tooltip" },
-                  }}
-                />
-              </div>
-            )}
+    <div className="obs-statistics">
+      <h5 className="mb-2">Statistics</h5>
+      <div className="row">
+        <div className="col-md-7">
+          <p className="mb-1 small">Distribution of continuous values</p>
+          {isPending && <LoadingLinear />}
+          {!isPending && !serverError && (
+            <div className="obs-distribution">
+              <SparkLineChart
+                data={fetchedData.kde_values[1]}
+                showHighlight={true}
+                showTooltip={true}
+                margin={{ top: 10, right: 20, bottom: 10, left: 20 }}
+                xAxis={{
+                  data: fetchedData.kde_values[0],
+                  valueFormatter: (v) =>
+                    `${formatNumerical(v, FORMATS.EXPONENTIAL)}`,
+                }}
+                valueFormatter={(v) =>
+                  `${formatNumerical(v, FORMATS.EXPONENTIAL)}`
+                }
+                slotProps={{
+                  popper: { className: "feature-histogram-tooltip" },
+                }}
+              />
+            </div>
+          )}
+        </div>
+        <div className="col-md-5 d-flex flex-column text-end">
+          <div className="d-flex justify-content-between">
+            <span>Min</span>{" "}
+            <span>{formatNumerical(obs.min, FORMATS.EXPONENTIAL)}</span>
           </div>
-          <div className="col-md-5 d-flex flex-column text-end">
-            <div className="d-flex justify-content-between">
-              <span>Min</span>{" "}
-              <span>{formatNumerical(obs.min, FORMATS.EXPONENTIAL)}</span>
-            </div>
-            <div className="d-flex justify-content-between">
-              <span>Max</span>{" "}
-              <span>{formatNumerical(obs.max, FORMATS.EXPONENTIAL)}</span>
-            </div>
-            <div className="d-flex justify-content-between">
-              <span>Mean</span>{" "}
-              <span>{formatNumerical(obs.mean, FORMATS.EXPONENTIAL)}</span>
-            </div>
-            <div className="d-flex justify-content-between">
-              <span>Median</span>{" "}
-              <span>{formatNumerical(obs.median, FORMATS.EXPONENTIAL)}</span>
-            </div>
+          <div className="d-flex justify-content-between">
+            <span>Max</span>{" "}
+            <span>{formatNumerical(obs.max, FORMATS.EXPONENTIAL)}</span>
+          </div>
+          <div className="d-flex justify-content-between">
+            <span>Mean</span>{" "}
+            <span>{formatNumerical(obs.mean, FORMATS.EXPONENTIAL)}</span>
+          </div>
+          <div className="d-flex justify-content-between">
+            <span>Median</span>{" "}
+            <span>{formatNumerical(obs.median, FORMATS.EXPONENTIAL)}</span>
           </div>
         </div>
-      </ListGroup.Item>
-    </ListGroup>
+      </div>
+    </div>
   );
 }
 
-export function ContinuousObs({
-  obs,
-  updateObs,
-  toggleAll,
-  toggleObs,
-  toggleLabel,
-  toggleSlice,
-  toggleColor,
-}) {
+export function ContinuousObs({ obs, updateObs, toggleAll, toggleObs }) {
   const ENDPOINT = "obs/bins";
   const dataset = useDataset();
   const { isSliced } = useFilteredData();
@@ -510,14 +500,8 @@ export function ContinuousObs({
       {!serverError && updatedObs && (
         <>
           <ListGroup variant="flush" className="cherita-list">
-            <ListGroup.Item className="cherita-list-item-unstyled">
-              <ObsToolbar
-                item={obs}
-                onToggleAllObs={toggleAll}
-                onToggleLabel={toggleLabel}
-                onToggleSlice={toggleSlice}
-                onToggleColor={toggleColor}
-              />
+            <ListGroup.Item className="unstyled">
+              <ObsToolbar item={obs} onToggleAllObs={toggleAll} />
             </ListGroup.Item>
             <VirtualizedList
               getDataAtIndex={getDataAtIndex}

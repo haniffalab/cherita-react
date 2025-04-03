@@ -14,6 +14,7 @@ import Accordion from "react-bootstrap/Accordion";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
 import AccordionContext from "react-bootstrap/AccordionContext";
 
+import { CategoricalObs, ContinuousObs } from "./ObsItem";
 import {
   COLOR_ENCODINGS,
   DEFAULT_OBS_GROUP,
@@ -22,7 +23,6 @@ import {
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
-import { CategoricalObs, ContinuousObs } from "./ObsItem";
 
 // @TODO: integrate ObsAccordionToggle with ObsColsList active, expandedItems, etc. to avoid duplication
 
@@ -274,7 +274,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
                   toggleLabel={() => toggleLabel(item)}
                   toggleSlice={() => toggleSlice(item)}
                   toggleColor={() => toggleColor(item)}
-                  showColor={showColor}
+                  showColor={showColor && isColorEncoding}
                 />
               ) : (
                 <ContinuousObs
