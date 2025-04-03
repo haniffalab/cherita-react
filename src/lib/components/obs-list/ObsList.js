@@ -306,6 +306,10 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     )
   );
 
+  const defaultActiveGroup = enableGroups
+    ? `group-${_.findKey(obsGroups, (g) => g.includes(active?.[0]))}`
+    : null;
+
   if (!serverError) {
     return (
       <div className="position-relative h-100">
@@ -316,7 +320,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
         ) : (
           <Accordion
             flush
-            defaultActiveKey={active}
+            defaultActiveKey={[...active, ...[defaultActiveGroup]]}
             alwaysOpen
             className="obs-accordion"
           >
