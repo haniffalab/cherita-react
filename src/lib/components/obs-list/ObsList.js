@@ -24,8 +24,6 @@ import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 
-// @TODO: integrate ObsAccordionToggle with ObsColsList active, expandedItems, etc. to avoid duplication
-
 const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
   const { activeEventKey } = useContext(AccordionContext);
 
@@ -33,9 +31,7 @@ const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
     handleAccordionToggle(eventKey);
   });
 
-  const isCurrentEventKey = Array.isArray(activeEventKey)
-    ? activeEventKey.includes(eventKey)
-    : activeEventKey === eventKey;
+  const isCurrentEventKey = (activeEventKey || []).includes(eventKey);
 
   return (
     <div
@@ -58,8 +54,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
   const dispatch = useDatasetDispatch();
   const [enableGroups, setEnableGroups] = useState(enableObsGroups);
   const [obsCols, setObsCols] = useState(null);
-  const [active, setActive] = useState(dataset.selectedObs?.name);
-  const [expandedItems, setExpandedItems] = useState({});
+  const [active, setActive] = useState([]);
   const [params, setParams] = useState({ url: dataset.url });
   const obsGroups = useMemo(
     () => ({
@@ -115,27 +110,9 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
   }, [fetchedData, isPending, obsGroups, serverError, enableGroups]);
 
   useEffect(() => {
-    if (obsCols && Object.keys(expandedItems).length === 0) {
-      const initialExpanded = Object.keys(obsCols).reduce((acc, key) => {
-        acc[key] = false;
-        return acc;
-      }, {});
-
-      if (active && obsCols[active]) {
-        initialExpanded[active] = true;
-      }
-
-      setExpandedItems(initialExpanded);
-    }
-  }, [obsCols, expandedItems, active]);
-
-  // @TODO: fix re-rendering performance issue
-  useEffect(() => {
     if (obsCols) {
-      if (obsCols[dataset.selectedObs?.name]) {
-        setActive(dataset.selectedObs?.name);
-      } else {
-        setActive(null);
+      if (!obsCols[dataset.selectedObs?.name]) {
+        setActive([]);
         dispatch({ type: "select.obs", obs: null });
       }
     }
@@ -148,15 +125,13 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
   };
 
   const handleAccordionToggle = (itemName) => {
-    _.delay(
-      // to avoid contents of accordion disappearing while closing
-      () => {
-        setExpandedItems((prev) => {
-          return { ...prev, [itemName]: !prev[itemName] };
-        });
-      },
-      expandedItems[itemName] ? 250 : 0
-    );
+    if (active.includes(itemName)) {
+      _.delay(() => setActive((prev) => _.without(prev, itemName)), 250);
+    } else {
+      setActive((prev) => {
+        return [...prev, itemName];
+      });
+    }
   };
 
   const toggleAll = (item) => {
@@ -262,7 +237,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
         </ObsAccordionToggle>
         <Accordion.Collapse eventKey={item.name}>
           <div className="obs-accordion-body">
-            {expandedItems[item.name] &&
+            {active.includes(item.name) &&
               (item.type === OBS_TYPES.CATEGORICAL ||
               item.type === OBS_TYPES.BOOLEAN ? (
                 <CategoricalObs
