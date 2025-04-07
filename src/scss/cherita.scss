@@ -250,15 +250,19 @@ $gauge-padding: 0.15rem;
 
 .feature-disease-info {
   font-weight: 300;
-  padding: 0;
+  padding-left: 0 !important;
   border-top: 1px solid var(list-group-border-color);
   border-right: 0;
   border-left: 0;
   border-bottom: 0;
+  overflow-x: hidden;
 }
 
-.feature-disease-info table {
-  margin: 0;
+.feature-disease-info .disease-link {
+  padding: 0;
+  white-space: normal;
+  text-align: left;
+  width: 100%;
 }
 
 .cherita-app-plot {
