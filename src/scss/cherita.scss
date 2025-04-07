@@ -255,14 +255,16 @@ $gauge-padding: 0.15rem;
   border-right: 0;
   border-left: 0;
   border-bottom: 0;
-  overflow-x: hidden;
 }
 
-.feature-disease-info .disease-link {
+.disease-link {
   padding: 0;
   white-space: normal;
   text-align: left;
   width: 100%;
+  position: sticky;
+  top: 0;
+  background-color: var(--#{$prefix}body-bg) !important;
 }
 
 .cherita-app-plot {

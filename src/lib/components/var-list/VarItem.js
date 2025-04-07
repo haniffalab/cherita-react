@@ -81,7 +81,7 @@ function VarDiseaseInfoItem(item) {
             _.map(item.metadata, (value, key) => {
               if (value !== null && value !== undefined) {
                 return (
-                  <tr>
+                  <tr key={key}>
                     <td>{key}</td>
                     <td>{value}</td>
                   </tr>
