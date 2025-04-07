@@ -82,7 +82,7 @@ function VarDiseaseInfoItem(item) {
               if (value !== null && value !== undefined) {
                 return (
                   <tr key={key}>
-                    <td>{key}</td>
+                    <td>{_.capitalize(key)}</td>
                     <td>{value}</td>
                   </tr>
                 );
