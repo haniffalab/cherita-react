@@ -249,7 +249,8 @@ $gauge-padding: 0.15rem;
 }
 
 .feature-disease-info {
-  font-weight: lighter;
+  font-weight: 300;
+  padding: 0;
   border-top: 1px solid var(list-group-border-color);
   border-right: 0;
   border-left: 0;
@@ -314,11 +315,6 @@ $gauge-padding: 0.15rem;
 /* Add a bottom border to the last item in the Accordion */
 .accordion-flush .accordion-item:last-child {
   border-bottom: 1px solid #dee2e6; /* Adjust the color and width as needed */
-}
-
-.var-disease-info-collapse {
-  max-height: 40vh;
-  overflow-y: auto;
 }
 
 .cherita-scatterplot #deckgl-wrapper {

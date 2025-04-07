@@ -99,17 +99,13 @@ function VarDiseaseInfoItem(item) {
 
 function VarDiseaseInfo({ data }) {
   return (
-    <>
-      <ListGroup>
-        <VirtualizedList
-          getDataAtIndex={(index) => data[index]}
-          count={data.length}
-          estimateSize={140}
-          maxHeight="100%"
-          ItemComponent={VarDiseaseInfoItem}
-        />
-      </ListGroup>
-    </>
+    <VirtualizedList
+      getDataAtIndex={(index) => data[index]}
+      count={data.length}
+      estimateSize={140}
+      maxHeight="40vh"
+      ItemComponent={VarDiseaseInfoItem}
+    />
   );
 }
 
