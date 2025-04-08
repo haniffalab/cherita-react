@@ -7,7 +7,7 @@ import { Badge, Form, ListGroup } from "react-bootstrap";
 
 import { ObsToolbar } from "./ObsToolbar";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { useColor } from "../../helpers/color-helper";
 import { Histogram } from "../../utils/Histogram";
