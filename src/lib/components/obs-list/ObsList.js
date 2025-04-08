@@ -118,12 +118,6 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     }
   }, [dataset.selectedObs, dispatch, obsCols]);
 
-  const updateObs = (updatedObs) => {
-    setObsCols((o) => {
-      return { ...o, [updatedObs.name]: updatedObs };
-    });
-  };
-
   const handleAccordionToggle = (itemName, isCurrentEventKey) => {
     if (isCurrentEventKey) {
       _.delay(() => setActive((prev) => _.without(prev, itemName)), 250);
@@ -139,7 +133,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     setObsCols((o) => {
       return { ...o, [item.name]: { ...item, omit: omit } };
     });
-    if (active === item.name) {
+    if (dataset.selectedObs?.name === item.name) {
       dispatch({ type: "select.obs", obs: { ...item, omit: omit } });
     }
   };
@@ -175,7 +169,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     setObsCols((o) => {
       return { ...o, [item.name]: { ...item, omit: omit } };
     });
-    if (active === item.name) {
+    if (dataset.selectedObs?.name === item.name) {
       dispatch({ type: "select.obs", obs: { ...item, omit: omit } });
     }
   };
@@ -241,7 +235,6 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
                 <CategoricalObs
                   key={item.name}
                   obs={item}
-                  updateObs={updateObs}
                   toggleAll={() => toggleAll(item)}
                   toggleObs={(value) => toggleObs(item, value)}
                   toggleLabel={() => toggleLabel(item)}
@@ -253,7 +246,6 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
                 <ContinuousObs
                   key={item.name}
                   obs={item}
-                  updateObs={updateObs}
                   toggleAll={() => toggleAll(item)}
                   toggleObs={(value) => toggleObs(item, value)}
                   toggleLabel={() => toggleLabel(item)}
