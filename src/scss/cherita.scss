@@ -73,15 +73,13 @@ $prefix: "bs-" !default;
 .cherita-spatial-footer {
   position: absolute;
   z-index: 10;
-  bottom: 1rem;
+  bottom: 0;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   flex-wrap: wrap;
   width: 100%;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-bottom: 1rem;
+  padding: 1rem;
   pointer-events: none;
 
   > * {

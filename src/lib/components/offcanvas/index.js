@@ -10,7 +10,7 @@ import { VarNamesList } from "../var-list/VarList";
 
 export function OffcanvasObs({ show, handleClose, ...props }) {
   return (
-    <Offcanvas show={show} onHide={handleClose} scroll={true} backdrop={false}>
+    <Offcanvas show={show} onHide={handleClose} scroll={true}>
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Categories</Offcanvas.Title>
       </Offcanvas.Header>

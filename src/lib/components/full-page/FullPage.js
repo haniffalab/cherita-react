@@ -1,6 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { Card, Container, Modal, Nav, Navbar } from "react-bootstrap";
+import { faLayerGroup, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import {
+  Card,
+  Container,
+  Modal,
+  OverlayTrigger,
+  Tooltip,
+} from "react-bootstrap";
+import Button from "react-bootstrap/Button";
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 
 import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
@@ -33,6 +44,8 @@ export function FullPage({
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const showObsBtn = useMediaQuery("(max-width: 991.98px)");
+  const showVarsBtn = useMediaQuery("(max-width: 1199.98px)");
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -69,32 +82,42 @@ export function FullPage({
           className="d-flex g-0"
           style={{ height: appDimensions.height }}
         >
-          <Navbar expand="sm" bg="primary" className="cherita-navbar">
-            <div className="container-fluid">
-              <Navbar.Toggle aria-controls="navbarScroll" />
-              <Navbar.Collapse id="navbarScroll">
-                <Nav className="me-auto my-0" navbarScroll>
-                  <Nav.Item className="d-block d-lg-none">
-                    <Nav.Link onClick={() => setShowObs(true)}>
-                      Observations
-                    </Nav.Link>
-                  </Nav.Item>
-                  <Nav.Item>
-                    <Nav.Link onClick={() => setShowVars(true)}>
-                      Features
-                    </Nav.Link>
-                  </Nav.Item>
-                </Nav>
-                <Nav className="d-flex">
-                  <Nav.Item>
-                    <Nav.Link onClick={() => setShowControls(true)}>
-                      Controls
-                    </Nav.Link>
-                  </Nav.Item>
-                </Nav>
-              </Navbar.Collapse>
-            </div>
-          </Navbar>
+          <div className="cherita-navbar">
+            <ButtonGroup vertical className="w-100 mb-1">
+              {showObsBtn && (
+                <OverlayTrigger
+                  placement="left"
+                  overlay={
+                    <Tooltip id="tooltip-obs">Browse categories</Tooltip>
+                  }
+                >
+                  <Button
+                    onClick={() => setShowObs(true)}
+                    className={
+                      showObsBtn && !showVarsBtn ? "rounded" : "rounded-top"
+                    }
+                  >
+                    <FontAwesomeIcon icon={faLayerGroup} />
+                  </Button>
+                </OverlayTrigger>
+              )}
+              {showVarsBtn && (
+                <OverlayTrigger
+                  placement="left"
+                  overlay={<Tooltip id="tooltip-vars">Search features</Tooltip>}
+                >
+                  <Button
+                    onClick={() => setShowVars(true)}
+                    className={
+                      showVarsBtn && !showObsBtn ? "rounded" : "rounded-bottom"
+                    }
+                  >
+                    <FontAwesomeIcon icon={faSearch} />
+                  </Button>
+                </OverlayTrigger>
+              )}
+            </ButtonGroup>
+          </div>
           <div className="cherita-app-obs modern-scrollbars border-end h-100">
             <ObsColsList {...props} />
           </div>
