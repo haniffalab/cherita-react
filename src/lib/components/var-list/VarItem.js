@@ -53,63 +53,56 @@ function VarHistogram({ item }) {
 function VarDiseaseInfoItem(item) {
   const dispatch = useDatasetDispatch();
   return (
-    <ListGroup.Item key={item.disease_name} className="feature-disease-info">
-      <div>
-        <button
-          type="button"
-          className="btn btn-link"
-          onClick={() => {
-            dispatch({
-              type: "select.disease",
-              id: item.disease_id,
-              name: item.disease_name,
-            });
-          }}
-        >
-          {item.disease_name}
-        </button>
-        <br />
-        <Table striped>
-          <tbody>
-            <tr>
-              <td>Confidence</td>
-              <td>{item.confidence || "unknown"}</td>
-            </tr>
-            <tr>
-              <td>Organ{item.organs.length > 1 ? "s" : ""}</td>
-              <td>{item.organs.map((o) => o.name).join(", ")}</td>
-            </tr>
-            {!_.isEmpty(item.metadata) &&
-              _.map(item.metadata, (value, key) => {
-                if (value !== null && value !== undefined) {
-                  return (
-                    <tr>
-                      <td>{key}</td>
-                      <td>{value}</td>
-                    </tr>
-                  );
-                }
-              })}
-          </tbody>
-        </Table>
-      </div>
+    <ListGroup.Item key={item.disease_id} className="feature-disease-info">
+      <button
+        type="button"
+        className="btn btn-link disease-link"
+        onClick={() => {
+          dispatch({
+            type: "select.disease",
+            id: item.disease_id,
+            name: item.disease_name,
+          });
+        }}
+      >
+        {item.disease_name}
+      </button>
+      <Table striped size="sm" responsive>
+        <tbody>
+          <tr>
+            <td>Confidence</td>
+            <td>{item.confidence || "unknown"}</td>
+          </tr>
+          <tr>
+            <td>Organ{item.organs.length > 1 ? "s" : ""}</td>
+            <td>{item.organs.map((o) => o.name).join(", ")}</td>
+          </tr>
+          {!_.isEmpty(item.metadata) &&
+            _.map(item.metadata, (value, key) => {
+              if (value !== null && value !== undefined) {
+                return (
+                  <tr key={key}>
+                    <td>{_.upperFirst(key)}</td>
+                    <td>{value}</td>
+                  </tr>
+                );
+              }
+            })}
+        </tbody>
+      </Table>
     </ListGroup.Item>
   );
 }
 
 function VarDiseaseInfo({ data }) {
   return (
-    <>
-      <ListGroup>
-        <VirtualizedList
-          getDataAtIndex={(index) => data[index]}
-          count={data.length}
-          estimateSize={140}
-          maxHeight="100%"
-          ItemComponent={VarDiseaseInfoItem}
-        />
-      </ListGroup>
-    </>
+    <VirtualizedList
+      getDataAtIndex={(index) => data[index]}
+      count={data.length}
+      estimateSize={140}
+      maxHeight="40vh"
+      ItemComponent={VarDiseaseInfoItem}
+    />
   );
 }
 
