@@ -14,6 +14,7 @@ import Accordion from "react-bootstrap/Accordion";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
 import AccordionContext from "react-bootstrap/AccordionContext";
 
+import { CategoricalObs, ContinuousObs } from "./ObsItem";
 import {
   COLOR_ENCODINGS,
   DEFAULT_OBS_GROUP,
@@ -22,20 +23,15 @@ import {
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
-import { CategoricalObs, ContinuousObs } from "./ObsItem";
-
-// @TODO: integrate ObsAccordionToggle with ObsColsList active, expandedItems, etc. to avoid duplication
 
 const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
   const { activeEventKey } = useContext(AccordionContext);
 
-  const decoratedOnClick = useAccordionButton(eventKey, () => {
-    handleAccordionToggle(eventKey);
-  });
+  const isCurrentEventKey = (activeEventKey || []).includes(eventKey);
 
-  const isCurrentEventKey = Array.isArray(activeEventKey)
-    ? activeEventKey.includes(eventKey)
-    : activeEventKey === eventKey;
+  const decoratedOnClick = useAccordionButton(eventKey, () => {
+    handleAccordionToggle(eventKey, isCurrentEventKey);
+  });
 
   return (
     <div
@@ -58,8 +54,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
   const dispatch = useDatasetDispatch();
   const [enableGroups, setEnableGroups] = useState(enableObsGroups);
   const [obsCols, setObsCols] = useState(null);
-  const [active, setActive] = useState(dataset.selectedObs?.name);
-  const [expandedItems, setExpandedItems] = useState({});
+  const [active, setActive] = useState([...[dataset.selectedObs?.name]]);
   const [params, setParams] = useState({ url: dataset.url });
   const obsGroups = useMemo(
     () => ({
@@ -115,48 +110,20 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
   }, [fetchedData, isPending, obsGroups, serverError, enableGroups]);
 
   useEffect(() => {
-    if (obsCols && Object.keys(expandedItems).length === 0) {
-      const initialExpanded = Object.keys(obsCols).reduce((acc, key) => {
-        acc[key] = false;
-        return acc;
-      }, {});
-
-      if (active && obsCols[active]) {
-        initialExpanded[active] = true;
-      }
-
-      setExpandedItems(initialExpanded);
-    }
-  }, [obsCols, expandedItems, active]);
-
-  // @TODO: fix re-rendering performance issue
-  useEffect(() => {
     if (obsCols) {
-      if (obsCols[dataset.selectedObs?.name]) {
-        setActive(dataset.selectedObs?.name);
-      } else {
-        setActive(null);
+      if (!obsCols[dataset.selectedObs?.name]) {
+        setActive([]);
         dispatch({ type: "select.obs", obs: null });
       }
     }
   }, [dataset.selectedObs, dispatch, obsCols]);
 
-  const updateObs = (updatedObs) => {
-    setObsCols((o) => {
-      return { ...o, [updatedObs.name]: updatedObs };
-    });
-  };
-
-  const handleAccordionToggle = (itemName) => {
-    _.delay(
-      // to avoid contents of accordion disappearing while closing
-      () => {
-        setExpandedItems((prev) => {
-          return { ...prev, [itemName]: !prev[itemName] };
-        });
-      },
-      expandedItems[itemName] ? 250 : 0
-    );
+  const handleAccordionToggle = (itemName, isCurrentEventKey) => {
+    if (isCurrentEventKey) {
+      _.delay(() => setActive((prev) => _.without(prev, itemName)), 250);
+    } else {
+      setActive((prev) => [...prev, itemName]);
+    }
   };
 
   const toggleAll = (item) => {
@@ -166,7 +133,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     setObsCols((o) => {
       return { ...o, [item.name]: { ...item, omit: omit } };
     });
-    if (active === item.name) {
+    if (dataset.selectedObs?.name === item.name) {
       dispatch({ type: "select.obs", obs: { ...item, omit: omit } });
     }
   };
@@ -202,7 +169,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     setObsCols((o) => {
       return { ...o, [item.name]: { ...item, omit: omit } };
     });
-    if (active === item.name) {
+    if (dataset.selectedObs?.name === item.name) {
       dispatch({ type: "select.obs", obs: { ...item, omit: omit } });
     }
   };
@@ -262,25 +229,23 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
         </ObsAccordionToggle>
         <Accordion.Collapse eventKey={item.name}>
           <div className="obs-accordion-body">
-            {expandedItems[item.name] &&
+            {active.includes(item.name) &&
               (item.type === OBS_TYPES.CATEGORICAL ||
               item.type === OBS_TYPES.BOOLEAN ? (
                 <CategoricalObs
                   key={item.name}
                   obs={item}
-                  updateObs={updateObs}
                   toggleAll={() => toggleAll(item)}
                   toggleObs={(value) => toggleObs(item, value)}
                   toggleLabel={() => toggleLabel(item)}
                   toggleSlice={() => toggleSlice(item)}
                   toggleColor={() => toggleColor(item)}
-                  showColor={showColor}
+                  showColor={showColor && isColorEncoding}
                 />
               ) : (
                 <ContinuousObs
                   key={item.name}
                   obs={item}
-                  updateObs={updateObs}
                   toggleAll={() => toggleAll(item)}
                   toggleObs={(value) => toggleObs(item, value)}
                   toggleLabel={() => toggleLabel(item)}
@@ -325,15 +290,17 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
   });
 
   const obsList = enableGroups ? (
-    <Accordion className="obs-group-accordion" flush alwaysOpen>
-      {groupList}
-    </Accordion>
+    <>{groupList}</>
   ) : (
     _.map(
       _.sortBy(obsCols, (o) => _.lowerCase(o.name)),
       (item) => obsItem(item)
     )
   );
+
+  const defaultActiveGroup = enableGroups
+    ? `group-${_.findKey(obsGroups, (g) => g.includes(active?.[0]))}`
+    : null;
 
   if (!serverError) {
     return (
@@ -345,7 +312,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
         ) : (
           <Accordion
             flush
-            defaultActiveKey={[active]}
+            defaultActiveKey={[...active, ...[defaultActiveGroup]]}
             alwaysOpen
             className="obs-accordion"
           >

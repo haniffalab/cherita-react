@@ -249,15 +249,22 @@ $gauge-padding: 0.15rem;
 }
 
 .feature-disease-info {
-  font-weight: lighter;
+  font-weight: 300;
+  padding-left: 0 !important;
   border-top: 1px solid var(list-group-border-color);
   border-right: 0;
   border-left: 0;
   border-bottom: 0;
 }
 
-.feature-disease-info table {
-  margin: 0;
+.disease-link {
+  padding: 0;
+  white-space: normal;
+  text-align: left;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  background-color: var(--#{$prefix}body-bg) !important;
 }
 
 .cherita-app-plot {
@@ -314,11 +321,6 @@ $gauge-padding: 0.15rem;
 /* Add a bottom border to the last item in the Accordion */
 .accordion-flush .accordion-item:last-child {
   border-bottom: 1px solid #dee2e6; /* Adjust the color and width as needed */
-}
-
-.var-disease-info-collapse {
-  max-height: 40vh;
-  overflow-y: auto;
 }
 
 .cherita-scatterplot #deckgl-wrapper {
