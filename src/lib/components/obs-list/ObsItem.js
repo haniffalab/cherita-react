@@ -7,7 +7,7 @@ import { Badge, Form, ListGroup } from "react-bootstrap";
 
 import { ObsToolbar } from "./ObsToolbar";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { useColor } from "../../helpers/color-helper";
 import { Histogram } from "../../utils/Histogram";
@@ -273,33 +273,18 @@ function CategoricalItem({
 
 export function CategoricalObs({
   obs,
-  updateObs,
   toggleAll,
   toggleObs,
   showColor = true,
 }) {
   const dataset = useDataset();
   const { isSliced } = useFilteredData();
-  const dispatch = useDatasetDispatch();
   const totalCounts = _.sum(_.values(obs.value_counts));
   const min = _.min(_.values(obs.codes));
   const max = _.max(_.values(obs.codes));
 
   const obsHistograms = useObsHistogram(obs);
   const filteredObsData = useFilteredObsData(obs);
-
-  useEffect(() => {
-    if (dataset.selectedObs?.name === obs.name) {
-      const selectedObsData = _.omit(dataset.selectedObs, ["omit"]);
-      const obsData = _.omit(obs, ["omit"]);
-      if (!_.isEqual(selectedObsData, obsData)) {
-        // outdated selectedObs
-        dispatch({ type: "select.obs", obs: obs });
-      } else if (!_.isEqual(dataset.selectedObs.omit, obs.omit)) {
-        updateObs({ ...obs, omit: dataset.selectedObs.omit });
-      }
-    }
-  }, [dataset.selectedObs, dispatch, obs, obs.name, updateObs]);
 
   const getDataAtIndex = useCallback(
     (index) => {
@@ -424,55 +409,15 @@ function ObsContinuousStats({ obs }) {
   );
 }
 
-export function ContinuousObs({ obs, updateObs, toggleAll, toggleObs }) {
-  const ENDPOINT = "obs/bins";
-  const dataset = useDataset();
+// @TODO: add bin controls
+// @TODO: add histogram
+export function ContinuousObs({ obs, toggleAll, toggleObs }) {
   const { isSliced } = useFilteredData();
-  const dispatch = useDatasetDispatch();
-  const binnedObs = binContinuous(obs, _.min([N_BINS, obs.n_unique]));
-  const params = {
-    url: dataset.url,
-    obsCol: binnedObs.name,
-    thresholds: binnedObs.bins.thresholds,
-    nBins: binnedObs.bins.nBins,
-  };
-
-  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
-    refetchOnMount: false,
-  });
+  const totalCounts = _.sum(_.values(obs.value_counts));
+  const min = _.min(_.values(obs.codes));
+  const max = _.max(_.values(obs.codes));
 
   const filteredObsData = useFilteredObsData(obs);
-
-  const updatedObs = fetchedData && _.isMatch(obs, fetchedData);
-
-  useEffect(() => {
-    // Update ObsList obsCols with bin data
-    // after update -> re-render -> obs will already be updated
-    if (!isPending && !serverError && !_.isMatch(obs, fetchedData)) {
-      updateObs({
-        ...binnedObs,
-        ...fetchedData,
-        codesMap: _.invert(fetchedData.codes),
-      });
-    }
-  }, [binnedObs, fetchedData, isPending, obs, serverError, updateObs]);
-
-  useEffect(() => {
-    if (updatedObs && dataset.selectedObs?.name === obs.name) {
-      const selectedObsData = _.omit(dataset.selectedObs, ["omit"]);
-      const obsData = _.omit(obs, ["omit"]);
-      if (!_.isEqual(selectedObsData, obsData)) {
-        // outdated selectedObs
-        dispatch({ type: "select.obs", obs: obs });
-      } else if (!_.isEqual(dataset.selectedObs.omit, obs.omit)) {
-        updateObs({ ...obs, omit: dataset.selectedObs.omit });
-      }
-    }
-  }, [dataset.selectedObs, dispatch, obs, obs.name, updateObs, updatedObs]);
-
-  const totalCounts = _.sum(_.values(obs?.value_counts));
-  const min = _.min(_.values(obs?.codes));
-  const max = _.max(_.values(obs?.codes));
 
   const getDataAtIndex = (index) => {
     return {
@@ -496,27 +441,22 @@ export function ContinuousObs({ obs, updateObs, toggleAll, toggleObs }) {
 
   return (
     <>
-      {isPending && <LoadingLinear />}
-      {!serverError && updatedObs && (
-        <>
-          <ListGroup variant="flush" className="cherita-list">
-            <ListGroup.Item className="unstyled">
-              <ObsToolbar item={obs} onToggleAllObs={toggleAll} />
-            </ListGroup.Item>
-            <VirtualizedList
-              getDataAtIndex={getDataAtIndex}
-              count={obs.values.length}
-              ItemComponent={CategoricalItem}
-              totalCounts={totalCounts}
-              min={min}
-              max={max}
-              onChange={toggleObs}
-              showColor={false}
-            />
-          </ListGroup>
-          <ObsContinuousStats obs={obs} />
-        </>
-      )}
+      <ListGroup variant="flush" className="cherita-list">
+        <ListGroup.Item className="unstyled">
+          <ObsToolbar item={obs} onToggleAllObs={toggleAll} />
+        </ListGroup.Item>
+        <VirtualizedList
+          getDataAtIndex={getDataAtIndex}
+          count={obs.values.length}
+          ItemComponent={CategoricalItem}
+          totalCounts={totalCounts}
+          min={min}
+          max={max}
+          onChange={toggleObs}
+          showColor={false}
+        />
+      </ListGroup>
+      <ObsContinuousStats obs={obs} />
     </>
   );
 }
