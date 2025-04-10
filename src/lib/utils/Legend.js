@@ -61,14 +61,15 @@ export function Legend({
         </div>
       </div>
     );
-  } else {
+  } else if (
+    dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+    dataset.selectedObs
+  ) {
     return (
-      <div className="cherita-legend w-100 ">
-        <p className="m-0 p-0 text-end">
-          <FontAwesomeIcon icon={faDroplet} className="me-1" />
-          {dataset.colorEncoding === COLOR_ENCODINGS.OBS && dataset.selectedObs
-            ? dataset.selectedObs.name
-            : ""}
+      <div className="cherita-legend categorical">
+        <p className="legend-text text-end m-0 p-0">
+          <FontAwesomeIcon icon={faDroplet} className="me-2" />
+          {dataset.selectedObs.name}
         </p>
       </div>
     );

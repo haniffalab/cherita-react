@@ -1,17 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { faLayerGroup, faSearch } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import useMediaQuery from "@mui/material/useMediaQuery";
-import {
-  Card,
-  Container,
-  Modal,
-  OverlayTrigger,
-  Tooltip,
-} from "react-bootstrap";
-import Button from "react-bootstrap/Button";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
+import { Card, Container, Modal } from "react-bootstrap";
 
 import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
@@ -44,8 +33,6 @@ export function FullPage({
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const showObsBtn = useMediaQuery("(max-width: 991.98px)");
-  const showVarsBtn = useMediaQuery("(max-width: 1199.98px)");
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -82,46 +69,15 @@ export function FullPage({
           className="d-flex g-0"
           style={{ height: appDimensions.height }}
         >
-          <div className="cherita-navbar">
-            <ButtonGroup vertical className="w-100 mb-1">
-              {showObsBtn && (
-                <OverlayTrigger
-                  placement="left"
-                  overlay={
-                    <Tooltip id="tooltip-obs">Browse categories</Tooltip>
-                  }
-                >
-                  <Button
-                    onClick={() => setShowObs(true)}
-                    className={
-                      showObsBtn && !showVarsBtn ? "rounded" : "rounded-top"
-                    }
-                  >
-                    <FontAwesomeIcon icon={faLayerGroup} />
-                  </Button>
-                </OverlayTrigger>
-              )}
-              {showVarsBtn && (
-                <OverlayTrigger
-                  placement="left"
-                  overlay={<Tooltip id="tooltip-vars">Search features</Tooltip>}
-                >
-                  <Button
-                    onClick={() => setShowVars(true)}
-                    className={
-                      showVarsBtn && !showObsBtn ? "rounded" : "rounded-bottom"
-                    }
-                  >
-                    <FontAwesomeIcon icon={faSearch} />
-                  </Button>
-                </OverlayTrigger>
-              )}
-            </ButtonGroup>
-          </div>
           <div className="cherita-app-obs modern-scrollbars border-end h-100">
             <ObsColsList {...props} />
           </div>
-          <div className="cherita-app-canvas flex-grow-1">{children}</div>
+          <div className="cherita-app-canvas flex-grow-1">
+            {children({
+              setShowObs,
+              setShowVars,
+            })}
+          </div>
           <div className="cherita-app-sidebar p-3">
             <Card>
               <Card.Body className="d-flex flex-column p-0">
@@ -161,7 +117,9 @@ export function FullPage({
 export function FullPageScatterplot(props) {
   return (
     <FullPage {...props}>
-      <Scatterplot />
+      {({ setShowObs, setShowVars }) => (
+        <Scatterplot setShowObs={setShowObs} setShowVars={setShowVars} />
+      )}
     </FullPage>
   );
 }

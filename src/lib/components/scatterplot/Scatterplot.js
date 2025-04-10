@@ -45,7 +45,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0,
 };
 
-export function Scatterplot({ radius = 30 }) {
+export function Scatterplot({ radius = 30, setShowObs, setShowVars }) {
   const dataset = useDataset();
   const { obsIndices, valueMin, valueMax, slicedLength } = useFilteredData();
   const dispatch = useDatasetDispatch();
@@ -394,6 +394,8 @@ export function Scatterplot({ radius = 30 }) {
           resetBounds={() => setViewState(getBounds())}
           increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
           decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
+          setShowObs={setShowObs}
+          setShowVars={setShowVars}
         />
         <div className="cherita-spatial-footer">
           <div className="cherita-toolbox-footer">
