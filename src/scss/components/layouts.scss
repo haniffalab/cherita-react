@@ -4,11 +4,16 @@
 
 .cherita-app {
   .cherita-navbar {
+    @extend .m-3;
+    @extend .d-block;
+    @extend .d-xl-none;
+
     position: absolute;
-    z-index: 10;
-    top: 1rem;
-    right: 1rem;
-    width: 3rem;
+    z-index: 11;
+    top: 0;
+    left: 0;
+    right: 0;
+    border-radius: 0.25rem;
     @media (min-width: 992px) and (max-width: 1199px) {
       margin-left: calc(33.33333333% + 1rem) !important;
     }
