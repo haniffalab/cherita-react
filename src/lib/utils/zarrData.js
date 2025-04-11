@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 
 import _ from "lodash";
+import { slice } from "zarr";
 
 import { OBS_TYPES } from "../constants/constants";
 import { useDataset } from "../context/DatasetContext";
 import { GET_OPTIONS, useZarr, useMultipleZarr } from "../helpers/zarr-helper";
 
+// @TODO: support specifying slice to load from context
 export const useObsmData = (obsm = null) => {
   const dataset = useDataset();
 
@@ -14,13 +16,18 @@ export const useObsmData = (obsm = null) => {
   const [obsmParams, setObsmParams] = useState({
     url: dataset.url,
     path: "obsm/" + obsm,
+    s: [null, slice(null, 2)], // load only [:, :2]
   });
 
   useEffect(() => {
-    setObsmParams({ url: dataset.url, path: "obsm/" + obsm });
+    setObsmParams({
+      url: dataset.url,
+      path: "obsm/" + obsm,
+      s: [null, slice(null, 2)],
+    });
   }, [dataset.url, obsm]);
 
-  return useZarr(obsmParams, null, GET_OPTIONS, { enabled: !!obsm });
+  return useZarr(obsmParams, GET_OPTIONS, { enabled: !!obsm });
 };
 
 const meanData = (_i, data) => {
@@ -95,7 +102,7 @@ export const useObsData = (obs = null) => {
     });
   }, [dataset.url, obs]);
 
-  return useZarr(obsParams, null, GET_OPTIONS, { enabled: !!obs });
+  return useZarr(obsParams, GET_OPTIONS, { enabled: !!obs });
 };
 
 export const useLabelObsData = () => {
