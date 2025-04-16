@@ -5,6 +5,7 @@ import { Dropdown } from "react-bootstrap";
 
 import { useDatasetDispatch } from "../../context/DatasetContext";
 import { useDiseaseSearch, useVarSearch } from "../../utils/search";
+import { VirtualizedList } from "../../utils/VirtualizedList";
 
 export function VarSearchResults({ text, setShowSuggestions, handleSelect }) {
   const [suggestions, setSuggestions] = useState([]);
@@ -43,32 +44,36 @@ export function VarSearchResults({ text, setShowSuggestions, handleSelect }) {
     }
   }, [fetchedData, isPending, serverError, setShowSuggestions]);
 
-  const suggestionsList = useMemo(() => {
-    return deferredData?.map((item) => {
-      return (
-        <Dropdown.Item
-          key={item.name}
-          as="button"
-          disabled={isStale}
-          onClick={() => {
-            handleSelect(dispatch, item);
-            _.delay(() => {
-              setShowSuggestions(false);
-            }, 150);
-          }}
-        >
-          {item.name}
-        </Dropdown.Item>
-      );
-    });
-  }, [deferredData, dispatch, handleSelect, isStale, setShowSuggestions]);
+  const getDataAtIndex = (index) => deferredData[index];
+  const ItemComponent = (item) => (
+    <Dropdown.Item
+      key={item.name}
+      as="button"
+      disabled={isStale}
+      onClick={() => {
+        handleSelect(dispatch, item);
+        _.delay(() => {
+          setShowSuggestions(false);
+        }, 150);
+      }}
+    >
+      {item.name}
+    </Dropdown.Item>
+  );
 
   return (
     <div>
       <Dropdown.Header>Features</Dropdown.Header>
       <div className="search-results">
         {deferredData?.length ? (
-          suggestionsList
+          <VirtualizedList
+            getDataAtIndex={getDataAtIndex}
+            count={deferredData.length}
+            ItemComponent={ItemComponent}
+            overscan={500}
+            estimateSize={32}
+            maxHeight="25vh"
+          />
         ) : (
           <Dropdown.Item key="empty" as="button" disabled>
             {!serverError
@@ -119,36 +124,40 @@ export function DiseasesSearchResults({ text, setShowSuggestions }) {
     }
   }, [fetchedData, isPending, serverError, setShowSuggestions]);
 
-  const suggestionsList = useMemo(() => {
-    return deferredData?.map((item) => {
-      return (
-        <Dropdown.Item
-          key={item.id}
-          as="button"
-          disabled={isStale}
-          onClick={() => {
-            dispatch({
-              type: "select.disease",
-              id: item.disease_id,
-              name: item.disease_name,
-            });
-            _.delay(() => {
-              setShowSuggestions(false);
-            }, 150);
-          }}
-        >
-          {item.disease_name}
-        </Dropdown.Item>
-      );
-    });
-  }, [deferredData, dispatch, isStale, setShowSuggestions]);
+  const getDataAtIndex = (index) => deferredData[index];
+  const ItemComponent = (item) => (
+    <Dropdown.Item
+      key={item.name}
+      as="button"
+      disabled={isStale}
+      onClick={() => {
+        dispatch({
+          type: "select.disease",
+          id: item.disease_id,
+          name: item.disease_name,
+        });
+        _.delay(() => {
+          setShowSuggestions(false);
+        }, 150);
+      }}
+    >
+      {item.disease_name}
+    </Dropdown.Item>
+  );
 
   return (
     <div>
       <Dropdown.Header>Diseases</Dropdown.Header>
       <div className="search-results">
         {deferredData?.length ? (
-          suggestionsList
+          <VirtualizedList
+            getDataAtIndex={getDataAtIndex}
+            count={deferredData.length}
+            ItemComponent={ItemComponent}
+            overscan={250}
+            estimateSize={32}
+            maxHeight="25vh"
+          />
         ) : (
           <Dropdown.Item key="empty" as="button" disabled>
             {!serverError
