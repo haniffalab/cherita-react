@@ -1,8 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 
+import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import _ from "lodash";
-import { Dropdown, Form, FormGroup, InputGroup } from "react-bootstrap";
+import { Button, Form, FormGroup, InputGroup, Modal } from "react-bootstrap";
+import Col from "react-bootstrap/Col";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
 
 import { DiseasesSearchResults, VarSearchResults } from "./SearchResults";
 
@@ -40,6 +44,16 @@ export function SearchBar({
     }
   }, [text]);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleInputClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+  };
+
   //@TODO: Abstract styles
   return (
     <div>
@@ -51,24 +65,12 @@ export function SearchBar({
         <FormGroup>
           <InputGroup>
             <Form.Control
-              ref={inputRef}
-              onFocus={() => {
-                setShowSuggestions(text.length > 0);
-              }}
-              onBlur={() => {
-                _.delay(() => {
-                  setShowSuggestions(false);
-                }, 150);
-              }}
+              onClick={handleInputClick}
               type="text"
               placeholder={"Search " + displayText}
               value={text}
-              onChange={(e) => {
-                setText(e.target.value);
-              }}
               style={{
                 paddingLeft: "2.5rem",
-                borderRadius: "5px",
               }}
             />
             <div
@@ -84,34 +86,90 @@ export function SearchBar({
               <SearchIcon />
             </div>
           </InputGroup>
-          <Dropdown
-            show={showSuggestions}
-            onMouseDown={(e) => {
-              e.preventDefault();
-            }}
-            onSelect={() => {
-              inputRef.current.blur();
-            }}
-          >
-            <Dropdown.Menu style={{ width: "90%" }}>
-              {searchVar && (
-                <VarSearchResults
-                  text={text}
-                  setShowSuggestions={setShowSuggestions}
-                  handleSelect={handleSelect}
-                />
-              )}
-              {searchVar && searchDiseases && <Dropdown.Divider />}
-              {searchDiseases && (
-                <DiseasesSearchResults
-                  text={text}
-                  setShowSuggestions={setShowSuggestions}
-                />
-              )}
-            </Dropdown.Menu>
-          </Dropdown>
         </FormGroup>
       </Form>
+      <Modal show={isModalOpen} onHide={handleClose} size="lg">
+        <Modal.Body>
+          <Container>
+            <Row>
+              <Col xs={12}>
+                <Form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                  }}
+                >
+                  <FormGroup>
+                    <div className="d-flex align-items-center my-3">
+                      <InputGroup>
+                        <Form.Control
+                          ref={inputRef}
+                          autoFocus
+                          onFocus={() => {
+                            setShowSuggestions(text.length > 0);
+                          }}
+                          onBlur={() => {
+                            _.delay(() => {
+                              setShowSuggestions(false);
+                            }, 150);
+                          }}
+                          type="text"
+                          placeholder={"Search " + displayText}
+                          value={text}
+                          onChange={(e) => {
+                            setText(e.target.value);
+                          }}
+                          style={{
+                            paddingLeft: "2.5rem",
+                          }}
+                        />
+                        <div
+                          style={{
+                            position: "absolute",
+                            left: "10px",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            pointerEvents: "none",
+                            zIndex: 10,
+                          }}
+                        >
+                          <SearchIcon />
+                        </div>
+                      </InputGroup>
+
+                      <Button
+                        variant="outline-secondary"
+                        onClick={handleClose}
+                        className="ms-2"
+                      >
+                        <CloseIcon />
+                      </Button>
+                    </div>
+                  </FormGroup>
+                </Form>
+              </Col>
+            </Row>
+            <Row>
+              <Col xs={12} md={6}>
+                {searchVar && (
+                  <VarSearchResults
+                    text={text}
+                    setShowSuggestions={setShowSuggestions}
+                    handleSelect={handleSelect}
+                  />
+                )}
+              </Col>
+              <Col xs={12} md={6}>
+                {searchDiseases && (
+                  <DiseasesSearchResults
+                    text={text}
+                    setShowSuggestions={setShowSuggestions}
+                  />
+                )}
+              </Col>
+            </Row>
+          </Container>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 }
