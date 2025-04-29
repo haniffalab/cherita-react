@@ -88,7 +88,7 @@ export function SearchBar({
           </InputGroup>
         </FormGroup>
       </Form>
-      <Modal show={isModalOpen} onHide={handleClose} size="lg">
+      <Modal show={isModalOpen} onHide={handleClose} size="xl">
         <Modal.Body>
           <Container>
             <Row>
@@ -149,23 +149,28 @@ export function SearchBar({
               </Col>
             </Row>
             <Row>
-              <Col xs={12} md={6}>
-                {searchVar && (
+              {searchVar && (
+                <Col xs={12} md={4}>
                   <VarSearchResults
                     text={text}
                     setShowSuggestions={setShowSuggestions}
                     handleSelect={handleSelect}
                   />
-                )}
-              </Col>
-              <Col xs={12} md={6}>
-                {searchDiseases && (
-                  <DiseasesSearchResults
-                    text={text}
-                    setShowSuggestions={setShowSuggestions}
-                  />
-                )}
-              </Col>
+                </Col>
+              )}
+              {searchDiseases && (
+                <>
+                  <Col xs={12} md={4}>
+                    <DiseasesSearchResults
+                      text={text}
+                      setShowSuggestions={setShowSuggestions}
+                    />
+                  </Col>
+                  <Col xs={12} md={4}>
+                    List of genes assoicated with disease
+                  </Col>
+                </>
+              )}
             </Row>
           </Container>
         </Modal.Body>

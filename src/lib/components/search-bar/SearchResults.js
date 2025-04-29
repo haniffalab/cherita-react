@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useDeferredValue } from "react";
+import React, { useDeferredValue, useEffect, useMemo, useState } from "react";
 
 import _ from "lodash";
 import { Dropdown } from "react-bootstrap";
@@ -65,7 +65,7 @@ export function VarSearchResults({ text, setShowSuggestions, handleSelect }) {
 
   return (
     <div>
-      <Dropdown.Header>Features</Dropdown.Header>
+      <h5>Genes</h5>
       <div className="search-results">
         {deferredData?.length ? (
           suggestionsList
