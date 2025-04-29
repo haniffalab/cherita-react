@@ -352,9 +352,6 @@ $gauge-padding: 0.15rem;
 }
 
 .search-results {
-  max-height: 25vh;
-  overflow-y: scroll;
-
   .dropdown-item {
     white-space: normal;
     overflow-wrap: break-word;
