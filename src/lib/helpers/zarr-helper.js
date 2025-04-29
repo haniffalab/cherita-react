@@ -35,8 +35,7 @@ const fetchDataFromZarr = async (url, path, s, opts) => {
 };
 
 export const useZarr = (
-  { url, path },
-  s = null,
+  { url, path, s = null },
   options = GET_OPTIONS,
   opts = {}
 ) => {

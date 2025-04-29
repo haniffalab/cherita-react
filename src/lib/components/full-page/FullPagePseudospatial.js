@@ -23,6 +23,7 @@ import { VarNamesList } from "../var-list/VarList";
 export function FullPage({
   children,
   varMode = SELECTION_MODES.SINGLE,
+  searchDiseases = false,
   ...props
 }) {
   const appRef = useRef();
@@ -120,7 +121,7 @@ export function FullPage({
                 </div>
 
                 <div className="sidebar-features modern-scrollbars">
-                  <SearchBar searchDiseases={true} searchVar={true} />
+                  <SearchBar searchDiseases={searchDiseases} searchVar={true} />
                   <VarNamesList mode={varMode} />
                 </div>
               </Card.Body>

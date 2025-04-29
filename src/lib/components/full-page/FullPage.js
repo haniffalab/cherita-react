@@ -23,6 +23,7 @@ import { Violin } from "../violin/Violin";
 export function FullPage({
   children,
   varMode = SELECTION_MODES.SINGLE,
+  searchDiseases = false,
   ...props
 }) {
   const appRef = useRef();
@@ -103,7 +104,7 @@ export function FullPage({
             <Card>
               <Card.Body className="d-flex flex-column p-0">
                 <div className="sidebar-features modern-scrollbars">
-                  <SearchBar searchDiseases={true} searchVar={true} />
+                  <SearchBar searchDiseases={searchDiseases} searchVar={true} />
                   <VarNamesList mode={varMode} />
                 </div>
               </Card.Body>
