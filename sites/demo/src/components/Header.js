@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 export default function Header() {
   return (
     <header>
-      <Navbar bg="primary" data-bs-theme="dark">
+      <Navbar bg="primary" variant="dark">
         <Container fluid>
           <Navbar.Brand href="#">Demo</Navbar.Brand>
           <Nav className="me-auto">
@@ -38,7 +38,7 @@ export default function Header() {
               <NavDropdown.Item as={Link} to="plots">
                 Plots
               </NavDropdown.Item>
-            </NavDropdown>            
+            </NavDropdown>
           </Nav>
         </Container>
       </Navbar>
