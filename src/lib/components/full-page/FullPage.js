@@ -156,3 +156,43 @@ export function FullPagePlots(props) {
     />
   );
 }
+
+export function FullPageDotplot(props) {
+  return (
+    <FullPage
+      {...props}
+      varMode={SELECTION_MODES.MULTIPLE}
+      renderItem={() => <Dotplot />}
+    />
+  );
+}
+
+export function FullPageHeatmap(props) {
+  return (
+    <FullPage
+      {...props}
+      varMode={SELECTION_MODES.MULTIPLE}
+      renderItem={() => <Heatmap />}
+    />
+  );
+}
+
+export function FullPageMatrixplot(props) {
+  return (
+    <FullPage
+      {...props}
+      varMode={SELECTION_MODES.MULTIPLE}
+      renderItem={() => <Matrixplot />}
+    />
+  );
+}
+
+export function FullPageViolin(props) {
+  return (
+    <FullPage
+      {...props}
+      varMode={SELECTION_MODES.MULTIPLE}
+      renderItem={() => <Violin mode={VIOLIN_MODES.MULTIKEY} />}
+    />
+  );
+}

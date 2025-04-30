@@ -1,21 +1,21 @@
 import React from "react";
 
+import {
+  FullPageScatterplot,
+  FullPageDotplot,
+  FullPageHeatmap,
+  FullPageMatrixplot,
+  FullPageViolin,
+  FullPagePlots,
+  FullPagePseudospatial,
+} from "@haniffalab/cherita-react";
 import { Route, Routes } from "react-router-dom";
 
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import DotplotDemo from "./containers/DotplotDemo";
-import { FullPageDemo } from "./containers/FullPageDemo";
 import HeatmapDemo from "./containers/HeatmapDemo";
 import MatrixplotDemo from "./containers/MatrixplotDemo";
-import {
-  FullPageDotplot,
-  FullPageHeatmap,
-  FullPageMatrixplot,
-  FullPageViolin,
-  PlotsDemo,
-} from "./containers/PlotsDemo";
-import { PseudospatialDemo } from "./containers/PseudospatialDemo";
 import ScatterplotDemo from "./containers/ScatterplotDemo";
 import ViolinDemo from "./containers/ViolinDemo";
 
@@ -47,14 +47,18 @@ export default function App(props) {
         <Route
           exact
           path="/pseudospatial"
-          element={<PseudospatialDemo {...props} />}
+          element={<FullPagePseudospatial {...props} />}
         />
         <Route
           exact
           path="/full-page"
-          element={<FullPageDemo {...props} />}
+          element={<FullPageScatterplot {...props} />}
         ></Route>
-        <Route exact path="/plots" element={<PlotsDemo {...props} />}></Route>
+        <Route
+          exact
+          path="/plots"
+          element={<FullPagePlots {...props} />}
+        ></Route>
         <Route
           exact
           path="/full-page/dotplot"

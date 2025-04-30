@@ -17,6 +17,10 @@ export {
   FullPage,
   FullPagePlots,
   FullPageScatterplot,
+  FullPageDotplot,
+  FullPageHeatmap,
+  FullPageMatrixplot,
+  FullPageViolin,
 } from "./components/full-page/FullPage";
 export { FullPagePseudospatial } from "./components/full-page/FullPagePseudospatial";
 export {
@@ -25,6 +29,7 @@ export {
   OffcanvasObsm,
   OffcanvasVars,
 } from "./components/offcanvas";
+export { Toolbar } from "./components/toolbar/Toolbar";
 export { COLORSCALES } from "./constants/colorscales";
 export { SELECTION_MODES, VIOLIN_MODES } from "./constants/constants";
 export { DatasetProvider } from "./context/DatasetContext";
