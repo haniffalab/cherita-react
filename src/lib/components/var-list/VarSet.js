@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 
 import {
+  faChevronDown,
+  faChevronUp,
   faCircleInfo,
   faDroplet,
+  faPlus,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { List } from "@mui/icons-material";
 import _ from "lodash";
 import {
   Button,
@@ -81,8 +83,31 @@ function SingleSelectionSet({
             >
               <FontAwesomeIcon icon={faCircleInfo}></FontAwesomeIcon>
             </OverlayTrigger>
-            <List />
+            <Button
+              type="button"
+              key={set.name}
+              variant={isActive ? "primary" : "outline-primary"}
+              className="m-0 p-0 px-1"
+              disabled={!set.vars.length}
+              title="Set as color encoding"
+            >
+              <FontAwesomeIcon icon={openSet ? faChevronUp : faChevronDown} />
+            </Button>
             {/* <VarHistogram set={set} /> */}
+            <Button
+              type="button"
+              key={set.name}
+              variant={isActive ? "primary" : "outline-primary"}
+              className="m-0 p-0 px-1"
+              onClick={(e) => {
+                e.stopPropagation();
+                selectSet();
+              }}
+              disabled={!set.vars.length}
+              title="Set as color encoding"
+            >
+              <FontAwesomeIcon icon={faPlus} />
+            </Button>
             <Button
               type="button"
               key={set.name}

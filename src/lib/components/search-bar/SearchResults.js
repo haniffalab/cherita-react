@@ -1,7 +1,9 @@
 import React, { useDeferredValue, useEffect, useMemo, useState } from "react";
 
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { Dropdown } from "react-bootstrap";
+import { Button, Dropdown, ListGroup } from "react-bootstrap";
 
 import { useDatasetDispatch } from "../../context/DatasetContext";
 import { useDiseaseSearch, useVarSearch } from "../../utils/search";
@@ -46,43 +48,58 @@ export function VarSearchResults({ text, setShowSuggestions, handleSelect }) {
 
   const getDataAtIndex = (index) => deferredData[index];
   const ItemComponent = (item) => (
-    <Dropdown.Item
-      key={item.name}
-      as="button"
-      disabled={isStale}
-      onClick={() => {
-        handleSelect(dispatch, item);
-        _.delay(() => {
-          setShowSuggestions(false);
-        }, 150);
-      }}
-    >
-      {item.name}
-    </Dropdown.Item>
+    <>
+      <div className="virtualized-list-wrapper">
+        <ListGroup.Item key={item}>
+          <div className="d-flex justify-content-between align-items-center w-100">
+            <div>{item.name}</div>
+            <div className="d-flex align-items-center gap-1">
+              <Button
+                type="button"
+                className="m-0 p-0 px-1"
+                variant="outline-secondary"
+                title="Remove from list"
+                disabled={isStale}
+                onClick={() => {
+                  handleSelect(dispatch, item);
+                  _.delay(() => {
+                    setShowSuggestions(false);
+                  }, 150);
+                }}
+              >
+                <FontAwesomeIcon icon={faPlus} />
+              </Button>
+            </div>
+          </div>
+        </ListGroup.Item>
+      </div>
+    </>
   );
 
   return (
     <div>
       <h5>Genes</h5>
       <div className="search-results">
-        {deferredData?.length ? (
-          <VirtualizedList
-            getDataAtIndex={getDataAtIndex}
-            count={deferredData.length}
-            ItemComponent={ItemComponent}
-            overscan={500}
-            estimateSize={32}
-            maxHeight="25vh"
-          />
-        ) : (
-          <Dropdown.Item key="empty" as="button" disabled>
-            {!serverError
-              ? isStale || isPending
-                ? "Loading..."
-                : "No items found"
-              : "Failed to fetch data"}
-          </Dropdown.Item>
-        )}
+        <ListGroup variant="flush" className="cherita-list">
+          {deferredData?.length ? (
+            <VirtualizedList
+              getDataAtIndex={getDataAtIndex}
+              count={deferredData.length}
+              ItemComponent={ItemComponent}
+              overscan={500}
+              estimateSize={42}
+              maxHeight="70vh"
+            />
+          ) : (
+            <Dropdown.Item key="empty" as="button" disabled>
+              {!serverError
+                ? isStale || isPending
+                  ? "Loading..."
+                  : "No items found"
+                : "Failed to fetch data"}
+            </Dropdown.Item>
+          )}
+        </ListGroup>
       </div>
     </div>
   );
@@ -156,7 +173,7 @@ export function DiseasesSearchResults({ text, setShowSuggestions }) {
             ItemComponent={ItemComponent}
             overscan={250}
             estimateSize={32}
-            maxHeight="25vh"
+            maxHeight="70vh"
           />
         ) : (
           <Dropdown.Item key="empty" as="button" disabled>
