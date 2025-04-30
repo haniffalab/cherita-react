@@ -12,7 +12,7 @@ import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 
-export default function HeatmapDemo(props) {
+export default function ViolinDemo(props) {
   const [showObs, setShowObs] = useState(false);
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);

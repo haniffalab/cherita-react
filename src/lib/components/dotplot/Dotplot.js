@@ -140,7 +140,7 @@ export function Dotplot() {
   if (!serverError) {
     if (hasSelections) {
       return (
-        <div className="cherita-dotplot position-relative">
+        <div className="cherita-plot cherita-dotplot position-relative">
           {isPending && <LoadingSpinner />}
           <Plot
             data={data}

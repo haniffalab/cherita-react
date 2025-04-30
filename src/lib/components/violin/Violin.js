@@ -138,13 +138,13 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
   if (!serverError) {
     if (hasSelections) {
       return (
-        <div className="cherita-violin position-relative">
+        <div className="cherita-plot cherita-violin position-relative">
           {isPending && <LoadingSpinner />}
           <Plot
             data={data}
             layout={layout}
             useResizeHandler={true}
-            style={{ maxWidth: "100%", maxHeight: "100%" }}
+            style={{ width: "100%", height: "100%" }}
           />
           {fetchedData?.resampled && (
             <Alert variant="warning">

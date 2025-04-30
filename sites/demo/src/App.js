@@ -8,7 +8,13 @@ import DotplotDemo from "./containers/DotplotDemo";
 import { FullPageDemo } from "./containers/FullPageDemo";
 import HeatmapDemo from "./containers/HeatmapDemo";
 import MatrixplotDemo from "./containers/MatrixplotDemo";
-import { FullPageDotplot, PlotsDemo } from "./containers/PlotsDemo";
+import {
+  FullPageDotplot,
+  FullPageHeatmap,
+  FullPageMatrixplot,
+  FullPageViolin,
+  PlotsDemo,
+} from "./containers/PlotsDemo";
 import { PseudospatialDemo } from "./containers/PseudospatialDemo";
 import ScatterplotDemo from "./containers/ScatterplotDemo";
 import ViolinDemo from "./containers/ViolinDemo";
@@ -53,6 +59,21 @@ export default function App(props) {
           exact
           path="/full-page/dotplot"
           element={<FullPageDotplot {...props} />}
+        ></Route>
+        <Route
+          exact
+          path="/full-page/heatmap"
+          element={<FullPageHeatmap {...props} />}
+        ></Route>
+        <Route
+          exact
+          path="/full-page/matrixplot"
+          element={<FullPageMatrixplot {...props} />}
+        ></Route>
+        <Route
+          exact
+          path="/full-page/violin"
+          element={<FullPageViolin {...props} />}
         ></Route>
       </Routes>
       <Footer />

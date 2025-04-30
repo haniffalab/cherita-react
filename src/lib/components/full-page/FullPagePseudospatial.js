@@ -149,15 +149,14 @@ export function FullPage({
 }
 
 export function FullPagePseudospatial(props) {
+  const { setShowObs, setShowVars } = props;
   return (
     <FullPage {...props} varMode={SELECTION_MODES.SINGLE}>
-      {({ setShowObs, setShowVars }) => (
-        <Scatterplot
-          setShowObs={setShowObs}
-          setShowVars={setShowVars}
-          isFullscreen={true}
-        />
-      )}
+      <Scatterplot
+        setShowObs={setShowObs}
+        setShowVars={setShowVars}
+        isFullscreen={true}
+      />
     </FullPage>
   );
 }

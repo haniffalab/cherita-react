@@ -43,6 +43,15 @@ export default function Header() {
               <NavDropdown.Item as={Link} to="full-page/dotplot">
                 Dotplot
               </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="full-page/heatmap">
+                Heatmap
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="full-page/matrixplot">
+                Matrixplot
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="full-page/violin">
+                Violin
+              </NavDropdown.Item>
             </NavDropdown>
           </Nav>
         </Container>

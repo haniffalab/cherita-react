@@ -100,13 +100,13 @@ export function Heatmap() {
   if (!serverError) {
     if (hasSelections) {
       return (
-        <div className="cherita-heatmap position-relative">
+        <div className="cherita-plot cherita-heatmap position-relative">
           {isPending && <LoadingSpinner />}
           <Plot
             data={data}
             layout={layout}
             useResizeHandler={true}
-            style={{ maxWidth: "100%", maxHeight: "100%" }}
+            style={{ width: "100%", height: "100%" }}
           />
         </div>
       );
