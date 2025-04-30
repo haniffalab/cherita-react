@@ -118,7 +118,11 @@ export function FullPageScatterplot(props) {
   return (
     <FullPage {...props}>
       {({ setShowObs, setShowVars }) => (
-        <Scatterplot setShowObs={setShowObs} setShowVars={setShowVars} />
+        <Scatterplot
+          setShowObs={setShowObs}
+          setShowVars={setShowVars}
+          isFullscreen={true}
+        />
       )}
     </FullPage>
   );

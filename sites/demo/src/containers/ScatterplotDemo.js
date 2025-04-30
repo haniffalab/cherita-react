@@ -20,12 +20,17 @@ export default function ScatterplotDemo(props) {
       <div className="cherita-container">
         <DatasetProvider {...props}>
           <div className="cherita-container-scatterplot">
-            <Scatterplot setShowObs={setShowObs} setShowVars={setShowVars} />
+            <Scatterplot
+              setShowObs={setShowObs}
+              setShowVars={setShowVars}
+              isFullscreen={false}
+            />
           </div>
           <OffcanvasObs show={showObs} handleClose={() => setShowObs(false)} />
           <OffcanvasVars
             show={showVars}
             handleClose={() => setShowVars(false)}
+            mode="single"
           />
           <OffcanvasControls
             show={showControls}

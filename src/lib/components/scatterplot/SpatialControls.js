@@ -43,6 +43,7 @@ export function SpatialControls({
   decreaseZoom,
   setShowObs,
   setShowVars,
+  isFullscreen,
 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
@@ -50,8 +51,11 @@ export function SpatialControls({
 
   const handleCloseControls = () => setShowControls(false);
   const handleShowControls = () => setShowControls(true);
-  const showObsBtn = useMediaQuery("(max-width: 991.98px)");
-  const showVarsBtn = useMediaQuery("(max-width: 1199.98px)");
+
+  const LgBreakpoint = useMediaQuery("(max-width: 991.98px)");
+  const XlBreakpoint = useMediaQuery("(max-width: 1199.98px)");
+  const showObsBtn = isFullscreen ? LgBreakpoint : true;
+  const showVarsBtn = isFullscreen ? XlBreakpoint : true;
 
   const onSelect = (eventKey, event) => {
     switch (eventKey) {
@@ -116,31 +120,30 @@ export function SpatialControls({
 
   return (
     <div className="cherita-spatial-controls">
-      <ButtonGroup vertical className="w-100 mb-1">
-        {showObsBtn && (
-          <OverlayTrigger
-            placement="right"
-            overlay={<Tooltip id="tooltip-obs">Browse categories</Tooltip>}
-          >
-            <Button onClick={() => setShowObs(true)}>
-              <FontAwesomeIcon icon={faList} />
-            </Button>
-          </OverlayTrigger>
-        )}
-        {showVarsBtn && (
-          <OverlayTrigger
-            placement="right"
-            overlay={<Tooltip id="tooltip-vars">Search features</Tooltip>}
-          >
-            <Button onClick={() => setShowVars(true)}>
-              <FontAwesomeIcon icon={faSearch} />
-            </Button>
-          </OverlayTrigger>
-        )}
-        <Button onClick={handleShowControls}>
-          <FontAwesomeIcon icon={faSliders} />
-        </Button>
-      </ButtonGroup>
+      {(showObsBtn || showVarsBtn) && (
+        <ButtonGroup vertical className="w-100 mb-1">
+          {showObsBtn && (
+            <OverlayTrigger
+              placement="right"
+              overlay={<Tooltip id="tooltip-obs">Browse categories</Tooltip>}
+            >
+              <Button onClick={() => setShowObs(true)}>
+                <FontAwesomeIcon icon={faList} />
+              </Button>
+            </OverlayTrigger>
+          )}
+          {showVarsBtn && (
+            <OverlayTrigger
+              placement="right"
+              overlay={<Tooltip id="tooltip-vars">Search features</Tooltip>}
+            >
+              <Button onClick={() => setShowVars(true)}>
+                <FontAwesomeIcon icon={faSearch} />
+              </Button>
+            </OverlayTrigger>
+          )}
+        </ButtonGroup>
+      )}
       <ButtonGroup vertical className="w-100">
         <Button
           onClick={() => setMode(() => ViewMode)}
@@ -188,6 +191,9 @@ export function SpatialControls({
           </Dropdown.Menu>
         </Dropdown>
         {!!features?.features?.length && polygonControls}
+        <Button onClick={handleShowControls}>
+          <FontAwesomeIcon icon={faSliders} />
+        </Button>
       </ButtonGroup>
       <OffcanvasControls
         show={showControls}
