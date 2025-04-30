@@ -73,15 +73,13 @@ $prefix: "bs-" !default;
 .cherita-spatial-footer {
   position: absolute;
   z-index: 10;
-  bottom: 1rem;
+  bottom: 0;
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: end;
   flex-wrap: wrap;
   width: 100%;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-bottom: 1rem;
+  padding: 1rem;
   pointer-events: none;
 
   > * {
@@ -105,6 +103,41 @@ $prefix: "bs-" !default;
 .cherita-legend {
   order: 2;
   width: 12rem;
+  color: #333;
+}
+
+.cherita-legend.categorical {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-left: 1rem;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: auto;
+  .legend-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+    display: inline-block;
+  }
+}
+
+@media (max-width: 600px) {
+  .cherita-spatial-footer {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cherita-legend {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 0;
+  }
 }
 
 .cherita-accordion-active .accordion-button {
