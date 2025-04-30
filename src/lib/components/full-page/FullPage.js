@@ -98,6 +98,7 @@ export function FullPage({
           <OffcanvasVars
             show={showVars}
             handleClose={() => setShowVars(false)}
+            mode={varMode}
           />
           <OffcanvasControls
             show={showControls}
@@ -116,7 +117,7 @@ export function FullPage({
 
 export function FullPageScatterplot(props) {
   return (
-    <FullPage {...props}>
+    <FullPage {...props} varMode={SELECTION_MODES.SINGLE}>
       {({ setShowObs, setShowVars }) => (
         <Scatterplot
           setShowObs={setShowObs}

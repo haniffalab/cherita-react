@@ -7,6 +7,7 @@ import {
   OffcanvasVars,
   Scatterplot,
   ScatterplotControls,
+  SELECTION_MODES,
 } from "@haniffalab/cherita-react";
 import Container from "react-bootstrap/Container";
 
@@ -30,7 +31,7 @@ export default function ScatterplotDemo(props) {
           <OffcanvasVars
             show={showVars}
             handleClose={() => setShowVars(false)}
-            mode="single"
+            mode={SELECTION_MODES.SINGLE}
           />
           <OffcanvasControls
             show={showControls}
