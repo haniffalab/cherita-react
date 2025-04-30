@@ -146,7 +146,7 @@ export function Dotplot() {
             data={data}
             layout={layout}
             useResizeHandler={true}
-            style={{ maxWidth: "100%", maxHeight: "100%" }}
+            style={{ width: "100%", height: "100%" }}
           />
         </div>
       );

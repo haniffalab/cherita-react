@@ -1,3 +1,4 @@
+import { DropdownDivider } from "react-bootstrap";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
@@ -30,15 +31,19 @@ export default function Header() {
             </Nav.Link>
             <NavDropdown title="Full Page" id="full-page-dropdown">
               <NavDropdown.Item as={Link} to="full-page">
-                FullPage
+                Scatterplot
               </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="pseudospatial">
-                FullPagePseudospatial
+                Pseudospatial
               </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="plots">
-                Plots
+                All plots
               </NavDropdown.Item>
-            </NavDropdown>            
+              <DropdownDivider />
+              <NavDropdown.Item as={Link} to="full-page/dotplot">
+                Dotplot
+              </NavDropdown.Item>
+            </NavDropdown>
           </Nav>
         </Container>
       </Navbar>
