@@ -1,12 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { Card, Container, Modal } from "react-bootstrap";
 
 import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
 import { Dotplot } from "../dotplot/Dotplot";
+import { DotplotControls } from "../dotplot/DotplotControls";
 import { Heatmap } from "../heatmap/Heatmap";
+import { HeatmapControls } from "../heatmap/HeatmapControls";
 import { Matrixplot } from "../matrixplot/Matrixplot";
+import { MatrixplotControls } from "../matrixplot/MatrixplotControls";
 import { ObsColsList } from "../obs-list/ObsList";
 import {
   OffcanvasControls,
@@ -17,13 +21,17 @@ import {
 import { Scatterplot } from "../scatterplot/Scatterplot";
 import { ScatterplotControls } from "../scatterplot/ScatterplotControls";
 import { SearchBar } from "../search-bar/SearchBar";
+import { Toolbar } from "../toolbar/Toolbar";
 import { VarNamesList } from "../var-list/VarList";
 import { Violin } from "../violin/Violin";
+import { ViolinControls } from "../violin/ViolinControls";
 
 export function FullPage({
   renderItem,
   varMode = SELECTION_MODES.SINGLE,
   searchDiseases = true,
+  showToolbar = false,
+  Controls = null,
   ...props
 }) {
   const appRef = useRef();
@@ -34,6 +42,11 @@ export function FullPage({
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  const LgBreakpoint = useMediaQuery("(max-width: 991.98px)");
+  const XlBreakpoint = useMediaQuery("(max-width: 1199.98px)");
+  const showObsBtn = LgBreakpoint;
+  const showVarsBtn = XlBreakpoint;
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -67,13 +80,23 @@ export function FullPage({
       <DatasetProvider {...props}>
         <Container
           fluid
-          className="d-flex g-0"
+          className="cherita-app-container"
           style={{ height: appDimensions.height }}
         >
           <div className="cherita-app-obs modern-scrollbars border-end h-100">
             <ObsColsList {...props} />
           </div>
-          <div className="cherita-app-canvas flex-grow-1">
+          <div className="cherita-app-canvas">
+            {showToolbar && (
+              <Toolbar
+                showObsBtn={showObsBtn}
+                showVarsBtn={showVarsBtn}
+                showCtrlsBtn={!!Controls}
+                setShowObs={setShowObs}
+                setShowVars={setShowVars}
+                setShowControls={setShowControls}
+              />
+            )}
             {renderItem({
               setShowObs,
               setShowVars,
@@ -104,7 +127,7 @@ export function FullPage({
           <OffcanvasControls
             show={showControls}
             handleClose={() => setShowControls(false)}
-            Controls={ScatterplotControls}
+            Controls={Controls}
           />
           <OffcanvasObsm
             show={showObsm}
@@ -121,6 +144,7 @@ export function FullPageScatterplot(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.SINGLE}
+      Controls={ScatterplotControls}
       renderItem={({ setShowObs, setShowVars }) => (
         <Scatterplot
           setShowObs={setShowObs}
@@ -137,6 +161,7 @@ export function FullPagePlots(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
+      showToolbar={true}
       renderItem={() => (
         <div className="container-fluid w-100 h-100 d-flex flex-column overflow-y-auto">
           <div className="row flex-grow-1">
@@ -162,6 +187,8 @@ export function FullPageDotplot(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
+      showToolbar={true}
+      Controls={DotplotControls}
       renderItem={() => <Dotplot />}
     />
   );
@@ -172,6 +199,8 @@ export function FullPageHeatmap(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
+      showToolbar={true}
+      Controls={HeatmapControls}
       renderItem={() => <Heatmap />}
     />
   );
@@ -182,6 +211,8 @@ export function FullPageMatrixplot(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
+      showToolbar={true}
+      Controls={MatrixplotControls}
       renderItem={() => <Matrixplot />}
     />
   );
@@ -192,6 +223,8 @@ export function FullPageViolin(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
+      showToolbar={true}
+      Controls={ViolinControls}
       renderItem={() => <Violin mode={VIOLIN_MODES.MULTIKEY} />}
     />
   );
