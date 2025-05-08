@@ -116,11 +116,13 @@ export function FullPage({
             handleClose={() => setShowVars(false)}
             mode={varMode}
           />
-          <OffcanvasControls
-            show={showControls}
-            handleClose={() => setShowControls(false)}
-            Controls={Controls}
-          />
+          {Controls && (
+            <OffcanvasControls
+              show={showControls}
+              handleClose={() => setShowControls(false)}
+              Controls={Controls}
+            />
+          )}
           <OffcanvasObsm
             show={showObsm}
             handleClose={() => setShowObsm(false)}
