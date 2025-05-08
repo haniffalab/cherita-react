@@ -13,6 +13,7 @@ import {
   ObsPlotlyToolbar,
   VarPlotlyToolbar,
 } from "../toolbar/Toolbar";
+import { PLOTLY_MODEBAR_BUTTONS } from "../../constants/constants";
 
 export function Matrixplot({
   showObsBtn = false,
@@ -118,19 +119,9 @@ export function Matrixplot({
     showCtrlsBtn && ControlsPlotlyToolbar({ onClick: setShowControls }),
   ]);
 
-  const plotlyModeBarButtons = [
-    "toImage",
-    "zoom2d",
-    "pan2d",
-    "zoomIn2d",
-    "zoomOut2d",
-    "autoScale2d",
-    "resetScale2d",
-  ];
-
   const modeBarButtons = customModeBarButtons.length
-    ? [customModeBarButtons, plotlyModeBarButtons]
-    : [plotlyModeBarButtons];
+    ? [customModeBarButtons, PLOTLY_MODEBAR_BUTTONS]
+    : [PLOTLY_MODEBAR_BUTTONS];
 
   if (!serverError) {
     if (hasSelections) {

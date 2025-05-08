@@ -6,7 +6,10 @@ import _ from "lodash";
 import { Alert, OverlayTrigger, Tooltip } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
-import { VIOLIN_MODES } from "../../constants/constants";
+import {
+  PLOTLY_MODEBAR_BUTTONS,
+  VIOLIN_MODES,
+} from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
@@ -154,19 +157,9 @@ export function Violin({
     showCtrlsBtn && ControlsPlotlyToolbar({ onClick: setShowControls }),
   ]);
 
-  const plotlyModeBarButtons = [
-    "toImage",
-    "zoom2d",
-    "pan2d",
-    "zoomIn2d",
-    "zoomOut2d",
-    "autoScale2d",
-    "resetScale2d",
-  ];
-
   const modeBarButtons = customModeBarButtons.length
-    ? [customModeBarButtons, plotlyModeBarButtons]
-    : [plotlyModeBarButtons];
+    ? [customModeBarButtons, PLOTLY_MODEBAR_BUTTONS]
+    : [PLOTLY_MODEBAR_BUTTONS];
 
   if (!serverError) {
     if (hasSelections) {

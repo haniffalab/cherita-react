@@ -80,3 +80,13 @@ export const DEFAULT_OBS_GROUP = [
   "tissue",
   "tissue_type",
 ];
+
+export const PLOTLY_MODEBAR_BUTTONS = [
+  "toImage",
+  "zoom2d",
+  "pan2d",
+  "zoomIn2d",
+  "zoomOut2d",
+  "autoScale2d",
+  "resetScale2d",
+];
