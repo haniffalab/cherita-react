@@ -48,3 +48,39 @@ export const Toolbar = ({
     </Navbar>
   );
 };
+
+export const ObsPlotlyToolbar = ({ onClick }) => {
+  return {
+    name: "Categories",
+    icon: {
+      width: 512,
+      height: 512,
+      path: faList.icon[4],
+    },
+    click: onClick,
+  };
+};
+
+export const VarPlotlyToolbar = ({ onClick }) => {
+  return {
+    name: "Features",
+    icon: {
+      width: 512,
+      height: 512,
+      path: faSearch.icon[4],
+    },
+    click: onClick,
+  };
+};
+
+export const ControlsPlotlyToolbar = ({ onClick }) => {
+  return {
+    name: "Controls",
+    icon: {
+      width: 512,
+      height: 512,
+      path: faSliders.icon[4],
+    },
+    click: onClick,
+  };
+};

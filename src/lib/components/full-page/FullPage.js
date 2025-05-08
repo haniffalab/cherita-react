@@ -21,7 +21,6 @@ import {
 import { Scatterplot } from "../scatterplot/Scatterplot";
 import { ScatterplotControls } from "../scatterplot/ScatterplotControls";
 import { SearchBar } from "../search-bar/SearchBar";
-import { Toolbar } from "../toolbar/Toolbar";
 import { VarNamesList } from "../var-list/VarList";
 import { Violin } from "../violin/Violin";
 import { ViolinControls } from "../violin/ViolinControls";
@@ -30,7 +29,6 @@ export function FullPage({
   renderItem,
   varMode = SELECTION_MODES.SINGLE,
   searchDiseases = true,
-  showToolbar = false,
   Controls = null,
   ...props
 }) {
@@ -87,19 +85,13 @@ export function FullPage({
             <ObsColsList {...props} />
           </div>
           <div className="cherita-app-canvas">
-            {showToolbar && (
-              <Toolbar
-                showObsBtn={showObsBtn}
-                showVarsBtn={showVarsBtn}
-                showCtrlsBtn={!!Controls}
-                setShowObs={setShowObs}
-                setShowVars={setShowVars}
-                setShowControls={setShowControls}
-              />
-            )}
             {renderItem({
+              showObsBtn,
+              showVarsBtn,
+              showCtrlsBtn: !!Controls,
               setShowObs,
               setShowVars,
+              setShowControls,
             })}
           </div>
           <div className="cherita-app-sidebar p-3">
@@ -161,7 +153,6 @@ export function FullPagePlots(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
-      showToolbar={true}
       renderItem={() => (
         <div className="container-fluid w-100 h-100 d-flex flex-column overflow-y-auto">
           <div className="row flex-grow-1">
@@ -187,9 +178,8 @@ export function FullPageDotplot(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
-      showToolbar={true}
       Controls={DotplotControls}
-      renderItem={() => <Dotplot />}
+      renderItem={(props) => <Dotplot {...props} />}
     />
   );
 }
@@ -199,9 +189,8 @@ export function FullPageHeatmap(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
-      showToolbar={true}
       Controls={HeatmapControls}
-      renderItem={() => <Heatmap />}
+      renderItem={(props) => <Heatmap {...props} />}
     />
   );
 }
@@ -211,9 +200,8 @@ export function FullPageMatrixplot(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
-      showToolbar={true}
       Controls={MatrixplotControls}
-      renderItem={() => <Matrixplot />}
+      renderItem={(props) => <Matrixplot {...props} />}
     />
   );
 }
@@ -223,9 +211,8 @@ export function FullPageViolin(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
-      showToolbar={true}
       Controls={ViolinControls}
-      renderItem={() => <Violin mode={VIOLIN_MODES.MULTIKEY} />}
+      renderItem={(props) => <Violin mode={VIOLIN_MODES.MULTIKEY} {...props} />}
     />
   );
 }

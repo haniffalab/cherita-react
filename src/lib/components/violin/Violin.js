@@ -11,8 +11,21 @@ import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
+import {
+  ControlsPlotlyToolbar,
+  ObsPlotlyToolbar,
+  VarPlotlyToolbar,
+} from "../toolbar/Toolbar";
 
-export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
+export function Violin({
+  mode = VIOLIN_MODES.MULTIKEY,
+  showObsBtn = false,
+  showVarsBtn = false,
+  showCtrlsBtn = false,
+  setShowObs,
+  setShowVars,
+  setShowControls,
+}) {
   const ENDPOINT = "violin";
   const dataset = useDataset();
   const { obsIndices, isSliced } = useFilteredData();
@@ -135,6 +148,26 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     }
   }, [fetchedData, hasSelections, isPending, serverError]);
 
+  const customModeBarButtons = _.compact([
+    showObsBtn && ObsPlotlyToolbar({ onClick: setShowObs }),
+    showVarsBtn && VarPlotlyToolbar({ onClick: setShowVars }),
+    showCtrlsBtn && ControlsPlotlyToolbar({ onClick: setShowControls }),
+  ]);
+
+  const plotlyModeBarButtons = [
+    "toImage",
+    "zoom2d",
+    "pan2d",
+    "zoomIn2d",
+    "zoomOut2d",
+    "autoScale2d",
+    "resetScale2d",
+  ];
+
+  const modeBarButtons = customModeBarButtons.length
+    ? [customModeBarButtons, plotlyModeBarButtons]
+    : [plotlyModeBarButtons];
+
   if (!serverError) {
     if (hasSelections) {
       return (
@@ -145,6 +178,10 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
             layout={layout}
             useResizeHandler={true}
             style={{ width: "100%", height: "100%" }}
+            config={{
+              displaylogo: false,
+              modeBarButtons: modeBarButtons,
+            }}
           />
           {fetchedData?.resampled && (
             <Alert variant="warning">

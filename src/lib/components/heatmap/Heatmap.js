@@ -8,8 +8,20 @@ import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
+import {
+  ControlsPlotlyToolbar,
+  ObsPlotlyToolbar,
+  VarPlotlyToolbar,
+} from "../toolbar/Toolbar";
 
-export function Heatmap() {
+export function Heatmap({
+  showObsBtn = false,
+  showVarsBtn = false,
+  showCtrlsBtn = false,
+  setShowObs,
+  setShowVars,
+  setShowControls,
+}) {
   const ENDPOINT = "heatmap";
   const dataset = useDataset();
   const { obsIndices, isSliced } = useFilteredData();
@@ -97,6 +109,26 @@ export function Heatmap() {
     updateColorscale(colorscale.current);
   }, [dataset.controls.colorScale, updateColorscale]);
 
+  const customModeBarButtons = _.compact([
+    showObsBtn && ObsPlotlyToolbar({ onClick: setShowObs }),
+    showVarsBtn && VarPlotlyToolbar({ onClick: setShowVars }),
+    showCtrlsBtn && ControlsPlotlyToolbar({ onClick: setShowControls }),
+  ]);
+
+  const plotlyModeBarButtons = [
+    "toImage",
+    "zoom2d",
+    "pan2d",
+    "zoomIn2d",
+    "zoomOut2d",
+    "autoScale2d",
+    "resetScale2d",
+  ];
+
+  const modeBarButtons = customModeBarButtons.length
+    ? [customModeBarButtons, plotlyModeBarButtons]
+    : [plotlyModeBarButtons];
+
   if (!serverError) {
     if (hasSelections) {
       return (
@@ -107,6 +139,10 @@ export function Heatmap() {
             layout={layout}
             useResizeHandler={true}
             style={{ width: "100%", height: "100%" }}
+            config={{
+              displaylogo: false,
+              modeBarButtons: modeBarButtons,
+            }}
           />
         </div>
       );
