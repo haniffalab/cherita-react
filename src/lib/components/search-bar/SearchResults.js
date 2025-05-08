@@ -11,9 +11,9 @@ import { VirtualizedList } from "../../utils/VirtualizedList";
 
 export function VarSearchResults({
   text,
-  setShowSuggestions,
   handleSelect,
   setSelectedResult,
+  setResultsLength,
 }) {
   const [suggestions, setSuggestions] = useState([]);
   const dispatch = useDatasetDispatch();
@@ -34,11 +34,10 @@ export function VarSearchResults({
         });
       } else {
         setSuggestions([]);
-        setShowSuggestions(false);
       }
     };
     return _.debounce(setData, 300);
-  }, [setParams, setShowSuggestions]);
+  }, [setParams]);
 
   useEffect(() => {
     updateParams(text);
@@ -47,9 +46,9 @@ export function VarSearchResults({
   useEffect(() => {
     if (!isPending && !serverError) {
       setSuggestions(fetchedData);
-      setShowSuggestions(true);
+      setResultsLength(fetchedData?.length);
     }
-  }, [fetchedData, isPending, serverError, setShowSuggestions]);
+  }, [fetchedData, isPending, serverError, setResultsLength]);
 
   const getDataAtIndex = (index) => deferredData[index];
   const ItemComponent = (item) => (
@@ -72,9 +71,6 @@ export function VarSearchResults({
                 disabled={isStale}
                 onClick={() => {
                   handleSelect(dispatch, item);
-                  _.delay(() => {
-                    setShowSuggestions(false);
-                  }, 150);
                 }}
               >
                 <FontAwesomeIcon icon={faPlus} />
@@ -101,11 +97,13 @@ export function VarSearchResults({
             />
           ) : (
             <Dropdown.Item key="empty" as="button" disabled>
-              {!serverError
-                ? isStale || isPending
-                  ? "Loading..."
-                  : "No items found"
-                : "Failed to fetch data"}
+              {!text.length
+                ? "Search features"
+                : !serverError
+                  ? isStale || isPending
+                    ? "Loading..."
+                    : "No items found"
+                  : "Failed to fetch data"}
             </Dropdown.Item>
           )}
         </ListGroup>
@@ -116,8 +114,8 @@ export function VarSearchResults({
 
 export function DiseasesSearchResults({
   text,
-  setShowSuggestions,
   setSelectedResult,
+  setResultsLength,
 }) {
   const [suggestions, setSuggestions] = useState([]);
   const dispatch = useDatasetDispatch();
@@ -150,9 +148,9 @@ export function DiseasesSearchResults({
   useEffect(() => {
     if (!isPending && !serverError) {
       setSuggestions(fetchedData);
-      setShowSuggestions(true);
+      setResultsLength(fetchedData?.length);
     }
-  }, [fetchedData, isPending, serverError, setShowSuggestions]);
+  }, [fetchedData, isPending, serverError, setResultsLength]);
 
   const getDataAtIndex = (index) => deferredData[index];
   const ItemComponent = (item) => (
@@ -167,9 +165,6 @@ export function DiseasesSearchResults({
           id: item.disease_id,
           name: item.disease_name,
         });
-        _.delay(() => {
-          setShowSuggestions(false);
-        }, 150);
       }}
     >
       {item.disease_name}
@@ -190,11 +185,13 @@ export function DiseasesSearchResults({
           />
         ) : (
           <Dropdown.Item key="empty" as="button" disabled>
-            {!serverError
-              ? isStale || isPending
-                ? "Loading..."
-                : "No items found"
-              : "Failed to fetch data"}
+            {!text.length
+              ? "Search diseases"
+              : !serverError
+                ? isStale || isPending
+                  ? "Loading..."
+                  : "No items found"
+                : "Failed to fetch data"}
           </Dropdown.Item>
         )}
       </div>
