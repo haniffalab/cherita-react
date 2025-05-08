@@ -21,7 +21,7 @@ import { SearchBar } from "../search-bar/SearchBar";
 import { VarNamesList } from "../var-list/VarList";
 
 export function FullPage({
-  children,
+  renderItem,
   varMode = SELECTION_MODES.SINGLE,
   searchDiseases = false,
   ...props
@@ -77,7 +77,7 @@ export function FullPage({
             <ObsColsList {...props} />
           </div>
           <div className="cherita-app-canvas flex-grow-1">
-            {children({
+            {renderItem({
               setShowObs,
               setShowVars,
             })}
@@ -150,14 +150,16 @@ export function FullPage({
 
 export function FullPagePseudospatial(props) {
   return (
-    <FullPage {...props} varMode={SELECTION_MODES.SINGLE}>
-      {({ setShowObs, setShowVars }) => (
+    <FullPage
+      {...props}
+      varMode={SELECTION_MODES.SINGLE}
+      renderItem={({ setShowObs, setShowVars }) => (
         <Scatterplot
           setShowObs={setShowObs}
           setShowVars={setShowVars}
           isFullscreen={true}
         />
       )}
-    </FullPage>
+    />
   );
 }

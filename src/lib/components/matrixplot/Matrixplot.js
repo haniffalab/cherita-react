@@ -4,12 +4,25 @@ import _ from "lodash";
 import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
+import { PLOTLY_MODEBAR_BUTTONS } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
+import {
+  ControlsPlotlyToolbar,
+  ObsPlotlyToolbar,
+  VarPlotlyToolbar,
+} from "../toolbar/Toolbar";
 
-export function Matrixplot() {
+export function Matrixplot({
+  showObsBtn = false,
+  showVarsBtn = false,
+  showCtrlsBtn = false,
+  setShowObs,
+  setShowVars,
+  setShowControls,
+}) {
   const ENDPOINT = "matrixplot";
   const dataset = useDataset();
   const { obsIndices, isSliced } = useFilteredData();
@@ -100,16 +113,30 @@ export function Matrixplot() {
     updateColorscale(colorscale.current);
   }, [dataset.controls.colorScale, updateColorscale]);
 
+  const customModeBarButtons = _.compact([
+    showObsBtn && ObsPlotlyToolbar({ onClick: setShowObs }),
+    showVarsBtn && VarPlotlyToolbar({ onClick: setShowVars }),
+    showCtrlsBtn && ControlsPlotlyToolbar({ onClick: setShowControls }),
+  ]);
+
+  const modeBarButtons = customModeBarButtons.length
+    ? [customModeBarButtons, PLOTLY_MODEBAR_BUTTONS]
+    : [PLOTLY_MODEBAR_BUTTONS];
+
   if (!serverError) {
     if (hasSelections) {
       return (
-        <div className="cherita-matrixplot position-relative">
+        <div className="cherita-plot cherita-matrixplot position-relative">
           {isPending && <LoadingSpinner />}
           <Plot
             data={data}
             layout={layout}
             useResizeHandler={true}
-            style={{ maxWidth: "100%", maxHeight: "100%" }}
+            style={{ width: "100%", height: "100%" }}
+            config={{
+              displaylogo: false,
+              modeBarButtons: modeBarButtons,
+            }}
           />
         </div>
       );
