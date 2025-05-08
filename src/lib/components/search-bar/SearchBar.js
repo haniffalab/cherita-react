@@ -6,7 +6,9 @@ import _ from "lodash";
 import { Button, Form, FormGroup, InputGroup, Modal } from "react-bootstrap";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
 import Row from "react-bootstrap/Row";
+import Tab from "react-bootstrap/Tab";
 
 import { DiseasesSearchResults, VarSearchResults } from "./SearchResults";
 
@@ -31,6 +33,7 @@ export function SearchBar({
   handleSelect = onVarSelect,
 }) {
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedResult, setSelectedResult] = useState(null);
   const [text, setText] = useState("");
   const inputRef = useRef(null);
   const displayText = [
@@ -89,8 +92,8 @@ export function SearchBar({
         </FormGroup>
       </Form>
       <Modal show={isModalOpen} onHide={handleClose} size="xl">
-        <Modal.Body>
-          <Container>
+        <Modal.Header className="bg-primary">
+          <Container className="gx-0">
             <Row>
               <Col xs={12}>
                 <Form
@@ -99,7 +102,7 @@ export function SearchBar({
                   }}
                 >
                   <FormGroup>
-                    <div className="d-flex align-items-center my-3">
+                    <div className="d-flex align-items-center">
                       <InputGroup>
                         <Form.Control
                           ref={inputRef}
@@ -134,43 +137,84 @@ export function SearchBar({
                         >
                           <SearchIcon />
                         </div>
+                        <Button variant="light" onClick={handleClose}>
+                          <CloseIcon />
+                        </Button>
                       </InputGroup>
-
-                      <Button
-                        variant="outline-secondary"
-                        onClick={handleClose}
-                        className="ms-2"
-                      >
-                        <CloseIcon />
-                      </Button>
                     </div>
                   </FormGroup>
                 </Form>
               </Col>
             </Row>
+          </Container>
+        </Modal.Header>
+        <Modal.Body className="p-0">
+          <Container>
             <Row>
-              {searchVar && (
-                <Col xs={12} md={4}>
-                  <VarSearchResults
-                    text={text}
-                    setShowSuggestions={setShowSuggestions}
-                    handleSelect={handleSelect}
-                  />
-                </Col>
-              )}
-              {searchDiseases && (
-                <>
-                  <Col xs={12} md={4}>
-                    <DiseasesSearchResults
-                      text={text}
-                      setShowSuggestions={setShowSuggestions}
-                    />
-                  </Col>
-                  <Col xs={12} md={4}>
-                    List of genes assoicated with disease
-                  </Col>
-                </>
-              )}
+              <Col xs={12} md={8}>
+                <Tab.Container defaultActiveKey="first">
+                  <Row>
+                    <Col sm={3} className="py-3 border-end">
+                      <Nav variant="pills" className="flex-column">
+                        {searchVar && (
+                          <Nav.Item>
+                            <Nav.Link eventKey="first">Genes (0)</Nav.Link>
+                          </Nav.Item>
+                        )}
+                        {searchDiseases && (
+                          <Nav.Item>
+                            <Nav.Link eventKey="second">Diseases (0)</Nav.Link>
+                          </Nav.Item>
+                        )}
+                      </Nav>
+                    </Col>
+                    <Col sm={9} className="py-3">
+                      <Tab.Content>
+                        {searchVar && (
+                          <Tab.Pane eventKey="first">
+                            <VarSearchResults
+                              text={text}
+                              setShowSuggestions={setShowSuggestions}
+                              handleSelect={handleSelect}
+                              setSelectedResult={setSelectedResult}
+                            />
+                          </Tab.Pane>
+                        )}
+                        {searchDiseases && (
+                          <Tab.Pane eventKey="second">
+                            <DiseasesSearchResults
+                              text={text}
+                              setShowSuggestions={setShowSuggestions}
+                              setSelectedResult={setSelectedResult}
+                            />
+                          </Tab.Pane>
+                        )}
+                      </Tab.Content>
+                    </Col>
+                  </Row>
+                </Tab.Container>
+              </Col>
+              <Col
+                xs={12}
+                md={4}
+                className="bg-light p-3"
+                style={{
+                  position: "sticky",
+                  top: 0,
+                  height: "100vh",
+                  overflowY: "auto",
+                  borderLeft: "1px solid #dee2e6",
+                }}
+              >
+                {selectedResult ? (
+                  <div>
+                    <h5>Selected Result</h5>
+                    <pre>{JSON.stringify(selectedResult, null, 2)}</pre>
+                  </div>
+                ) : (
+                  <div className="text-muted">No result selected</div>
+                )}
+              </Col>
             </Row>
           </Container>
         </Modal.Body>

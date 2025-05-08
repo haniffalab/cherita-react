@@ -9,7 +9,12 @@ import { useDatasetDispatch } from "../../context/DatasetContext";
 import { useDiseaseSearch, useVarSearch } from "../../utils/search";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 
-export function VarSearchResults({ text, setShowSuggestions, handleSelect }) {
+export function VarSearchResults({
+  text,
+  setShowSuggestions,
+  handleSelect,
+  setSelectedResult,
+}) {
   const [suggestions, setSuggestions] = useState([]);
   const dispatch = useDatasetDispatch();
 
@@ -50,7 +55,12 @@ export function VarSearchResults({ text, setShowSuggestions, handleSelect }) {
   const ItemComponent = (item) => (
     <>
       <div className="virtualized-list-wrapper">
-        <ListGroup.Item key={item}>
+        <ListGroup.Item
+          key={item}
+          onClick={() => {
+            setSelectedResult(item);
+          }}
+        >
           <div className="d-flex justify-content-between align-items-center w-100">
             <div>{item.name}</div>
             <div className="d-flex align-items-center gap-1">
@@ -78,7 +88,6 @@ export function VarSearchResults({ text, setShowSuggestions, handleSelect }) {
 
   return (
     <div>
-      <h5>Genes</h5>
       <div className="search-results">
         <ListGroup variant="flush" className="cherita-list">
           {deferredData?.length ? (
@@ -105,7 +114,11 @@ export function VarSearchResults({ text, setShowSuggestions, handleSelect }) {
   );
 }
 
-export function DiseasesSearchResults({ text, setShowSuggestions }) {
+export function DiseasesSearchResults({
+  text,
+  setShowSuggestions,
+  setSelectedResult,
+}) {
   const [suggestions, setSuggestions] = useState([]);
   const dispatch = useDatasetDispatch();
 
@@ -148,6 +161,7 @@ export function DiseasesSearchResults({ text, setShowSuggestions }) {
       as="button"
       disabled={isStale}
       onClick={() => {
+        setSelectedResult(item);
         dispatch({
           type: "select.disease",
           id: item.disease_id,
@@ -164,7 +178,6 @@ export function DiseasesSearchResults({ text, setShowSuggestions }) {
 
   return (
     <div>
-      <Dropdown.Header>Diseases</Dropdown.Header>
       <div className="search-results">
         {deferredData?.length ? (
           <VirtualizedList
