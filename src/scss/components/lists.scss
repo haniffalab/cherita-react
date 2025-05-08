@@ -13,6 +13,7 @@
     color: var(--#{$prefix}body-color);
     background-color: var(--#{$prefix}tertiary-bg);
     border-radius: var(--#{$prefix}border-radius);
+    cursor: pointer;
   }
 }
 .obs-statistics {

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
-import _ from "lodash";
 import { Button, Form, FormGroup, InputGroup, Modal } from "react-bootstrap";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
