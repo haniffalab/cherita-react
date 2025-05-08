@@ -4,6 +4,7 @@ import _ from "lodash";
 import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
+import { PLOTLY_MODEBAR_BUTTONS } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
@@ -13,7 +14,6 @@ import {
   ObsPlotlyToolbar,
   VarPlotlyToolbar,
 } from "../toolbar/Toolbar";
-import { PLOTLY_MODEBAR_BUTTONS } from "../../constants/constants";
 
 export function Dotplot({
   showObsBtn = false,
