@@ -94,7 +94,7 @@ function VarDiseaseInfoItem(item) {
   );
 }
 
-function VarDiseaseInfo({ data }) {
+export function VarDiseaseInfo({ data }) {
   return (
     <VirtualizedList
       getDataAtIndex={(index) => data[index]}

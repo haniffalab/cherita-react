@@ -8,12 +8,42 @@ import { Button, ListGroup } from "react-bootstrap";
 import { VAR_SORT } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFetch } from "../../utils/requests";
+import { VarDiseaseInfo } from "../var-list/VarItem";
 
 export function VarInfo({ varItem }) {
+  const ENDPOINT = "disease/gene";
+  const dataset = useDataset();
+  const [params, setParams] = useState({
+    geneName: varItem.name,
+    diseaseDatasets: dataset.diseaseDatasets,
+  });
+
+  useEffect(() => {
+    setParams((p) => {
+      return {
+        ...p,
+        geneName: varItem.name,
+      };
+    });
+  }, [varItem.name]);
+
+  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
+    refetchOnMount: false,
+    enabled: !!dataset.diseaseDatasets.length,
+  });
+
+  const hasDiseaseInfo = !isPending && !serverError && !!fetchedData?.length;
+
   return (
     <div>
       <h5>{varItem.name}</h5>
-      <p>{JSON.stringify(varItem)}</p>
+      {!!dataset.diseaseDatasets.length && isPending && <p>Loading...</p>}
+      {hasDiseaseInfo && (
+        <>
+          <h6>Associated diseases</h6>
+          <VarDiseaseInfo data={fetchedData} />
+        </>
+      )}
     </div>
   );
 }

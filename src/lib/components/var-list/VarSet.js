@@ -88,7 +88,7 @@ function SingleSelectionSet({
             </OverlayTrigger>
             <Button
               type="button"
-              variant={isActive ? "primary" : "outline-primary"}
+              variant="outline-primary"
               className="m-0 p-0 px-1"
               disabled={!set.vars.length}
               title="Open set"
@@ -98,7 +98,7 @@ function SingleSelectionSet({
             {/* <VarHistogram set={set} /> */}
             <Button
               type="button"
-              variant={isActive ? "primary" : "outline-primary"}
+              variant="outline-primary"
               className="m-0 p-0 px-1"
               onClick={(e) => {
                 e.stopPropagation();
