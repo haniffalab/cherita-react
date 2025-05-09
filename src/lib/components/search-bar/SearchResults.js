@@ -12,6 +12,7 @@ import { VirtualizedList } from "../../utils/VirtualizedList";
 export function VarSearchResults({
   text,
   handleSelect,
+  selectedResult,
   setSelectedResult,
   setResultsLength,
 }) {
@@ -59,6 +60,7 @@ export function VarSearchResults({
           onClick={() => {
             setSelectedResult(item);
           }}
+          active={selectedResult?.index === item.index}
         >
           <div className="d-flex justify-content-between align-items-center w-100">
             <div>{item.name}</div>
@@ -114,6 +116,7 @@ export function VarSearchResults({
 
 export function DiseasesSearchResults({
   text,
+  selectedResult,
   setSelectedResult,
   setResultsLength,
 }) {
@@ -166,6 +169,7 @@ export function DiseasesSearchResults({
               name: item.disease_name,
             });
           }}
+          active={selectedResult?.id === item.id}
         >
           <div className="d-flex justify-content-between align-items-center w-100">
             <div>{item.disease_name}</div>

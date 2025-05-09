@@ -15,6 +15,9 @@
     border-radius: var(--#{$prefix}border-radius);
     cursor: pointer;
   }
+  .list-group-item.active {
+    background-color: var(--#{$prefix}secondary-bg);
+  }
 }
 .obs-statistics {
   border: 0;

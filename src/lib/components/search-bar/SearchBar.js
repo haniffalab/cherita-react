@@ -36,7 +36,11 @@ function SearchModal({
   searchVar,
   searchDiseases,
 }) {
-  const [selectedResult, setSelectedResult] = useState(null);
+  const [tab, setTab] = useState("var");
+  const [selectedResult, setSelectedResult] = useState({
+    var: null,
+    disease: null,
+  });
   const [varResultsLength, setVarResultsLength] = useState(null);
   const [diseaseResultsLength, setDiseaseResultsLength] = useState(null);
 
@@ -64,6 +68,12 @@ function SearchModal({
                         value={text}
                         onChange={(e) => {
                           setText(e.target.value);
+                          setSelectedResult({
+                            var: null,
+                            disease: null,
+                          });
+                          setVarResultsLength(null);
+                          setDiseaseResultsLength(null);
                         }}
                       />
                       <Button variant="light" onClick={handleClose}>
@@ -81,13 +91,13 @@ function SearchModal({
         <Container>
           <Row>
             <Col xs={12} md={8}>
-              <Tab.Container defaultActiveKey="first">
+              <Tab.Container activeKey={tab} onSelect={(k) => setTab(k)}>
                 <Row className="w-100">
                   <Col sm={3} className="py-3 border-end">
                     <Nav variant="pills" className="flex-column">
                       {searchVar && (
                         <Nav.Item>
-                          <Nav.Link eventKey="first">
+                          <Nav.Link eventKey="var">
                             Genes{" "}
                             {!!varResultsLength && `(${varResultsLength})`}
                           </Nav.Link>
@@ -95,7 +105,7 @@ function SearchModal({
                       )}
                       {searchDiseases && (
                         <Nav.Item>
-                          <Nav.Link eventKey="second">
+                          <Nav.Link eventKey="disease">
                             Diseases{" "}
                             {!!diseaseResultsLength &&
                               `(${diseaseResultsLength})`}
@@ -107,20 +117,30 @@ function SearchModal({
                   <Col sm={9} className="py-3">
                     <Tab.Content>
                       {searchVar && (
-                        <Tab.Pane eventKey="first">
+                        <Tab.Pane eventKey="var">
                           <VarSearchResults
                             text={text}
                             handleSelect={handleSelect}
-                            setSelectedResult={setSelectedResult}
+                            selectedResult={selectedResult.var}
+                            setSelectedResult={(item) =>
+                              setSelectedResult((prev) => {
+                                return { ...prev, var: item };
+                              })
+                            }
                             setResultsLength={setVarResultsLength}
                           />
                         </Tab.Pane>
                       )}
                       {searchDiseases && (
-                        <Tab.Pane eventKey="second">
+                        <Tab.Pane eventKey="disease">
                           <DiseasesSearchResults
                             text={text}
-                            setSelectedResult={setSelectedResult}
+                            selectedResult={selectedResult.disease}
+                            setSelectedResult={(item) =>
+                              setSelectedResult((prev) => {
+                                return { ...prev, disease: item };
+                              })
+                            }
                             setResultsLength={setDiseaseResultsLength}
                           />
                         </Tab.Pane>
@@ -131,10 +151,10 @@ function SearchModal({
               </Tab.Container>
             </Col>
             <Col xs={12} md={4} className="bg-light p-3 search-modal-info">
-              {selectedResult ? (
+              {selectedResult[tab] ? (
                 <div>
                   <h5>Selected Result</h5>
-                  <pre>{JSON.stringify(selectedResult, null, 2)}</pre>
+                  <pre>{JSON.stringify(selectedResult[tab], null, 2)}</pre>
                 </div>
               ) : (
                 <div className="text-muted">No result selected</div>
