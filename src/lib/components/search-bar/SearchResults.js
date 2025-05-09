@@ -69,7 +69,7 @@ export function VarSearchResults({
                 type="button"
                 className="m-0 p-0 px-1"
                 variant="outline-secondary"
-                title="Remove from list"
+                title="Add to list"
                 disabled={isStale}
                 onClick={() => {
                   handleSelect(dispatch, item);

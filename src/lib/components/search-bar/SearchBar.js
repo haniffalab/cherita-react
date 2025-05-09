@@ -9,7 +9,9 @@ import Nav from "react-bootstrap/Nav";
 import Row from "react-bootstrap/Row";
 import Tab from "react-bootstrap/Tab";
 
+import { DiseaseInfo, VarInfo } from "./SearchInfo";
 import { DiseasesSearchResults, VarSearchResults } from "./SearchResults";
+import { COLOR_ENCODINGS } from "../../constants/constants";
 
 function onVarSelect(dispatch, item) {
   dispatch({
@@ -22,17 +24,33 @@ function onVarSelect(dispatch, item) {
   });
   dispatch({
     type: "set.colorEncoding",
-    value: "var",
+    value: COLOR_ENCODINGS.VAR,
   });
 }
 
-function SearchModal({
+function addVarSet(dispatch, { name, vars }) {
+  dispatch({
+    type: "add.varSet",
+    varSet: {
+      name: name,
+      vars: vars,
+      isSet: true,
+    },
+  });
+}
+
+const FEATURE_TYPE = {
+  VAR: "var",
+  DISEASE: "disease",
+};
+
+export function SearchModal({
   show,
   handleClose,
   text,
   setText,
   displayText,
-  handleSelect,
+  handleSelect = onVarSelect,
   searchVar,
   searchDiseases,
 }) {
@@ -97,7 +115,7 @@ function SearchModal({
                     <Nav variant="pills" className="flex-column">
                       {searchVar && (
                         <Nav.Item>
-                          <Nav.Link eventKey="var">
+                          <Nav.Link eventKey={FEATURE_TYPE.VAR}>
                             Genes{" "}
                             {!!varResultsLength && `(${varResultsLength})`}
                           </Nav.Link>
@@ -105,7 +123,7 @@ function SearchModal({
                       )}
                       {searchDiseases && (
                         <Nav.Item>
-                          <Nav.Link eventKey="disease">
+                          <Nav.Link eventKey={FEATURE_TYPE.DISEASE}>
                             Diseases{" "}
                             {!!diseaseResultsLength &&
                               `(${diseaseResultsLength})`}
@@ -117,7 +135,7 @@ function SearchModal({
                   <Col sm={9} className="py-3">
                     <Tab.Content>
                       {searchVar && (
-                        <Tab.Pane eventKey="var">
+                        <Tab.Pane eventKey={FEATURE_TYPE.VAR}>
                           <VarSearchResults
                             text={text}
                             handleSelect={handleSelect}
@@ -132,7 +150,7 @@ function SearchModal({
                         </Tab.Pane>
                       )}
                       {searchDiseases && (
-                        <Tab.Pane eventKey="disease">
+                        <Tab.Pane eventKey={FEATURE_TYPE.DISEASE}>
                           <DiseasesSearchResults
                             text={text}
                             selectedResult={selectedResult.disease}
@@ -152,10 +170,15 @@ function SearchModal({
             </Col>
             <Col xs={12} md={4} className="bg-light p-3 search-modal-info">
               {selectedResult[tab] ? (
-                <div>
-                  <h5>Selected Result</h5>
-                  <pre>{JSON.stringify(selectedResult[tab], null, 2)}</pre>
-                </div>
+                tab === FEATURE_TYPE.DISEASE ? (
+                  <DiseaseInfo
+                    disease={selectedResult.disease}
+                    handleSelect={handleSelect}
+                    addVarSet={addVarSet}
+                  />
+                ) : (
+                  <VarInfo varItem={selectedResult.var} />
+                )
               ) : (
                 <div className="text-muted">No result selected</div>
               )}
@@ -167,11 +190,7 @@ function SearchModal({
   );
 }
 
-export function SearchBar({
-  searchVar = true,
-  searchDiseases = false,
-  handleSelect = onVarSelect,
-}) {
+export function SearchBar({ searchVar = true, searchDiseases = false }) {
   const [text, setText] = useState("");
   const displayText = [
     ...(searchVar ? ["features"] : []),
@@ -209,7 +228,6 @@ export function SearchBar({
         searchVar={searchVar}
         searchDiseases={searchDiseases}
         handleClose={() => setShowModal(false)}
-        handleSelect={handleSelect}
       />
     </div>
   );

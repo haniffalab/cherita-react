@@ -28,3 +28,10 @@
   background-color: var(--#{$prefix}tertiary-bg);
   border-radius: var(--#{$prefix}border-radius);
 }
+
+.cherita-list.var-set-list {
+  .list-group-item {
+    padding-right: 0;
+    padding-left: 0.35rem;
+  }
+}
