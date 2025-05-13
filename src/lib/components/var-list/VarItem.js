@@ -7,8 +7,12 @@ import _ from "lodash";
 import { Button, Collapse, ListGroup, Table } from "react-bootstrap";
 
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { Histogram } from "../../utils/Histogram";
 import { useDebouncedFetch, useFetch } from "../../utils/requests";
 import { VirtualizedList } from "../../utils/VirtualizedList";
@@ -16,10 +20,11 @@ import { VirtualizedList } from "../../utils/VirtualizedList";
 function VarHistogram({ item }) {
   const ENDPOINT = "var/histograms";
   const dataset = useDataset();
+  const settings = useSettings();
   const { obsIndices } = useFilteredData();
   // @TODO: consider using Filter's isSliced; would trigger more re-renders/requests
   // const { obsIndices, isSliced } = useFilteredData();
-  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
+  const isSliced = settings.sliceBy.obs || settings.sliceBy.polygons;
   const [params, setParams] = useState({
     url: dataset.url,
     varKey: item.matrix_index,
@@ -51,7 +56,7 @@ function VarHistogram({ item }) {
 }
 
 function VarDiseaseInfoItem(item) {
-  const dispatch = useDatasetDispatch();
+  const dispatch = useSettingsDispatch();
   return (
     <ListGroup.Item key={item.disease_id} className="feature-disease-info">
       <button
@@ -229,8 +234,8 @@ export function VarItem({
   mode = SELECTION_MODES.SINGLE,
   isDiseaseGene = false,
 }) {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
 
   const selectVar = () => {
     if (mode === SELECTION_MODES.SINGLE) {
@@ -290,7 +295,7 @@ export function VarItem({
       <SingleSelectionItem
         item={item}
         isActive={
-          dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
+          settings.colorEncoding === COLOR_ENCODINGS.VAR &&
           active === item.matrix_index
         }
         selectVar={selectVar}

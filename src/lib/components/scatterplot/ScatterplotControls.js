@@ -6,24 +6,27 @@ import { Dropdown } from "react-bootstrap";
 
 import { COLORSCALES } from "../../constants/colorscales";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 
 export const ScatterplotControls = () => {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
   const [sliderValue, setSliderValue] = React.useState(
-    dataset.controls.range || [0, 1]
+    settings.controls.range || [0, 1]
   );
 
   const isCategorical =
-    dataset.colorEncoding === COLOR_ENCODINGS.OBS
-      ? dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL
+    settings.colorEncoding === COLOR_ENCODINGS.OBS
+      ? settings.selectedObs?.type === OBS_TYPES.CATEGORICAL
       : false;
 
   const colormapList = _.keys(COLORSCALES).map((key) => (
     <Dropdown.Item
       key={key}
-      active={dataset.controls.colorScale === key}
+      active={settings.controls.colorScale === key}
       onClick={() => {
         dispatch({
           type: "set.controls.colorScale",
@@ -38,8 +41,8 @@ export const ScatterplotControls = () => {
   const valueLabelFormat = (value) => {
     return (
       value *
-        (dataset.controls.valueRange[1] - dataset.controls.valueRange[0]) +
-      dataset.controls.valueRange[0]
+        (settings.controls.valueRange[1] - settings.controls.valueRange[0]) +
+      settings.controls.valueRange[0]
     ).toFixed(2);
   };
 
@@ -61,8 +64,8 @@ export const ScatterplotControls = () => {
   };
 
   useEffect(() => {
-    setSliderValue(dataset.controls.range);
-  }, [dataset.controls.range]);
+    setSliderValue(settings.controls.range);
+  }, [settings.controls.range]);
 
   const rangeSlider = (
     <Box className="w-100">
@@ -90,7 +93,7 @@ export const ScatterplotControls = () => {
     <div>
       <Dropdown>
         <Dropdown.Toggle id="dropdownColorscale" variant="light">
-          {dataset.controls.colorScale}
+          {settings.controls.colorScale}
         </Dropdown.Toggle>
         <Dropdown.Menu>{colormapList}</Dropdown.Menu>
       </Dropdown>

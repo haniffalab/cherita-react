@@ -13,16 +13,19 @@ import Dropdown from "react-bootstrap/Dropdown";
 
 import { COLORSCALES } from "../../constants/colorscales";
 import { DOTPLOT_SCALES } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 
 export function DotplotControls() {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
   const [controls, setControls] = useState({
-    expressionCutoff: dataset.controls.expressionCutoff,
+    expressionCutoff: settings.controls.expressionCutoff,
     colorAxis: {
-      cmin: dataset.controls.colorAxis.cmin,
-      cmax: dataset.controls.colorAxis.cmax,
+      cmin: settings.controls.colorAxis.cmin,
+      cmax: settings.controls.colorAxis.cmax,
     },
   });
 
@@ -30,21 +33,21 @@ export function DotplotControls() {
     setControls((c) => ({
       ...c,
       colorAxis: {
-        cmin: dataset.controls.colorAxis.cmin,
-        cmax: dataset.controls.colorAxis.cmax,
+        cmin: settings.controls.colorAxis.cmin,
+        cmax: settings.controls.colorAxis.cmax,
       },
-      expressionCutoff: dataset.controls.expressionCutoff,
+      expressionCutoff: settings.controls.expressionCutoff,
     }));
   }, [
-    dataset.controls.colorAxis.cmin,
-    dataset.controls.colorAxis.cmax,
-    dataset.controls.expressionCutoff,
+    settings.controls.colorAxis.cmin,
+    settings.controls.colorAxis.cmax,
+    settings.controls.expressionCutoff,
   ]);
 
   const colorScaleList = _.keys(COLORSCALES).map((key) => (
     <Dropdown.Item
       key={key}
-      active={dataset.controls.colorScale === key}
+      active={settings.controls.colorScale === key}
       onClick={() => {
         dispatch({
           type: "set.controls.colorScale",
@@ -59,7 +62,7 @@ export function DotplotControls() {
   const standardScaleList = _.values(DOTPLOT_SCALES).map((scale) => (
     <Dropdown.Item
       key={scale.value}
-      active={dataset.controls.scale.dotplot === scale}
+      active={settings.controls.scale.dotplot === scale}
       onClick={() => {
         dispatch({
           type: "set.controls.scale",
@@ -77,7 +80,7 @@ export function DotplotControls() {
       <ButtonGroup>
         <Dropdown>
           <Dropdown.Toggle id="dropdownColorscale" variant="light">
-            {dataset.controls.colorScale}
+            {settings.controls.colorScale}
           </Dropdown.Toggle>
           <Dropdown.Menu>{colorScaleList}</Dropdown.Menu>
         </Dropdown>
@@ -87,7 +90,7 @@ export function DotplotControls() {
           <InputGroup.Text>Standard scale</InputGroup.Text>
           <Dropdown>
             <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {dataset.controls.scale.dotplot.name}
+              {settings.controls.scale.dotplot.name}
             </Dropdown.Toggle>
             <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
           </Dropdown>
@@ -98,11 +101,11 @@ export function DotplotControls() {
           id="toggleMeanOnlyExpressed"
           type="checkbox"
           variant="outline-primary"
-          checked={dataset.controls.meanOnlyExpressed}
+          checked={settings.controls.meanOnlyExpressed}
           onChange={() => {
             dispatch({
               type: "set.controls.meanOnlyExpressed",
-              meanOnlyExpressed: !dataset.controls.meanOnlyExpressed,
+              meanOnlyExpressed: !settings.controls.meanOnlyExpressed,
             });
           }}
         >
@@ -154,8 +157,8 @@ export function DotplotControls() {
             type="number"
             value={controls.colorAxis.cmin}
             step={0.1}
-            min={Math.min(dataset.controls.colorAxis.dmin, 0.0)}
-            max={dataset.controls.colorAxis.dmax}
+            min={Math.min(settings.controls.colorAxis.dmin, 0.0)}
+            max={settings.controls.colorAxis.dmax}
             onChange={(e) => {
               setControls({
                 ...controls,
@@ -171,12 +174,12 @@ export function DotplotControls() {
             value={controls.colorAxis.cmax}
             step={0.1}
             min={controls.colorAxis.cmin}
-            max={dataset.controls.colorAxis.dmax}
+            max={settings.controls.colorAxis.dmax}
             onChange={(e) => {
               if (
-                parseFloat(e.target.value) > dataset.controls.colorAxis.dmax
+                parseFloat(e.target.value) > settings.controls.colorAxis.dmax
               ) {
-                e.target.value = dataset.controls.colorAxis.dmax.toFixed(1);
+                e.target.value = settings.controls.colorAxis.dmax.toFixed(1);
               }
               setControls({
                 ...controls,
@@ -192,8 +195,8 @@ export function DotplotControls() {
             onClick={() => {
               dispatch({
                 type: "set.controls.colorAxis.crange",
-                cmin: dataset.controls.colorAxis.dmin,
-                cmax: dataset.controls.colorAxis.dmax,
+                cmin: settings.controls.colorAxis.dmin,
+                cmax: settings.controls.colorAxis.dmax,
               });
             }}
           >

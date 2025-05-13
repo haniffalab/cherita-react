@@ -10,7 +10,11 @@ import { VarItem } from "./VarItem";
 import { VarListToolbar } from "./VarListToolbar";
 import { VarSet } from "./VarSet";
 import { SELECTION_MODES, VAR_SORT } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useDataset } from "../../context/DatasetContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 
@@ -54,65 +58,67 @@ export function VarNamesList({
   mode = SELECTION_MODES.SINGLE,
   displayName = "genes",
 }) {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
   const [varButtons, setVarButtons] = useState(
     mode === SELECTION_MODES.SINGLE
-      ? dataset.selectedVar
-        ? _.unionWith([dataset.selectedVar], dataset.varSets, _.isEqual)
-        : [...dataset.varSets]
-      : [...dataset.selectedMultiVar, ...dataset.varSets]
+      ? settings.selectedVar
+        ? _.unionWith([settings.selectedVar], settings.varSets, _.isEqual)
+        : [...settings.varSets]
+      : [...settings.selectedMultiVar, ...settings.varSets]
   );
   const [active, setActive] = useState(
     mode === SELECTION_MODES.SINGLE
-      ? dataset.selectedVar?.matrix_index || dataset.selectedVar?.name
-      : dataset.selectedMultiVar.map((i) => i.matrix_index || i.name)
+      ? settings.selectedVar?.matrix_index || settings.selectedVar?.name
+      : settings.selectedMultiVar.map((i) => i.matrix_index || i.name)
   );
   const [sortedVarButtons, setSortedVarButtons] = useState([]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.SINGLE) {
       setVarButtons((v) => {
-        if (dataset.selectedVar) {
-          return _.unionWith(v, [dataset.selectedVar], _.isEqual);
+        if (settings.selectedVar) {
+          return _.unionWith(v, [settings.selectedVar], _.isEqual);
         } else {
           return v;
         }
       });
-      setActive(dataset.selectedVar?.matrix_index || dataset.selectedVar?.name);
+      setActive(
+        settings.selectedVar?.matrix_index || settings.selectedVar?.name
+      );
     }
-  }, [mode, dataset.selectedVar]);
+  }, [mode, settings.selectedVar]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.MULTIPLE) {
       setVarButtons((v) => {
-        if (dataset.selectedMultiVar.length) {
-          return _.unionWith(v, dataset.selectedMultiVar, _.isEqual);
+        if (settings.selectedMultiVar.length) {
+          return _.unionWith(v, settings.selectedMultiVar, _.isEqual);
         } else {
           return v;
         }
       });
-      setActive(dataset.selectedMultiVar.map((i) => i.matrix_index || i.name));
+      setActive(settings.selectedMultiVar.map((i) => i.matrix_index || i.name));
     }
-  }, [mode, dataset.selectedMultiVar]);
+  }, [mode, settings.selectedMultiVar]);
 
   useEffect(() => {
     setVarButtons((v) => {
       const updated = _.compact(
         _.map(v, (i) => {
           if (i.isSet) {
-            return dataset.varSets.find((s) => s.name === i.name);
+            return settings.varSets.find((s) => s.name === i.name);
           } else return i;
         })
       );
-      const newSets = _.difference(dataset.varSets, updated);
+      const newSets = _.difference(settings.varSets, updated);
       return [...updated, ...newSets];
     });
 
     if (mode === SELECTION_MODES.SINGLE) {
-      if (dataset.selectedVar?.isSet) {
-        const selectedSet = dataset.varSets.find(
-          (s) => s.name === dataset.selectedVar.name
+      if (settings.selectedVar?.isSet) {
+        const selectedSet = settings.varSets.find(
+          (s) => s.name === settings.selectedVar.name
         );
         dispatch({
           type: "select.var",
@@ -122,25 +128,25 @@ export function VarNamesList({
     } else {
       dispatch({
         type: "update.multivar",
-        vars: dataset.varSets,
+        vars: settings.varSets,
       });
     }
   }, [
     mode,
-    dataset.varSets,
-    dataset.selectedVar?.isSet,
-    dataset.selectedVar?.name,
+    settings.varSets,
+    settings.selectedVar?.isSet,
+    settings.selectedVar?.name,
     dispatch,
   ]);
 
   const varMeans = useVarMean(
     varButtons,
-    dataset.varSort.var.sort === VAR_SORT.MATRIX
+    settings.varSort.var.sort === VAR_SORT.MATRIX
   );
 
   // @TODO: deferr sortedVarButtons ?
   useEffect(() => {
-    if (dataset.varSort.var.sort === VAR_SORT.MATRIX) {
+    if (settings.varSort.var.sort === VAR_SORT.MATRIX) {
       if (
         !varMeans.isPending &&
         !varMeans.serverError &&
@@ -152,20 +158,20 @@ export function VarNamesList({
             (o) => {
               return sortMeans(o, varMeans.fetchedData);
             },
-            dataset.varSort.var.sortOrder
+            settings.varSort.var.sortOrder
           )
         );
       }
-    } else if (dataset.varSort.var.sort === VAR_SORT.NAME) {
+    } else if (settings.varSort.var.sort === VAR_SORT.NAME) {
       setSortedVarButtons(
-        _.orderBy(varButtons, "name", dataset.varSort.var.sortOrder)
+        _.orderBy(varButtons, "name", settings.varSort.var.sortOrder)
       );
     } else {
       setSortedVarButtons(varButtons);
     }
   }, [
-    dataset.varSort.var.sort,
-    dataset.varSort.var.sortOrder,
+    settings.varSort.var.sort,
+    settings.varSort.var.sortOrder,
     varButtons,
     varMeans.isPending,
     varMeans.serverError,
@@ -206,7 +212,7 @@ export function VarNamesList({
     let n = 1;
     let setName = `Set ${n}`;
     const setNameExists = (name) => {
-      return dataset.varSets.some((set) => set.name === name);
+      return settings.varSets.some((set) => set.name === name);
     };
     while (setNameExists(setName)) {
       n++;
@@ -216,7 +222,7 @@ export function VarNamesList({
   };
 
   const isPending =
-    varMeans.isPending && dataset.varSort.var.sort === VAR_SORT.MATRIX;
+    varMeans.isPending && settings.varSort.var.sort === VAR_SORT.MATRIX;
 
   return (
     <div className="position-relative">

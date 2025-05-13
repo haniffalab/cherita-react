@@ -6,7 +6,11 @@ import _ from "lodash";
 import { Button, ListGroup } from "react-bootstrap";
 
 import { VAR_SORT } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useDataset } from "../../context/DatasetContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { useFetch } from "../../utils/requests";
 import { VarDiseaseInfo } from "../var-list/VarItem";
 
@@ -87,7 +91,8 @@ const sortMeans = (i, means) => {
 export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
   const ENDPOINT = "disease/genes";
   const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
   const [diseaseVars, setDiseaseVars] = useState([]);
   const [sortedDiseaseVars, setSortedDiseaseVars] = useState([]);
   const [params, setParams] = useState({
@@ -116,11 +121,11 @@ export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
 
   const varMeans = useVarMean(
     diseaseVars,
-    !!diseaseVars?.length && dataset.varSort.disease.sort === VAR_SORT.MATRIX
+    !!diseaseVars?.length && settings.varSort.disease.sort === VAR_SORT.MATRIX
   );
 
   useEffect(() => {
-    if (dataset.varSort.disease.sort === VAR_SORT.MATRIX) {
+    if (settings.varSort.disease.sort === VAR_SORT.MATRIX) {
       if (!varMeans.isPending && !varMeans.serverError) {
         setSortedDiseaseVars(
           _.orderBy(
@@ -128,20 +133,20 @@ export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
             (o) => {
               return sortMeans(o, varMeans.fetchedData);
             },
-            dataset.varSort.disease.sortOrder
+            settings.varSort.disease.sortOrder
           )
         );
       }
-    } else if (dataset.varSort.disease.sort === VAR_SORT.NAME) {
+    } else if (settings.varSort.disease.sort === VAR_SORT.NAME) {
       setSortedDiseaseVars(
-        _.orderBy(diseaseVars, "name", dataset.varSort.disease.sortOrder)
+        _.orderBy(diseaseVars, "name", settings.varSort.disease.sortOrder)
       );
     } else {
       setSortedDiseaseVars(diseaseVars);
     }
   }, [
-    dataset.varSort.disease.sort,
-    dataset.varSort.disease.sortOrder,
+    settings.varSort.disease.sort,
+    settings.varSort.disease.sortOrder,
     diseaseVars,
     varMeans.fetchedData,
     varMeans.isPending,
@@ -173,7 +178,7 @@ export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
 
   const isPending =
     diseaseData.isPending ||
-    (varMeans.isPending && dataset.varSort.disease.sort === VAR_SORT.MATRIX);
+    (varMeans.isPending && settings.varSort.disease.sort === VAR_SORT.MATRIX);
 
   return (
     <div>
