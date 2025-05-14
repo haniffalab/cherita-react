@@ -56,20 +56,9 @@ function VarHistogram({ item }) {
 }
 
 function VarDiseaseInfoItem(item) {
-  const dispatch = useSettingsDispatch();
   return (
     <ListGroup.Item key={item.disease_id} className="feature-disease-info">
-      <button
-        type="button"
-        className="btn btn-link disease-link"
-        onClick={() => {
-          dispatch({
-            type: "select.disease",
-            id: item.disease_id,
-            name: item.disease_name,
-          });
-        }}
-      >
+      <button type="button" className="btn btn-link disease-link">
         {item.disease_name}
       </button>
       <Table striped size="sm" responsive>
@@ -230,7 +219,6 @@ function MultipleSelectionItem({ item, isActive, toggleVar }) {
 export function VarItem({
   item,
   active,
-  setVarButtons,
   mode = SELECTION_MODES.SINGLE,
   isDiseaseGene = false,
 }) {
@@ -260,8 +248,9 @@ export function VarItem({
   };
 
   const removeVar = () => {
-    setVarButtons((b) => {
-      return b.filter((i) => i.name !== item.name);
+    dispatch({
+      type: "remove.var",
+      var: item,
     });
     if (mode === SELECTION_MODES.SINGLE) {
       if (active === item.matrix_index) {
@@ -280,14 +269,10 @@ export function VarItem({
   };
 
   const toggleVar = () => {
-    if (active.includes(item.matrix_index)) {
-      dispatch({
-        type: "deselect.multivar",
-        var: item,
-      });
-    } else {
-      selectVar(item);
-    }
+    dispatch({
+      type: "toggle.multivar",
+      var: item,
+    });
   };
 
   if (item && mode === SELECTION_MODES.SINGLE) {

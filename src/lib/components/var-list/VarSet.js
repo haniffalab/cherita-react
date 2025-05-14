@@ -107,7 +107,6 @@ function SingleSelectionSet({
                 e.stopPropagation();
                 setShowModal(true);
               }}
-              disabled={!set.vars.length}
               title="Add to set"
             >
               <FontAwesomeIcon icon={faPlus} />
@@ -222,8 +221,8 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
       }
     }
     dispatch({
-      type: "remove.varSet",
-      varSet: set,
+      type: "remove.var",
+      var: set,
     });
   };
 
@@ -236,14 +235,10 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
   };
 
   const toggleSet = () => {
-    if (active.includes(set.name)) {
-      dispatch({
-        type: "deselect.multivar",
-        var: set,
-      });
-    } else {
-      selectSet();
-    }
+    dispatch({
+      type: "toggle.multivar",
+      var: set,
+    });
   };
 
   if (set && mode === SELECTION_MODES.SINGLE) {
@@ -263,7 +258,7 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
       <MultipleSelectionSet
         set={set}
         isActive={_.includes(active, set.name)}
-        toggleSet={() => toggleSet(set)}
+        toggleSet={toggleSet}
       />
     );
   } else {

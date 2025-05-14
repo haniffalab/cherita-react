@@ -121,8 +121,6 @@ export function DiseasesSearchResults({
   setResultsLength,
 }) {
   const [suggestions, setSuggestions] = useState([]);
-  const dispatch = useSettingsDispatch();
-
   const {
     setParams,
     data: { fetchedData = [], isPending, serverError },
@@ -163,11 +161,6 @@ export function DiseasesSearchResults({
           key={item.name}
           onClick={() => {
             setSelectedResult(item);
-            dispatch({
-              type: "select.disease",
-              id: item.disease_id,
-              name: item.disease_name,
-            });
           }}
           active={selectedResult?.id === item.id}
         >

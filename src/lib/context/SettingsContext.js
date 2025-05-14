@@ -26,7 +26,7 @@ const initialSettings = {
   selectedMultiVar: [],
   colorEncoding: null,
   labelObs: [],
-  varSets: [],
+  vars: [],
   sliceBy: { obs: false, polygons: false },
   polygons: {},
   controls: {
@@ -72,20 +72,20 @@ export function SettingsProvider({
   );
 
   useEffect(() => {
-    try {
-      if (canOverrideSettings) {
+    if (canOverrideSettings) {
+      try {
         setLocalSettings(settings);
-      }
-    } catch (err) {
-      if (
-        err.code === 22 ||
-        err.code === 1014 ||
-        err.name === "QuotaExceededError" ||
-        err.name === "NS_ERROR_DOM_QUOTA_REACHED"
-      ) {
-        console.err("Browser storage quota exceeded");
-      } else {
-        console.err(err);
+      } catch (err) {
+        if (
+          err.code === 22 ||
+          err.code === 1014 ||
+          err.name === "QuotaExceededError" ||
+          err.name === "NS_ERROR_DOM_QUOTA_REACHED"
+        ) {
+          console.err("Browser storage quota exceeded");
+        } else {
+          console.err(err);
+        }
       }
     }
   }, [canOverrideSettings, setLocalSettings, settings]);
@@ -134,17 +134,49 @@ function settingsReducer(settings, action) {
       return { ...settings, selectedObsm: action.obsm };
     }
     case "select.var": {
-      return { ...settings, selectedVar: action.var };
+      if (settings.vars.find((v) => _.isEqual(v, action.var))) {
+        return { ...settings, selectedVar: action.var };
+      } else {
+        return {
+          ...settings,
+          selectedVar: action.var,
+          vars: [...settings.vars, action.var],
+        };
+      }
     }
     case "select.multivar": {
-      if (
-        settings.selectedMultiVar.find((i) =>
-          action.var.isSet
-            ? i.name === action.var.name
-            : i.matrix_index === action.var.matrix_index
-        )
-      ) {
-        return settings;
+      const vars = settings.vars.find((v) => _.isEqual(v, action.var))
+        ? settings.vars
+        : [...settings.vars, action.var];
+      if (settings.selectedMultiVar.find((v) => _.isEqual(v, action.var))) {
+        return { ...settings, vars: vars };
+      } else {
+        return {
+          ...settings,
+          selectedMultiVar: [...settings.selectedMultiVar, action.var],
+          vars: vars,
+        };
+      }
+    }
+    case "deselect.multivar": {
+      return {
+        ...settings,
+        selectedMultiVar: settings.selectedMultiVar.filter(
+          (v) => v !== action.var.name
+        ),
+      };
+    }
+    case "toggle.multivar": {
+      const inMultiVar = settings.selectedMultiVar.some(
+        (v) => v.name === action.var.name
+      );
+      if (inMultiVar) {
+        return {
+          ...settings,
+          selectedMultiVar: settings.selectedMultiVar.filter(
+            (v) => v.name !== action.var.name
+          ),
+        };
       } else {
         return {
           ...settings,
@@ -152,29 +184,16 @@ function settingsReducer(settings, action) {
         };
       }
     }
-    case "deselect.multivar": {
-      return {
-        ...settings,
-        selectedMultiVar: settings.selectedMultiVar.filter((a) =>
-          action.var.isSet
-            ? a.name !== action.var.name
-            : a.matrix_index !== action.var.matrix_index
-        ),
-      };
-    }
-    case "update.multivar": {
-      return {
-        ...settings,
-        selelectedMultiVar: settings.selectedMultiVar.map((i) => {
-          if (i.isSet) {
-            return action.vars.find((s) => s.name === i.name);
-          }
-          return i;
-        }),
-      };
-    }
     case "set.colorEncoding": {
       return { ...settings, colorEncoding: action.value };
+    }
+    case "reset.vars": {
+      return {
+        ...settings,
+        vars: [],
+        selectedVar: null,
+        selectedMultiVar: [],
+      };
     }
     case "reset.multiVar": {
       return {
@@ -196,28 +215,38 @@ function settingsReducer(settings, action) {
             : settings.colorEncoding,
       };
     }
-    case "add.varSet": {
-      return { ...settings, varSets: [...settings.varSets, action.varSet] };
+    case "add.var": {
+      if (settings.vars.find((v) => _.isEqual(v, action.var))) {
+        return settings;
+      } else {
+        return { ...settings, vars: [...settings.vars, action.var] };
+      }
     }
-    case "remove.varSet": {
+    case "remove.var": {
+      const selectedVar =
+        settings.selectedVar?.name === action.var.name
+          ? null
+          : settings.selectedVar;
+      const selectedMultiVar = settings.selectedMultiVar.filter(
+        (v) => v.name !== action.var.name
+      );
       return {
         ...settings,
-        varSets: settings.varSets.filter((a) => a.name !== action.varSet.name),
+        vars: settings.vars.filter((a) => a.name !== action.var.name),
+        selectedVar: selectedVar,
+        selectedMultiVar: selectedMultiVar,
       };
     }
-    case "reset.varSets": {
-      return { ...settings, varSets: [] };
-    }
     case "add.varSet.var": {
-      const varSet = settings.varSets.find(
-        (s) => s.name === action.varSet.name
+      const varSet = settings.vars.find(
+        (s) => s.isSet && s.name === action.varSet.name
       );
       if (varSet.vars.find((v) => _.isEqual(v, action.var))) {
         return settings;
       } else {
         return {
           ...settings,
-          varSets: settings.varSets.map((s) => {
+          vars: settings.vars.map((s) => {
             if (s.name === varSet.name) {
               return { ...s, vars: [...s.vars, action.var] };
             } else {
@@ -228,12 +257,12 @@ function settingsReducer(settings, action) {
       }
     }
     case "remove.varSet.var": {
-      const varSet = settings.varSets.find(
-        (s) => s.name === action.varSet.name
+      const varSet = settings.vars.find(
+        (s) => s.isSet && s.name === action.varSet.name
       );
       return {
         ...settings,
-        varSets: settings.varSets.map((s) => {
+        vars: settings.vars.map((s) => {
           if (s.name === varSet.name) {
             return {
               ...s,

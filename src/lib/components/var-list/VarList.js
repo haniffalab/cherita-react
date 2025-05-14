@@ -60,29 +60,15 @@ export function VarNamesList({
 }) {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
-  const [varButtons, setVarButtons] = useState(
-    mode === SELECTION_MODES.SINGLE
-      ? settings.selectedVar
-        ? _.unionWith([settings.selectedVar], settings.varSets, _.isEqual)
-        : [...settings.varSets]
-      : [...settings.selectedMultiVar, ...settings.varSets]
-  );
   const [active, setActive] = useState(
     mode === SELECTION_MODES.SINGLE
       ? settings.selectedVar?.matrix_index || settings.selectedVar?.name
       : settings.selectedMultiVar.map((i) => i.matrix_index || i.name)
   );
-  const [sortedVarButtons, setSortedVarButtons] = useState([]);
+  const [sortedVars, setSortedVars] = useState([]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.SINGLE) {
-      setVarButtons((v) => {
-        if (settings.selectedVar) {
-          return _.unionWith(v, [settings.selectedVar], _.isEqual);
-        } else {
-          return v;
-        }
-      });
       setActive(
         settings.selectedVar?.matrix_index || settings.selectedVar?.name
       );
@@ -91,60 +77,16 @@ export function VarNamesList({
 
   useEffect(() => {
     if (mode === SELECTION_MODES.MULTIPLE) {
-      setVarButtons((v) => {
-        if (settings.selectedMultiVar.length) {
-          return _.unionWith(v, settings.selectedMultiVar, _.isEqual);
-        } else {
-          return v;
-        }
-      });
       setActive(settings.selectedMultiVar.map((i) => i.matrix_index || i.name));
     }
   }, [mode, settings.selectedMultiVar]);
 
-  useEffect(() => {
-    setVarButtons((v) => {
-      const updated = _.compact(
-        _.map(v, (i) => {
-          if (i.isSet) {
-            return settings.varSets.find((s) => s.name === i.name);
-          } else return i;
-        })
-      );
-      const newSets = _.difference(settings.varSets, updated);
-      return [...updated, ...newSets];
-    });
-
-    if (mode === SELECTION_MODES.SINGLE) {
-      if (settings.selectedVar?.isSet) {
-        const selectedSet = settings.varSets.find(
-          (s) => s.name === settings.selectedVar.name
-        );
-        dispatch({
-          type: "select.var",
-          var: selectedSet,
-        });
-      }
-    } else {
-      dispatch({
-        type: "update.multivar",
-        vars: settings.varSets,
-      });
-    }
-  }, [
-    mode,
-    settings.varSets,
-    settings.selectedVar?.isSet,
-    settings.selectedVar?.name,
-    dispatch,
-  ]);
-
   const varMeans = useVarMean(
-    varButtons,
+    settings.vars,
     settings.varSort.var.sort === VAR_SORT.MATRIX
   );
 
-  // @TODO: deferr sortedVarButtons ?
+  // @TODO: deferr sortedVars ?
   useEffect(() => {
     if (settings.varSort.var.sort === VAR_SORT.MATRIX) {
       if (
@@ -152,9 +94,9 @@ export function VarNamesList({
         !varMeans.serverError &&
         varMeans.fetchedData
       ) {
-        setSortedVarButtons(
+        setSortedVars(
           _.orderBy(
-            varButtons,
+            settings.vars,
             (o) => {
               return sortMeans(o, varMeans.fetchedData);
             },
@@ -163,19 +105,19 @@ export function VarNamesList({
         );
       }
     } else if (settings.varSort.var.sort === VAR_SORT.NAME) {
-      setSortedVarButtons(
-        _.orderBy(varButtons, "name", settings.varSort.var.sortOrder)
+      setSortedVars(
+        _.orderBy(settings.vars, "name", settings.varSort.var.sortOrder)
       );
     } else {
-      setSortedVarButtons(varButtons);
+      setSortedVars(settings.vars);
     }
   }, [
     settings.varSort.var.sort,
     settings.varSort.var.sortOrder,
-    varButtons,
     varMeans.isPending,
     varMeans.serverError,
     varMeans.fetchedData,
+    settings.vars,
   ]);
 
   const makeListItem = (item, isDiseaseGene = false) => {
@@ -184,7 +126,6 @@ export function VarNamesList({
         <VarItem
           item={item}
           active={active}
-          setVarButtons={setVarButtons}
           mode={mode}
           isDiseaseGene={isDiseaseGene}
         />
@@ -200,7 +141,7 @@ export function VarNamesList({
     );
   };
 
-  const varList = _.map(sortedVarButtons, (item) => {
+  const varList = _.map(sortedVars, (item) => {
     if (item.isSet) {
       return makeSetListItem(item);
     } else {
@@ -211,10 +152,10 @@ export function VarNamesList({
   const newSetName = () => {
     let n = 1;
     let setName = `Set ${n}`;
-    const setNameExists = (name) => {
-      return settings.varSets.some((set) => set.name === name);
+    const nameExists = (name) => {
+      return settings.vars.some((v) => v.name === name);
     };
-    while (setNameExists(setName)) {
+    while (nameExists(setName)) {
       n++;
       setName = `Set ${n}`;
     }
@@ -234,8 +175,8 @@ export function VarNamesList({
               variant="info"
               onClick={() => {
                 dispatch({
-                  type: "add.varSet",
-                  varSet: {
+                  type: "add.var",
+                  var: {
                     name: newSetName(),
                     vars: [],
                     isSet: true,
@@ -248,15 +189,8 @@ export function VarNamesList({
             <Button
               variant="info"
               onClick={() => {
-                setVarButtons([]);
                 dispatch({
-                  type:
-                    mode === SELECTION_MODES.SINGLE
-                      ? "reset.var"
-                      : "reset.multiVar",
-                });
-                dispatch({
-                  type: "reset.varSets",
+                  type: "reset.vars",
                 });
               }}
             >

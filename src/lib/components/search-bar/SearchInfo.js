@@ -165,7 +165,11 @@ export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
               variant="outline-secondary"
               title="Add to list"
               onClick={() => {
-                handleSelect(dispatch, v);
+                handleSelect(dispatch, {
+                  name: v.name,
+                  index: v.index,
+                  matrix_index: v.matrix_index,
+                });
               }}
             >
               <FontAwesomeIcon icon={faPlus} />
