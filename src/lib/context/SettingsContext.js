@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useReducer } from "react";
 
-import { useLocalStorage } from "@uidotdev/usehooks";
 import _ from "lodash";
 
 import {
@@ -53,6 +52,16 @@ const initialSettings = {
   },
 };
 
+const initializer = ({
+  canOverrideSettings,
+  defaultSettings,
+  localSettings,
+}) => {
+  return canOverrideSettings
+    ? _.assign({}, initialSettings, defaultSettings, localSettings)
+    : _.assign({}, initialSettings, defaultSettings);
+};
+
 export function SettingsProvider({
   dataset_url,
   defaultSettings,
@@ -60,21 +69,20 @@ export function SettingsProvider({
   children,
 }) {
   const DATASET_STORAGE_KEY = `${LOCAL_STORAGE_KEY}-${dataset_url}`;
-  const [localSettings, setLocalSettings] = useLocalStorage(
-    DATASET_STORAGE_KEY,
-    {}
-  );
+  // Use localStorage directly instead of useLocalStorage due to unnecessary re-renders
+  // https://github.com/uidotdev/usehooks/issues/157
+  const localSettings =
+    JSON.parse(localStorage.getItem(DATASET_STORAGE_KEY)) || {};
   const [settings, dispatch] = useReducer(
     settingsReducer,
-    canOverrideSettings
-      ? _.assign(initialSettings, defaultSettings, localSettings)
-      : _.assign(initialSettings, defaultSettings)
+    { canOverrideSettings, defaultSettings, localSettings },
+    initializer
   );
 
   useEffect(() => {
     if (canOverrideSettings) {
       try {
-        setLocalSettings(settings);
+        localStorage.setItem(DATASET_STORAGE_KEY, JSON.stringify(settings));
       } catch (err) {
         if (
           err.code === 22 ||
@@ -88,7 +96,7 @@ export function SettingsProvider({
         }
       }
     }
-  }, [canOverrideSettings, setLocalSettings, settings]);
+  }, [DATASET_STORAGE_KEY, canOverrideSettings, settings]);
 
   return (
     <SettingsContext.Provider value={settings}>
