@@ -420,9 +420,9 @@ export function Scatterplot({
             <Toolbox
               mode={
                 settings.colorEncoding === COLOR_ENCODINGS.VAR
-                  ? settings.selectedVar.name
+                  ? settings.selectedVar?.name
                   : settings.colorEncoding === COLOR_ENCODINGS.OBS
-                    ? settings.selectedObs.name
+                    ? settings.selectedObs?.name
                     : null
               }
               obsLength={parseInt(obsmData.data?.length)}
