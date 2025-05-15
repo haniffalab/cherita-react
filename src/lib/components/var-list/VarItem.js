@@ -105,7 +105,6 @@ export function SelectionItem({
   isActive,
   selectVar,
   removeVar,
-  isDiseaseGene = false,
   showSetColorEncoding = true,
   showRemove = true,
   isMultiple = false,
@@ -121,7 +120,7 @@ export function SelectionItem({
 
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
     refetchOnMount: false,
-    enabled: !!dataset.diseaseDatasets.length && isDiseaseGene,
+    enabled: !!dataset.diseaseDatasets.length,
   });
 
   const hasDiseaseInfo = !isPending && !serverError && !!fetchedData?.length;
@@ -141,7 +140,7 @@ export function SelectionItem({
 
           <div className="d-flex align-items-center gap-1">
             {hasDiseaseInfo && <MoreVert />}
-            {!isDiseaseGene && <VarHistogram item={item} />}
+            <VarHistogram item={item} />
             {showSetColorEncoding && (
               <Button
                 type="button"
@@ -173,7 +172,7 @@ export function SelectionItem({
                 )}
               </Button>
             )}
-            {(!isDiseaseGene || !showRemove) && (
+            {showRemove && (
               <Button
                 type="button"
                 className="m-0 p-0 px-1"
@@ -201,12 +200,7 @@ export function SelectionItem({
   );
 }
 
-export function VarItem({
-  item,
-  active,
-  mode = SELECTION_MODES.SINGLE,
-  isDiseaseGene = false,
-}) {
+export function VarItem({ item, active, mode = SELECTION_MODES.SINGLE }) {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
 
@@ -270,7 +264,6 @@ export function VarItem({
         }
         selectVar={selectVar}
         removeVar={removeVar}
-        isDiseaseGene={isDiseaseGene}
       />
     );
   } else if (mode === SELECTION_MODES.MULTIPLE) {
@@ -282,7 +275,6 @@ export function VarItem({
         }
         selectVar={toggleVar}
         removeVar={removeVar}
-        isDiseaseGene={isDiseaseGene}
         isMultiple={true}
       />
     );
