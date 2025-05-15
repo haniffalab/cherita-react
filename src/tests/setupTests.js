@@ -8,10 +8,24 @@ import { DatasetProvider } from "../lib/context/DatasetContext";
 // Mock the context or props
 export const mockDataset = {
   varNamesCol: null,
+  defaultSettings: {
+    vars: [
+      {
+        name: "gene1",
+        index: "gene1",
+        matrix_index: 0,
+      },
+    ],
+  },
 };
 
 jest.mock("@tanstack/react-query-persist-client", () => ({
   PersistQueryClientProvider: ({ children }) => <>{children}</>,
+}));
+
+jest.mock("../lib/utils/requests", () => ({
+  useFetch: jest.fn(),
+  useDebouncedFetch: jest.fn(),
 }));
 
 export const Wrapper = ({ children }) => {
@@ -31,11 +45,7 @@ export const Wrapper = ({ children }) => {
   return (
     // Provide a query client as PersistQueryClientProvider is mocked
     <QueryClientProvider client={queryClient}>
-      <DatasetProvider dataset={mockDataset}>{children}</DatasetProvider>
+      <DatasetProvider {...mockDataset}>{children}</DatasetProvider>
     </QueryClientProvider>
   );
 };
-
-jest.mock("../lib/utils/requests", () => ({
-  useFetch: jest.fn(),
-}));
