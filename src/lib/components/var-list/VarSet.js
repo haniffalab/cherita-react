@@ -18,7 +18,7 @@ import {
   Tooltip,
 } from "react-bootstrap";
 
-import { SingleSelectionItem } from "./VarItem";
+import { SelectionItem } from "./VarItem";
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
 import {
   useSettings,
@@ -36,12 +36,13 @@ const addVarToSet = (dispatch, set, v) => {
   });
 };
 
-function SingleSelectionSet({
+function SelectionSet({
   set,
   isActive,
   selectSet,
   removeSet,
   removeSetVar,
+  isMultiple = false,
 }) {
   const [openSet, setOpenSet] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -51,7 +52,7 @@ function SingleSelectionSet({
     _.map(set.vars, (v) => {
       return (
         <ListGroup.Item key={v.name}>
-          <SingleSelectionItem
+          <SelectionItem
             item={v}
             showSetColorEncoding={false}
             removeVar={() => removeSetVar(v)}
@@ -123,132 +124,9 @@ function SingleSelectionSet({
               title="Set as color encoding"
             >
               <FontAwesomeIcon icon={faDroplet} />
-            </Button>
-            <Button
-              type="button"
-              className="m-0 p-0 px-1"
-              variant="outline-secondary"
-              title="Remove from list"
-              onClick={(e) => {
-                e.stopPropagation();
-                removeSet();
-              }}
-            >
-              <FontAwesomeIcon icon={faTrash} />
-            </Button>
-          </div>
-        </div>
-      </div>
-      <Collapse in={openSet}>
-        <div className="mt-2">
-          <ListGroup variant="flush" className="cherita-list var-set-list">
-            {varList}
-          </ListGroup>
-        </div>
-      </Collapse>
-      <SearchModal
-        show={showModal}
-        handleClose={() => setShowModal(false)}
-        text={searchText}
-        setText={setSearchText}
-        displayText={"features"}
-        handleSelect={(d, i) => {
-          addVarToSet(d, set, i);
-        }}
-        searchVar={true}
-        searchDiseases={false}
-      />
-    </>
-  );
-}
-
-function MultipleSelectionSet({
-  set,
-  isActive,
-  toggleSet,
-  removeSet,
-  removeSetVar,
-}) {
-  const [openSet, setOpenSet] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [searchText, setSearchText] = useState("");
-
-  const varList = set.vars.length ? (
-    _.map(set.vars, (v) => {
-      return (
-        <ListGroup.Item key={v.name}>
-          <SingleSelectionItem
-            item={v}
-            showSetColorEncoding={false}
-            removeVar={() => removeSetVar(v)}
-          />
-        </ListGroup.Item>
-      );
-    })
-  ) : (
-    <ListGroup.Item>
-      <div className="text-muted">No features in this set</div>
-    </ListGroup.Item>
-  );
-  return (
-    <>
-      <div
-        className="d-flex justify-content-between cursor-pointer"
-        onClick={() => {
-          setOpenSet((o) => !o);
-        }}
-      >
-        <div className="d-flex justify-content-between align-items-center w-100">
-          <div className="ellipsis-text" title={set.name}>
-            {set.name}
-          </div>
-
-          <div className="d-flex align-items-center gap-1">
-            <OverlayTrigger
-              placement="top"
-              overlay={
-                <Tooltip>
-                  This set represents the mean value of its features
-                </Tooltip>
-              }
-            >
-              <FontAwesomeIcon icon={faCircleInfo}></FontAwesomeIcon>
-            </OverlayTrigger>
-            <Button
-              type="button"
-              variant="outline-primary"
-              className="m-0 p-0 px-1"
-              disabled={!set.vars.length}
-              title="Open set"
-            >
-              <FontAwesomeIcon icon={openSet ? faChevronUp : faChevronDown} />
-            </Button>
-            {/* <VarHistogram set={set} /> */}
-            <Button
-              type="button"
-              variant="outline-primary"
-              className="m-0 p-0 px-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowModal(true);
-              }}
-              title="Add to set"
-            >
-              <FontAwesomeIcon icon={faPlus} />
-            </Button>
-            <Button
-              type="button"
-              variant={isActive ? "primary" : "outline-primary"}
-              className="m-0 p-0 px-1"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleSet();
-              }}
-              disabled={!set.vars.length}
-              title="Select/deselect"
-            >
-              <FontAwesomeIcon icon={faDroplet} />
-              <FontAwesomeIcon icon={faPlus} size="xs" className="ps-xs-1" />
+              {isMultiple && (
+                <FontAwesomeIcon icon={faPlus} size="xs" className="ps-xs-1" />
+              )}
             </Button>
             <Button
               type="button"
@@ -348,7 +226,7 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
 
   if (set && mode === SELECTION_MODES.SINGLE) {
     return (
-      <SingleSelectionSet
+      <SelectionSet
         set={set}
         isActive={
           settings.colorEncoding === COLOR_ENCODINGS.VAR && active === set.name
@@ -360,12 +238,13 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
     );
   } else if (mode === SELECTION_MODES.MULTIPLE) {
     return (
-      <MultipleSelectionSet
+      <SelectionSet
         set={set}
         isActive={_.includes(active, set.name)}
-        toggleSet={toggleSet}
+        selectSet={toggleSet}
         removeSet={removeSet}
         removeSetVar={(v) => removeSetVar(v)}
+        isMultiple={true}
       />
     );
   } else {

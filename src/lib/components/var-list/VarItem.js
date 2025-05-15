@@ -100,7 +100,7 @@ export function VarDiseaseInfo({ data }) {
   );
 }
 
-export function SingleSelectionItem({
+export function SelectionItem({
   item,
   isActive,
   selectVar,
@@ -108,6 +108,7 @@ export function SingleSelectionItem({
   isDiseaseGene = false,
   showSetColorEncoding = true,
   showRemove = true,
+  isMultiple = false,
 }) {
   const ENDPOINT = "disease/gene";
   const [openInfo, setOpenInfo] = useState(false);
@@ -163,98 +164,13 @@ export function SingleSelectionItem({
                 }
               >
                 <FontAwesomeIcon icon={faDroplet} />
-              </Button>
-            )}
-            {(!isDiseaseGene || !showRemove) && (
-              <Button
-                type="button"
-                className="m-0 p-0 px-1"
-                variant="outline-secondary"
-                title="Remove from list"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeVar();
-                }}
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-      {hasDiseaseInfo && (
-        <Collapse in={openInfo}>
-          <div className="mt-2 var-disease-info-collapse">
-            <VarDiseaseInfo data={fetchedData} />
-          </div>
-        </Collapse>
-      )}
-    </>
-  );
-}
-
-function MultipleSelectionItem({
-  item,
-  isActive,
-  toggleVar,
-  removeVar,
-  isDiseaseGene = false,
-  showSetColorEncoding = true,
-  showRemove = true,
-}) {
-  const ENDPOINT = "disease/gene";
-  const [openInfo, setOpenInfo] = useState(false);
-  const dataset = useDataset();
-  const params = {
-    geneName: item.name,
-    diseaseDatasets: dataset.diseaseDatasets,
-  };
-  const isNotInData = item.matrix_index === -1;
-
-  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
-    refetchOnMount: false,
-    enabled: !!dataset.diseaseDatasets.length && isDiseaseGene,
-  });
-
-  const hasDiseaseInfo = !isPending && !serverError && !!fetchedData?.length;
-
-  return (
-    <>
-      <div
-        className={`d-flex justify-content-between ${
-          hasDiseaseInfo ? "cursor-pointer" : ""
-        }`}
-        onClick={() => {
-          setOpenInfo((o) => !o);
-        }}
-      >
-        <div className="d-flex justify-content-between align-items-center w-100">
-          <div>{item.name}</div>
-
-          <div className="d-flex align-items-center gap-1">
-            {hasDiseaseInfo && <MoreVert />}
-            {!isDiseaseGene && <VarHistogram item={item} />}
-            {showSetColorEncoding && (
-              <Button
-                type="button"
-                key={item.matrix_index}
-                variant={
-                  isActive
-                    ? "primary"
-                    : isNotInData
-                      ? "outline-secondary"
-                      : "outline-primary"
-                }
-                className="m-0 p-0 px-1"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleVar();
-                }}
-                disabled={isNotInData}
-                title={isNotInData ? "Not present in data" : "Select/deselect"}
-              >
-                <FontAwesomeIcon icon={faDroplet} />
-                <FontAwesomeIcon icon={faPlus} size="xs" className="ps-xs-1" />
+                {isMultiple && (
+                  <FontAwesomeIcon
+                    icon={faPlus}
+                    size="xs"
+                    className="ps-xs-1"
+                  />
+                )}
               </Button>
             )}
             {(!isDiseaseGene || !showRemove) && (
@@ -346,7 +262,7 @@ export function VarItem({
 
   if (item && mode === SELECTION_MODES.SINGLE) {
     return (
-      <SingleSelectionItem
+      <SelectionItem
         item={item}
         isActive={
           settings.colorEncoding === COLOR_ENCODINGS.VAR &&
@@ -359,14 +275,15 @@ export function VarItem({
     );
   } else if (mode === SELECTION_MODES.MULTIPLE) {
     return (
-      <MultipleSelectionItem
+      <SelectionItem
         item={item}
         isActive={
           item.matrix_index !== -1 && _.includes(active, item.matrix_index)
         }
-        toggleVar={toggleVar}
+        selectVar={toggleVar}
         removeVar={removeVar}
         isDiseaseGene={isDiseaseGene}
+        isMultiple={true}
       />
     );
   } else {
