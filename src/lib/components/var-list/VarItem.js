@@ -15,7 +15,6 @@ import {
 } from "../../context/SettingsContext";
 import { Histogram } from "../../utils/Histogram";
 import { useDebouncedFetch, useFetch } from "../../utils/requests";
-import { VirtualizedList } from "../../utils/VirtualizedList";
 
 function VarHistogram({ item }) {
   const ENDPOINT = "var/histograms";
@@ -90,13 +89,11 @@ function VarDiseaseInfoItem(item) {
 
 export function VarDiseaseInfo({ data }) {
   return (
-    <VirtualizedList
-      getDataAtIndex={(index) => data[index]}
-      count={data.length}
-      estimateSize={140}
-      maxHeight="40vh"
-      ItemComponent={VarDiseaseInfoItem}
-    />
+    <ListGroup className="feature-disease-info-list">
+      {data.map((item) => {
+        return <VarDiseaseInfoItem key={item.disease_id} {...item} />;
+      })}
+    </ListGroup>
   );
 }
 

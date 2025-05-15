@@ -281,6 +281,11 @@ $gauge-padding: 0.15rem;
   font-size: 0.85rem !important;
 }
 
+.feature-disease-info-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
 .feature-disease-info {
   font-weight: 300;
   padding-left: 0 !important;
