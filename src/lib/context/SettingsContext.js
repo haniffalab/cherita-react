@@ -224,7 +224,7 @@ function settingsReducer(settings, action) {
       };
     }
     case "add.var": {
-      if (settings.vars.find((v) => _.isEqual(v, action.var))) {
+      if (settings.vars.find((v) => v.name === action.var.name)) {
         return settings;
       } else {
         return { ...settings, vars: [...settings.vars, action.var] };
@@ -249,18 +249,36 @@ function settingsReducer(settings, action) {
       const varSet = settings.vars.find(
         (s) => s.isSet && s.name === action.varSet.name
       );
-      if (varSet.vars.find((v) => _.isEqual(v, action.var))) {
+      if (!varSet) {
+        return settings;
+      }
+      if (varSet.vars.some((v) => v.name === action.var.name)) {
         return settings;
       } else {
+        const varSetVars = [...varSet.vars, action.var];
+        const vars = settings.vars.map((v) => {
+          if (v.name === varSet.name) {
+            return { ...v, vars: varSetVars };
+          } else {
+            return v;
+          }
+        });
+        const selectedVar =
+          settings.selectedVar?.name === action.varSet.name
+            ? { ...varSet, vars: varSetVars }
+            : settings.selectedVar;
+        const selectedMultiVar = settings.selectedMultiVar.map((v) => {
+          if (v.name === varSet.name) {
+            return { ...v, vars: varSetVars };
+          } else {
+            return v;
+          }
+        });
         return {
           ...settings,
-          vars: settings.vars.map((s) => {
-            if (s.name === varSet.name) {
-              return { ...s, vars: [...s.vars, action.var] };
-            } else {
-              return s;
-            }
-          }),
+          vars: vars,
+          selectedVar: selectedVar,
+          selectedMultiVar: selectedMultiVar,
         };
       }
     }
@@ -268,19 +286,40 @@ function settingsReducer(settings, action) {
       const varSet = settings.vars.find(
         (s) => s.isSet && s.name === action.varSet.name
       );
-      return {
-        ...settings,
-        vars: settings.vars.map((s) => {
-          if (s.name === varSet.name) {
-            return {
-              ...s,
-              vars: s.vars.filter((v) => v.name !== action.var.name),
-            };
+      if (!varSet) {
+        return settings;
+      }
+      if (!varSet.vars.some((v) => v.name === action.var.name)) {
+        return settings;
+      } else {
+        const varSetVars = varSet.vars.filter(
+          (v) => v.name !== action.var.name
+        );
+        const vars = settings.vars.map((v) => {
+          if (v.name === varSet.name) {
+            return { ...v, vars: varSetVars };
           } else {
-            return s;
+            return v;
           }
-        }),
-      };
+        });
+        const selectedVar =
+          settings.selectedVar?.name === action.varSet.name
+            ? { ...varSet, vars: varSetVars }
+            : settings.selectedVar;
+        const selectedMultiVar = settings.selectedMultiVar.map((v) => {
+          if (v.name === varSet.name) {
+            return { ...v, vars: varSetVars };
+          } else {
+            return v;
+          }
+        });
+        return {
+          ...settings,
+          vars: vars,
+          selectedVar: selectedVar,
+          selectedMultiVar: selectedMultiVar,
+        };
+      }
     }
     case "set.controls.colorScale": {
       return {
