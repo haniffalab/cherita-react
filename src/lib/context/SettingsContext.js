@@ -302,23 +302,41 @@ function settingsReducer(settings, action) {
             return v;
           }
         });
-        const selectedVar =
-          settings.selectedVar?.name === action.varSet.name
-            ? { ...varSet, vars: varSetVars }
-            : settings.selectedVar;
-        const selectedMultiVar = settings.selectedMultiVar.map((v) => {
-          if (v.name === varSet.name) {
-            return { ...v, vars: varSetVars };
-          } else {
-            return v;
-          }
-        });
-        return {
-          ...settings,
-          vars: vars,
-          selectedVar: selectedVar,
-          selectedMultiVar: selectedMultiVar,
-        };
+        // Remove from selected if varSet vars is empty
+        if (!varSetVars.length) {
+          const selectedVar =
+            settings.selectedVar?.name === action.varSet.name
+              ? null
+              : settings.selectedVar;
+          const selectedMultiVar = settings.selectedMultiVar.filter(
+            (v) => v.name !== action.varSet.name
+          );
+          return {
+            ...settings,
+            vars: vars,
+            selectedVar: selectedVar,
+            selectedMultiVar: selectedMultiVar,
+          };
+        } else {
+          // Update selected if varSet is selected
+          const selectedVar =
+            settings.selectedVar?.name === action.varSet.name
+              ? { ...varSet, vars: varSetVars }
+              : settings.selectedVar;
+          const selectedMultiVar = settings.selectedMultiVar.map((v) => {
+            if (v.name === varSet.name) {
+              return { ...v, vars: varSetVars };
+            } else {
+              return v;
+            }
+          });
+          return {
+            ...settings,
+            vars: vars,
+            selectedVar: selectedVar,
+            selectedMultiVar: selectedMultiVar,
+          };
+        }
       }
     }
     case "set.controls.colorScale": {
