@@ -9,14 +9,19 @@ import {
   Tooltip,
 } from "react-bootstrap";
 
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useDataset } from "../../context/DatasetContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { useFetch } from "../../utils/requests";
 import { ObsmKeysListBtn } from "../../utils/Skeleton";
 
 export function ObsmKeysList() {
   const ENDPOINT = "obsm/keys";
   const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
   const [obsmKeysList, setObsmKeysList] = useState([]);
   const [active, setActive] = useState(null);
   const [params, setParams] = useState({
@@ -43,10 +48,10 @@ export function ObsmKeysList() {
   }, [fetchedData, isPending, serverError]);
 
   useEffect(() => {
-    if (dataset.selectedObsm) {
-      setActive(dataset.selectedObsm);
+    if (settings.selectedObsm) {
+      setActive(settings.selectedObsm);
     }
-  }, [dataset.selectedObsm]);
+  }, [settings.selectedObsm]);
 
   const obsmList = obsmKeysList.map((item) => {
     return (
@@ -73,8 +78,8 @@ export function ObsmKeysList() {
     return (
       <DropdownButton
         as={ButtonGroup}
-        title={dataset.selectedObsm || "Select an embedding"}
-        variant={dataset.selectedObsm ? "primary" : "warning"}
+        title={settings.selectedObsm || "Select an embedding"}
+        variant={settings.selectedObsm ? "primary" : "warning"}
         id="bg-nested-dropdown"
         size="sm"
       >

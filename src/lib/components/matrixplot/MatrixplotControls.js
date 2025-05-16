@@ -10,16 +10,19 @@ import {
 
 import { COLORSCALES } from "../../constants/colorscales";
 import { MATRIXPLOT_SCALES } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 
 export function MatrixplotControls() {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
 
   const colorScaleList = _.keys(COLORSCALES).map((key) => (
     <Dropdown.Item
       key={key}
-      active={dataset.controls.colorScale === key}
+      active={settings.controls.colorScale === key}
       onClick={() => {
         dispatch({
           type: "set.controls.colorScale",
@@ -34,7 +37,7 @@ export function MatrixplotControls() {
   const standardScaleList = _.values(MATRIXPLOT_SCALES).map((scale) => (
     <Dropdown.Item
       key={scale.value}
-      active={dataset.controls.scale.matrixplot.name === scale.name}
+      active={settings.controls.scale.matrixplot.name === scale.name}
       onClick={() => {
         dispatch({
           type: "set.controls.scale",
@@ -52,7 +55,7 @@ export function MatrixplotControls() {
       <ButtonGroup>
         <Dropdown>
           <Dropdown.Toggle id="dropdownColorscale" variant="light">
-            {dataset.controls.colorScale}
+            {settings.controls.colorScale}
           </Dropdown.Toggle>
           <Dropdown.Menu>{colorScaleList}</Dropdown.Menu>
         </Dropdown>
@@ -62,7 +65,7 @@ export function MatrixplotControls() {
           <InputGroup.Text>Standard scale</InputGroup.Text>
           <Dropdown>
             <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {dataset.controls.scale.matrixplot.name}
+              {settings.controls.scale.matrixplot.name}
             </Dropdown.Toggle>
             <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
           </Dropdown>

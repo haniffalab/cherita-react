@@ -9,6 +9,7 @@ import { ObsToolbar } from "./ObsToolbar";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
+import { useSettings } from "../../context/SettingsContext";
 import { useColor } from "../../helpers/color-helper";
 import { Histogram } from "../../utils/Histogram";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
@@ -17,25 +18,25 @@ import { formatNumerical, FORMATS } from "../../utils/string";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 import { useObsData } from "../../utils/zarrData";
 
-const N_BINS = 5;
+// const N_BINS = 5;
 
-function binContinuous(data, nBins) {
-  const binSize = (data.max - data.min) * (1 / nBins);
-  const thresholds = _.range(nBins + 1).map((b) => {
-    return data.min + binSize * b;
-  });
-  const binEdges = _.range(thresholds.length - 1).map((i) => [
-    thresholds[i],
-    thresholds[i + 1],
-  ]);
-  const bins = {
-    nBins: nBins,
-    binSize: binSize,
-    thresholds: thresholds,
-    binEdges: binEdges,
-  };
-  return { ...data, bins: bins };
-}
+// function binContinuous(data, nBins) {
+//   const binSize = (data.max - data.min) * (1 / nBins);
+//   const thresholds = _.range(nBins + 1).map((b) => {
+//     return data.min + binSize * b;
+//   });
+//   const binEdges = _.range(thresholds.length - 1).map((i) => [
+//     thresholds[i],
+//     thresholds[i + 1],
+//   ]);
+//   const bins = {
+//     nBins: nBins,
+//     binSize: binSize,
+//     thresholds: thresholds,
+//     binEdges: binEdges,
+//   };
+//   return { ...data, bins: bins };
+// }
 
 function getContinuousLabel(code, binEdges) {
   return `[ ${formatNumerical(binEdges[code][0])}, ${formatNumerical(
@@ -47,16 +48,17 @@ function getContinuousLabel(code, binEdges) {
 const useObsHistogram = (obs) => {
   const ENDPOINT = "obs/histograms";
   const dataset = useDataset();
+  const settings = useSettings();
   const { obsIndices, isSliced } = useFilteredData();
   const [params, setParams] = useState({
     url: dataset.url,
     obsCol: _.omit(obs, "omit"), // avoid re-rendering when toggling unselected obs
-    varKey: dataset.selectedVar?.isSet
+    varKey: settings.selectedVar?.isSet
       ? {
-          name: dataset.selectedVar?.name,
-          indices: dataset.selectedVar?.vars.map((v) => v.index),
+          name: settings.selectedVar?.name,
+          indices: settings.selectedVar?.vars.map((v) => v.index),
         }
-      : dataset.selectedVar?.index,
+      : settings.selectedVar?.index,
     obsIndices: isSliced ? [...(obsIndices || [])] : null,
   });
 
@@ -65,20 +67,20 @@ const useObsHistogram = (obs) => {
       return {
         ...p,
         obsCol: _.omit(obs, "omit"),
-        varKey: dataset.selectedVar?.isSet
+        varKey: settings.selectedVar?.isSet
           ? {
-              name: dataset.selectedVar?.name,
-              indices: dataset.selectedVar?.vars.map((v) => v.index),
+              name: settings.selectedVar?.name,
+              indices: settings.selectedVar?.vars.map((v) => v.index),
             }
-          : dataset.selectedVar?.index,
+          : settings.selectedVar?.index,
         obsIndices: isSliced ? [...(obsIndices || [])] : null,
       };
     });
   }, [
-    dataset.selectedVar?.index,
-    dataset.selectedVar?.isSet,
-    dataset.selectedVar?.name,
-    dataset.selectedVar?.vars,
+    settings.selectedVar?.index,
+    settings.selectedVar?.isSet,
+    settings.selectedVar?.name,
+    settings.selectedVar?.vars,
     obsIndices,
     isSliced,
     obs,
@@ -86,7 +88,7 @@ const useObsHistogram = (obs) => {
 
   return useFetch(ENDPOINT, params, {
     enabled:
-      !!dataset.selectedVar && dataset.colorEncoding === COLOR_ENCODINGS.VAR,
+      !!settings.selectedVar && settings.colorEncoding === COLOR_ENCODINGS.VAR,
     refetchOnMount: false,
   });
 };
@@ -277,7 +279,7 @@ export function CategoricalObs({
   toggleObs,
   showColor = true,
 }) {
-  const dataset = useDataset();
+  const settings = useSettings();
   const { isSliced } = useFilteredData();
   const totalCounts = _.sum(_.values(obs.value_counts));
   const min = _.min(_.values(obs.codes));
@@ -298,7 +300,7 @@ export function CategoricalObs({
         isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
         label: obs.values[index],
         histogramData:
-          dataset.colorEncoding === COLOR_ENCODINGS.VAR
+          settings.colorEncoding === COLOR_ENCODINGS.VAR
             ? {
                 data: obsHistograms.fetchedData?.[obs.values[index]],
                 isPending: obsHistograms.isPending,
@@ -313,7 +315,7 @@ export function CategoricalObs({
       };
     },
     [
-      dataset.colorEncoding,
+      settings.colorEncoding,
       filteredObsData?.pct,
       filteredObsData?.value_counts,
       isSliced,
@@ -327,7 +329,7 @@ export function CategoricalObs({
     ]
   );
 
-  showColor &= dataset.colorEncoding === COLOR_ENCODINGS.OBS;
+  showColor &= settings.colorEncoding === COLOR_ENCODINGS.OBS;
 
   return (
     <ListGroup variant="flush" className="cherita-list">
