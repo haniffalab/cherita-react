@@ -4,10 +4,10 @@ import { faDroplet } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 
-import { COLOR_ENCODINGS } from "../constants/constants";
-import { useDataset } from "../context/DatasetContext";
-import { rgbToHex, useColor } from "../helpers/color-helper";
 import { formatNumerical, FORMATS } from "./string";
+import { COLOR_ENCODINGS } from "../constants/constants";
+import { useSettings } from "../context/SettingsContext";
+import { rgbToHex, useColor } from "../helpers/color-helper";
 
 export function Legend({
   isCategorical = false,
@@ -16,7 +16,7 @@ export function Legend({
   colorscale = null,
   addText = "",
 }) {
-  const dataset = useDataset();
+  const settings = useSettings();
   const { getColor } = useColor();
 
   const spanList = useMemo(() => {
@@ -38,15 +38,15 @@ export function Legend({
     });
   }, [colorscale, getColor, isCategorical]);
 
-  if (dataset.colorEncoding && !isCategorical) {
+  if (settings.colorEncoding && !isCategorical) {
     return (
       <div className="cherita-legend">
         <div className="gradient">
           <p className="small m-0 p-0">
             <FontAwesomeIcon icon={faDroplet} className="me-1" />
-            {(dataset.colorEncoding === COLOR_ENCODINGS.VAR
-              ? dataset.selectedVar?.name
-              : dataset.selectedObs?.name) + addText}
+            {(settings.colorEncoding === COLOR_ENCODINGS.VAR
+              ? settings.selectedVar?.name
+              : settings.selectedObs?.name) + addText}
           </p>
           {spanList}
           <span className="domain-min">
@@ -62,14 +62,14 @@ export function Legend({
       </div>
     );
   } else if (
-    dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
-    dataset.selectedObs
+    settings.colorEncoding === COLOR_ENCODINGS.OBS &&
+    settings.selectedObs
   ) {
     return (
       <div className="cherita-legend categorical">
         <p className="legend-text text-end m-0 p-0">
           <FontAwesomeIcon icon={faDroplet} className="me-2" />
-          {dataset.selectedObs.name}
+          {settings.selectedObs.name}
         </p>
       </div>
     );

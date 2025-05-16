@@ -1,23 +1,26 @@
 import React, { useEffect, useState } from "react";
 
-import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 import { ButtonGroup, Dropdown, Form } from "react-bootstrap";
+
 import {
   PSEUDOSPATIAL_CATEGORICAL_MODES as MODES,
   PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
 } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useDataset } from "../../context/DatasetContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { useFetch } from "../../utils/requests";
 
 function CategoricalMode() {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
   const modeList = _.map(MODES, (m, key) => (
     <Dropdown.Item
       key={key}
-      active={dataset.pseudospatial.categoricalMode === m}
+      active={settings.pseudospatial.categoricalMode === m}
       onClick={() => {
         dispatch({
           type: "set.pseudospatial.categoricalMode",
@@ -29,7 +32,7 @@ function CategoricalMode() {
     </Dropdown.Item>
   ));
 
-  const mode = _.find(MODES, { value: dataset.pseudospatial.categoricalMode });
+  const mode = _.find(MODES, { value: settings.pseudospatial.categoricalMode });
 
   return (
     <Dropdown>
@@ -44,7 +47,8 @@ function CategoricalMode() {
 function MaskSet() {
   const ENDPOINT = "masks";
   const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
   const [maskSets, setMaskSets] = useState(null);
 
   const [params, setParams] = useState({ url: dataset.url });
@@ -68,7 +72,7 @@ function MaskSet() {
   const maskSetList = _.map(maskSets, (ms, key) => (
     <Dropdown.Item
       key={key}
-      active={dataset.pseudospatial.maskSet === key}
+      active={settings.pseudospatial.maskSet === key}
       onClick={() => {
         dispatch({ type: "set.pseudospatial.maskSet", maskSet: key });
       }}
@@ -79,15 +83,16 @@ function MaskSet() {
 
   const handleMaskChange = (mask) => {
     let newMasks =
-      dataset.pseudospatial.maskValues ||
-      maskSets?.[dataset.pseudospatial?.maskSet];
+      settings.pseudospatial.maskValues ||
+      maskSets?.[settings.pseudospatial?.maskSet];
 
     newMasks = newMasks.includes(mask)
       ? newMasks.filter((m) => m !== mask)
       : [...newMasks, mask];
 
     if (
-      !_.difference(maskSets?.[dataset.pseudospatial?.maskSet], newMasks).length
+      !_.difference(maskSets?.[settings.pseudospatial?.maskSet], newMasks)
+        .length
     ) {
       newMasks = null;
     }
@@ -97,9 +102,9 @@ function MaskSet() {
 
   const toggleMasks = () => {
     if (
-      !dataset.pseudospatial.maskValues ||
-      dataset.pseudospatial.maskValues?.length ===
-        maskSets?.[dataset.pseudospatial?.maskSet]?.length
+      !settings.pseudospatial.maskValues ||
+      settings.pseudospatial.maskValues?.length ===
+        maskSets?.[settings.pseudospatial?.maskSet]?.length
     ) {
       dispatch({ type: "set.pseudospatial.maskValues", maskValues: [] });
     } else {
@@ -108,15 +113,15 @@ function MaskSet() {
   };
 
   const masksList = _.map(
-    maskSets?.[dataset.pseudospatial?.maskSet],
+    maskSets?.[settings.pseudospatial?.maskSet],
     (mask) => (
       <Dropdown.ItemText key={mask}>
         <Form.Check
           type="checkbox"
           label={mask}
           checked={
-            !dataset.pseudospatial.maskValues ||
-            dataset.pseudospatial.maskValues.includes(mask)
+            !settings.pseudospatial.maskValues ||
+            settings.pseudospatial.maskValues.includes(mask)
           }
           onChange={() => handleMaskChange(mask)}
         />
@@ -124,20 +129,20 @@ function MaskSet() {
     )
   );
 
-  const nMasks = dataset.pseudospatial.maskValues
-    ? dataset.pseudospatial.maskValues?.length
-    : maskSets?.[dataset.pseudospatial?.maskSet]?.length || "No";
+  const nMasks = settings.pseudospatial.maskValues
+    ? settings.pseudospatial.maskValues?.length
+    : maskSets?.[settings.pseudospatial?.maskSet]?.length || "No";
 
   const toggleAllChecked =
-    !dataset.pseudospatial.maskValues ||
-    dataset.pseudospatial.maskValues?.length ===
-      maskSets?.[dataset.pseudospatial?.maskSet]?.length;
+    !settings.pseudospatial.maskValues ||
+    settings.pseudospatial.maskValues?.length ===
+      maskSets?.[settings.pseudospatial?.maskSet]?.length;
 
   return (
     <>
       <Dropdown>
         <Dropdown.Toggle variant="light">
-          {_.capitalize(dataset.pseudospatial.maskSet || "Select a mask set")}
+          {_.capitalize(settings.pseudospatial.maskSet || "Select a mask set")}
         </Dropdown.Toggle>
         <Dropdown.Menu>
           <Dropdown.Header>Mask set</Dropdown.Header>
