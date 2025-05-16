@@ -24,7 +24,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
   const [params, setParams] = useState({
     url: dataset.url,
     mode: mode,
-    scale: settings.controls.scale.violinplot.value,
+    scale: settings.controls.scale.violinplot,
     varNamesCol: dataset.varNamesCol,
     ...{
       [VIOLIN_MODES.MULTIKEY]: {
@@ -72,7 +72,7 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
               ? { name: i.name, indices: i.vars.map((v) => v.index) }
               : i.index
           ),
-          scale: settings.controls.scale.violinplot.value,
+          scale: settings.controls.scale.violinplot,
           varNamesCol: dataset.varNamesCol,
         };
       });
@@ -101,13 +101,13 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
                 settings.selectedObs?.omit
               ).map((c) => settings.selectedObs?.codesMap[c]),
           obsIndices: isSliced ? [...(obsIndices || [])] : null,
-          scale: settings.controls.scale.violinplot.value,
+          scale: settings.controls.scale.violinplot,
           varNamesCol: dataset.varNamesCol,
         };
       });
     }
   }, [
-    settings.controls.scale.violinplot.value,
+    settings.controls.scale.violinplot,
     settings.selectedMultiVar,
     settings.selectedObs,
     settings.selectedVar,

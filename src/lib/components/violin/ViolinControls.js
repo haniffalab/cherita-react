@@ -1,12 +1,7 @@
 import React from "react";
 
 import _ from "lodash";
-import {
-  Dropdown,
-  ButtonGroup,
-  ButtonToolbar,
-  InputGroup,
-} from "react-bootstrap";
+import { Form } from "react-bootstrap";
 
 import { VIOLINPLOT_SCALES } from "../../constants/constants";
 import {
@@ -18,35 +13,28 @@ export function ViolinControls() {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
 
-  const scaleList = _.values(VIOLINPLOT_SCALES).map((scale) => (
-    <Dropdown.Item
-      key={scale.value}
-      active={settings.controls.scale.violinplot === scale}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.scale",
-          plot: "violinplot",
-          scale: scale,
-        });
-      }}
-    >
-      {scale.name}
-    </Dropdown.Item>
-  ));
-
   return (
-    <ButtonToolbar>
-      <ButtonGroup>
-        <InputGroup>
-          <InputGroup.Text>Scale</InputGroup.Text>
-          <Dropdown>
-            <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {settings.controls.scale.violinplot.name}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>{scaleList}</Dropdown.Menu>
-          </Dropdown>
-        </InputGroup>
-      </ButtonGroup>
-    </ButtonToolbar>
+    <>
+      <Form>
+        <Form.Group className="mb-2">
+          <Form.Select
+            value={settings.controls.scale.violinplot || ""}
+            onChange={(e) => {
+              dispatch({
+                type: "set.controls.scale",
+                plot: "violinplot",
+                scale: !e.target.value.length ? null : e.target.value,
+              });
+            }}
+          >
+            {_.values(VIOLINPLOT_SCALES).map((scale) => (
+              <option key={scale.value} value={scale.value || ""}>
+                {scale.name}
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+      </Form>
+    </>
   );
 }

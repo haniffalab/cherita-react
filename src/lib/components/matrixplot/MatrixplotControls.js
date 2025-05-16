@@ -1,12 +1,7 @@
 import React from "react";
 
 import _ from "lodash";
-import {
-  Dropdown,
-  ButtonGroup,
-  ButtonToolbar,
-  InputGroup,
-} from "react-bootstrap";
+import { Form } from "react-bootstrap";
 
 import { COLORSCALES } from "../../constants/colorscales";
 import { MATRIXPLOT_SCALES } from "../../constants/constants";
@@ -19,58 +14,47 @@ export function MatrixplotControls() {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
 
-  const colorScaleList = _.keys(COLORSCALES).map((key) => (
-    <Dropdown.Item
-      key={key}
-      active={settings.controls.colorScale === key}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.colorScale",
-          colorScale: key,
-        });
-      }}
-    >
-      {key}
-    </Dropdown.Item>
-  ));
-
-  const standardScaleList = _.values(MATRIXPLOT_SCALES).map((scale) => (
-    <Dropdown.Item
-      key={scale.value}
-      active={settings.controls.scale.matrixplot.name === scale.name}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.scale",
-          plot: "matrixplot",
-          scale: scale,
-        });
-      }}
-    >
-      {scale.name}
-    </Dropdown.Item>
-  ));
-
   return (
-    <ButtonToolbar>
-      <ButtonGroup>
-        <Dropdown>
-          <Dropdown.Toggle id="dropdownColorscale" variant="light">
-            {settings.controls.colorScale}
-          </Dropdown.Toggle>
-          <Dropdown.Menu>{colorScaleList}</Dropdown.Menu>
-        </Dropdown>
-      </ButtonGroup>
-      <ButtonGroup>
-        <InputGroup>
-          <InputGroup.Text>Standard scale</InputGroup.Text>
-          <Dropdown>
-            <Dropdown.Toggle id="dropdownStandardScale" variant="light">
-              {settings.controls.scale.matrixplot.name}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>{standardScaleList}</Dropdown.Menu>
-          </Dropdown>
-        </InputGroup>
-      </ButtonGroup>
-    </ButtonToolbar>
+    <>
+      <Form>
+        <Form.Group className="mb-1">
+          <Form.Label>Colorscale</Form.Label>
+          <Form.Select
+            value={settings.controls.colorScale}
+            onChange={(e) => {
+              dispatch({
+                type: "set.controls.colorScale",
+                colorScale: e.target.value,
+              });
+            }}
+          >
+            {_.keys(COLORSCALES).map((key) => (
+              <option key={key} value={key}>
+                {key}
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+        <Form.Group className="mb-2">
+          <Form.Label>Standard scale</Form.Label>
+          <Form.Select
+            value={settings.controls.scale.matrixplot || ""}
+            onChange={(e) => {
+              dispatch({
+                type: "set.controls.scale",
+                plot: "matrixplot",
+                scale: !e.target.value.length ? null : e.target.value,
+              });
+            }}
+          >
+            {_.values(MATRIXPLOT_SCALES).map((scale) => (
+              <option key={scale.value} value={scale.value || ""}>
+                {scale.name}
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+      </Form>
+    </>
   );
 }

@@ -1,7 +1,7 @@
 import React from "react";
 
 import _ from "lodash";
-import { Dropdown } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 
 import { COLORSCALES } from "../../constants/colorscales";
 import {
@@ -13,27 +13,28 @@ export function HeatmapControls() {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
 
-  const colormapList = _.keys(COLORSCALES).map((key) => (
-    <Dropdown.Item
-      key={key}
-      active={settings.controls.colorScale === key}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.colorScale",
-          colorScale: key,
-        });
-      }}
-    >
-      {key}
-    </Dropdown.Item>
-  ));
-
   return (
-    <Dropdown>
-      <Dropdown.Toggle id="dropdownColorscale" variant="light">
-        {settings.controls.colorScale}
-      </Dropdown.Toggle>
-      <Dropdown.Menu>{colormapList}</Dropdown.Menu>
-    </Dropdown>
+    <>
+      <Form>
+        <Form.Group className="mb-1">
+          <Form.Label>Colorscale</Form.Label>
+          <Form.Select
+            value={settings.controls.colorScale}
+            onChange={(e) => {
+              dispatch({
+                type: "set.controls.colorScale",
+                colorScale: e.target.value,
+              });
+            }}
+          >
+            {_.keys(COLORSCALES).map((key) => (
+              <option key={key} value={key}>
+                {key}
+              </option>
+            ))}
+          </Form.Select>
+        </Form.Group>
+      </Form>
+    </>
   );
 }
