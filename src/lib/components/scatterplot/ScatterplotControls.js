@@ -1,15 +1,14 @@
 import React, { useEffect } from "react";
 
 import { Box, Slider, Typography } from "@mui/material";
-import _ from "lodash";
 import { Form } from "react-bootstrap";
 
-import { COLORSCALES } from "../../constants/colorscales";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import {
   useSettings,
   useSettingsDispatch,
 } from "../../context/SettingsContext";
+import { ColorscaleSelect } from "../controls/Controls";
 
 export const ScatterplotControls = () => {
   const settings = useSettings();
@@ -79,24 +78,7 @@ export const ScatterplotControls = () => {
   return (
     <>
       <Form>
-        <Form.Group className="mb-2">
-          <Form.Label>Colorscale</Form.Label>
-          <Form.Select
-            value={settings.controls.colorScale}
-            onChange={(e) => {
-              dispatch({
-                type: "set.controls.colorScale",
-                colorScale: e.target.value,
-              });
-            }}
-          >
-            {_.keys(COLORSCALES).map((key) => (
-              <option key={key} value={key}>
-                {key}
-              </option>
-            ))}
-          </Form.Select>
-        </Form.Group>
+        <ColorscaleSelect />
         <Form.Group className="mb-2">{rangeSlider}</Form.Group>
       </Form>
     </>
