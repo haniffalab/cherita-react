@@ -1,12 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { Card, Container, Modal } from "react-bootstrap";
 
 import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
 import { Dotplot } from "../dotplot/Dotplot";
+import { DotplotControls } from "../dotplot/DotplotControls";
 import { Heatmap } from "../heatmap/Heatmap";
+import { HeatmapControls } from "../heatmap/HeatmapControls";
 import { Matrixplot } from "../matrixplot/Matrixplot";
+import { MatrixplotControls } from "../matrixplot/MatrixplotControls";
 import { ObsColsList } from "../obs-list/ObsList";
 import {
   OffcanvasControls,
@@ -19,11 +23,13 @@ import { ScatterplotControls } from "../scatterplot/ScatterplotControls";
 import { SearchBar } from "../search-bar/SearchBar";
 import { VarNamesList } from "../var-list/VarList";
 import { Violin } from "../violin/Violin";
+import { ViolinControls } from "../violin/ViolinControls";
 
 export function FullPage({
-  children,
+  renderItem,
   varMode = SELECTION_MODES.SINGLE,
-  searchDiseases = false,
+  searchDiseases = true,
+  Controls = null,
   ...props
 }) {
   const appRef = useRef();
@@ -34,6 +40,11 @@ export function FullPage({
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  const LgBreakpoint = useMediaQuery("(max-width: 991.98px)");
+  const XlBreakpoint = useMediaQuery("(max-width: 1199.98px)");
+  const showObsBtn = LgBreakpoint;
+  const showVarsBtn = XlBreakpoint;
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -67,16 +78,20 @@ export function FullPage({
       <DatasetProvider {...props}>
         <Container
           fluid
-          className="d-flex g-0"
+          className="cherita-app-container"
           style={{ height: appDimensions.height }}
         >
           <div className="cherita-app-obs modern-scrollbars border-end h-100">
             <ObsColsList {...props} />
           </div>
-          <div className="cherita-app-canvas flex-grow-1">
-            {children({
+          <div className="cherita-app-canvas">
+            {renderItem({
+              showObsBtn,
+              showVarsBtn,
+              showCtrlsBtn: !!Controls,
               setShowObs,
               setShowVars,
+              setShowControls,
             })}
           </div>
           <div className="cherita-app-sidebar p-3">
@@ -101,11 +116,13 @@ export function FullPage({
             handleClose={() => setShowVars(false)}
             mode={varMode}
           />
-          <OffcanvasControls
-            show={showControls}
-            handleClose={() => setShowControls(false)}
-            Controls={ScatterplotControls}
-          />
+          {Controls && (
+            <OffcanvasControls
+              show={showControls}
+              handleClose={() => setShowControls(false)}
+              Controls={Controls}
+            />
+          )}
           <OffcanvasObsm
             show={showObsm}
             handleClose={() => setShowObsm(false)}
@@ -118,35 +135,86 @@ export function FullPage({
 
 export function FullPageScatterplot(props) {
   return (
-    <FullPage {...props} varMode={SELECTION_MODES.SINGLE}>
-      {({ setShowObs, setShowVars }) => (
+    <FullPage
+      {...props}
+      varMode={SELECTION_MODES.SINGLE}
+      Controls={ScatterplotControls}
+      renderItem={({ setShowObs, setShowVars }) => (
         <Scatterplot
           setShowObs={setShowObs}
           setShowVars={setShowVars}
           isFullscreen={true}
         />
       )}
-    </FullPage>
+    />
   );
 }
 
 export function FullPagePlots(props) {
   return (
-    <FullPage {...props} varMode={SELECTION_MODES.MULTIPLE}>
-      <div className="container-fluid w-100 h-100 d-flex flex-column overflow-y-auto">
-        <div className="row flex-grow-1">
-          <Heatmap />
+    <FullPage
+      {...props}
+      varMode={SELECTION_MODES.MULTIPLE}
+      renderItem={() => (
+        <div className="container-fluid w-100 h-100 d-flex flex-column overflow-y-auto">
+          <div className="row flex-grow-1">
+            <Heatmap />
+          </div>
+          <div className="row flex-grow-1">
+            <Matrixplot />
+          </div>
+          <div className="row flex-grow-1">
+            <Dotplot />
+          </div>
+          <div className="row flex-grow-1">
+            <Violin mode={VIOLIN_MODES.MULTIKEY} />
+          </div>
         </div>
-        <div className="row flex-grow-1">
-          <Matrixplot />
-        </div>
-        <div className="row flex-grow-1">
-          <Dotplot />
-        </div>
-        <div className="row flex-grow-1">
-          <Violin mode={VIOLIN_MODES.GROUPBY} />
-        </div>
-      </div>
-    </FullPage>
+      )}
+    />
+  );
+}
+
+export function FullPageDotplot(props) {
+  return (
+    <FullPage
+      {...props}
+      varMode={SELECTION_MODES.MULTIPLE}
+      Controls={DotplotControls}
+      renderItem={(props) => <Dotplot {...props} />}
+    />
+  );
+}
+
+export function FullPageHeatmap(props) {
+  return (
+    <FullPage
+      {...props}
+      varMode={SELECTION_MODES.MULTIPLE}
+      Controls={HeatmapControls}
+      renderItem={(props) => <Heatmap {...props} />}
+    />
+  );
+}
+
+export function FullPageMatrixplot(props) {
+  return (
+    <FullPage
+      {...props}
+      varMode={SELECTION_MODES.MULTIPLE}
+      Controls={MatrixplotControls}
+      renderItem={(props) => <Matrixplot {...props} />}
+    />
+  );
+}
+
+export function FullPageViolin(props) {
+  return (
+    <FullPage
+      {...props}
+      varMode={SELECTION_MODES.MULTIPLE}
+      Controls={ViolinControls}
+      renderItem={(props) => <Violin mode={VIOLIN_MODES.MULTIKEY} {...props} />}
+    />
   );
 }
