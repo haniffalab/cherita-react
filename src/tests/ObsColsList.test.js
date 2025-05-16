@@ -8,14 +8,22 @@ import { ObsColsList } from "../lib/components/obs-list/ObsList";
 
 // Mock the context or props
 const mockDataset = {
-  selectedObs: { name: "mockName" },
+  varNamesCol: null,
+};
+
+const mockSettings = {
+  selectedObs: { name: "obsName" },
 };
 
 const mockDispatch = jest.fn();
 
 jest.mock("../lib/context/DatasetContext", () => ({
   useDataset: () => mockDataset,
-  useDatasetDispatch: () => mockDispatch,
+}));
+
+jest.mock("../lib/context/SettingsContext", () => ({
+  useSettings: () => mockSettings,
+  useSettingsDispatch: () => mockDispatch,
 }));
 
 const queryClient = new QueryClient();

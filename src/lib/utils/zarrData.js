@@ -5,13 +5,15 @@ import { slice } from "zarr";
 
 import { OBS_TYPES } from "../constants/constants";
 import { useDataset } from "../context/DatasetContext";
+import { useSettings } from "../context/SettingsContext";
 import { GET_OPTIONS, useZarr, useMultipleZarr } from "../helpers/zarr-helper";
 
 // @TODO: support specifying slice to load from context
 export const useObsmData = (obsm = null) => {
   const dataset = useDataset();
+  const settings = useSettings();
 
-  obsm = obsm || dataset.selectedObsm;
+  obsm = obsm || settings.selectedObsm;
 
   const [obsmParams, setObsmParams] = useState({
     url: dataset.url,
@@ -36,40 +38,41 @@ const meanData = (_i, data) => {
 
 export const useXData = (agg = meanData) => {
   const dataset = useDataset();
+  const settings = useSettings();
 
   const [xParams, setXParams] = useState(
-    !dataset.selectedVar
+    !settings.selectedVar
       ? []
-      : !dataset.selectedVar?.isSet
+      : !settings.selectedVar?.isSet
         ? [
             {
               url: dataset.url,
               path: "X",
-              s: [null, dataset.selectedVar?.matrix_index],
+              s: [null, settings.selectedVar?.matrix_index],
             },
           ]
-        : _.map(dataset.selectedVar?.vars, (v) => {
+        : _.map(settings.selectedVar?.vars, (v) => {
             return { url: dataset.url, path: "X", s: [null, v.matrix_index] };
           })
   );
 
   useEffect(() => {
     setXParams(
-      !dataset.selectedVar
+      !settings.selectedVar
         ? []
-        : !dataset.selectedVar?.isSet
+        : !settings.selectedVar?.isSet
           ? [
               {
                 url: dataset.url,
                 path: "X",
-                s: [null, dataset.selectedVar?.matrix_index],
+                s: [null, settings.selectedVar?.matrix_index],
               },
             ]
-          : _.map(dataset.selectedVar?.vars, (v) => {
+          : _.map(settings.selectedVar?.vars, (v) => {
               return { url: dataset.url, path: "X", s: [null, v.matrix_index] };
             })
     );
-  }, [dataset.url, dataset.selectedVar]);
+  }, [dataset.url, settings.selectedVar]);
 
   return useMultipleZarr(
     xParams,
@@ -81,8 +84,9 @@ export const useXData = (agg = meanData) => {
 
 export const useObsData = (obs = null) => {
   const dataset = useDataset();
+  const settings = useSettings();
 
-  obs = obs || dataset.selectedObs;
+  obs = obs || settings.selectedObs;
 
   const [obsParams, setObsParams] = useState({
     url: dataset.url,
@@ -107,9 +111,10 @@ export const useObsData = (obs = null) => {
 
 export const useLabelObsData = () => {
   const dataset = useDataset();
+  const settings = useSettings();
 
   const [labelObsParams, setLabelObsParams] = useState(
-    _.map(dataset.labelObs, (obs) => {
+    _.map(settings.labelObs, (obs) => {
       return {
         url: dataset.url,
         path:
@@ -123,7 +128,7 @@ export const useLabelObsData = () => {
 
   useEffect(() => {
     setLabelObsParams(
-      _.map(dataset.labelObs, (obs) => {
+      _.map(settings.labelObs, (obs) => {
         return {
           url: dataset.url,
           path:
@@ -134,7 +139,7 @@ export const useLabelObsData = () => {
         };
       })
     );
-  }, [dataset.labelObs, dataset.url]);
+  }, [settings.labelObs, dataset.url]);
 
   return useMultipleZarr(labelObsParams, GET_OPTIONS, {
     enabled: !!labelObsParams.length,

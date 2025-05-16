@@ -11,18 +11,21 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
 
 import { VAR_SORT, VAR_SORT_ORDER } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 
 // @TODO: set option for "var" and "disease"
 export function VarListToolbar({ varType = "var" }) {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
-  const [sort, setSort] = useState(dataset.varSort.var.sort);
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
+  const [sort, setSort] = useState(settings.varSort.var.sort);
   const [nameSortOrder, setNameSortOrder] = useState(
-    dataset.varSort.var.sortOrder
+    settings.varSort.var.sortOrder
   );
   const [matrixSortOrder, setMatrixSortOrder] = useState(
-    dataset.varSort.var.sortOrder
+    settings.varSort.var.sortOrder
   );
 
   const handleSort = (sortValue, sortOrder, setSortOrder) => {

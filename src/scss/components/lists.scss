@@ -29,9 +29,8 @@
   border-radius: var(--#{$prefix}border-radius);
 }
 
-.cherita-list.var-set-list {
-  .list-group-item {
-    padding-right: 0;
-    padding-left: 0.35rem;
-  }
+.cherita-list.var-set-list > .list-group-item {
+  filter: brightness(0.95); // darken background
+  padding-right: 0;
+  padding-left: 0.35rem;
 }

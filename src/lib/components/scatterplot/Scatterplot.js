@@ -24,8 +24,11 @@ import {
   SELECTED_POLYGON_FILLCOLOR,
   UNSELECTED_POLYGON_FILLCOLOR,
 } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { useZarrData } from "../../context/ZarrDataContext";
 import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
@@ -51,9 +54,9 @@ export function Scatterplot({
   setShowVars,
   isFullscreen = false,
 }) {
-  const dataset = useDataset();
+  const settings = useSettings();
   const { obsIndices, valueMin, valueMax, slicedLength } = useFilteredData();
-  const dispatch = useDatasetDispatch();
+  const dispatch = useSettingsDispatch();
   const { getColor } = useColor();
   const deckRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
@@ -69,7 +72,7 @@ export function Scatterplot({
   const [mode, setMode] = useState(() => ViewMode);
   const [features, setFeatures] = useState({
     type: "FeatureCollection",
-    features: dataset.polygons[dataset.selectedObsm] || [],
+    features: settings.polygons[settings.selectedObsm] || [],
   });
   const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
 
@@ -98,7 +101,7 @@ export function Scatterplot({
       });
     }
   }, [
-    dataset.selectedObsm,
+    settings.selectedObsm,
     obsmData.data,
     obsmData.isPending,
     obsmData.serverError,
@@ -117,7 +120,7 @@ export function Scatterplot({
   }, [data.positions]);
 
   useEffect(() => {
-    if (dataset.colorEncoding === COLOR_ENCODINGS.VAR) {
+    if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
       setIsRendering(true);
       if (!xData.isPending && !xData.serverError) {
         // @TODO: add condition to check obs slicing
@@ -131,7 +134,7 @@ export function Scatterplot({
       }
     }
   }, [
-    dataset.colorEncoding,
+    settings.colorEncoding,
     xData.data,
     xData.isPending,
     xData.serverError,
@@ -139,7 +142,7 @@ export function Scatterplot({
   ]);
 
   useEffect(() => {
-    if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
+    if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
       setIsRendering(true);
       if (!obsData.isPending && !obsData.serverError) {
         setData((d) => {
@@ -151,8 +154,8 @@ export function Scatterplot({
         });
       }
     } else if (
-      dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
-      dataset.sliceBy.obs
+      settings.colorEncoding === COLOR_ENCODINGS.VAR &&
+      settings.sliceBy.obs
     ) {
       if (!obsData.isPending && !obsData.serverError) {
         setData((d) => {
@@ -165,23 +168,23 @@ export function Scatterplot({
       }
     }
   }, [
-    dataset.colorEncoding,
+    settings.colorEncoding,
     obsData.data,
     obsData.isPending,
     obsData.serverError,
-    dataset.sliceBy.obs,
+    settings.sliceBy.obs,
   ]);
 
   const isCategorical = useMemo(() => {
-    if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
+    if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
       return (
-        dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-        dataset.selectedObs?.type === OBS_TYPES.BOOLEAN
+        settings.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+        settings.selectedObs?.type === OBS_TYPES.BOOLEAN
       );
     } else {
       return false;
     }
-  }, [dataset.colorEncoding, dataset.selectedObs?.type]);
+  }, [settings.colorEncoding, settings.selectedObs?.type]);
 
   useEffect(() => {
     dispatch({
@@ -191,8 +194,8 @@ export function Scatterplot({
   }, [dispatch, valueMax, valueMin]);
 
   const { min, max } = {
-    min: dataset.controls.range[0] * (valueMax - valueMin) + valueMin,
-    max: dataset.controls.range[1] * (valueMax - valueMin) + valueMin,
+    min: settings.controls.range[0] * (valueMax - valueMin) + valueMin,
+    max: settings.controls.range[1] * (valueMax - valueMin) + valueMin,
   };
 
   const getFillColor = useCallback(
@@ -289,10 +292,10 @@ export function Scatterplot({
   useEffect(() => {
     dispatch({
       type: "set.polygons",
-      obsm: dataset.selectedObsm,
+      obsm: settings.selectedObsm,
       polygons: features?.features || [],
     });
-  }, [dataset.selectedObsm, dispatch, features.features]);
+  }, [settings.selectedObsm, dispatch, features.features]);
 
   function onLayerClick(info) {
     if (mode !== ViewMode) {
@@ -322,21 +325,24 @@ export function Scatterplot({
     const text = [];
 
     if (
-      dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
-      dataset.selectedObs &&
-      !_.some(dataset.labelObs, { name: dataset.selectedObs.name })
+      settings.colorEncoding === COLOR_ENCODINGS.OBS &&
+      settings.selectedObs &&
+      !_.some(settings.labelObs, { name: settings.selectedObs.name })
     ) {
-      text.push(getLabel(dataset.selectedObs, obsData.data?.[index]));
+      text.push(getLabel(settings.selectedObs, obsData.data?.[index]));
     }
 
-    if (dataset.colorEncoding === COLOR_ENCODINGS.VAR && dataset.selectedVar) {
-      text.push(getLabel(dataset.selectedVar, xData.data?.[index], true));
+    if (
+      settings.colorEncoding === COLOR_ENCODINGS.VAR &&
+      settings.selectedVar
+    ) {
+      text.push(getLabel(settings.selectedVar, xData.data?.[index], true));
     }
 
-    if (dataset.labelObs.length) {
+    if (settings.labelObs.length) {
       text.push(
         ..._.map(labelObsData.data, (v, k) => {
-          const labelObs = _.find(dataset.labelObs, (o) => o.name === k);
+          const labelObs = _.find(settings.labelObs, (o) => o.name === k);
           return getLabel(labelObs, v[index]);
         })
       );
@@ -362,12 +368,12 @@ export function Scatterplot({
     !obsmData.isPending;
 
   const error =
-    (dataset.selectedObsm && obsmData.serverError?.length) ||
-    (dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
+    (settings.selectedObsm && obsmData.serverError?.length) ||
+    (settings.colorEncoding === COLOR_ENCODINGS.VAR &&
       xData.serverError?.length) ||
-    (dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
+    (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
       obsData.serverError?.length) ||
-    (dataset.labelObs.lengh && labelObsData.serverError?.length);
+    (settings.labelObs.lengh && labelObsData.serverError?.length);
 
   return (
     <div className="cherita-container-scatterplot">
@@ -413,10 +419,10 @@ export function Scatterplot({
             )}
             <Toolbox
               mode={
-                dataset.colorEncoding === COLOR_ENCODINGS.VAR
-                  ? dataset.selectedVar.name
-                  : dataset.colorEncoding === COLOR_ENCODINGS.OBS
-                    ? dataset.selectedObs.name
+                settings.colorEncoding === COLOR_ENCODINGS.VAR
+                  ? settings.selectedVar?.name
+                  : settings.colorEncoding === COLOR_ENCODINGS.OBS
+                    ? settings.selectedObs?.name
                     : null
               }
               obsLength={parseInt(obsmData.data?.length)}
