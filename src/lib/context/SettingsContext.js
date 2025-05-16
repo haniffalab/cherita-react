@@ -34,9 +34,9 @@ const initialSettings = {
     range: [0, 1],
     colorAxis: { dmin: 0, dmax: 1, cmin: 0, cmax: 1 },
     scale: {
-      dotplot: DOTPLOT_SCALES.NONE,
-      matrixplot: MATRIXPLOT_SCALES.NONE,
-      violinplot: VIOLINPLOT_SCALES.WIDTH,
+      dotplot: DOTPLOT_SCALES.NONE.value,
+      matrixplot: MATRIXPLOT_SCALES.NONE.value,
+      violinplot: VIOLINPLOT_SCALES.WIDTH.value,
     },
     meanOnlyExpressed: false,
     expressionCutoff: 0.0,
