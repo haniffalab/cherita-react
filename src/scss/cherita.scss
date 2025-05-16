@@ -394,3 +394,9 @@ $gauge-padding: 0.15rem;
   margin-right: 0.4rem;
   width: 1rem;
 }
+
+.ellipsis-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -6,13 +6,13 @@ import _ from "lodash";
 import { Alert, Button, ListGroup } from "react-bootstrap";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 
+import { VarItem } from "./VarItem";
+import { VarListToolbar } from "./VarListToolbar";
+import { VarSet } from "./VarSet";
 import { SELECTION_MODES, VAR_SORT } from "../../constants/constants";
 import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
-import { VarItem } from "./VarItem";
-import { VarListToolbar } from "./VarListToolbar";
-import { VarSet } from "./VarSet";
 
 const useVarMean = (varKeys, enabled = false) => {
   const ENDPOINT = "matrix/mean";
@@ -50,126 +50,9 @@ const sortMeans = (i, means) => {
   return means[i.name] || _.min(_.values(means)) - 1;
 };
 
-// @TODO: display where disease data comes from
-// add to disease dataset metadata
-function DiseaseVarList({ makeListItem }) {
-  const ENDPOINT = "disease/genes";
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
-  const [diseaseVars, setDiseaseVars] = useState([]);
-  const [sortedDiseaseVars, setSortedDiseaseVars] = useState([]);
-  const [params, setParams] = useState({
-    url: dataset.url,
-    col: dataset.varNamesCol,
-    diseaseId: dataset.selectedDisease?.id,
-    diseaseDatasets: dataset.diseaseDatasets,
-  });
-
-  useEffect(() => {
-    setParams((p) => {
-      return { ...p, diseaseId: dataset.selectedDisease?.id };
-    });
-  }, [dataset.selectedDisease]);
-
-  const diseaseData = useFetch(ENDPOINT, params, {
-    enabled: !!params.diseaseId,
-    refetchOnMount: false,
-  });
-
-  useEffect(() => {
-    if (!diseaseData.isPending && !diseaseData.serverError) {
-      setDiseaseVars(diseaseData.fetchedData);
-    }
-  }, [diseaseData.fetchedData, diseaseData.isPending, diseaseData.serverError]);
-
-  const varMeans = useVarMean(
-    diseaseVars,
-    !!diseaseVars?.length && dataset.varSort.disease.sort === VAR_SORT.MATRIX
-  );
-
-  useEffect(() => {
-    if (dataset.varSort.disease.sort === VAR_SORT.MATRIX) {
-      if (!varMeans.isPending && !varMeans.serverError) {
-        setSortedDiseaseVars(
-          _.orderBy(
-            diseaseVars,
-            (o) => {
-              return sortMeans(o, varMeans.fetchedData);
-            },
-            dataset.varSort.disease.sortOrder
-          )
-        );
-      }
-    } else if (dataset.varSort.disease.sort === VAR_SORT.NAME) {
-      setSortedDiseaseVars(
-        _.orderBy(diseaseVars, "name", dataset.varSort.disease.sortOrder)
-      );
-    } else {
-      setSortedDiseaseVars(diseaseVars);
-    }
-  }, [
-    dataset.varSort.disease.sort,
-    dataset.varSort.disease.sortOrder,
-    diseaseVars,
-    varMeans.fetchedData,
-    varMeans.isPending,
-    varMeans.serverError,
-  ]);
-
-  const diseaseVarList = _.map(sortedDiseaseVars, (item) => {
-    return makeListItem(item, true);
-  });
-
-  const isPending =
-    diseaseData.isPending ||
-    (varMeans.isPending && dataset.varSort.disease.sort === VAR_SORT.MATRIX);
-
-  return (
-    <>
-      {dataset.selectedDisease &&
-        (!isPending && !diseaseVars?.length ? (
-          <>
-            <div className="d-flex justify-content-between mt-3">
-              <h5>Disease genes</h5>
-            </div>
-            <Alert variant="light">No disease genes found.</Alert>
-          </>
-        ) : (
-          <>
-            <div className="d-flex justify-content-between my-2">
-              <h5>Disease genes</h5>
-              <ButtonGroup aria-label="Feature options" size="sm">
-                <Button
-                  variant="info"
-                  onClick={() => {
-                    dispatch({
-                      type: "reset.disease",
-                    });
-                  }}
-                >
-                  <FontAwesomeIcon icon={faTimes} className="me-1" />
-                  Clear
-                </Button>
-              </ButtonGroup>
-            </div>
-            <p>{dataset.selectedDisease?.name}</p>
-            <VarListToolbar varType="disease" />
-            <div className="position-relative">
-              {isPending && <LoadingSpinner />}
-              <ListGroup variant="flush" className="cherita-list">
-                {diseaseVarList}
-              </ListGroup>
-            </div>
-          </>
-        ))}
-    </>
-  );
-}
-
 export function VarNamesList({
   mode = SELECTION_MODES.SINGLE,
   displayName = "genes",
-  showDiseaseVarList = true,
 }) {
   const dataset = useDataset();
   const dispatch = useDatasetDispatch();
@@ -390,9 +273,6 @@ export function VarNamesList({
               </div>
             </>
           )}
-        </>
-        <>
-          {showDiseaseVarList && <DiseaseVarList makeListItem={makeListItem} />}
         </>
       </div>
     </div>
