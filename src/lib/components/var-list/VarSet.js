@@ -20,7 +20,10 @@ import {
 
 import { SingleSelectionItem } from "./VarItem";
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { SearchModal } from "../search-bar/SearchBar";
 
 // @TODO: add button to score genes and plot
@@ -104,7 +107,6 @@ function SingleSelectionSet({
                 e.stopPropagation();
                 setShowModal(true);
               }}
-              disabled={!set.vars.length}
               title="Add to set"
             >
               <FontAwesomeIcon icon={faPlus} />
@@ -182,8 +184,8 @@ function MultipleSelectionSet({ set, isActive, toggleSet }) {
 }
 
 export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
 
   const selectSet = () => {
     if (mode === SELECTION_MODES.SINGLE) {
@@ -219,8 +221,8 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
       }
     }
     dispatch({
-      type: "remove.varSet",
-      varSet: set,
+      type: "remove.var",
+      var: set,
     });
   };
 
@@ -233,14 +235,10 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
   };
 
   const toggleSet = () => {
-    if (active.includes(set.name)) {
-      dispatch({
-        type: "deselect.multivar",
-        var: set,
-      });
-    } else {
-      selectSet();
-    }
+    dispatch({
+      type: "toggle.multivar",
+      var: set,
+    });
   };
 
   if (set && mode === SELECTION_MODES.SINGLE) {
@@ -248,7 +246,7 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
       <SingleSelectionSet
         set={set}
         isActive={
-          dataset.colorEncoding === COLOR_ENCODINGS.VAR && active === set.name
+          settings.colorEncoding === COLOR_ENCODINGS.VAR && active === set.name
         }
         selectSet={selectSet}
         removeSet={removeSet}
@@ -260,7 +258,7 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
       <MultipleSelectionSet
         set={set}
         isActive={_.includes(active, set.name)}
-        toggleSet={() => toggleSet(set)}
+        toggleSet={toggleSet}
       />
     );
   } else {

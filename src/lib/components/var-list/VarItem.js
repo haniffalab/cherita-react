@@ -7,8 +7,12 @@ import _ from "lodash";
 import { Button, Collapse, ListGroup, Table } from "react-bootstrap";
 
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { Histogram } from "../../utils/Histogram";
 import { useDebouncedFetch, useFetch } from "../../utils/requests";
 import { VirtualizedList } from "../../utils/VirtualizedList";
@@ -16,10 +20,11 @@ import { VirtualizedList } from "../../utils/VirtualizedList";
 function VarHistogram({ item }) {
   const ENDPOINT = "var/histograms";
   const dataset = useDataset();
+  const settings = useSettings();
   const { obsIndices } = useFilteredData();
   // @TODO: consider using Filter's isSliced; would trigger more re-renders/requests
   // const { obsIndices, isSliced } = useFilteredData();
-  const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
+  const isSliced = settings.sliceBy.obs || settings.sliceBy.polygons;
   const [params, setParams] = useState({
     url: dataset.url,
     varKey: item.matrix_index,
@@ -51,20 +56,9 @@ function VarHistogram({ item }) {
 }
 
 function VarDiseaseInfoItem(item) {
-  const dispatch = useDatasetDispatch();
   return (
     <ListGroup.Item key={item.disease_id} className="feature-disease-info">
-      <button
-        type="button"
-        className="btn btn-link disease-link"
-        onClick={() => {
-          dispatch({
-            type: "select.disease",
-            id: item.disease_id,
-            name: item.disease_name,
-          });
-        }}
-      >
+      <button type="button" className="btn btn-link disease-link">
         {item.disease_name}
       </button>
       <Table striped size="sm" responsive>
@@ -225,12 +219,11 @@ function MultipleSelectionItem({ item, isActive, toggleVar }) {
 export function VarItem({
   item,
   active,
-  setVarButtons,
   mode = SELECTION_MODES.SINGLE,
   isDiseaseGene = false,
 }) {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
 
   const selectVar = () => {
     if (mode === SELECTION_MODES.SINGLE) {
@@ -255,8 +248,9 @@ export function VarItem({
   };
 
   const removeVar = () => {
-    setVarButtons((b) => {
-      return b.filter((i) => i.name !== item.name);
+    dispatch({
+      type: "remove.var",
+      var: item,
     });
     if (mode === SELECTION_MODES.SINGLE) {
       if (active === item.matrix_index) {
@@ -275,14 +269,10 @@ export function VarItem({
   };
 
   const toggleVar = () => {
-    if (active.includes(item.matrix_index)) {
-      dispatch({
-        type: "deselect.multivar",
-        var: item,
-      });
-    } else {
-      selectVar(item);
-    }
+    dispatch({
+      type: "toggle.multivar",
+      var: item,
+    });
   };
 
   if (item && mode === SELECTION_MODES.SINGLE) {
@@ -290,7 +280,7 @@ export function VarItem({
       <SingleSelectionItem
         item={item}
         isActive={
-          dataset.colorEncoding === COLOR_ENCODINGS.VAR &&
+          settings.colorEncoding === COLOR_ENCODINGS.VAR &&
           active === item.matrix_index
         }
         selectVar={selectVar}
