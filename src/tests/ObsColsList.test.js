@@ -1,31 +1,50 @@
 import React from "react";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 
+import { Wrapper } from "./setupTests";
 import { ObsColsList } from "../lib/components/obs-list/ObsList";
-
-// Mock the context or props
-const mockDataset = {
-  selectedObs: { name: "mockName" },
-};
-
-const mockDispatch = jest.fn();
-
-jest.mock("../lib/context/DatasetContext", () => ({
-  useDataset: () => mockDataset,
-  useDatasetDispatch: () => mockDispatch,
-}));
-
-const queryClient = new QueryClient();
+import { useFetch } from "../lib/utils/requests";
 
 test("renders ObsColsList component", () => {
-  render(
-    <QueryClientProvider client={queryClient}>
-      <ObsColsList />
-    </QueryClientProvider>
-  );
+  useFetch.mockReturnValue({
+    fetchedData: null,
+    isPending: true,
+    serverError: null,
+  });
+
+  render(<ObsColsList />, { wrapper: Wrapper });
   const element = screen.getByRole("progressbar");
+  expect(element).toBeInTheDocument();
+});
+
+test("fetches data and renders ObsColsList", async () => {
+  const mockData = [
+    {
+      codes: {
+        False: 0,
+        True: 1,
+      },
+      n_values: 2,
+      name: "boolean",
+      type: "boolean",
+      value_counts: {
+        False: 10,
+        True: 5,
+      },
+      values: ["False", "True"],
+    },
+  ];
+
+  useFetch.mockReturnValue({
+    fetchedData: mockData,
+    isPending: false,
+    serverError: null,
+  });
+
+  render(<ObsColsList />, { wrapper: Wrapper });
+
+  const element = await screen.findByText("boolean");
   expect(element).toBeInTheDocument();
 });

@@ -28,9 +28,13 @@ import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Dropdown from "react-bootstrap/Dropdown";
 
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useDataset } from "../../context/DatasetContext";
 import { OffcanvasControls } from "../offcanvas";
 import { ScatterplotControls } from "./ScatterplotControls";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 
 export function SpatialControls({
   mode,
@@ -45,8 +49,8 @@ export function SpatialControls({
   setShowVars,
   isFullscreen,
 }) {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
   const [showControls, setShowControls] = useState(false);
 
   const handleCloseControls = () => setShowControls(false);
@@ -89,7 +93,7 @@ export function SpatialControls({
   const polygonControls = (
     <>
       <Button
-        active={dataset.sliceBy.polygons}
+        active={settings.sliceBy.polygons}
         title="Filter data with polygons"
         onClick={() => {
           setMode(() => ViewMode);
