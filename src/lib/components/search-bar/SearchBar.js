@@ -30,8 +30,8 @@ function onVarSelect(dispatch, item) {
 
 function addVarSet(dispatch, { name, vars }) {
   dispatch({
-    type: "add.varSet",
-    varSet: {
+    type: "add.var",
+    var: {
       name: name,
       vars: vars,
       isSet: true,

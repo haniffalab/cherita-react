@@ -18,9 +18,12 @@ import {
   Tooltip,
 } from "react-bootstrap";
 
-import { SingleSelectionItem } from "./VarItem";
+import { SelectionItem } from "./VarItem";
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { SearchModal } from "../search-bar/SearchBar";
 
 // @TODO: add button to score genes and plot
@@ -33,12 +36,13 @@ const addVarToSet = (dispatch, set, v) => {
   });
 };
 
-function SingleSelectionSet({
+function SelectionSet({
   set,
   isActive,
   selectSet,
   removeSet,
   removeSetVar,
+  isMultiple = false,
 }) {
   const [openSet, setOpenSet] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -48,7 +52,7 @@ function SingleSelectionSet({
     _.map(set.vars, (v) => {
       return (
         <ListGroup.Item key={v.name}>
-          <SingleSelectionItem
+          <SelectionItem
             item={v}
             showSetColorEncoding={false}
             removeVar={() => removeSetVar(v)}
@@ -104,7 +108,6 @@ function SingleSelectionSet({
                 e.stopPropagation();
                 setShowModal(true);
               }}
-              disabled={!set.vars.length}
               title="Add to set"
             >
               <FontAwesomeIcon icon={faPlus} />
@@ -121,6 +124,9 @@ function SingleSelectionSet({
               title="Set as color encoding"
             >
               <FontAwesomeIcon icon={faDroplet} />
+              {isMultiple && (
+                <FontAwesomeIcon icon={faPlus} size="xs" className="ps-xs-1" />
+              )}
             </Button>
             <Button
               type="button"
@@ -160,30 +166,9 @@ function SingleSelectionSet({
   );
 }
 
-function MultipleSelectionSet({ set, isActive, toggleSet }) {
-  return (
-    <>
-      <div className="d-flex">
-        <div className="flex-grow-1">
-          <Button
-            type="button"
-            key={set.name}
-            variant={isActive ? "primary" : "outline-primary"}
-            className="m-0 p-0 px-1"
-            onClick={toggleSet}
-            title={set.name}
-          >
-            {set.name}
-          </Button>
-        </div>
-      </div>
-    </>
-  );
-}
-
 export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
 
   const selectSet = () => {
     if (mode === SELECTION_MODES.SINGLE) {
@@ -219,8 +204,8 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
       }
     }
     dispatch({
-      type: "remove.varSet",
-      varSet: set,
+      type: "remove.var",
+      var: set,
     });
   };
 
@@ -233,22 +218,18 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
   };
 
   const toggleSet = () => {
-    if (active.includes(set.name)) {
-      dispatch({
-        type: "deselect.multivar",
-        var: set,
-      });
-    } else {
-      selectSet();
-    }
+    dispatch({
+      type: "toggle.multivar",
+      var: set,
+    });
   };
 
   if (set && mode === SELECTION_MODES.SINGLE) {
     return (
-      <SingleSelectionSet
+      <SelectionSet
         set={set}
         isActive={
-          dataset.colorEncoding === COLOR_ENCODINGS.VAR && active === set.name
+          settings.colorEncoding === COLOR_ENCODINGS.VAR && active === set.name
         }
         selectSet={selectSet}
         removeSet={removeSet}
@@ -257,10 +238,13 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
     );
   } else if (mode === SELECTION_MODES.MULTIPLE) {
     return (
-      <MultipleSelectionSet
+      <SelectionSet
         set={set}
         isActive={_.includes(active, set.name)}
-        toggleSet={() => toggleSet(set)}
+        selectSet={toggleSet}
+        removeSet={removeSet}
+        removeSetVar={(v) => removeSetVar(v)}
+        isMultiple={true}
       />
     );
   } else {
