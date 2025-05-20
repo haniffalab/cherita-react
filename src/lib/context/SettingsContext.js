@@ -17,6 +17,10 @@ import {
 export const SettingsContext = createContext(null);
 export const SettingsDispatchContext = createContext(null);
 
+// @TODO: consider splitting constant values and dataset-resolved values
+// e.g. store only obs name in selectedObs, and resolved obs data (counts, values, etc.) elsewhere
+// e.g. store only var name in selectedVar, and resolved var data (index, matrix_index) elsewhere
+// would simplify passing and validating defaultSettings and localSettings
 const initialSettings = {
   selectedObs: null,
   selectedVar: null,
@@ -52,14 +56,62 @@ const initialSettings = {
   },
 };
 
+// validate on initialization and reducer
+const validateSettings = (settings) => {
+  // make sure selectedVar is in vars
+  if (settings.selectedVar) {
+    const inVars = _.some(
+      settings.vars,
+      (v) => v.name === settings.selectedVar.name
+    );
+    if (!inVars) {
+      settings.vars = [...settings.vars, settings.selectedVar];
+    }
+  }
+
+  // make sure selectedMultiVar are in vars
+  if (settings.selectedMultiVar) {
+    const notInVars = _.differenceBy(
+      settings.selectedMultiVar,
+      settings.vars,
+      "name"
+    );
+    if (notInVars.length) {
+      settings.vars = [...settings.vars, ...notInVars];
+    }
+  }
+
+  // make sure there's a selectedVar if colorEncoding is VAR
+  if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
+    if (!settings.selectedVar) {
+      settings.colorEncoding = null;
+    } else if (
+      settings.selectedVar.isSet &&
+      !settings.selectedVar.vars.length
+    ) {
+      settings.selectedVar = null;
+      settings.colorEncoding = null;
+    }
+  }
+
+  // make sure there's a selectedObs if colorEncoding is OBS
+  if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
+    if (!settings.selectedObs) {
+      settings.colorEncoding = null;
+    }
+  }
+  return settings;
+};
+
 const initializer = ({
   canOverrideSettings,
   defaultSettings,
   localSettings,
 }) => {
-  return canOverrideSettings
+  const mergedSettings = canOverrideSettings
     ? _.assign({}, initialSettings, defaultSettings, localSettings)
     : _.assign({}, initialSettings, defaultSettings);
+  return validateSettings(mergedSettings);
 };
 
 export function SettingsProvider({
@@ -142,86 +194,72 @@ function settingsReducer(settings, action) {
       return { ...settings, selectedObsm: action.obsm };
     }
     case "select.var": {
-      if (settings.vars.find((v) => _.isEqual(v, action.var))) {
-        return { ...settings, selectedVar: action.var };
-      } else {
-        return {
-          ...settings,
-          selectedVar: action.var,
-          vars: [...settings.vars, action.var],
-        };
-      }
+      return validateSettings({
+        ...settings,
+        selectedVar: action.var,
+      });
     }
     case "select.multivar": {
-      const vars = settings.vars.find((v) => _.isEqual(v, action.var))
-        ? settings.vars
-        : [...settings.vars, action.var];
-      if (settings.selectedMultiVar.find((v) => _.isEqual(v, action.var))) {
-        return { ...settings, vars: vars };
+      const inMultiVar = settings.selectedMultiVar.some(
+        (v) => v.name === action.var.name
+      );
+      if (inMultiVar) {
+        return validateSettings({ ...settings });
       } else {
-        return {
+        return validateSettings({
           ...settings,
           selectedMultiVar: [...settings.selectedMultiVar, action.var],
-          vars: vars,
-        };
+        });
       }
     }
     case "deselect.multivar": {
-      return {
+      return validateSettings({
         ...settings,
         selectedMultiVar: settings.selectedMultiVar.filter(
           (v) => v !== action.var.name
         ),
-      };
+      });
     }
     case "toggle.multivar": {
       const inMultiVar = settings.selectedMultiVar.some(
         (v) => v.name === action.var.name
       );
       if (inMultiVar) {
-        return {
+        return validateSettings({
           ...settings,
           selectedMultiVar: settings.selectedMultiVar.filter(
             (v) => v.name !== action.var.name
           ),
-        };
+        });
       } else {
-        return {
+        return validateSettings({
           ...settings,
           selectedMultiVar: [...settings.selectedMultiVar, action.var],
-        };
+        });
       }
     }
     case "set.colorEncoding": {
-      return { ...settings, colorEncoding: action.value };
+      return validateSettings({ ...settings, colorEncoding: action.value });
     }
     case "reset.vars": {
-      return {
+      return validateSettings({
         ...settings,
         vars: [],
         selectedVar: null,
         selectedMultiVar: [],
-      };
+      });
     }
     case "reset.multiVar": {
-      return {
+      return validateSettings({
         ...settings,
         selectedMultiVar: [],
-        colorEncoding:
-          settings.colorEncoding === COLOR_ENCODINGS.VAR
-            ? null
-            : settings.colorEncoding,
-      };
+      });
     }
     case "reset.var": {
-      return {
+      return validateSettings({
         ...settings,
         selectedVar: null,
-        colorEncoding:
-          settings.colorEncoding === COLOR_ENCODINGS.VAR
-            ? null
-            : settings.colorEncoding,
-      };
+      });
     }
     case "add.var": {
       if (settings.vars.find((v) => v.name === action.var.name)) {
@@ -238,12 +276,12 @@ function settingsReducer(settings, action) {
       const selectedMultiVar = settings.selectedMultiVar.filter(
         (v) => v.name !== action.var.name
       );
-      return {
+      return validateSettings({
         ...settings,
         vars: settings.vars.filter((a) => a.name !== action.var.name),
         selectedVar: selectedVar,
         selectedMultiVar: selectedMultiVar,
-      };
+      });
     }
     case "add.varSet.var": {
       const varSet = settings.vars.find(
@@ -274,12 +312,12 @@ function settingsReducer(settings, action) {
             return v;
           }
         });
-        return {
+        return validateSettings({
           ...settings,
           vars: vars,
           selectedVar: selectedVar,
           selectedMultiVar: selectedMultiVar,
-        };
+        });
       }
     }
     case "remove.varSet.var": {
@@ -311,12 +349,12 @@ function settingsReducer(settings, action) {
           const selectedMultiVar = settings.selectedMultiVar.filter(
             (v) => v.name !== action.varSet.name
           );
-          return {
+          return validateSettings({
             ...settings,
             vars: vars,
             selectedVar: selectedVar,
             selectedMultiVar: selectedMultiVar,
-          };
+          });
         } else {
           // Update selected if varSet is selected
           const selectedVar =
@@ -330,12 +368,12 @@ function settingsReducer(settings, action) {
               return v;
             }
           });
-          return {
+          return validateSettings({
             ...settings,
             vars: vars,
             selectedVar: selectedVar,
             selectedMultiVar: selectedMultiVar,
-          };
+          });
         }
       }
     }
