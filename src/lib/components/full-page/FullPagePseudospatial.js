@@ -4,6 +4,11 @@ import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Button, Card, Container, Modal } from "react-bootstrap";
 
+import dotPlotIcon from "../../../assets/images/plots/dotplot.svg";
+import heatmapPlotIcon from "../../../assets/images/plots/heatmap.svg";
+import matrixPlotIcon from "../../../assets/images/plots/matrixplot.svg";
+import scatterPlotIcon from "../../../assets/images/plots/umap.svg";
+import violinPlotIcon from "../../../assets/images/plots/violin.svg";
 import { SELECTION_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
 import { ObsColsList } from "../obs-list/ObsList";
@@ -84,10 +89,36 @@ export function FullPage({
           </div>
           <div className="cherita-app-sidebar p-3">
             <Card>
-              <Card.Header className="d-flex justify-content-evenly align-items-center">
+              <Card.Header className="d-flex justify-content-evenly align-items-center p-0">
                 <Button variant="link" onClick={() => setShowModal(true)}>
                   <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
                 </Button>
+                <img src={dotPlotIcon} alt="Dotplot" height={32} width={32} />
+
+                <img
+                  src={matrixPlotIcon}
+                  alt="Matrixplot"
+                  height={32}
+                  width={32}
+                />
+                <img
+                  src={violinPlotIcon}
+                  alt="Violin Plot"
+                  height={32}
+                  width={32}
+                />
+                <img
+                  src={scatterPlotIcon}
+                  alt="Scatterplot"
+                  height={32}
+                  width={32}
+                />
+                <img
+                  src={heatmapPlotIcon}
+                  alt="Heatmap"
+                  height={32}
+                  width={32}
+                />
               </Card.Header>
               <Card.Body className="d-flex flex-column p-0">
                 <div className="sidebar-pseudospatial">
