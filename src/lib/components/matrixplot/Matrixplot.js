@@ -32,7 +32,7 @@ export function Matrixplot() {
       i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
     ),
     obsIndices: isSliced ? [...(obsIndices || [])] : null,
-    standardScale: settings.controls.standardScale,
+    standardScale: settings.controls.scale.matrixplot,
     varNamesCol: dataset.varNamesCol,
   });
 
@@ -59,12 +59,12 @@ export function Matrixplot() {
             : i.index
         ),
         obsIndices: isSliced ? [...(obsIndices || [])] : null,
-        standardScale: settings.controls.standardScale,
+        standardScale: settings.controls.scale.matrixplot,
         varNamesCol: dataset.varNamesCol,
       };
     });
   }, [
-    settings.controls.standardScale,
+    settings.controls.scale.matrixplot,
     settings.selectedMultiVar,
     settings.selectedObs,
     dataset.url,

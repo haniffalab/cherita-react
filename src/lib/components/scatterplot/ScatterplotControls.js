@@ -1,15 +1,14 @@
 import React, { useEffect } from "react";
 
 import { Box, Slider, Typography } from "@mui/material";
-import _ from "lodash";
-import { Dropdown } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 
-import { COLORSCALES } from "../../constants/colorscales";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
 import {
   useSettings,
   useSettingsDispatch,
 } from "../../context/SettingsContext";
+import { ColorscaleSelect } from "../controls/Controls";
 
 export const ScatterplotControls = () => {
   const settings = useSettings();
@@ -22,21 +21,6 @@ export const ScatterplotControls = () => {
     settings.colorEncoding === COLOR_ENCODINGS.OBS
       ? settings.selectedObs?.type === OBS_TYPES.CATEGORICAL
       : false;
-
-  const colormapList = _.keys(COLORSCALES).map((key) => (
-    <Dropdown.Item
-      key={key}
-      active={settings.controls.colorScale === key}
-      onClick={() => {
-        dispatch({
-          type: "set.controls.colorScale",
-          colorScale: key,
-        });
-      }}
-    >
-      {key}
-    </Dropdown.Item>
-  ));
 
   const valueLabelFormat = (value) => {
     return (
@@ -72,32 +56,31 @@ export const ScatterplotControls = () => {
       <Typography id="colorscale-range" gutterBottom>
         Colorscale range
       </Typography>
-      <Slider
-        aria-labelledby="colorscale-range"
-        min={0}
-        max={1}
-        step={0.001}
-        value={sliderValue}
-        onChange={updateSlider}
-        onChangeCommitted={updateRange}
-        valueLabelDisplay="auto"
-        getAriaValueText={valueLabelFormat}
-        valueLabelFormat={valueLabelFormat}
-        marks={marks}
-        disabled={isCategorical}
-      />
+      <div className="px-4">
+        <Slider
+          aria-labelledby="colorscale-range"
+          min={0}
+          max={1}
+          step={0.001}
+          value={sliderValue}
+          onChange={updateSlider}
+          onChangeCommitted={updateRange}
+          valueLabelDisplay="auto"
+          getAriaValueText={valueLabelFormat}
+          valueLabelFormat={valueLabelFormat}
+          marks={marks}
+          disabled={isCategorical}
+        />
+      </div>
     </Box>
   );
 
   return (
-    <div>
-      <Dropdown>
-        <Dropdown.Toggle id="dropdownColorscale" variant="light">
-          {settings.controls.colorScale}
-        </Dropdown.Toggle>
-        <Dropdown.Menu>{colormapList}</Dropdown.Menu>
-      </Dropdown>
-      <div className="m-4">{rangeSlider}</div>
-    </div>
+    <>
+      <Form>
+        <ColorscaleSelect />
+        <Form.Group className="mb-2">{rangeSlider}</Form.Group>
+      </Form>
+    </>
   );
 };

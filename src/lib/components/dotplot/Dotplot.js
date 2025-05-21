@@ -36,7 +36,7 @@ export function Dotplot() {
       i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
     ),
     obsIndices: isSliced ? [...(obsIndices || [])] : null,
-    standardScale: settings.controls.standardScale,
+    standardScale: settings.controls.scale.dotplot,
     meanOnlyExpressed: settings.controls.meanOnlyExpressed,
     expressionCutoff: settings.controls.expressionCutoff,
     varNamesCol: dataset.varNamesCol,
@@ -66,7 +66,7 @@ export function Dotplot() {
             : i.index
         ),
         obsIndices: isSliced ? [...(obsIndices || [])] : null,
-        standardScale: settings.controls.standardScale,
+        standardScale: settings.controls.scale.dotplot,
         meanOnlyExpressed: settings.controls.meanOnlyExpressed,
         expressionCutoff: settings.controls.expressionCutoff,
         varNamesCol: dataset.varNamesCol,
@@ -76,7 +76,7 @@ export function Dotplot() {
     dataset.url,
     settings.selectedObs,
     settings.selectedMultiVar,
-    settings.controls.standardScale,
+    settings.controls.scale.dotplot,
     settings.controls.meanOnlyExpressed,
     settings.controls.expressionCutoff,
     dataset.varNamesCol,
