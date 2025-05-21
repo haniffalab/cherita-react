@@ -120,15 +120,10 @@ export function VarNamesList({
     settings.vars,
   ]);
 
-  const makeListItem = (item, isDiseaseGene = false) => {
+  const makeListItem = (item) => {
     return (
       <ListGroup.Item key={item.matrix_index}>
-        <VarItem
-          item={item}
-          active={active}
-          mode={mode}
-          isDiseaseGene={isDiseaseGene}
-        />
+        <VarItem item={item} active={active} mode={mode} />
       </ListGroup.Item>
     );
   };

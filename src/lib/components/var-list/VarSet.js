@@ -18,7 +18,7 @@ import {
   Tooltip,
 } from "react-bootstrap";
 
-import { SingleSelectionItem } from "./VarItem";
+import { SelectionItem } from "./VarItem";
 import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
 import {
   useSettings,
@@ -36,12 +36,13 @@ const addVarToSet = (dispatch, set, v) => {
   });
 };
 
-function SingleSelectionSet({
+function SelectionSet({
   set,
   isActive,
   selectSet,
   removeSet,
   removeSetVar,
+  isMultiple = false,
 }) {
   const [openSet, setOpenSet] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -51,7 +52,7 @@ function SingleSelectionSet({
     _.map(set.vars, (v) => {
       return (
         <ListGroup.Item key={v.name}>
-          <SingleSelectionItem
+          <SelectionItem
             item={v}
             showSetColorEncoding={false}
             removeVar={() => removeSetVar(v)}
@@ -123,6 +124,9 @@ function SingleSelectionSet({
               title="Set as color encoding"
             >
               <FontAwesomeIcon icon={faDroplet} />
+              {isMultiple && (
+                <FontAwesomeIcon icon={faPlus} size="xs" className="ps-xs-1" />
+              )}
             </Button>
             <Button
               type="button"
@@ -158,27 +162,6 @@ function SingleSelectionSet({
         searchVar={true}
         searchDiseases={false}
       />
-    </>
-  );
-}
-
-function MultipleSelectionSet({ set, isActive, toggleSet }) {
-  return (
-    <>
-      <div className="d-flex">
-        <div className="flex-grow-1">
-          <Button
-            type="button"
-            key={set.name}
-            variant={isActive ? "primary" : "outline-primary"}
-            className="m-0 p-0 px-1"
-            onClick={toggleSet}
-            title={set.name}
-          >
-            {set.name}
-          </Button>
-        </div>
-      </div>
     </>
   );
 }
@@ -243,7 +226,7 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
 
   if (set && mode === SELECTION_MODES.SINGLE) {
     return (
-      <SingleSelectionSet
+      <SelectionSet
         set={set}
         isActive={
           settings.colorEncoding === COLOR_ENCODINGS.VAR && active === set.name
@@ -255,10 +238,13 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
     );
   } else if (mode === SELECTION_MODES.MULTIPLE) {
     return (
-      <MultipleSelectionSet
+      <SelectionSet
         set={set}
         isActive={_.includes(active, set.name)}
-        toggleSet={toggleSet}
+        selectSet={toggleSet}
+        removeSet={removeSet}
+        removeSetVar={(v) => removeSetVar(v)}
+        isMultiple={true}
       />
     );
   } else {

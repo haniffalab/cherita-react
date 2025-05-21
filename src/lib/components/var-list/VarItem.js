@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-import { faDroplet, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faDroplet, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MoreVert } from "@mui/icons-material";
 import _ from "lodash";
@@ -15,7 +15,6 @@ import {
 } from "../../context/SettingsContext";
 import { Histogram } from "../../utils/Histogram";
 import { useDebouncedFetch, useFetch } from "../../utils/requests";
-import { VirtualizedList } from "../../utils/VirtualizedList";
 
 function VarHistogram({ item }) {
   const ENDPOINT = "var/histograms";
@@ -90,24 +89,22 @@ function VarDiseaseInfoItem(item) {
 
 export function VarDiseaseInfo({ data }) {
   return (
-    <VirtualizedList
-      getDataAtIndex={(index) => data[index]}
-      count={data.length}
-      estimateSize={140}
-      maxHeight="40vh"
-      ItemComponent={VarDiseaseInfoItem}
-    />
+    <ListGroup className="feature-disease-info-list">
+      {data.map((item) => {
+        return <VarDiseaseInfoItem key={item.disease_id} {...item} />;
+      })}
+    </ListGroup>
   );
 }
 
-export function SingleSelectionItem({
+export function SelectionItem({
   item,
   isActive,
   selectVar,
   removeVar,
-  isDiseaseGene = false,
   showSetColorEncoding = true,
   showRemove = true,
+  isMultiple = false,
 }) {
   const ENDPOINT = "disease/gene";
   const [openInfo, setOpenInfo] = useState(false);
@@ -140,7 +137,7 @@ export function SingleSelectionItem({
 
           <div className="d-flex align-items-center gap-1">
             {hasDiseaseInfo && <MoreVert />}
-            {!isDiseaseGene && <VarHistogram item={item} />}
+            <VarHistogram item={item} />
             {showSetColorEncoding && (
               <Button
                 type="button"
@@ -163,9 +160,16 @@ export function SingleSelectionItem({
                 }
               >
                 <FontAwesomeIcon icon={faDroplet} />
+                {isMultiple && (
+                  <FontAwesomeIcon
+                    icon={faPlus}
+                    size="xs"
+                    className="ps-xs-1"
+                  />
+                )}
               </Button>
             )}
-            {(!isDiseaseGene || !showRemove) && (
+            {showRemove && (
               <Button
                 type="button"
                 className="m-0 p-0 px-1"
@@ -193,35 +197,7 @@ export function SingleSelectionItem({
   );
 }
 
-function MultipleSelectionItem({ item, isActive, toggleVar }) {
-  const isNotInData = item.matrix_index === -1;
-  return (
-    <>
-      <div className="d-flex">
-        <div className="flex-grow-1">
-          <Button
-            type="button"
-            key={item.matrix_index}
-            variant={isActive ? "primary" : "outline-primary"}
-            className="m-0 p-0 px-1"
-            onClick={toggleVar}
-            disabled={isNotInData}
-            title={isNotInData ? "Not present in data" : item.name}
-          >
-            {item.name}
-          </Button>
-        </div>
-      </div>
-    </>
-  );
-}
-
-export function VarItem({
-  item,
-  active,
-  mode = SELECTION_MODES.SINGLE,
-  isDiseaseGene = false,
-}) {
+export function VarItem({ item, active, mode = SELECTION_MODES.SINGLE }) {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
 
@@ -277,7 +253,7 @@ export function VarItem({
 
   if (item && mode === SELECTION_MODES.SINGLE) {
     return (
-      <SingleSelectionItem
+      <SelectionItem
         item={item}
         isActive={
           settings.colorEncoding === COLOR_ENCODINGS.VAR &&
@@ -285,112 +261,21 @@ export function VarItem({
         }
         selectVar={selectVar}
         removeVar={removeVar}
-        isDiseaseGene={isDiseaseGene}
       />
     );
   } else if (mode === SELECTION_MODES.MULTIPLE) {
     return (
-      <MultipleSelectionItem
+      <SelectionItem
         item={item}
         isActive={
           item.matrix_index !== -1 && _.includes(active, item.matrix_index)
         }
-        toggleVar={toggleVar}
+        selectVar={toggleVar}
+        removeVar={removeVar}
+        isMultiple={true}
       />
     );
   } else {
     return null;
   }
-}
-
-export function SearchResultItem({
-  item,
-  isActive,
-  selectVar,
-  removeVar,
-  isDiseaseGene = false,
-  showSetColorEncoding = true,
-  showRemove = true,
-}) {
-  const ENDPOINT = "disease/gene";
-  const [openInfo, setOpenInfo] = useState(false);
-  const dataset = useDataset();
-  const params = {
-    geneName: item.name,
-    diseaseDatasets: dataset.diseaseDatasets,
-  };
-  const isNotInData = item.matrix_index === -1;
-
-  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
-    refetchOnMount: false,
-    enabled: !!dataset.diseaseDatasets.length,
-  });
-
-  const hasDiseaseInfo = !isPending && !serverError && !!fetchedData?.length;
-
-  return (
-    <>
-      <div
-        className={`d-flex justify-content-between ${
-          hasDiseaseInfo ? "cursor-pointer" : ""
-        }`}
-        onClick={() => {
-          setOpenInfo((o) => !o);
-        }}
-      >
-        <div className="d-flex justify-content-between align-items-center w-100">
-          <div>{item.name}</div>
-
-          <div className="d-flex align-items-center gap-1">
-            {hasDiseaseInfo && <MoreVert />}
-            {showSetColorEncoding && (
-              <Button
-                type="button"
-                key={item.matrix_index}
-                variant={
-                  isActive
-                    ? "primary"
-                    : isNotInData
-                      ? "outline-secondary"
-                      : "outline-primary"
-                }
-                className="m-0 p-0 px-1"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  selectVar();
-                }}
-                disabled={isNotInData}
-                title={
-                  isNotInData ? "Not present in data" : "Set as color encoding"
-                }
-              >
-                <FontAwesomeIcon icon={faDroplet} />
-              </Button>
-            )}
-            {(!isDiseaseGene || !showRemove) && (
-              <Button
-                type="button"
-                className="m-0 p-0 px-1"
-                variant="outline-secondary"
-                title="Remove from list"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeVar();
-                }}
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-      {hasDiseaseInfo && (
-        <Collapse in={openInfo}>
-          <div className="mt-2 var-disease-info-collapse">
-            <VarDiseaseInfo data={fetchedData} />
-          </div>
-        </Collapse>
-      )}
-    </>
-  );
 }
