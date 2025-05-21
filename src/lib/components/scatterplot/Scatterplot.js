@@ -62,10 +62,8 @@ export function Scatterplot({
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [isRendering, setIsRendering] = useState(true);
   const [data, setData] = useState({
-    ids: [],
     positions: [],
     values: [],
-    sliceValues: [],
   });
   const [radiusScale, setRadiusScale] = useState(radius || 1);
 
@@ -138,6 +136,36 @@ export function Scatterplot({
     return { latitude, longitude, zoom };
   }, [data.positions]);
 
+  // @TODO: needs optimization
+  const { sortedData, sortedObsIndices, getOriginalIndex } = useMemo(() => {
+    if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
+      if (data.positions && data.values) {
+        const sortedIndices = data.values
+          .map((_, i) => i)
+          .sort((a, b) => data.values[a] - data.values[b]);
+        const sortedObsIndices = obsIndices
+          ? new Set(
+              _.map([...obsIndices], (i) => {
+                return _.indexOf(sortedIndices, i);
+              })
+            )
+          : obsIndices;
+        return {
+          sortedData: _.mapValues(data, (v, k) => {
+            return v ? _.at(v, sortedIndices) : v;
+          }),
+          sortedObsIndices: sortedObsIndices,
+          getOriginalIndex: (i) => sortedIndices[i],
+        };
+      }
+    }
+    return {
+      sortedData: data,
+      sortedObsIndices: obsIndices,
+      getOriginalIndex: (i) => i,
+    };
+  }, [data, obsIndices, settings.colorEncoding]);
+
   useEffect(() => {
     if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
       setIsRendering(true);
@@ -170,19 +198,6 @@ export function Scatterplot({
       } else if (!obsData.isPending && obsData.serverError) {
         setData((d) => {
           return { ...d, values: [] };
-        });
-      }
-    } else if (
-      settings.colorEncoding === COLOR_ENCODINGS.VAR &&
-      settings.sliceBy.obs
-    ) {
-      if (!obsData.isPending && !obsData.serverError) {
-        setData((d) => {
-          return { ...d, sliceValues: obsData.data };
-        });
-      } else if (!obsData.isPending && obsData.serverError) {
-        setData((d) => {
-          return { ...d, sliceValues: [] };
         });
       }
     }
@@ -219,25 +234,25 @@ export function Scatterplot({
 
   const getFillColor = useCallback(
     (_d, { index }) => {
-      const grayOut = obsIndices && !obsIndices.has(index);
+      const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
       return (
         getColor({
-          value: (data.values[index] - min) / (max - min),
+          value: (sortedData.values[index] - min) / (max - min),
           categorical: isCategorical,
           grayOut: grayOut,
         }) || [0, 0, 0, 100]
       );
     },
-    [data.values, obsIndices, getColor, isCategorical, max, min]
+    [sortedData.values, sortedObsIndices, getColor, isCategorical, max, min]
   );
 
   // @TODO: add support for pseudospatial hover to reflect in radius
   const getRadius = useCallback(
     (_d, { index }) => {
-      const grayOut = obsIndices && !obsIndices.has(index);
+      const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
       return grayOut ? 1 : 3;
     },
-    [obsIndices]
+    [sortedObsIndices]
   );
 
   const memoizedLayers = useMemo(() => {
@@ -245,7 +260,7 @@ export function Scatterplot({
       new ScatterplotLayer({
         id: "cherita-layer-scatterplot",
         pickable: true,
-        data: data.positions,
+        data: sortedData.positions,
         radiusScale: radiusScale,
         radiusMinPixels: 1,
         getPosition: (d) => d,
@@ -289,7 +304,7 @@ export function Scatterplot({
       }),
     ];
   }, [
-    data.positions,
+    sortedData.positions,
     features,
     getFillColor,
     getRadius,
@@ -348,28 +363,36 @@ export function Scatterplot({
       settings.selectedObs &&
       !_.some(settings.labelObs, { name: settings.selectedObs.name })
     ) {
-      text.push(getLabel(settings.selectedObs, obsData.data?.[index]));
+      text.push(
+        getLabel(settings.selectedObs, obsData.data?.[getOriginalIndex(index)])
+      );
     }
 
     if (
       settings.colorEncoding === COLOR_ENCODINGS.VAR &&
       settings.selectedVar
     ) {
-      text.push(getLabel(settings.selectedVar, xData.data?.[index], true));
+      text.push(
+        getLabel(
+          settings.selectedVar,
+          xData.data?.[getOriginalIndex(index)],
+          true
+        )
+      );
     }
 
     if (settings.labelObs.length) {
       text.push(
         ..._.map(labelObsData.data, (v, k) => {
           const labelObs = _.find(settings.labelObs, (o) => o.name === k);
-          return getLabel(labelObs, v[index]);
+          return getLabel(labelObs, v[getOriginalIndex(index)]);
         })
       );
     }
 
     if (!text.length) return;
 
-    const grayOut = obsIndices && !obsIndices.has(index);
+    const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
 
     return {
       text: text.length ? _.compact(text).join("\n") : null,
