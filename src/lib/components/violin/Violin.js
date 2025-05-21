@@ -6,13 +6,29 @@ import _ from "lodash";
 import { Alert, OverlayTrigger, Tooltip } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
-import { VIOLIN_MODES } from "../../constants/constants";
+import {
+  PLOTLY_MODEBAR_BUTTONS,
+  VIOLIN_MODES,
+} from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
+import {
+  ControlsPlotlyToolbar,
+  ObsPlotlyToolbar,
+  VarPlotlyToolbar,
+} from "../toolbar/Toolbar";
 
-export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
+export function Violin({
+  mode = VIOLIN_MODES.MULTIKEY,
+  showObsBtn = false,
+  showVarsBtn = false,
+  showCtrlsBtn = false,
+  setShowObs,
+  setShowVars,
+  setShowControls,
+}) {
   const ENDPOINT = "violin";
   const dataset = useDataset();
   const { obsIndices, isSliced } = useFilteredData();
@@ -135,16 +151,30 @@ export function Violin({ mode = VIOLIN_MODES.MULTIKEY }) {
     }
   }, [fetchedData, hasSelections, isPending, serverError]);
 
+  const customModeBarButtons = _.compact([
+    showObsBtn && ObsPlotlyToolbar({ onClick: setShowObs }),
+    showVarsBtn && VarPlotlyToolbar({ onClick: setShowVars }),
+    showCtrlsBtn && ControlsPlotlyToolbar({ onClick: setShowControls }),
+  ]);
+
+  const modeBarButtons = customModeBarButtons.length
+    ? [customModeBarButtons, PLOTLY_MODEBAR_BUTTONS]
+    : [PLOTLY_MODEBAR_BUTTONS];
+
   if (!serverError) {
     if (hasSelections) {
       return (
-        <div className="cherita-violin position-relative">
+        <div className="cherita-plot cherita-violin position-relative">
           {isPending && <LoadingSpinner />}
           <Plot
             data={data}
             layout={layout}
             useResizeHandler={true}
-            style={{ maxWidth: "100%", maxHeight: "100%" }}
+            style={{ width: "100%", height: "100%" }}
+            config={{
+              displaylogo: false,
+              modeBarButtons: modeBarButtons,
+            }}
           />
           {fetchedData?.resampled && (
             <Alert variant="warning">
