@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
 import _ from "lodash";
 import { slice } from "zarr";
@@ -15,19 +15,14 @@ export const useObsmData = (obsm = null) => {
 
   obsm = obsm || settings.selectedObsm;
 
-  const [obsmParams, setObsmParams] = useState({
-    url: dataset.url,
-    path: "obsm/" + obsm,
-    s: [null, slice(null, 2)], // load only [:, :2]
-  });
-
-  useEffect(() => {
-    setObsmParams({
+  const obsmParams = useMemo(
+    () => ({
       url: dataset.url,
       path: "obsm/" + obsm,
-      s: [null, slice(null, 2)],
-    });
-  }, [dataset.url, obsm]);
+      s: [null, slice(null, 2)], // load only [:, :2]
+    }),
+    [dataset.url, obsm]
+  );
 
   return useZarr(obsmParams, GET_OPTIONS, { enabled: !!obsm });
 };
@@ -40,24 +35,8 @@ export const useXData = (agg = meanData) => {
   const dataset = useDataset();
   const settings = useSettings();
 
-  const [xParams, setXParams] = useState(
-    !settings.selectedVar
-      ? []
-      : !settings.selectedVar?.isSet
-        ? [
-            {
-              url: dataset.url,
-              path: "X",
-              s: [null, settings.selectedVar?.matrix_index],
-            },
-          ]
-        : _.map(settings.selectedVar?.vars, (v) => {
-            return { url: dataset.url, path: "X", s: [null, v.matrix_index] };
-          })
-  );
-
-  useEffect(() => {
-    setXParams(
+  const xParams = useMemo(
+    () =>
       !settings.selectedVar
         ? []
         : !settings.selectedVar?.isSet
@@ -70,9 +49,9 @@ export const useXData = (agg = meanData) => {
             ]
           : _.map(settings.selectedVar?.vars, (v) => {
               return { url: dataset.url, path: "X", s: [null, v.matrix_index] };
-            })
-    );
-  }, [dataset.url, settings.selectedVar]);
+            }),
+    [dataset.url, settings.selectedVar]
+  );
 
   return useMultipleZarr(
     xParams,
@@ -88,23 +67,16 @@ export const useObsData = (obs = null) => {
 
   obs = obs || settings.selectedObs;
 
-  const [obsParams, setObsParams] = useState({
-    url: dataset.url,
-    path:
-      "obs/" +
-      obs?.name +
-      (obs?.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
-  });
-
-  useEffect(() => {
-    setObsParams({
+  const obsParams = useMemo(
+    () => ({
       url: dataset.url,
       path:
         "obs/" +
         obs?.name +
         (obs?.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
-    });
-  }, [dataset.url, obs]);
+    }),
+    [dataset.url, obs?.name, obs?.type]
+  );
 
   return useZarr(obsParams, GET_OPTIONS, { enabled: !!obs });
 };
@@ -113,21 +85,8 @@ export const useLabelObsData = () => {
   const dataset = useDataset();
   const settings = useSettings();
 
-  const [labelObsParams, setLabelObsParams] = useState(
-    _.map(settings.labelObs, (obs) => {
-      return {
-        url: dataset.url,
-        path:
-          "obs/" +
-          obs.name +
-          (obs.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
-        key: obs.name,
-      };
-    })
-  );
-
-  useEffect(() => {
-    setLabelObsParams(
+  const labelObsParams = useMemo(
+    () =>
       _.map(settings.labelObs, (obs) => {
         return {
           url: dataset.url,
@@ -137,9 +96,9 @@ export const useLabelObsData = () => {
             (obs.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
           key: obs.name,
         };
-      })
-    );
-  }, [settings.labelObs, dataset.url]);
+      }),
+    [dataset.url, settings.labelObs]
+  );
 
   return useMultipleZarr(labelObsParams, GET_OPTIONS, {
     enabled: !!labelObsParams.length,
