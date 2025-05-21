@@ -136,35 +136,34 @@ export function Scatterplot({
     return { latitude, longitude, zoom };
   }, [data.positions]);
 
-  // @TODO: needs optimization
-  const { sortedData, sortedObsIndices, getOriginalIndex } = useMemo(() => {
+  const { sortedData, getOriginalIndex, sortedIndexMap } = useMemo(() => {
     if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
       if (data.positions && data.values) {
         const sortedIndices = data.values
           .map((_, i) => i)
           .sort((a, b) => data.values[a] - data.values[b]);
-        const sortedObsIndices = obsIndices
-          ? new Set(
-              _.map([...obsIndices], (i) => {
-                return _.indexOf(sortedIndices, i);
-              })
-            )
-          : obsIndices;
+        const sortedIndexMap = new Map(sortedIndices.map((oi, i) => [oi, i]));
         return {
           sortedData: _.mapValues(data, (v, k) => {
             return v ? _.at(v, sortedIndices) : v;
           }),
-          sortedObsIndices: sortedObsIndices,
           getOriginalIndex: (i) => sortedIndices[i],
+          sortedIndexMap: sortedIndexMap,
         };
       }
     }
     return {
       sortedData: data,
-      sortedObsIndices: obsIndices,
       getOriginalIndex: (i) => i,
+      sortedIndexMap: { get: (key) => key }, // identity map
     };
-  }, [data, obsIndices, settings.colorEncoding]);
+  }, [data, settings.colorEncoding]);
+
+  const sortedObsIndices = useMemo(() => {
+    return obsIndices
+      ? new Set(Array.from(obsIndices, (i) => sortedIndexMap.get(i)))
+      : obsIndices;
+  }, [obsIndices, sortedIndexMap]);
 
   useEffect(() => {
     if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
