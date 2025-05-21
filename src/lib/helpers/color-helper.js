@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 import { COLORSCALES } from "../constants/colorscales";
-import { useDataset } from "../context/DatasetContext";
+import { useSettings } from "../context/SettingsContext";
 
 const GRAY = [214, 212, 212];
 
@@ -44,7 +44,7 @@ export const rgbToHex = (color) => {
 };
 
 export const useColor = () => {
-  const dataset = useDataset();
+  const settings = useSettings();
 
   const getColor = useCallback(
     ({
@@ -52,12 +52,12 @@ export const useColor = () => {
       categorical = false,
       grayOut = false,
       grayParams: { alpha = 0.75, gray = 0.95 } = {},
-      colorEncoding = dataset.colorEncoding,
+      colorEncoding = settings.colorEncoding,
       colorscale = null,
     }) => {
       const colormap =
         colorscale ||
-        COLORSCALES[categorical ? "Accent" : dataset.controls.colorScale];
+        COLORSCALES[categorical ? "Accent" : settings.controls.colorScale];
       if (colorEncoding) {
         if (grayOut) {
           // Mix color with gray manually instead of chroma.mix to get better performance with deck.gl
@@ -75,7 +75,7 @@ export const useColor = () => {
         return null;
       }
     },
-    [dataset.colorEncoding, dataset.controls.colorScale]
+    [settings.colorEncoding, settings.controls.colorScale]
   );
 
   return { getColor };

@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
 import { Button, ListGroup } from "react-bootstrap";
 
-import { useDatasetDispatch } from "../../context/DatasetContext";
+import { useSettingsDispatch } from "../../context/SettingsContext";
 import { useDiseaseSearch, useVarSearch } from "../../utils/search";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 
@@ -17,7 +17,7 @@ export function VarSearchResults({
   setResultsLength,
 }) {
   const [suggestions, setSuggestions] = useState([]);
-  const dispatch = useDatasetDispatch();
+  const dispatch = useSettingsDispatch();
 
   const {
     setParams,
@@ -121,8 +121,6 @@ export function DiseasesSearchResults({
   setResultsLength,
 }) {
   const [suggestions, setSuggestions] = useState([]);
-  const dispatch = useDatasetDispatch();
-
   const {
     setParams,
     data: { fetchedData = [], isPending, serverError },
@@ -163,11 +161,6 @@ export function DiseasesSearchResults({
           key={item.name}
           onClick={() => {
             setSelectedResult(item);
-            dispatch({
-              type: "select.disease",
-              id: item.disease_id,
-              name: item.disease_name,
-            });
           }}
           active={selectedResult?.id === item.id}
         >

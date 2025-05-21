@@ -4,16 +4,19 @@ import _ from "lodash";
 import { Dropdown } from "react-bootstrap";
 
 import { COLORSCALES } from "../../constants/colorscales";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 
 export function HeatmapControls() {
-  const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
 
   const colormapList = _.keys(COLORSCALES).map((key) => (
     <Dropdown.Item
       key={key}
-      active={dataset.controls.colorScale === key}
+      active={settings.controls.colorScale === key}
       onClick={() => {
         dispatch({
           type: "set.controls.colorScale",
@@ -28,7 +31,7 @@ export function HeatmapControls() {
   return (
     <Dropdown>
       <Dropdown.Toggle id="dropdownColorscale" variant="light">
-        {dataset.controls.colorScale}
+        {settings.controls.colorScale}
       </Dropdown.Toggle>
       <Dropdown.Menu>{colormapList}</Dropdown.Menu>
     </Dropdown>

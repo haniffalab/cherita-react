@@ -6,27 +6,29 @@ import Plot from "react-plotly.js";
 
 import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
+import { useSettings } from "../../context/SettingsContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 
 export function Heatmap() {
   const ENDPOINT = "heatmap";
   const dataset = useDataset();
+  const settings = useSettings();
   const { obsIndices, isSliced } = useFilteredData();
-  const colorscale = useRef(dataset.controls.colorScale);
+  const colorscale = useRef(settings.controls.colorScale);
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
   const [params, setParams] = useState({
     url: dataset.url,
-    obsCol: dataset.selectedObs,
-    obsValues: !dataset.selectedObs?.omit.length
+    obsCol: settings.selectedObs,
+    obsValues: !settings.selectedObs?.omit.length
       ? null
       : _.difference(
-          _.values(dataset.selectedObs?.codes),
-          dataset.selectedObs?.omit
-        ).map((c) => dataset.selectedObs?.codesMap[c]),
-    varKeys: dataset.selectedMultiVar.map((i) =>
+          _.values(settings.selectedObs?.codes),
+          settings.selectedObs?.omit
+        ).map((c) => settings.selectedObs?.codesMap[c]),
+    varKeys: settings.selectedMultiVar.map((i) =>
       i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
     ),
     obsIndices: isSliced ? [...(obsIndices || [])] : null,
@@ -34,7 +36,7 @@ export function Heatmap() {
   });
 
   useEffect(() => {
-    if (dataset.selectedObs && dataset.selectedMultiVar.length) {
+    if (settings.selectedObs && settings.selectedMultiVar.length) {
       setHasSelections(true);
     } else {
       setHasSelections(false);
@@ -43,14 +45,14 @@ export function Heatmap() {
       return {
         ...p,
         url: dataset.url,
-        obsCol: dataset.selectedObs,
-        obsValues: !dataset.selectedObs?.omit.length
+        obsCol: settings.selectedObs,
+        obsValues: !settings.selectedObs?.omit.length
           ? null
           : _.difference(
-              _.values(dataset.selectedObs?.codes),
-              dataset.selectedObs?.omit
-            ).map((c) => dataset.selectedObs?.codesMap[c]),
-        varKeys: dataset.selectedMultiVar.map((i) =>
+              _.values(settings.selectedObs?.codes),
+              settings.selectedObs?.omit
+            ).map((c) => settings.selectedObs?.codesMap[c]),
+        varKeys: settings.selectedMultiVar.map((i) =>
           i.isSet
             ? { name: i.name, indices: i.vars.map((v) => v.index) }
             : i.index
@@ -60,8 +62,8 @@ export function Heatmap() {
       };
     });
   }, [
-    dataset.selectedMultiVar,
-    dataset.selectedObs,
+    settings.selectedMultiVar,
+    settings.selectedObs,
     dataset.url,
     dataset.varNamesCol,
     obsIndices,
@@ -93,9 +95,9 @@ export function Heatmap() {
   }, [fetchedData, hasSelections, isPending, serverError, updateColorscale]);
 
   useEffect(() => {
-    colorscale.current = dataset.controls.colorScale;
+    colorscale.current = settings.controls.colorScale;
     updateColorscale(colorscale.current);
-  }, [dataset.controls.colorScale, updateColorscale]);
+  }, [settings.controls.colorScale, updateColorscale]);
 
   if (!serverError) {
     if (hasSelections) {
