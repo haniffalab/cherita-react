@@ -62,6 +62,11 @@ export function Scatterplot({
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [isRendering, setIsRendering] = useState(true);
   const [radiusScale, setRadiusScale] = useState(radius || 1);
+  const [isPending, setIsPending] = useState(false);
+  const [data, setData] = useState({
+    positions: [],
+    values: [],
+  });
 
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
@@ -88,25 +93,29 @@ export function Scatterplot({
     [radius]
   );
 
-  const { data, isPending } = useMemo(() => {
-    let isPending = false;
+  useEffect(() => {
     if (
       obsmData.isPending ||
       (settings.colorEncoding === COLOR_ENCODINGS.VAR && xData.isPending) ||
       (settings.colorEncoding === COLOR_ENCODINGS.OBS && obsData.isPending)
     ) {
-      isPending = true;
+      setIsPending(true);
+    } else {
+      setIsPending(false);
+      setData((d) => ({
+        positions: !obsmData.serverError ? obsmData.data : d.positions,
+        values:
+          settings.colorEncoding === COLOR_ENCODINGS.VAR
+            ? !xData.serverError
+              ? xData.data
+              : d.values
+            : settings.colorEncoding === COLOR_ENCODINGS.OBS
+              ? !obsData.serverError
+                ? obsData.data
+                : d.values
+              : d.values,
+      }));
     }
-    const positions =
-      !obsmData.isPending && !obsmData.serverError ? obsmData.data : [];
-    let values = [];
-    if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
-      values = !xData.isPending && !xData.serverError ? xData.data : [];
-    }
-    if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
-      values = !obsData.isPending && !obsData.serverError ? obsData.data : [];
-    }
-    return { data: { positions, values }, isPending };
   }, [
     obsData.data,
     obsData.isPending,
@@ -167,11 +176,11 @@ export function Scatterplot({
       data.values &&
       data.positions.length === data.values.length
     ) {
-      const sortedIndices = data.values
-        .map((_, i) => i)
-        .sort((a, b) => data.values[a] - data.values[b]);
+      const sortedIndices = _.map(data.values, (_v, i) => i).sort(
+        (a, b) => data.values[a] - data.values[b]
+      );
       const sortedIndexMap = new Map(
-        sortedIndices.map((originalIndex, sortedIndex) => [
+        _.map(sortedIndices, (originalIndex, sortedIndex) => [
           originalIndex,
           sortedIndex,
         ])
@@ -227,7 +236,8 @@ export function Scatterplot({
 
   const getFillColor = useCallback(
     (_d, { index }) => {
-      const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
+      const grayOut =
+        isPending || (sortedObsIndices && !sortedObsIndices.has(index));
       return (
         getColor({
           value: (sortedData.values[index] - min) / (max - min),
@@ -236,7 +246,15 @@ export function Scatterplot({
         }) || [0, 0, 0, 100]
       );
     },
-    [sortedData.values, sortedObsIndices, getColor, isCategorical, max, min]
+    [
+      isPending,
+      sortedObsIndices,
+      getColor,
+      sortedData.values,
+      min,
+      max,
+      isCategorical,
+    ]
   );
 
   // @TODO: add support for pseudospatial hover to reflect in radius
