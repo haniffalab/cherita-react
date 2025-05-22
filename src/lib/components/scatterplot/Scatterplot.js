@@ -113,8 +113,25 @@ export function Scatterplot({
   ]);
 
   useEffect(() => {
-    if (data.positions && !!data.positions.length) {
+    if (
+      obsmData.isPending ||
+      (settings.colorEncoding === COLOR_ENCODINGS.VAR && xData.isPending) ||
+      (settings.colorEncoding === COLOR_ENCODINGS.OBS && obsData.isPending)
+    ) {
       setIsRendering(true);
+    }
+  }, [
+    obsData.isPending,
+    obsmData.isPending,
+    settings.colorEncoding,
+    settings.selectedObs,
+    settings.selectedObsm,
+    settings.selectedVar,
+    xData.isPending,
+  ]);
+
+  useEffect(() => {
+    if (data.positions && !!data.positions.length) {
       const mapHelper = new MapHelper();
       const { latitude, longitude, zoom, bounds } = mapHelper.fitBounds(
         data.positions,
@@ -127,8 +144,6 @@ export function Scatterplot({
       setViewState((v) => {
         return { ...v, longitude: longitude, latitude: latitude, zoom: zoom };
       });
-    } else if (!obsmData.isPending && obsmData.serverError) {
-      setIsRendering(true);
     }
   }, [
     settings.selectedObsm,
@@ -393,10 +408,6 @@ export function Scatterplot({
     };
   };
 
-  const isPending =
-    (isRendering || xData.isPending || obsmData.isPending) &&
-    !obsmData.isPending;
-
   const error =
     (settings.selectedObsm && obsmData.serverError?.length) ||
     (settings.colorEncoding === COLOR_ENCODINGS.VAR &&
@@ -409,7 +420,7 @@ export function Scatterplot({
     <div className="cherita-container-scatterplot">
       <div className="cherita-scatterplot">
         {obsmData.isPending && <LoadingSpinner disableShrink={true} />}
-        {isPending && <LoadingLinear />}
+        {isRendering && <LoadingLinear />}
         <DeckGL
           viewState={viewState}
           onViewStateChange={(e) => setViewState(e.viewState)}
@@ -441,7 +452,7 @@ export function Scatterplot({
         />
         <div className="cherita-spatial-footer">
           <div className="cherita-toolbox-footer">
-            {error && !isPending && (
+            {error && !isRendering && (
               <Alert variant="danger">
                 <FontAwesomeIcon icon={faTriangleExclamation} />
                 &nbsp;Error loading data
