@@ -61,10 +61,6 @@ export function Scatterplot({
   const deckRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [isRendering, setIsRendering] = useState(true);
-  const [data, setData] = useState({
-    positions: [],
-    values: [],
-  });
   const [radiusScale, setRadiusScale] = useState(radius || 1);
 
   // EditableGeoJsonLayer
@@ -92,15 +88,36 @@ export function Scatterplot({
     [radius]
   );
 
+  const data = useMemo(() => {
+    const positions =
+      !obsmData.isPending && !obsmData.serverError ? obsmData.data : [];
+    let values = [];
+    if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
+      values = !xData.isPending && !xData.serverError ? xData.data : [];
+    }
+    if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
+      values = !obsData.isPending && !obsData.serverError ? obsData.data : [];
+    }
+    return { positions, values };
+  }, [
+    obsData.data,
+    obsData.isPending,
+    obsData.serverError,
+    obsmData.data,
+    obsmData.isPending,
+    obsmData.serverError,
+    settings.colorEncoding,
+    xData.data,
+    xData.isPending,
+    xData.serverError,
+  ]);
+
   useEffect(() => {
-    if (!obsmData.isPending && !obsmData.serverError) {
+    if (data.positions && !!data.positions.length) {
       setIsRendering(true);
-      setData((d) => {
-        return { ...d, positions: obsmData.data };
-      });
       const mapHelper = new MapHelper();
       const { latitude, longitude, zoom, bounds } = mapHelper.fitBounds(
-        obsmData.data,
+        data.positions,
         {
           width: deckRef?.current?.deck?.width,
           height: deckRef?.current?.deck?.height,
@@ -112,9 +129,6 @@ export function Scatterplot({
       });
     } else if (!obsmData.isPending && obsmData.serverError) {
       setIsRendering(true);
-      setData((d) => {
-        return { ...d, positions: [] };
-      });
     }
   }, [
     settings.selectedObsm,
@@ -122,6 +136,7 @@ export function Scatterplot({
     obsmData.data,
     obsmData.isPending,
     obsmData.serverError,
+    data.positions,
   ]);
 
   const getBounds = useCallback(() => {
@@ -181,49 +196,6 @@ export function Scatterplot({
       ? new Set(Array.from(obsIndices, (i) => sortedIndexMap.get(i)))
       : obsIndices;
   }, [obsIndices, sortedIndexMap]);
-
-  useEffect(() => {
-    if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
-      setIsRendering(true);
-      if (!xData.isPending && !xData.serverError) {
-        // @TODO: add condition to check obs slicing
-        setData((d) => {
-          return { ...d, values: xData.data };
-        });
-      } else if (!xData.isPending && xData.serverError) {
-        setData((d) => {
-          return { ...d, values: [] };
-        });
-      }
-    }
-  }, [
-    settings.colorEncoding,
-    xData.data,
-    xData.isPending,
-    xData.serverError,
-    getColor,
-  ]);
-
-  useEffect(() => {
-    if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
-      setIsRendering(true);
-      if (!obsData.isPending && !obsData.serverError) {
-        setData((d) => {
-          return { ...d, values: obsData.data };
-        });
-      } else if (!obsData.isPending && obsData.serverError) {
-        setData((d) => {
-          return { ...d, values: [] };
-        });
-      }
-    }
-  }, [
-    settings.colorEncoding,
-    obsData.data,
-    obsData.isPending,
-    obsData.serverError,
-    settings.sliceBy.obs,
-  ]);
 
   const isCategorical = useMemo(() => {
     if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
@@ -380,7 +352,7 @@ export function Scatterplot({
       !_.some(settings.labelObs, { name: settings.selectedObs.name })
     ) {
       text.push(
-        getLabel(settings.selectedObs, obsData.data?.[getOriginalIndex(index)])
+        getLabel(settings.selectedObs, data.values?.[getOriginalIndex(index)])
       );
     }
 
@@ -391,7 +363,7 @@ export function Scatterplot({
       text.push(
         getLabel(
           settings.selectedVar,
-          xData.data?.[getOriginalIndex(index)],
+          data.values?.[getOriginalIndex(index)],
           true
         )
       );
@@ -483,7 +455,7 @@ export function Scatterplot({
                     ? settings.selectedObs?.name
                     : null
               }
-              obsLength={parseInt(obsmData.data?.length)}
+              obsLength={parseInt(data.positions?.length)}
               slicedLength={parseInt(slicedLength)}
             />
           </div>
