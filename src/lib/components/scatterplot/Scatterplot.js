@@ -102,19 +102,18 @@ export function Scatterplot({
       setIsPending(true);
     } else {
       setIsPending(false);
-      setData((d) => ({
-        positions: !obsmData.serverError ? obsmData.data : d.positions,
-        values:
-          settings.colorEncoding === COLOR_ENCODINGS.VAR
-            ? !xData.serverError
-              ? xData.data
-              : d.values
-            : settings.colorEncoding === COLOR_ENCODINGS.OBS
-              ? !obsData.serverError
-                ? obsData.data
-                : d.values
-              : d.values,
-      }));
+      setData((d) => {
+        let values = d.values;
+        if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
+          values = !xData.serverError ? xData.data : values;
+        } else if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
+          values = !obsData.serverError ? obsData.data : values;
+        }
+        return {
+          positions: !obsmData.serverError ? obsmData.data : d.positions,
+          values: values,
+        };
+      });
     }
   }, [
     obsData.data,
