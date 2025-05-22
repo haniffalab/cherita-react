@@ -88,7 +88,15 @@ export function Scatterplot({
     [radius]
   );
 
-  const data = useMemo(() => {
+  const { data, isPending } = useMemo(() => {
+    let isPending = false;
+    if (
+      obsmData.isPending ||
+      (settings.colorEncoding === COLOR_ENCODINGS.VAR && xData.isPending) ||
+      (settings.colorEncoding === COLOR_ENCODINGS.OBS && obsData.isPending)
+    ) {
+      isPending = true;
+    }
     const positions =
       !obsmData.isPending && !obsmData.serverError ? obsmData.data : [];
     let values = [];
@@ -98,7 +106,7 @@ export function Scatterplot({
     if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
       values = !obsData.isPending && !obsData.serverError ? obsData.data : [];
     }
-    return { positions, values };
+    return { data: { positions, values }, isPending };
   }, [
     obsData.data,
     obsData.isPending,
@@ -110,24 +118,6 @@ export function Scatterplot({
     xData.data,
     xData.isPending,
     xData.serverError,
-  ]);
-
-  useEffect(() => {
-    if (
-      obsmData.isPending ||
-      (settings.colorEncoding === COLOR_ENCODINGS.VAR && xData.isPending) ||
-      (settings.colorEncoding === COLOR_ENCODINGS.OBS && obsData.isPending)
-    ) {
-      setIsRendering(true);
-    }
-  }, [
-    obsData.isPending,
-    obsmData.isPending,
-    settings.colorEncoding,
-    settings.selectedObs,
-    settings.selectedObsm,
-    settings.selectedVar,
-    xData.isPending,
   ]);
 
   useEffect(() => {
@@ -420,7 +410,7 @@ export function Scatterplot({
     <div className="cherita-container-scatterplot">
       <div className="cherita-scatterplot">
         {obsmData.isPending && <LoadingSpinner disableShrink={true} />}
-        {isRendering && <LoadingLinear />}
+        {isPending && <LoadingLinear />}
         <DeckGL
           viewState={viewState}
           onViewStateChange={(e) => setViewState(e.viewState)}
