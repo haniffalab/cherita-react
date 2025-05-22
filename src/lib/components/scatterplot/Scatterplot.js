@@ -170,7 +170,9 @@ export function Scatterplot({
 
   const { sortedData, getOriginalIndex, sortedIndexMap } = useMemo(() => {
     if (
-      settings.colorEncoding === COLOR_ENCODINGS.VAR &&
+      (settings.colorEncoding === COLOR_ENCODINGS.VAR ||
+        (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
+          settings.selectedObs?.type === OBS_TYPES.CONTINUOUS)) &&
       data.positions &&
       data.values &&
       data.positions.length === data.values.length
@@ -202,6 +204,7 @@ export function Scatterplot({
     identityGetOriginalIndex,
     identitySortedIndexMap,
     settings.colorEncoding,
+    settings.selectedObs?.type,
   ]);
 
   const sortedObsIndices = useMemo(() => {
