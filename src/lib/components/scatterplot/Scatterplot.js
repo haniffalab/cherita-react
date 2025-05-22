@@ -136,28 +136,45 @@ export function Scatterplot({
     return { latitude, longitude, zoom };
   }, [data.positions]);
 
+  // Make stable references for getOriginalIndex and sortedIndexMap
+  const identityGetOriginalIndex = useCallback((i) => i, []);
+  const identitySortedIndexMap = useMemo(() => ({ get: (key) => key }), []);
+
   const { sortedData, getOriginalIndex, sortedIndexMap } = useMemo(() => {
-    if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
-      if (data.positions && data.values) {
-        const sortedIndices = data.values
-          .map((_, i) => i)
-          .sort((a, b) => data.values[a] - data.values[b]);
-        const sortedIndexMap = new Map(sortedIndices.map((oi, i) => [oi, i]));
-        return {
-          sortedData: _.mapValues(data, (v, k) => {
-            return v ? _.at(v, sortedIndices) : v;
-          }),
-          getOriginalIndex: (i) => sortedIndices[i],
-          sortedIndexMap: sortedIndexMap,
-        };
-      }
+    if (
+      settings.colorEncoding === COLOR_ENCODINGS.VAR &&
+      data.positions &&
+      data.values &&
+      data.positions.length === data.values.length
+    ) {
+      const sortedIndices = data.values
+        .map((_, i) => i)
+        .sort((a, b) => data.values[a] - data.values[b]);
+      const sortedIndexMap = new Map(
+        sortedIndices.map((originalIndex, sortedIndex) => [
+          originalIndex,
+          sortedIndex,
+        ])
+      );
+      return {
+        sortedData: _.mapValues(data, (v, _k) => {
+          return v ? _.at(v, sortedIndices) : v;
+        }),
+        getOriginalIndex: (i) => sortedIndices[i],
+        sortedIndexMap: sortedIndexMap,
+      };
     }
     return {
       sortedData: data,
-      getOriginalIndex: (i) => i,
-      sortedIndexMap: { get: (key) => key }, // identity map
+      getOriginalIndex: identityGetOriginalIndex, // return original index
+      sortedIndexMap: identitySortedIndexMap, // return original index
     };
-  }, [data, settings.colorEncoding]);
+  }, [
+    data,
+    identityGetOriginalIndex,
+    identitySortedIndexMap,
+    settings.colorEncoding,
+  ]);
 
   const sortedObsIndices = useMemo(() => {
     return obsIndices
