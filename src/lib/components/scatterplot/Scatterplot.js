@@ -424,7 +424,7 @@ export function Scatterplot({
       xData.serverError?.length) ||
     (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
       obsData.serverError?.length) ||
-    (settings.labelObs.lengh && labelObsData.serverError?.length);
+    (settings.labelObs.length && labelObsData.serverError?.length);
 
   return (
     <div className="cherita-container-scatterplot">
