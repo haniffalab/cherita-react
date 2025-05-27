@@ -52,7 +52,11 @@ const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
   );
 };
 
-export function ObsColsList({ showColor = true, enableObsGroups = true }) {
+export function ObsColsList({
+  showColor = true,
+  enableObsGroups = true,
+  showSelectedAsActive = false,
+}) {
   const ENDPOINT = "obs/cols";
   const dataset = useDataset();
   const settings = useSettings();
@@ -190,7 +194,8 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     const inSliceObs =
       settings.sliceBy.obs && settings.selectedObs?.name === item.name;
     const isColorEncoding =
-      settings.colorEncoding === COLOR_ENCODINGS.OBS &&
+      (showSelectedAsActive ||
+        settings.colorEncoding === COLOR_ENCODINGS.OBS) &&
       settings.selectedObs?.name === item.name;
     return (
       <div className="accordion-item" key={item.name}>
@@ -226,7 +231,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
                 event.stopPropagation();
                 toggleColor(item);
               }}
-              title="Is color encoding"
+              title={showSelectedAsActive ? "Is selected" : "Is color encoding"}
             >
               <WaterDropIcon />
             </span>
