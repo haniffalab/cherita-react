@@ -155,6 +155,7 @@ export function FullPagePlots(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
+      showSelectedAsActive={true}
       renderItem={() => (
         <div className="container-fluid w-100 h-100 d-flex flex-column overflow-y-auto">
           <div className="row flex-grow-1">
@@ -180,6 +181,7 @@ export function FullPageDotplot(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
+      showSelectedAsActive={true}
       Controls={DotplotControls}
       renderItem={(props) => <Dotplot {...props} />}
     />
@@ -191,6 +193,7 @@ export function FullPageHeatmap(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
+      showSelectedAsActive={true}
       Controls={HeatmapControls}
       renderItem={(props) => <Heatmap {...props} />}
     />
@@ -202,6 +205,7 @@ export function FullPageMatrixplot(props) {
     <FullPage
       {...props}
       varMode={SELECTION_MODES.MULTIPLE}
+      showSelectedAsActive={true}
       Controls={MatrixplotControls}
       renderItem={(props) => <Matrixplot {...props} />}
     />
