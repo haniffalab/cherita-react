@@ -154,8 +154,10 @@ function CategoricalItem({
   histogramData = { data: null, isPending: false, altColor: false },
   filteredStats = { value_counts: null, pct: null },
   isSliced,
+  colors = null,
   showColor = true,
 }) {
+  const { useUnsColors } = useDataset();
   const { getColor } = useColor();
 
   return (
@@ -261,6 +263,7 @@ function CategoricalItem({
                       grayOut: isOmitted,
                       grayParams: { alpha: 1 },
                       colorEncoding: "obs",
+                      ...(useUnsColors ? { colorscale: colors } : {}),
                     })})`}
                   />
                 </svg>
@@ -312,20 +315,22 @@ export function CategoricalObs({
           pct: filteredObsData?.pct[obs.values[index]] || 0,
         },
         isSliced: isSliced,
+        colors: obs.colors,
       };
     },
     [
-      settings.colorEncoding,
-      filteredObsData?.pct,
-      filteredObsData?.value_counts,
-      isSliced,
-      obs.codes,
-      obs.omit,
-      obs.value_counts,
       obs.values,
+      obs.codes,
+      obs.value_counts,
+      obs.omit,
+      obs.colors,
+      totalCounts,
+      settings.colorEncoding,
       obsHistograms.fetchedData,
       obsHistograms.isPending,
-      totalCounts,
+      isSliced,
+      filteredObsData?.value_counts,
+      filteredObsData?.pct,
     ]
   );
 
