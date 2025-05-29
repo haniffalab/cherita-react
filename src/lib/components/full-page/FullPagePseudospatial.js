@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Button, Card, Container, Modal, Nav, Navbar } from "react-bootstrap";
+import { Button, Card, Container, Modal } from "react-bootstrap";
 
 import { SELECTION_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
@@ -23,6 +23,7 @@ import { VarNamesList } from "../var-list/VarList";
 export function FullPage({
   children,
   varMode = SELECTION_MODES.SINGLE,
+  searchDiseases = false,
   ...props
 }) {
   const appRef = useRef();
@@ -72,36 +73,15 @@ export function FullPage({
           className="d-flex g-0"
           style={{ height: appDimensions.height }}
         >
-          <Navbar expand="sm" bg="primary" className="cherita-navbar">
-            <div className="container-fluid">
-              <Navbar.Toggle aria-controls="navbarScroll" />
-              <Navbar.Collapse id="navbarScroll">
-                <Nav className="me-auto my-0" navbarScroll>
-                  <Nav.Item className="d-block d-lg-none">
-                    <Nav.Link onClick={() => setShowObs(true)}>
-                      Observations
-                    </Nav.Link>
-                  </Nav.Item>
-                  <Nav.Item>
-                    <Nav.Link onClick={() => setShowVars(true)}>
-                      Features
-                    </Nav.Link>
-                  </Nav.Item>
-                </Nav>
-                <Nav className="d-flex">
-                  <Nav.Item>
-                    <Nav.Link onClick={() => setShowControls(true)}>
-                      Controls
-                    </Nav.Link>
-                  </Nav.Item>
-                </Nav>
-              </Navbar.Collapse>
-            </div>
-          </Navbar>
           <div className="cherita-app-obs modern-scrollbars border-end h-100">
             <ObsColsList {...props} />
           </div>
-          <div className="cherita-app-canvas flex-grow-1">{children}</div>
+          <div className="cherita-app-canvas flex-grow-1">
+            {children({
+              setShowObs,
+              setShowVars,
+            })}
+          </div>
           <div className="cherita-app-sidebar p-3">
             <Card>
               <Card.Header className="d-flex justify-content-evenly align-items-center">
@@ -120,7 +100,7 @@ export function FullPage({
                 </div>
 
                 <div className="sidebar-features modern-scrollbars">
-                  <SearchBar searchDiseases={true} searchVar={true} />
+                  <SearchBar searchDiseases={searchDiseases} searchVar={true} />
                   <VarNamesList mode={varMode} />
                 </div>
               </Card.Body>
@@ -145,6 +125,7 @@ export function FullPage({
           <OffcanvasVars
             show={showVars}
             handleClose={() => setShowVars(false)}
+            mode={varMode}
           />
           <OffcanvasControls
             show={showControls}
@@ -169,8 +150,14 @@ export function FullPage({
 
 export function FullPagePseudospatial(props) {
   return (
-    <FullPage {...props}>
-      <Scatterplot />
+    <FullPage {...props} varMode={SELECTION_MODES.SINGLE}>
+      {({ setShowObs, setShowVars }) => (
+        <Scatterplot
+          setShowObs={setShowObs}
+          setShowVars={setShowVars}
+          isFullscreen={true}
+        />
+      )}
     </FullPage>
   );
 }

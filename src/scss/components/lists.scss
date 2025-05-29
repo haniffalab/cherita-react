@@ -13,6 +13,10 @@
     color: var(--#{$prefix}body-color);
     background-color: var(--#{$prefix}tertiary-bg);
     border-radius: var(--#{$prefix}border-radius);
+    cursor: pointer;
+  }
+  .list-group-item.active {
+    background-color: var(--#{$prefix}secondary-bg);
   }
 }
 .obs-statistics {
@@ -23,4 +27,10 @@
   color: var(--#{$prefix}body-color);
   background-color: var(--#{$prefix}tertiary-bg);
   border-radius: var(--#{$prefix}border-radius);
+}
+
+.cherita-list.var-set-list > .list-group-item {
+  filter: brightness(0.95); // darken background
+  padding-right: 0;
+  padding-left: 0.35rem;
 }

@@ -4,42 +4,47 @@ import _ from "lodash";
 import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 
 export function Dotplot() {
   const ENDPOINT = "dotplot";
   const dataset = useDataset();
+  const settings = useSettings();
   const { obsIndices, isSliced } = useFilteredData();
-  const dispatch = useDatasetDispatch();
-  const colorscale = useRef(dataset.controls.colorScale);
+  const dispatch = useSettingsDispatch();
+  const colorscale = useRef(settings.controls.colorScale);
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
   const [params, setParams] = useState({
     url: dataset.url,
-    obsCol: dataset.selectedObs,
-    obsValues: !dataset.selectedObs?.omit.length
+    obsCol: settings.selectedObs,
+    obsValues: !settings.selectedObs?.omit.length
       ? null
       : _.difference(
-          _.values(dataset.selectedObs?.codes),
-          dataset.selectedObs?.omit
-        ).map((c) => dataset.selectedObs?.codesMap[c]),
-    varKeys: dataset.selectedMultiVar.map((i) =>
+          _.values(settings.selectedObs?.codes),
+          settings.selectedObs?.omit
+        ).map((c) => settings.selectedObs?.codesMap[c]),
+    varKeys: settings.selectedMultiVar.map((i) =>
       i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
     ),
     obsIndices: isSliced ? [...(obsIndices || [])] : null,
-    standardScale: dataset.controls.standardScale,
-    meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
-    expressionCutoff: dataset.controls.expressionCutoff,
+    standardScale: settings.controls.scale.dotplot,
+    meanOnlyExpressed: settings.controls.meanOnlyExpressed,
+    expressionCutoff: settings.controls.expressionCutoff,
     varNamesCol: dataset.varNamesCol,
   });
   // @TODO: set default scale
 
   useEffect(() => {
-    if (dataset.selectedObs && dataset.selectedMultiVar.length) {
+    if (settings.selectedObs && settings.selectedMultiVar.length) {
       setHasSelections(true);
     } else {
       setHasSelections(false);
@@ -48,32 +53,32 @@ export function Dotplot() {
       return {
         ...p,
         url: dataset.url,
-        obsCol: dataset.selectedObs,
-        obsValues: !dataset.selectedObs?.omit.length
+        obsCol: settings.selectedObs,
+        obsValues: !settings.selectedObs?.omit.length
           ? null
           : _.difference(
-              _.values(dataset.selectedObs?.codes),
-              dataset.selectedObs?.omit
-            ).map((c) => dataset.selectedObs?.codesMap[c]),
-        varKeys: dataset.selectedMultiVar.map((i) =>
+              _.values(settings.selectedObs?.codes),
+              settings.selectedObs?.omit
+            ).map((c) => settings.selectedObs?.codesMap[c]),
+        varKeys: settings.selectedMultiVar.map((i) =>
           i.isSet
             ? { name: i.name, indices: i.vars.map((v) => v.index) }
             : i.index
         ),
         obsIndices: isSliced ? [...(obsIndices || [])] : null,
-        standardScale: dataset.controls.standardScale,
-        meanOnlyExpressed: dataset.controls.meanOnlyExpressed,
-        expressionCutoff: dataset.controls.expressionCutoff,
+        standardScale: settings.controls.scale.dotplot,
+        meanOnlyExpressed: settings.controls.meanOnlyExpressed,
+        expressionCutoff: settings.controls.expressionCutoff,
         varNamesCol: dataset.varNamesCol,
       };
     });
   }, [
     dataset.url,
-    dataset.selectedObs,
-    dataset.selectedMultiVar,
-    dataset.controls.standardScale,
-    dataset.controls.meanOnlyExpressed,
-    dataset.controls.expressionCutoff,
+    settings.selectedObs,
+    settings.selectedMultiVar,
+    settings.controls.scale.dotplot,
+    settings.controls.meanOnlyExpressed,
+    settings.controls.expressionCutoff,
     dataset.varNamesCol,
     isSliced,
     obsIndices,
@@ -120,9 +125,9 @@ export function Dotplot() {
   ]);
 
   useEffect(() => {
-    colorscale.current = dataset.controls.colorScale;
+    colorscale.current = settings.controls.colorScale;
     updateColorscale(colorscale.current);
-  }, [dataset.controls.colorScale, updateColorscale]);
+  }, [settings.controls.colorScale, updateColorscale]);
 
   useEffect(() => {
     setLayout((l) => {
@@ -130,12 +135,12 @@ export function Dotplot() {
         ...l,
         coloraxis: {
           ...l.coloraxis,
-          cmin: dataset.controls.colorAxis.cmin,
-          cmax: dataset.controls.colorAxis.cmax,
+          cmin: settings.controls.colorAxis.cmin,
+          cmax: settings.controls.colorAxis.cmax,
         },
       };
     });
-  }, [dataset.controls.colorAxis.cmin, dataset.controls.colorAxis.cmax]);
+  }, [settings.controls.colorAxis.cmin, settings.controls.colorAxis.cmax]);
 
   if (!serverError) {
     if (hasSelections) {
