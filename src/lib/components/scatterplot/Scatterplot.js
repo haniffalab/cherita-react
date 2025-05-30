@@ -69,6 +69,7 @@ export function Scatterplot({
     positions: [],
     values: [],
   });
+  const [coordsError, setCoordsError] = useState(null);
 
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
@@ -111,8 +112,19 @@ export function Scatterplot({
         } else if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
           values = !obsData.serverError ? obsData.data : values;
         }
+        if (!obsmData.serverError && obsmData.data) {
+          if (obsmData.data[0].length !== 2) {
+            setCoordsError("Invalid coordinates. Expected 2D coordinates");
+            return { positions: [], values: [] };
+          }
+          setCoordsError(null);
+          return {
+            positions: obsmData.data,
+            values: values,
+          };
+        }
         return {
-          positions: !obsmData.serverError ? obsmData.data : d.positions,
+          positions: d.positions,
           values: values,
         };
       });
@@ -434,7 +446,8 @@ export function Scatterplot({
       xData.serverError?.length) ||
     (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
       obsData.serverError?.length) ||
-    (settings.labelObs.length && labelObsData.serverError?.length);
+    (settings.labelObs.length && labelObsData.serverError?.length) ||
+    coordsError;
 
   return (
     <div className="cherita-container-scatterplot">
