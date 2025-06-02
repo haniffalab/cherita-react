@@ -1,4 +1,3 @@
-import { DropdownDivider } from "react-bootstrap";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
@@ -30,16 +29,6 @@ export default function Header() {
               Violin
             </Nav.Link>
             <NavDropdown title="Full Page" id="full-page-dropdown">
-              <NavDropdown.Item as={Link} to="full-page">
-                Scatterplot
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="pseudospatial">
-                Pseudospatial
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="plots">
-                All plots
-              </NavDropdown.Item>
-              <DropdownDivider />
               <NavDropdown.Item as={Link} to="full-page/dotplot">
                 Dotplot
               </NavDropdown.Item>
@@ -48,6 +37,9 @@ export default function Header() {
               </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="full-page/matrixplot">
                 Matrixplot
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="full-page/scatterplot">
+                Scatterplot
               </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="full-page/violin">
                 Violin

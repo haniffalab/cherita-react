@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import useMediaQuery from "@mui/material/useMediaQuery";
 import { Card, Container, Modal } from "react-bootstrap";
 
 import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
 import { Dotplot } from "../dotplot/Dotplot";
 import { DotplotControls } from "../dotplot/DotplotControls";
+import { PlotTypeSelector } from "../full-page/PlotTypeSelector";
 import { Heatmap } from "../heatmap/Heatmap";
 import { HeatmapControls } from "../heatmap/HeatmapControls";
 import { Matrixplot } from "../matrixplot/Matrixplot";
@@ -18,6 +18,8 @@ import {
   OffcanvasObsm,
   OffcanvasVars,
 } from "../offcanvas";
+import { Pseudospatial } from "../pseudospatial/Pseudospatial";
+import { PseudospatialToolbar } from "../pseudospatial/PseudospatialToolbar";
 import { Scatterplot } from "../scatterplot/Scatterplot";
 import { ScatterplotControls } from "../scatterplot/ScatterplotControls";
 import { SearchBar } from "../search-bar/SearchBar";
@@ -26,10 +28,9 @@ import { Violin } from "../violin/Violin";
 import { ViolinControls } from "../violin/ViolinControls";
 
 export function FullPage({
-  renderItem,
   varMode = SELECTION_MODES.SINGLE,
+  isPseudospatial = false,
   searchDiseases = true,
-  Controls = null,
   ...props
 }) {
   const appRef = useRef();
@@ -40,11 +41,12 @@ export function FullPage({
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [showModal, setShowModal] = useState(false);
-
-  const LgBreakpoint = useMediaQuery("(max-width: 991.98px)");
-  const XlBreakpoint = useMediaQuery("(max-width: 1199.98px)");
-  const showObsBtn = LgBreakpoint;
-  const showVarsBtn = XlBreakpoint;
+  const [plotType, setPlotType] = useState(
+    props.defaultPlotType || "scatterplot"
+  );
+  const [showPseudospatialControls, setShowPseudospatialControls] =
+    useState(false);
+  const [pseudospatialPlotType, setpseudospatialPlotType] = useState(null);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -65,9 +67,39 @@ export function FullPage({
     };
 
     window.addEventListener("resize", updateDimensions);
-    updateDimensions(); // Initial update
+    updateDimensions();
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
+
+  const renderPlot = () => {
+    const commonProps = {
+      setShowObs,
+      setShowVars,
+      isFullscreen: true,
+    };
+
+    switch (plotType) {
+      case "dotplot":
+        return <Dotplot {...commonProps} />;
+      case "matrixplot":
+        return <Matrixplot {...commonProps} />;
+      case "heatmap":
+        return <Heatmap {...commonProps} />;
+      case "violin":
+        return <Violin mode={VIOLIN_MODES.MULTIKEY} {...commonProps} />;
+      case "scatterplot":
+      default:
+        return <Scatterplot {...commonProps} />;
+    }
+  };
+
+  const plotControls = {
+    scatterplot: ScatterplotControls,
+    dotplot: DotplotControls,
+    matrixplot: MatrixplotControls,
+    heatmap: HeatmapControls,
+    violin: ViolinControls,
+  }[plotType];
 
   return (
     <div
@@ -84,19 +116,27 @@ export function FullPage({
           <div className="cherita-app-obs modern-scrollbars border-end h-100">
             <ObsColsList {...props} />
           </div>
-          <div className="cherita-app-canvas">
-            {renderItem({
-              showObsBtn,
-              showVarsBtn,
-              showCtrlsBtn: !!Controls,
-              setShowObs,
-              setShowVars,
-              setShowControls,
-            })}
-          </div>
+          <div className="cherita-app-canvas">{renderPlot()}</div>
           <div className="cherita-app-sidebar p-3">
             <Card>
               <Card.Body className="d-flex flex-column p-0">
+                <div className="sidebar-plotselector">
+                  <PlotTypeSelector
+                    currentType={plotType}
+                    onChange={(type) => setPlotType(type)}
+                  />
+                </div>
+                {isPseudospatial ? (
+                  <div className="sidebar-pseudospatial">
+                    <Pseudospatial
+                      plotType={pseudospatialPlotType}
+                      setPlotType={setpseudospatialPlotType}
+                      setShowControls={setShowPseudospatialControls}
+                    />
+                  </div>
+                ) : (
+                  <></>
+                )}
                 <div className="sidebar-features modern-scrollbars">
                   <SearchBar searchDiseases={searchDiseases} searchVar={true} />
                   <VarNamesList mode={varMode} />
@@ -116,16 +156,22 @@ export function FullPage({
             handleClose={() => setShowVars(false)}
             mode={varMode}
           />
-          {Controls && (
+          {plotControls && (
             <OffcanvasControls
               show={showControls}
               handleClose={() => setShowControls(false)}
-              Controls={Controls}
+              Controls={plotControls}
             />
           )}
           <OffcanvasObsm
             show={showObsm}
             handleClose={() => setShowObsm(false)}
+          />
+          <OffcanvasControls
+            show={showPseudospatialControls}
+            handleClose={() => setShowPseudospatialControls(false)}
+            Controls={PseudospatialToolbar}
+            plotType={pseudospatialPlotType}
           />
         </div>
       </DatasetProvider>
@@ -137,40 +183,8 @@ export function FullPageScatterplot(props) {
   return (
     <FullPage
       {...props}
+      defaultPlotType="scatterplot"
       varMode={SELECTION_MODES.SINGLE}
-      Controls={ScatterplotControls}
-      renderItem={({ setShowObs, setShowVars }) => (
-        <Scatterplot
-          setShowObs={setShowObs}
-          setShowVars={setShowVars}
-          isFullscreen={true}
-        />
-      )}
-    />
-  );
-}
-
-export function FullPagePlots(props) {
-  return (
-    <FullPage
-      {...props}
-      varMode={SELECTION_MODES.MULTIPLE}
-      renderItem={() => (
-        <div className="container-fluid w-100 h-100 d-flex flex-column overflow-y-auto">
-          <div className="row flex-grow-1">
-            <Heatmap />
-          </div>
-          <div className="row flex-grow-1">
-            <Matrixplot />
-          </div>
-          <div className="row flex-grow-1">
-            <Dotplot />
-          </div>
-          <div className="row flex-grow-1">
-            <Violin mode={VIOLIN_MODES.MULTIKEY} />
-          </div>
-        </div>
-      )}
     />
   );
 }
@@ -179,9 +193,8 @@ export function FullPageDotplot(props) {
   return (
     <FullPage
       {...props}
+      defaultPlotType="dotplot"
       varMode={SELECTION_MODES.MULTIPLE}
-      Controls={DotplotControls}
-      renderItem={(props) => <Dotplot {...props} />}
     />
   );
 }
@@ -190,9 +203,8 @@ export function FullPageHeatmap(props) {
   return (
     <FullPage
       {...props}
+      defaultPlotType="heatmap"
       varMode={SELECTION_MODES.MULTIPLE}
-      Controls={HeatmapControls}
-      renderItem={(props) => <Heatmap {...props} />}
     />
   );
 }
@@ -201,9 +213,8 @@ export function FullPageMatrixplot(props) {
   return (
     <FullPage
       {...props}
+      defaultPlotType="matrixplot"
       varMode={SELECTION_MODES.MULTIPLE}
-      Controls={MatrixplotControls}
-      renderItem={(props) => <Matrixplot {...props} />}
     />
   );
 }
@@ -212,9 +223,8 @@ export function FullPageViolin(props) {
   return (
     <FullPage
       {...props}
+      defaultPlotType="violin"
       varMode={SELECTION_MODES.MULTIPLE}
-      Controls={ViolinControls}
-      renderItem={(props) => <Violin mode={VIOLIN_MODES.MULTIKEY} {...props} />}
     />
   );
 }

@@ -1,13 +1,11 @@
 import React from "react";
 
 import {
-  FullPageScatterplot,
   FullPageDotplot,
   FullPageHeatmap,
   FullPageMatrixplot,
+  FullPageScatterplot,
   FullPageViolin,
-  FullPagePlots,
-  FullPagePseudospatial,
 } from "@haniffalab/cherita-react";
 import { Route, Routes } from "react-router-dom";
 
@@ -46,18 +44,8 @@ export default function App(props) {
         <Route exact path="/violin" element={<ViolinDemo {...props} />} />
         <Route
           exact
-          path="/pseudospatial"
-          element={<FullPagePseudospatial {...props} />}
-        />
-        <Route
-          exact
-          path="/full-page"
+          path="/full-page/scatterplot"
           element={<FullPageScatterplot {...props} />}
-        ></Route>
-        <Route
-          exact
-          path="/plots"
-          element={<FullPagePlots {...props} />}
         ></Route>
         <Route
           exact
