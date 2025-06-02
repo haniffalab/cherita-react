@@ -195,6 +195,7 @@ export function FullPageDotplot(props) {
       {...props}
       defaultPlotType="dotplot"
       varMode={SELECTION_MODES.MULTIPLE}
+      showSelectedAsActive={true}
     />
   );
 }
@@ -205,6 +206,7 @@ export function FullPageHeatmap(props) {
       {...props}
       defaultPlotType="heatmap"
       varMode={SELECTION_MODES.MULTIPLE}
+      showSelectedAsActive={true}
     />
   );
 }
@@ -215,6 +217,7 @@ export function FullPageMatrixplot(props) {
       {...props}
       defaultPlotType="matrixplot"
       varMode={SELECTION_MODES.MULTIPLE}
+      showSelectedAsActive={true}
     />
   );
 }

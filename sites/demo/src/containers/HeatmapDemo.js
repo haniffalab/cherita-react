@@ -32,6 +32,7 @@ export default function HeatmapDemo(props) {
             show={showObs}
             handleClose={() => setShowObs(false)}
             showColor={false}
+            showSelectedAsActive={true}
           />
           <OffcanvasVars
             show={showVars}

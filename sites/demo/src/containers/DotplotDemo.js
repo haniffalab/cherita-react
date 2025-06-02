@@ -27,7 +27,11 @@ export default function DotplotDemo(props) {
           <div className="cherita-container-plot">
             <Dotplot />
           </div>
-          <OffcanvasObs show={showObs} handleClose={() => setShowObs(false)} />
+          <OffcanvasObs
+            show={showObs}
+            handleClose={() => setShowObs(false)}
+            showSelectedAsActive={true}
+          />
           <OffcanvasVars
             show={showVars}
             handleClose={() => setShowVars(false)}

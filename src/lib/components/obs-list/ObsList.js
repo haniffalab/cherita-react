@@ -20,7 +20,11 @@ import {
   DEFAULT_OBS_GROUP,
   OBS_TYPES,
 } from "../../constants/constants";
-import { useDataset, useDatasetDispatch } from "../../context/DatasetContext";
+import { useDataset } from "../../context/DatasetContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 
@@ -48,13 +52,18 @@ const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
   );
 };
 
-export function ObsColsList({ showColor = true, enableObsGroups = true }) {
+export function ObsColsList({
+  showColor = true,
+  enableObsGroups = true,
+  showSelectedAsActive = false,
+}) {
   const ENDPOINT = "obs/cols";
   const dataset = useDataset();
-  const dispatch = useDatasetDispatch();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
   const [enableGroups, setEnableGroups] = useState(enableObsGroups);
   const [obsCols, setObsCols] = useState(null);
-  const [active, setActive] = useState([...[dataset.selectedObs?.name]]);
+  const [active, setActive] = useState([...[settings.selectedObs?.name]]);
   const [params, setParams] = useState({ url: dataset.url });
   const obsGroups = useMemo(
     () => ({
@@ -111,12 +120,12 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
 
   useEffect(() => {
     if (obsCols) {
-      if (!obsCols[dataset.selectedObs?.name]) {
+      if (!obsCols[settings.selectedObs?.name]) {
         setActive([]);
         dispatch({ type: "select.obs", obs: null });
       }
     }
-  }, [dataset.selectedObs, dispatch, obsCols]);
+  }, [settings.selectedObs, dispatch, obsCols]);
 
   const handleAccordionToggle = (itemName, isCurrentEventKey) => {
     if (isCurrentEventKey) {
@@ -133,13 +142,13 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     setObsCols((o) => {
       return { ...o, [item.name]: { ...item, omit: omit } };
     });
-    if (dataset.selectedObs?.name === item.name) {
+    if (settings.selectedObs?.name === item.name) {
       dispatch({ type: "select.obs", obs: { ...item, omit: omit } });
     }
   };
 
   const toggleLabel = (item) => {
-    const inLabelObs = _.some(dataset.labelObs, (i) => i.name === item.name);
+    const inLabelObs = _.some(settings.labelObs, (i) => i.name === item.name);
     if (inLabelObs) {
       dispatch({ type: "remove.label.obs", obsName: item.name });
     } else {
@@ -169,7 +178,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     setObsCols((o) => {
       return { ...o, [item.name]: { ...item, omit: omit } };
     });
-    if (dataset.selectedObs?.name === item.name) {
+    if (settings.selectedObs?.name === item.name) {
       dispatch({ type: "select.obs", obs: { ...item, omit: omit } });
     }
   };
@@ -181,12 +190,13 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
     if (item.type === OBS_TYPES.DISCRETE) {
       return null;
     }
-    const inLabelObs = _.some(dataset.labelObs, (i) => i.name === item.name);
+    const inLabelObs = _.some(settings.labelObs, (i) => i.name === item.name);
     const inSliceObs =
-      dataset.sliceBy.obs && dataset.selectedObs?.name === item.name;
+      settings.sliceBy.obs && settings.selectedObs?.name === item.name;
     const isColorEncoding =
-      dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
-      dataset.selectedObs?.name === item.name;
+      (showSelectedAsActive ||
+        settings.colorEncoding === COLOR_ENCODINGS.OBS) &&
+      settings.selectedObs?.name === item.name;
     return (
       <div className="accordion-item" key={item.name}>
         <ObsAccordionToggle
@@ -221,7 +231,7 @@ export function ObsColsList({ showColor = true, enableObsGroups = true }) {
                 event.stopPropagation();
                 toggleColor(item);
               }}
-              title="Is color encoding"
+              title={showSelectedAsActive ? "Is selected" : "Is color encoding"}
             >
               <WaterDropIcon />
             </span>

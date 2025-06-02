@@ -4,8 +4,8 @@ import { booleanPointInPolygon, point } from "@turf/turf";
 import _ from "lodash";
 
 import { COLOR_ENCODINGS, OBS_TYPES } from "../constants/constants";
-import { useDataset } from "../context/DatasetContext";
 import { useFilteredDataDispatch } from "../context/FilterContext";
+import { useSettings } from "../context/SettingsContext";
 
 const EPSILON = 1e-6;
 
@@ -42,21 +42,21 @@ const isInValues = (omit, value) => {
 };
 
 export const useFilter = (data) => {
-  const dataset = useDataset();
+  const settings = useSettings();
   const filterDataDispatch = useFilteredDataDispatch();
 
   const { obsmData, xData, obsData, isPending, serverError } = data;
 
   const isCategorical =
-    dataset.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-    dataset.selectedObs?.type === OBS_TYPES.BOOLEAN;
+    settings.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+    settings.selectedObs?.type === OBS_TYPES.BOOLEAN;
 
-  const isContinuous = dataset.selectedObs?.type === OBS_TYPES.CONTINUOUS;
+  const isContinuous = settings.selectedObs?.type === OBS_TYPES.CONTINUOUS;
 
   const sliceByObs =
-    (dataset.colorEncoding === COLOR_ENCODINGS.OBS &&
-      !!dataset.selectedObs?.omit.length) ||
-    dataset.sliceBy.obs;
+    (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
+      !!settings.selectedObs?.omit.length) ||
+    settings.sliceBy.obs;
 
   const isInObsSlice = useCallback(
     (index, values) => {
@@ -64,15 +64,15 @@ export const useFilter = (data) => {
 
       if (values && sliceByObs) {
         if (isCategorical) {
-          inSlice &= isInValues(dataset.selectedObs?.omit, values[index]);
+          inSlice &= isInValues(settings.selectedObs?.omit, values[index]);
         } else if (isContinuous) {
           if (isNaN(values[index])) {
-            inSlice &= isInValues(dataset.selectedObs?.omit, -1);
+            inSlice &= isInValues(settings.selectedObs?.omit, -1);
           } else {
             inSlice &= isInBins(
               values[index],
-              dataset.selectedObs.bins.binEdges,
-              _.without(dataset.selectedObs.omit, -1)
+              settings.selectedObs.bins.binEdges,
+              _.without(settings.selectedObs.omit, -1)
             );
           }
         }
@@ -80,8 +80,8 @@ export const useFilter = (data) => {
       return inSlice;
     },
     [
-      dataset.selectedObs?.bins?.binEdges,
-      dataset.selectedObs?.omit,
+      settings.selectedObs?.bins?.binEdges,
+      settings.selectedObs?.omit,
       isCategorical,
       isContinuous,
       sliceByObs,
@@ -92,16 +92,16 @@ export const useFilter = (data) => {
     (index, positions) => {
       let inSlice = true;
 
-      if (dataset.sliceBy.polygons && positions) {
+      if (settings.sliceBy.polygons && positions) {
         inSlice &= isInPolygons(
-          dataset.polygons[dataset.selectedObsm],
+          settings.polygons[settings.selectedObsm],
           positions,
           index
         );
       }
       return inSlice;
     },
-    [dataset.polygons, dataset.selectedObsm, dataset.sliceBy.polygons]
+    [settings.polygons, settings.selectedObsm, settings.sliceBy.polygons]
   );
 
   const isInSlice = useCallback(
@@ -120,7 +120,7 @@ export const useFilter = (data) => {
         slicedLength: null,
       };
     }
-    if (dataset.colorEncoding === COLOR_ENCODINGS.VAR) {
+    if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
       const { filtered, filteredIndices } = _.reduce(
         xData.data,
         (acc, v, i) => {
@@ -138,7 +138,7 @@ export const useFilter = (data) => {
         valueMax: _.max(filtered),
         slicedLength: filtered.length,
       };
-    } else if (dataset.colorEncoding === COLOR_ENCODINGS.OBS) {
+    } else if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
       const { filtered, filteredIndices } = _.reduce(
         obsData.data,
         (acc, v, i) => {
@@ -165,7 +165,7 @@ export const useFilter = (data) => {
       };
     }
   }, [
-    dataset.colorEncoding,
+    settings.colorEncoding,
     isContinuous,
     isInSlice,
     isPending,
@@ -175,8 +175,8 @@ export const useFilter = (data) => {
     xData.data,
   ]);
 
-  const isSliced = sliceByObs || dataset.sliceBy.polygons;
-  // const isSliced = dataset.sliceBy.obs || dataset.sliceBy.polygons;
+  const isSliced = sliceByObs || settings.sliceBy.polygons;
+  // const isSliced = settings.sliceBy.obs || settings.sliceBy.polygons;
 
   useEffect(() => {
     if (!isPending && !serverError) {
@@ -190,8 +190,8 @@ export const useFilter = (data) => {
       });
     }
   }, [
-    dataset.sliceBy.obs,
-    dataset.sliceBy.polygons,
+    settings.sliceBy.obs,
+    settings.sliceBy.polygons,
     filterDataDispatch,
     filteredIndices,
     isPending,

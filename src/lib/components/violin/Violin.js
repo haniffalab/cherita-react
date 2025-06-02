@@ -12,6 +12,7 @@ import {
 } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
+import { useSettings } from "../../context/SettingsContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 import {
@@ -31,6 +32,7 @@ export function Violin({
 }) {
   const ENDPOINT = "violin";
   const dataset = useDataset();
+  const settings = useSettings();
   const { obsIndices, isSliced } = useFilteredData();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
@@ -38,11 +40,11 @@ export function Violin({
   const [params, setParams] = useState({
     url: dataset.url,
     mode: mode,
-    scale: dataset.controls.scale.violinplot.value,
+    scale: settings.controls.scale.violinplot,
     varNamesCol: dataset.varNamesCol,
     ...{
       [VIOLIN_MODES.MULTIKEY]: {
-        varKeys: dataset.selectedMultiVar.map((i) =>
+        varKeys: settings.selectedMultiVar.map((i) =>
           i.isSet
             ? { name: i.name, indices: i.vars.map((v) => v.index) }
             : i.index
@@ -50,19 +52,19 @@ export function Violin({
         obsKeys: [], // @TODO: implement
       },
       [VIOLIN_MODES.GROUPBY]: {
-        varKey: dataset.selectedVar?.isSet
+        varKey: settings.selectedVar?.isSet
           ? {
-              name: dataset.selectedVar?.name,
-              indices: dataset.selectedVar?.vars.map((v) => v.index),
+              name: settings.selectedVar?.name,
+              indices: settings.selectedVar?.vars.map((v) => v.index),
             }
-          : dataset.selectedVar?.index,
-        obsCol: dataset.selectedObs,
-        obsValues: !dataset.selectedObs?.omit.length
+          : settings.selectedVar?.index,
+        obsCol: settings.selectedObs,
+        obsValues: !settings.selectedObs?.omit.length
           ? null
           : _.difference(
-              _.values(dataset.selectedObs?.codes),
-              dataset.selectedObs?.omit
-            ).map((c) => dataset.selectedObs?.codesMap[c]),
+              _.values(settings.selectedObs?.codes),
+              settings.selectedObs?.omit
+            ).map((c) => settings.selectedObs?.codesMap[c]),
         obsIndices: isSliced ? [...(obsIndices || [])] : null,
       },
     }[mode],
@@ -71,7 +73,7 @@ export function Violin({
 
   useEffect(() => {
     if (mode === VIOLIN_MODES.MULTIKEY) {
-      if (dataset.selectedMultiVar.length) {
+      if (settings.selectedMultiVar.length) {
         setHasSelections(true);
       } else {
         setHasSelections(false);
@@ -81,17 +83,17 @@ export function Violin({
           ...p,
           url: dataset.url,
           mode: mode,
-          varKeys: dataset.selectedMultiVar.map((i) =>
+          varKeys: settings.selectedMultiVar.map((i) =>
             i.isSet
               ? { name: i.name, indices: i.vars.map((v) => v.index) }
               : i.index
           ),
-          scale: dataset.controls.scale.violinplot.value,
+          scale: settings.controls.scale.violinplot,
           varNamesCol: dataset.varNamesCol,
         };
       });
     } else if (mode === VIOLIN_MODES.GROUPBY) {
-      if (dataset.selectedObs && dataset.selectedVar) {
+      if (settings.selectedObs && settings.selectedVar) {
         setHasSelections(true);
       } else {
         setHasSelections(false);
@@ -101,30 +103,30 @@ export function Violin({
           ...p,
           url: dataset.url,
           mode: mode,
-          varKey: dataset.selectedVar?.isSet
+          varKey: settings.selectedVar?.isSet
             ? {
-                name: dataset.selectedVar?.name,
-                indices: dataset.selectedVar?.vars.map((v) => v.index),
+                name: settings.selectedVar?.name,
+                indices: settings.selectedVar?.vars.map((v) => v.index),
               }
-            : dataset.selectedVar?.index,
-          obsCol: dataset.selectedObs,
-          obsValues: !dataset.selectedObs?.omit.length
+            : settings.selectedVar?.index,
+          obsCol: settings.selectedObs,
+          obsValues: !settings.selectedObs?.omit.length
             ? null
             : _.difference(
-                _.values(dataset.selectedObs?.codes),
-                dataset.selectedObs?.omit
-              ).map((c) => dataset.selectedObs?.codesMap[c]),
+                _.values(settings.selectedObs?.codes),
+                settings.selectedObs?.omit
+              ).map((c) => settings.selectedObs?.codesMap[c]),
           obsIndices: isSliced ? [...(obsIndices || [])] : null,
-          scale: dataset.controls.scale.violinplot.value,
+          scale: settings.controls.scale.violinplot,
           varNamesCol: dataset.varNamesCol,
         };
       });
     }
   }, [
-    dataset.controls.scale.violinplot.value,
-    dataset.selectedMultiVar,
-    dataset.selectedObs,
-    dataset.selectedVar,
+    settings.controls.scale.violinplot,
+    settings.selectedMultiVar,
+    settings.selectedObs,
+    settings.selectedVar,
     dataset.url,
     dataset.varNamesCol,
     obsIndices,
