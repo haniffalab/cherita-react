@@ -4,6 +4,7 @@ import { useMediaQuery } from "@mui/material";
 import { Card, Container, Modal } from "react-bootstrap";
 
 import {
+  BREAKPOINTS,
   PLOT_TYPES,
   SELECTION_MODES,
   VIOLIN_MODES,
@@ -53,8 +54,8 @@ export function FullPage({
     useState(false);
   const [pseudospatialPlotType, setpseudospatialPlotType] = useState(null);
 
-  const LgBreakpoint = useMediaQuery("(max-width: 991.98px)");
-  const XlBreakpoint = useMediaQuery("(max-width: 1199.98px)");
+  const LgBreakpoint = useMediaQuery(BREAKPOINTS.LG);
+  const XlBreakpoint = useMediaQuery(BREAKPOINTS.XL);
   const showObsBtn = LgBreakpoint;
   const showVarsBtn = XlBreakpoint;
 

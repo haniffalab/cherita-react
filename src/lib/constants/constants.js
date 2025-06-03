@@ -98,3 +98,8 @@ export const PLOTLY_MODEBAR_BUTTONS = [
   "autoScale2d",
   "resetScale2d",
 ];
+
+export const BREAKPOINTS = {
+  LG: "(max-width: 991.98px)",
+  XL: "(max-width: 1199.98px)",
+};
