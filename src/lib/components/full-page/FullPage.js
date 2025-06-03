@@ -54,6 +54,10 @@ export function FullPage({
     useState(false);
   const [pseudospatialPlotType, setpseudospatialPlotType] = useState(null);
 
+  useEffect(() => {
+    setPlotType(defaultPlotType || PLOT_TYPES.SCATTERPLOT);
+  }, [defaultPlotType]);
+
   const LgBreakpoint = useMediaQuery(BREAKPOINTS.LG);
   const XlBreakpoint = useMediaQuery(BREAKPOINTS.XL);
   const showObsBtn = LgBreakpoint;
