@@ -186,7 +186,12 @@ export function FullPage({
             <Modal.Header closeButton></Modal.Header>
             <Modal.Body></Modal.Body>
           </Modal>
-          <OffcanvasObs show={showObs} handleClose={() => setShowObs(false)} />
+          <OffcanvasObs
+            {...props}
+            showSelectedAsActive={showSelectedAsActive}
+            show={showObs}
+            handleClose={() => setShowObs(false)}
+          />
           <OffcanvasVars
             show={showVars}
             handleClose={() => setShowVars(false)}
