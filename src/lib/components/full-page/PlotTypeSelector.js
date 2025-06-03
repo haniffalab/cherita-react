@@ -5,13 +5,14 @@ import heatmapIcon from "../../../assets/images/plots/heatmap.svg";
 import matrixplotIcon from "../../../assets/images/plots/matrixplot.svg";
 import scatterplotIcon from "../../../assets/images/plots/scatterplot.svg";
 import violinIcon from "../../../assets/images/plots/violin.svg";
+import { PLOT_TYPES } from "../../constants/constants";
 
 const iconMap = {
-  dotplot: dotplotIcon,
-  matrixplot: matrixplotIcon,
-  violin: violinIcon,
-  scatterplot: scatterplotIcon,
-  heatmap: heatmapIcon,
+  [PLOT_TYPES.DOTPLOT]: dotplotIcon,
+  [PLOT_TYPES.MATRIXPLOT]: matrixplotIcon,
+  [PLOT_TYPES.VIOLINPLOT]: violinIcon,
+  [PLOT_TYPES.SCATTERPLOT]: scatterplotIcon,
+  [PLOT_TYPES.HEATMAP]: heatmapIcon,
 };
 
 const plotTypes = Object.entries(iconMap).map(([type, icon]) => ({
@@ -22,7 +23,7 @@ const plotTypes = Object.entries(iconMap).map(([type, icon]) => ({
 
 export function PlotTypeSelector({ currentType, onChange }) {
   return (
-    <div className="d-flex gap-2">
+    <div className="d-flex gap-2 justify-content-between">
       {plotTypes.map(({ type, icon, alt }) => (
         <img
           key={type}
@@ -35,6 +36,7 @@ export function PlotTypeSelector({ currentType, onChange }) {
           style={{
             borderBottom: currentType === type ? "2px solid #007bff" : "none",
           }}
+          title={alt}
         />
       ))}
     </div>

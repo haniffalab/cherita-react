@@ -1,5 +1,13 @@
 export const LOCAL_STORAGE_KEY = "CHERITA";
 
+export const PLOT_TYPES = {
+  SCATTERPLOT: "scatterplot",
+  DOTPLOT: "dotplot",
+  HEATMAP: "heatmap",
+  MATRIXPLOT: "matrixplot",
+  VIOLINPLOT: "violinplot",
+};
+
 export const COLOR_ENCODINGS = {
   VAR: "var",
   OBS: "obs",

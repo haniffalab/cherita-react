@@ -2,7 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { Card, Container, Modal } from "react-bootstrap";
 
-import { SELECTION_MODES, VIOLIN_MODES } from "../../constants/constants";
+import {
+  PLOT_TYPES,
+  SELECTION_MODES,
+  VIOLIN_MODES,
+} from "../../constants/constants";
 import { DatasetProvider } from "../../context/DatasetContext";
 import { Dotplot } from "../dotplot/Dotplot";
 import { DotplotControls } from "../dotplot/DotplotControls";
@@ -28,9 +32,9 @@ import { Violin } from "../violin/Violin";
 import { ViolinControls } from "../violin/ViolinControls";
 
 export function FullPage({
-  varMode = SELECTION_MODES.SINGLE,
   isPseudospatial = false,
   searchDiseases = true,
+  defaultPlotType = PLOT_TYPES.SCATTERPLOT,
   ...props
 }) {
   const appRef = useRef();
@@ -42,7 +46,7 @@ export function FullPage({
   const [showControls, setShowControls] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [plotType, setPlotType] = useState(
-    props.defaultPlotType || "scatterplot"
+    defaultPlotType || PLOT_TYPES.SCATTERPLOT
   );
   const [showPseudospatialControls, setShowPseudospatialControls] =
     useState(false);
@@ -79,26 +83,46 @@ export function FullPage({
     };
 
     switch (plotType) {
-      case "dotplot":
+      case PLOT_TYPES.DOTPLOT:
         return <Dotplot {...commonProps} />;
-      case "matrixplot":
+      case PLOT_TYPES.MATRIXPLOT:
         return <Matrixplot {...commonProps} />;
-      case "heatmap":
+      case PLOT_TYPES.HEATMAP:
         return <Heatmap {...commonProps} />;
-      case "violin":
+      case PLOT_TYPES.VIOLINPLOT:
         return <Violin mode={VIOLIN_MODES.MULTIKEY} {...commonProps} />;
-      case "scatterplot":
+      case PLOT_TYPES.SCATTERPLOT:
       default:
         return <Scatterplot {...commonProps} />;
     }
   };
 
-  const plotControls = {
-    scatterplot: ScatterplotControls,
-    dotplot: DotplotControls,
-    matrixplot: MatrixplotControls,
-    heatmap: HeatmapControls,
-    violin: ViolinControls,
+  const { plotControls, varMode, showSelectedAsActive } = {
+    [PLOT_TYPES.SCATTERPLOT]: {
+      plotControls: ScatterplotControls,
+      varMode: SELECTION_MODES.SINGLE,
+      showSelectedAsActive: false,
+    },
+    [PLOT_TYPES.DOTPLOT]: {
+      plotControls: DotplotControls,
+      varMode: SELECTION_MODES.MULTIPLE,
+      showSelectedAsActive: true,
+    },
+    [PLOT_TYPES.MATRIXPLOT]: {
+      plotControls: MatrixplotControls,
+      varMode: SELECTION_MODES.MULTIPLE,
+      showSelectedAsActive: true,
+    },
+    [PLOT_TYPES.HEATMAP]: {
+      plotControls: HeatmapControls,
+      varMode: SELECTION_MODES.MULTIPLE,
+      showSelectedAsActive: true,
+    },
+    [PLOT_TYPES.VIOLINPLOT]: {
+      plotControls: ViolinControls,
+      varMode: SELECTION_MODES.MULTIPLE,
+      showSelectedAsActive: false,
+    },
   }[plotType];
 
   return (
@@ -114,7 +138,10 @@ export function FullPage({
           style={{ height: appDimensions.height }}
         >
           <div className="cherita-app-obs modern-scrollbars border-end h-100">
-            <ObsColsList {...props} />
+            <ObsColsList
+              {...props}
+              showSelectedAsActive={showSelectedAsActive}
+            />
           </div>
           <div className="cherita-app-canvas">{renderPlot()}</div>
           <div className="cherita-app-sidebar p-3">
@@ -126,7 +153,7 @@ export function FullPage({
                     onChange={(type) => setPlotType(type)}
                   />
                 </div>
-                {isPseudospatial ? (
+                {plotType === PLOT_TYPES.SCATTERPLOT && isPseudospatial ? (
                   <div className="sidebar-pseudospatial">
                     <Pseudospatial
                       plotType={pseudospatialPlotType}
@@ -180,54 +207,21 @@ export function FullPage({
 }
 
 export function FullPageScatterplot(props) {
-  return (
-    <FullPage
-      {...props}
-      defaultPlotType="scatterplot"
-      varMode={SELECTION_MODES.SINGLE}
-    />
-  );
+  return <FullPage {...props} defaultPlotType={PLOT_TYPES.SCATTERPLOT} />;
 }
 
 export function FullPageDotplot(props) {
-  return (
-    <FullPage
-      {...props}
-      defaultPlotType="dotplot"
-      varMode={SELECTION_MODES.MULTIPLE}
-      showSelectedAsActive={true}
-    />
-  );
+  return <FullPage {...props} defaultPlotType={PLOT_TYPES.DOTPLOT} />;
 }
 
 export function FullPageHeatmap(props) {
-  return (
-    <FullPage
-      {...props}
-      defaultPlotType="heatmap"
-      varMode={SELECTION_MODES.MULTIPLE}
-      showSelectedAsActive={true}
-    />
-  );
+  return <FullPage {...props} defaultPlotType={PLOT_TYPES.HEATMAP} />;
 }
 
 export function FullPageMatrixplot(props) {
-  return (
-    <FullPage
-      {...props}
-      defaultPlotType="matrixplot"
-      varMode={SELECTION_MODES.MULTIPLE}
-      showSelectedAsActive={true}
-    />
-  );
+  return <FullPage {...props} defaultPlotType={PLOT_TYPES.MATRIXPLOT} />;
 }
 
 export function FullPageViolin(props) {
-  return (
-    <FullPage
-      {...props}
-      defaultPlotType="violin"
-      varMode={SELECTION_MODES.MULTIPLE}
-    />
-  );
+  return <FullPage {...props} defaultPlotType={PLOT_TYPES.VIOLINPLOT} />;
 }
