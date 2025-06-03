@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 import { Card, Container, Modal } from "react-bootstrap";
 
@@ -75,7 +75,7 @@ export function FullPage({
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  const renderPlot = () => {
+  const plot = useMemo(() => {
     const commonProps = {
       setShowObs,
       setShowVars,
@@ -95,7 +95,7 @@ export function FullPage({
       default:
         return <Scatterplot {...commonProps} />;
     }
-  };
+  }, [plotType]);
 
   const { plotControls, varMode, showSelectedAsActive } = {
     [PLOT_TYPES.SCATTERPLOT]: {
@@ -143,7 +143,7 @@ export function FullPage({
               showSelectedAsActive={showSelectedAsActive}
             />
           </div>
-          <div className="cherita-app-canvas">{renderPlot()}</div>
+          <div className="cherita-app-canvas">{plot}</div>
           <div className="cherita-app-sidebar p-3">
             <Card>
               <Card.Body className="d-flex flex-column p-0">
