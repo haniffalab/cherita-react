@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
+import { useMediaQuery } from "@mui/material";
 import { Card, Container, Modal } from "react-bootstrap";
 
 import {
@@ -52,6 +53,11 @@ export function FullPage({
     useState(false);
   const [pseudospatialPlotType, setpseudospatialPlotType] = useState(null);
 
+  const LgBreakpoint = useMediaQuery("(max-width: 991.98px)");
+  const XlBreakpoint = useMediaQuery("(max-width: 1199.98px)");
+  const showObsBtn = LgBreakpoint;
+  const showVarsBtn = XlBreakpoint;
+
   useEffect(() => {
     const updateDimensions = () => {
       if (appRef.current) {
@@ -74,28 +80,6 @@ export function FullPage({
     updateDimensions();
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
-
-  const plot = useMemo(() => {
-    const commonProps = {
-      setShowObs,
-      setShowVars,
-      isFullscreen: true,
-    };
-
-    switch (plotType) {
-      case PLOT_TYPES.DOTPLOT:
-        return <Dotplot {...commonProps} />;
-      case PLOT_TYPES.MATRIXPLOT:
-        return <Matrixplot {...commonProps} />;
-      case PLOT_TYPES.HEATMAP:
-        return <Heatmap {...commonProps} />;
-      case PLOT_TYPES.VIOLINPLOT:
-        return <Violin mode={VIOLIN_MODES.MULTIKEY} {...commonProps} />;
-      case PLOT_TYPES.SCATTERPLOT:
-      default:
-        return <Scatterplot {...commonProps} />;
-    }
-  }, [plotType]);
 
   const { plotControls, varMode, showSelectedAsActive } = {
     [PLOT_TYPES.SCATTERPLOT]: {
@@ -124,6 +108,31 @@ export function FullPage({
       showSelectedAsActive: false,
     },
   }[plotType];
+
+  const plot = useMemo(() => {
+    const commonProps = {
+      showObsBtn,
+      showVarsBtn,
+      showCtrlsBtn: true,
+      setShowObs,
+      setShowVars,
+      setShowControls,
+    };
+
+    switch (plotType) {
+      case PLOT_TYPES.DOTPLOT:
+        return <Dotplot {...commonProps} />;
+      case PLOT_TYPES.MATRIXPLOT:
+        return <Matrixplot {...commonProps} />;
+      case PLOT_TYPES.HEATMAP:
+        return <Heatmap {...commonProps} />;
+      case PLOT_TYPES.VIOLINPLOT:
+        return <Violin mode={VIOLIN_MODES.MULTIKEY} {...commonProps} />;
+      case PLOT_TYPES.SCATTERPLOT:
+      default:
+        return <Scatterplot {...commonProps} isFullscreen={true} />;
+    }
+  }, [plotType, showObsBtn, showVarsBtn]);
 
   return (
     <div
