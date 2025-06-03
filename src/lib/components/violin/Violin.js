@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { Alert, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Alert, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
 import {
@@ -203,10 +203,48 @@ export function Violin({
     return (
       <div className="cherita-violin">
         {mode === VIOLIN_MODES.MULTIKEY && (
-          <Alert variant="light">Select features</Alert>
+          <Alert variant="light">
+            Select{" "}
+            {showVarsBtn ? (
+              <Button
+                variant="link"
+                className="border-0 p-0 align-baseline"
+                onClick={setShowVars}
+              >
+                features
+              </Button>
+            ) : (
+              "features"
+            )}
+          </Alert>
         )}
         {mode === VIOLIN_MODES.GROUPBY && (
-          <Alert variant="light">Select categories and a feature</Alert>
+          <Alert variant="light">
+            Select{" "}
+            {showObsBtn ? (
+              <Button
+                variant="link"
+                className="border-0 p-0 align-baseline"
+                onClick={setShowObs}
+              >
+                categories
+              </Button>
+            ) : (
+              "categories"
+            )}{" "}
+            and a{" "}
+            {showVarsBtn ? (
+              <Button
+                variant="link"
+                className="border-0 p-0 align-baseline"
+                onClick={setShowVars}
+              >
+                feature
+              </Button>
+            ) : (
+              "feature"
+            )}
+          </Alert>
         )}
       </div>
     );

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import _ from "lodash";
-import { Alert } from "react-bootstrap";
+import { Alert, Button } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
 import { PLOTLY_MODEBAR_BUTTONS } from "../../constants/constants";
@@ -185,7 +185,32 @@ export function Dotplot({
     }
     return (
       <div className="cherita-dotplot">
-        <Alert variant="light">Select features and a category</Alert>
+        <Alert variant="light">
+          Select{" "}
+          {showVarsBtn ? (
+            <Button
+              variant="link"
+              className="border-0 p-0 align-baseline"
+              onClick={setShowVars}
+            >
+              features
+            </Button>
+          ) : (
+            "features"
+          )}{" "}
+          and a{" "}
+          {showObsBtn ? (
+            <Button
+              variant="link"
+              className="border-0 p-0 align-baseline"
+              onClick={setShowObs}
+            >
+              category
+            </Button>
+          ) : (
+            "category"
+          )}
+        </Alert>
       </div>
     );
   } else {
