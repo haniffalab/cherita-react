@@ -1,13 +1,6 @@
 export { Dotplot } from "./components/dotplot/Dotplot";
 export { DotplotControls } from "./components/dotplot/DotplotControls";
-export {
-  FullPage,
-  FullPageDotplot,
-  FullPageHeatmap,
-  FullPageMatrixplot,
-  FullPageScatterplot,
-  FullPageViolin,
-} from "./components/full-page/FullPage";
+export { FullPage } from "./components/full-page/FullPage";
 export { Heatmap } from "./components/heatmap/Heatmap";
 export { HeatmapControls } from "./components/heatmap/HeatmapControls";
 export { Matrixplot } from "./components/matrixplot/Matrixplot";
@@ -29,6 +22,10 @@ export { VarNamesList } from "./components/var-list/VarList";
 export { Violin } from "./components/violin/Violin";
 export { ViolinControls } from "./components/violin/ViolinControls";
 export { COLORSCALES } from "./constants/colorscales";
-export { SELECTION_MODES, VIOLIN_MODES } from "./constants/constants";
+export {
+  PLOT_TYPES,
+  SELECTION_MODES,
+  VIOLIN_MODES,
+} from "./constants/constants";
 export { DatasetProvider } from "./context/DatasetContext";
 export { FilterProvider } from "./context/FilterContext";

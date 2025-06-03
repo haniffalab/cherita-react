@@ -205,23 +205,3 @@ export function FullPage({
     </div>
   );
 }
-
-export function FullPageScatterplot(props) {
-  return <FullPage {...props} defaultPlotType={PLOT_TYPES.SCATTERPLOT} />;
-}
-
-export function FullPageDotplot(props) {
-  return <FullPage {...props} defaultPlotType={PLOT_TYPES.DOTPLOT} />;
-}
-
-export function FullPageHeatmap(props) {
-  return <FullPage {...props} defaultPlotType={PLOT_TYPES.HEATMAP} />;
-}
-
-export function FullPageMatrixplot(props) {
-  return <FullPage {...props} defaultPlotType={PLOT_TYPES.MATRIXPLOT} />;
-}
-
-export function FullPageViolin(props) {
-  return <FullPage {...props} defaultPlotType={PLOT_TYPES.VIOLINPLOT} />;
-}

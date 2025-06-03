@@ -1,12 +1,6 @@
 import React from "react";
 
-import {
-  FullPageDotplot,
-  FullPageHeatmap,
-  FullPageMatrixplot,
-  FullPageScatterplot,
-  FullPageViolin,
-} from "@haniffalab/cherita-react";
+import { FullPage, PLOT_TYPES } from "@haniffalab/cherita-react";
 import { Route, Routes } from "react-router-dom";
 
 import Footer from "./components/Footer";
@@ -45,27 +39,33 @@ export default function App(props) {
         <Route
           exact
           path="/full-page/scatterplot"
-          element={<FullPageScatterplot {...props} />}
+          element={
+            <FullPage {...props} defaultPlotType={PLOT_TYPES.SCATTERPLOT} />
+          }
         ></Route>
         <Route
           exact
           path="/full-page/dotplot"
-          element={<FullPageDotplot {...props} />}
+          element={<FullPage {...props} defaultPlotType={PLOT_TYPES.DOTPLOT} />}
         ></Route>
         <Route
           exact
           path="/full-page/heatmap"
-          element={<FullPageHeatmap {...props} />}
+          element={<FullPage {...props} defaultPlotType={PLOT_TYPES.HEATMAP} />}
         ></Route>
         <Route
           exact
           path="/full-page/matrixplot"
-          element={<FullPageMatrixplot {...props} />}
+          element={
+            <FullPage {...props} defaultPlotType={PLOT_TYPES.MATRIXPLOT} />
+          }
         ></Route>
         <Route
           exact
           path="/full-page/violin"
-          element={<FullPageViolin {...props} />}
+          element={
+            <FullPage {...props} defaultPlotType={PLOT_TYPES.VIOLINPLOT} />
+          }
         ></Route>
       </Routes>
       <Footer />
