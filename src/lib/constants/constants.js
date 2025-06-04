@@ -1,5 +1,13 @@
 export const LOCAL_STORAGE_KEY = "CHERITA";
 
+export const PLOT_TYPES = {
+  SCATTERPLOT: "scatterplot",
+  DOTPLOT: "dotplot",
+  HEATMAP: "heatmap",
+  MATRIXPLOT: "matrixplot",
+  VIOLINPLOT: "violinplot",
+};
+
 export const COLOR_ENCODINGS = {
   VAR: "var",
   OBS: "obs",
@@ -80,3 +88,18 @@ export const DEFAULT_OBS_GROUP = [
   "tissue",
   "tissue_type",
 ];
+
+export const PLOTLY_MODEBAR_BUTTONS = [
+  "toImage",
+  "zoom2d",
+  "pan2d",
+  "zoomIn2d",
+  "zoomOut2d",
+  "autoScale2d",
+  "resetScale2d",
+];
+
+export const BREAKPOINTS = {
+  LG: "(max-width: 991.98px)",
+  XL: "(max-width: 1199.98px)",
+};
