@@ -412,34 +412,59 @@ function ObsContinuousStats({ obs }) {
 }
 
 // @TODO: add bin controls
-// @TODO: add histogram
 export function ContinuousObs({ obs, toggleAll, toggleObs }) {
+  const settings = useSettings();
   const { isSliced } = useFilteredData();
   const totalCounts = _.sum(_.values(obs.value_counts));
   const min = _.min(_.values(obs.codes));
   const max = _.max(_.values(obs.codes));
 
+  const obsHistograms = useObsHistogram(obs);
   const filteredObsData = useFilteredObsData(obs);
 
-  const getDataAtIndex = (index) => {
-    return {
-      value: obs.values[index],
-      code: obs.codes[obs.values[index]],
-      stats: {
-        value_counts: obs.value_counts[obs.values[index]],
-        pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
-      },
-      isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
-      label: isNaN(obs.values[index])
-        ? "NaN"
-        : getContinuousLabel(obs.codes[obs.values[index]], obs.bins.binEdges),
-      filteredStats: {
-        value_counts: filteredObsData?.value_counts[obs.values[index]] || 0,
-        pct: filteredObsData?.pct[obs.values[index]] || 0,
-      },
-      isSliced: isSliced,
-    };
-  };
+  const getDataAtIndex = useCallback(
+    (index) => {
+      return {
+        value: obs.values[index],
+        code: obs.codes[obs.values[index]],
+        stats: {
+          value_counts: obs.value_counts[obs.values[index]],
+          pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
+        },
+        isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
+        label: isNaN(obs.values[index])
+          ? "NaN"
+          : getContinuousLabel(obs.codes[obs.values[index]], obs.bins.binEdges),
+        histogramData:
+          settings.colorEncoding === COLOR_ENCODINGS.VAR
+            ? {
+                data: obsHistograms.fetchedData?.[obs.values[index]],
+                isPending: obsHistograms.isPending,
+                altColor: isSliced,
+              }
+            : { data: null, isPending: false },
+        filteredStats: {
+          value_counts: filteredObsData?.value_counts[obs.values[index]] || 0,
+          pct: filteredObsData?.pct[obs.values[index]] || 0,
+        },
+        isSliced: isSliced,
+      };
+    },
+    [
+      filteredObsData?.pct,
+      filteredObsData?.value_counts,
+      isSliced,
+      obs.bins.binEdges,
+      obs.codes,
+      obs.omit,
+      obs.value_counts,
+      obs.values,
+      obsHistograms.fetchedData,
+      obsHistograms.isPending,
+      settings.colorEncoding,
+      totalCounts,
+    ]
+  );
 
   return (
     <>
@@ -456,6 +481,7 @@ export function ContinuousObs({ obs, toggleAll, toggleObs }) {
           max={max}
           onChange={toggleObs}
           showColor={false}
+          estimateSize={42}
         />
       </ListGroup>
       <ObsContinuousStats obs={obs} />
