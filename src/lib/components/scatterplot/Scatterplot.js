@@ -49,7 +49,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 export function Scatterplot({
-  radius = 30,
+  radius = null,
   setShowObs,
   setShowVars,
   isFullscreen = false,
@@ -67,6 +67,7 @@ export function Scatterplot({
     values: [],
     sliceValues: [],
   });
+  const [radiusScale, setRadiusScale] = useState(radius || 1);
 
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
@@ -80,6 +81,19 @@ export function Scatterplot({
   const labelObsData = useLabelObsData();
   // @TODO: assert length of obsmData, xData, obsData is equal
 
+  const getRadiusScale = useCallback(
+    (bounds) => {
+      if (!!radius) return radius;
+      // From 28 degrees ~= 30km -> 30m radius
+      const lonDim = bounds[1][0] - bounds[0][0];
+      const latDim = bounds[1][1] - bounds[0][1];
+      const minDim = Math.min(lonDim, latDim);
+      const rs = (0.01 / minDim) * 111111;
+      return rs;
+    },
+    [radius]
+  );
+
   useEffect(() => {
     if (!obsmData.isPending && !obsmData.serverError) {
       setIsRendering(true);
@@ -87,10 +101,14 @@ export function Scatterplot({
         return { ...d, positions: obsmData.data };
       });
       const mapHelper = new MapHelper();
-      const { latitude, longitude, zoom } = mapHelper.fitBounds(obsmData.data, {
-        width: deckRef?.current?.deck?.width,
-        height: deckRef?.current?.deck?.height,
-      });
+      const { latitude, longitude, zoom, bounds } = mapHelper.fitBounds(
+        obsmData.data,
+        {
+          width: deckRef?.current?.deck?.width,
+          height: deckRef?.current?.deck?.height,
+        }
+      );
+      setRadiusScale(getRadiusScale(bounds));
       setViewState((v) => {
         return { ...v, longitude: longitude, latitude: latitude, zoom: zoom };
       });
@@ -102,6 +120,7 @@ export function Scatterplot({
     }
   }, [
     settings.selectedObsm,
+    getRadiusScale,
     obsmData.data,
     obsmData.isPending,
     obsmData.serverError,
@@ -227,7 +246,7 @@ export function Scatterplot({
         id: "cherita-layer-scatterplot",
         pickable: true,
         data: data.positions,
-        radiusScale: radius,
+        radiusScale: radiusScale,
         radiusMinPixels: 1,
         getPosition: (d) => d,
         getFillColor: getFillColor,
@@ -275,7 +294,7 @@ export function Scatterplot({
     getFillColor,
     getRadius,
     mode,
-    radius,
+    radiusScale,
     selectedFeatureIndexes,
   ]);
 
