@@ -28,9 +28,9 @@ import Button from "react-bootstrap/Button";
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import Dropdown from "react-bootstrap/Dropdown";
 
-import { useDataset } from "../../context/DatasetContext";
 import { OffcanvasControls } from "../offcanvas";
 import { ScatterplotControls } from "./ScatterplotControls";
+import { BREAKPOINTS } from "../../constants/constants";
 import {
   useSettings,
   useSettingsDispatch,
@@ -56,8 +56,8 @@ export function SpatialControls({
   const handleCloseControls = () => setShowControls(false);
   const handleShowControls = () => setShowControls(true);
 
-  const LgBreakpoint = useMediaQuery("(max-width: 991.98px)");
-  const XlBreakpoint = useMediaQuery("(max-width: 1199.98px)");
+  const LgBreakpoint = useMediaQuery(BREAKPOINTS.LG);
+  const XlBreakpoint = useMediaQuery(BREAKPOINTS.XL);
   const showObsBtn = isFullscreen ? LgBreakpoint : true;
   const showVarsBtn = isFullscreen ? XlBreakpoint : true;
 
