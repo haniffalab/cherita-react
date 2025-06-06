@@ -45,7 +45,7 @@ function getContinuousLabel(code, binEdges) {
   )}${code === binEdges.length - 1 ? " ]" : " )"}`;
 }
 
-const useObsHistogram = (obs) => {
+const useObsHistogram = (obs, { enabled = true }) => {
   const ENDPOINT = "obs/histograms";
   const dataset = useDataset();
   const settings = useSettings();
@@ -88,7 +88,9 @@ const useObsHistogram = (obs) => {
 
   return useFetch(ENDPOINT, params, {
     enabled:
-      !!settings.selectedVar && settings.colorEncoding === COLOR_ENCODINGS.VAR,
+      enabled &&
+      !!settings.selectedVar &&
+      settings.colorEncoding === COLOR_ENCODINGS.VAR,
     refetchOnMount: false,
   });
 };
@@ -281,6 +283,7 @@ export function CategoricalObs({
   toggleAll,
   toggleObs,
   showColor = true,
+  showHistograms = true,
 }) {
   const settings = useSettings();
   const { isSliced } = useFilteredData();
@@ -288,7 +291,7 @@ export function CategoricalObs({
   const min = _.min(_.values(obs.codes));
   const max = _.max(_.values(obs.codes));
 
-  const obsHistograms = useObsHistogram(obs);
+  const obsHistograms = useObsHistogram(obs, { enabled: showHistograms });
   const filteredObsData = useFilteredObsData(obs);
 
   const getDataAtIndex = useCallback(
@@ -303,7 +306,7 @@ export function CategoricalObs({
         isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
         label: obs.values[index],
         histogramData:
-          settings.colorEncoding === COLOR_ENCODINGS.VAR
+          showHistograms && settings.colorEncoding === COLOR_ENCODINGS.VAR
             ? {
                 data: obsHistograms.fetchedData?.[obs.values[index]],
                 isPending: obsHistograms.isPending,
@@ -323,8 +326,9 @@ export function CategoricalObs({
       obs.codes,
       obs.value_counts,
       obs.omit,
-      obs.colors,
       totalCounts,
+      showHistograms,
+      obs.colors,
       settings.colorEncoding,
       obsHistograms.fetchedData,
       obsHistograms.isPending,
@@ -417,14 +421,19 @@ function ObsContinuousStats({ obs }) {
 }
 
 // @TODO: add bin controls
-export function ContinuousObs({ obs, toggleAll, toggleObs }) {
+export function ContinuousObs({
+  obs,
+  toggleAll,
+  toggleObs,
+  showHistograms = true,
+}) {
   const settings = useSettings();
   const { isSliced } = useFilteredData();
   const totalCounts = _.sum(_.values(obs.value_counts));
   const min = _.min(_.values(obs.codes));
   const max = _.max(_.values(obs.codes));
 
-  const obsHistograms = useObsHistogram(obs);
+  const obsHistograms = useObsHistogram(obs, { enabled: showHistograms });
   const filteredObsData = useFilteredObsData(obs);
 
   const getDataAtIndex = useCallback(
@@ -441,7 +450,7 @@ export function ContinuousObs({ obs, toggleAll, toggleObs }) {
           ? "NaN"
           : getContinuousLabel(obs.codes[obs.values[index]], obs.bins.binEdges),
         histogramData:
-          settings.colorEncoding === COLOR_ENCODINGS.VAR
+          showHistograms && settings.colorEncoding === COLOR_ENCODINGS.VAR
             ? {
                 data: obsHistograms.fetchedData?.[obs.values[index]],
                 isPending: obsHistograms.isPending,
@@ -467,6 +476,7 @@ export function ContinuousObs({ obs, toggleAll, toggleObs }) {
       obsHistograms.fetchedData,
       obsHistograms.isPending,
       settings.colorEncoding,
+      showHistograms,
       totalCounts,
     ]
   );

@@ -56,6 +56,7 @@ export function ObsColsList({
   showColor = true,
   enableObsGroups = true,
   showSelectedAsActive = false,
+  showHistograms = true,
 }) {
   const ENDPOINT = "obs/cols";
   const dataset = useDataset();
@@ -251,6 +252,7 @@ export function ObsColsList({
                   toggleSlice={() => toggleSlice(item)}
                   toggleColor={() => toggleColor(item)}
                   showColor={showColor && isColorEncoding}
+                  showHistograms={showHistograms}
                 />
               ) : (
                 <ContinuousObs
@@ -261,6 +263,7 @@ export function ObsColsList({
                   toggleLabel={() => toggleLabel(item)}
                   toggleSlice={() => toggleSlice(item)}
                   toggleColor={() => toggleColor(item)}
+                  showHistograms={showHistograms}
                 />
               ))}
           </div>
