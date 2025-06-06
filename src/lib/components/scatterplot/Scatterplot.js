@@ -24,6 +24,7 @@ import {
   SELECTED_POLYGON_FILLCOLOR,
   UNSELECTED_POLYGON_FILLCOLOR,
 } from "../../constants/constants";
+import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import {
   useSettings,
@@ -54,6 +55,7 @@ export function Scatterplot({
   setShowVars,
   isFullscreen = false,
 }) {
+  const { useUnsColors } = useDataset();
   const settings = useSettings();
   const { obsIndices, valueMin, valueMax, slicedLength } = useFilteredData();
   const dispatch = useSettingsDispatch();
@@ -61,13 +63,13 @@ export function Scatterplot({
   const deckRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [isRendering, setIsRendering] = useState(true);
+  const [radiusScale, setRadiusScale] = useState(radius || 1);
+  const [isPending, setIsPending] = useState(false);
   const [data, setData] = useState({
-    ids: [],
     positions: [],
     values: [],
-    sliceValues: [],
   });
-  const [radiusScale, setRadiusScale] = useState(radius || 1);
+  const [coordsError, setCoordsError] = useState(null);
 
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
@@ -95,14 +97,56 @@ export function Scatterplot({
   );
 
   useEffect(() => {
-    if (!obsmData.isPending && !obsmData.serverError) {
-      setIsRendering(true);
+    if (
+      obsmData.isPending ||
+      (settings.colorEncoding === COLOR_ENCODINGS.VAR && xData.isPending) ||
+      (settings.colorEncoding === COLOR_ENCODINGS.OBS && obsData.isPending)
+    ) {
+      setIsPending(true);
+    } else {
+      setIsPending(false);
       setData((d) => {
-        return { ...d, positions: obsmData.data };
+        let values = d.values;
+        if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
+          values = !xData.serverError ? xData.data : values;
+        } else if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
+          values = !obsData.serverError ? obsData.data : values;
+        }
+        if (!obsmData.serverError && obsmData.data) {
+          if (obsmData.data[0].length !== 2) {
+            setCoordsError("Invalid coordinates. Expected 2D coordinates");
+            return { positions: [], values: [] };
+          }
+          setCoordsError(null);
+          return {
+            positions: obsmData.data,
+            values: values,
+          };
+        }
+        return {
+          positions: d.positions,
+          values: values,
+        };
       });
+    }
+  }, [
+    obsData.data,
+    obsData.isPending,
+    obsData.serverError,
+    obsmData.data,
+    obsmData.isPending,
+    obsmData.serverError,
+    settings.colorEncoding,
+    xData.data,
+    xData.isPending,
+    xData.serverError,
+  ]);
+
+  useEffect(() => {
+    if (data.positions && !!data.positions.length) {
       const mapHelper = new MapHelper();
       const { latitude, longitude, zoom, bounds } = mapHelper.fitBounds(
-        obsmData.data,
+        data.positions,
         {
           width: deckRef?.current?.deck?.width,
           height: deckRef?.current?.deck?.height,
@@ -112,11 +156,6 @@ export function Scatterplot({
       setViewState((v) => {
         return { ...v, longitude: longitude, latitude: latitude, zoom: zoom };
       });
-    } else if (!obsmData.isPending && obsmData.serverError) {
-      setIsRendering(true);
-      setData((d) => {
-        return { ...d, positions: [] };
-      });
     }
   }, [
     settings.selectedObsm,
@@ -124,6 +163,7 @@ export function Scatterplot({
     obsmData.data,
     obsmData.isPending,
     obsmData.serverError,
+    data.positions,
   ]);
 
   const getBounds = useCallback(() => {
@@ -138,61 +178,54 @@ export function Scatterplot({
     return { latitude, longitude, zoom };
   }, [data.positions]);
 
-  useEffect(() => {
-    if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
-      setIsRendering(true);
-      if (!xData.isPending && !xData.serverError) {
-        // @TODO: add condition to check obs slicing
-        setData((d) => {
-          return { ...d, values: xData.data };
-        });
-      } else if (!xData.isPending && xData.serverError) {
-        setData((d) => {
-          return { ...d, values: [] };
-        });
-      }
+  // Make stable references for getOriginalIndex and sortedIndexMap
+  const identityGetOriginalIndex = useCallback((i) => i, []);
+  const identitySortedIndexMap = useMemo(() => ({ get: (key) => key }), []);
+
+  const { sortedData, getOriginalIndex, sortedIndexMap } = useMemo(() => {
+    if (
+      (settings.colorEncoding === COLOR_ENCODINGS.VAR ||
+        (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
+          settings.selectedObs?.type === OBS_TYPES.CONTINUOUS)) &&
+      data.positions &&
+      data.values &&
+      data.positions.length === data.values.length
+    ) {
+      const sortedIndices = _.map(data.values, (_v, i) => i).sort(
+        (a, b) => data.values[a] - data.values[b]
+      );
+      const sortedIndexMap = new Map(
+        _.map(sortedIndices, (originalIndex, sortedIndex) => [
+          originalIndex,
+          sortedIndex,
+        ])
+      );
+      return {
+        sortedData: _.mapValues(data, (v, _k) => {
+          return v ? _.at(v, sortedIndices) : v;
+        }),
+        getOriginalIndex: (i) => sortedIndices[i],
+        sortedIndexMap: sortedIndexMap,
+      };
     }
+    return {
+      sortedData: data,
+      getOriginalIndex: identityGetOriginalIndex, // return original index
+      sortedIndexMap: identitySortedIndexMap, // return original index
+    };
   }, [
+    data,
+    identityGetOriginalIndex,
+    identitySortedIndexMap,
     settings.colorEncoding,
-    xData.data,
-    xData.isPending,
-    xData.serverError,
-    getColor,
+    settings.selectedObs?.type,
   ]);
 
-  useEffect(() => {
-    if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
-      setIsRendering(true);
-      if (!obsData.isPending && !obsData.serverError) {
-        setData((d) => {
-          return { ...d, values: obsData.data };
-        });
-      } else if (!obsData.isPending && obsData.serverError) {
-        setData((d) => {
-          return { ...d, values: [] };
-        });
-      }
-    } else if (
-      settings.colorEncoding === COLOR_ENCODINGS.VAR &&
-      settings.sliceBy.obs
-    ) {
-      if (!obsData.isPending && !obsData.serverError) {
-        setData((d) => {
-          return { ...d, sliceValues: obsData.data };
-        });
-      } else if (!obsData.isPending && obsData.serverError) {
-        setData((d) => {
-          return { ...d, sliceValues: [] };
-        });
-      }
-    }
-  }, [
-    settings.colorEncoding,
-    obsData.data,
-    obsData.isPending,
-    obsData.serverError,
-    settings.sliceBy.obs,
-  ]);
+  const sortedObsIndices = useMemo(() => {
+    return obsIndices
+      ? new Set(Array.from(obsIndices, (i) => sortedIndexMap.get(i)))
+      : obsIndices;
+  }, [obsIndices, sortedIndexMap]);
 
   const isCategorical = useMemo(() => {
     if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
@@ -219,25 +252,42 @@ export function Scatterplot({
 
   const getFillColor = useCallback(
     (_d, { index }) => {
-      const grayOut = obsIndices && !obsIndices.has(index);
+      const grayOut =
+        isPending || (sortedObsIndices && !sortedObsIndices.has(index));
       return (
         getColor({
-          value: (data.values[index] - min) / (max - min),
+          value: (sortedData.values[index] - min) / (max - min),
           categorical: isCategorical,
           grayOut: grayOut,
+          ...(useUnsColors &&
+          settings.colorEncoding === COLOR_ENCODINGS.OBS &&
+          settings.selectedObs?.colors
+            ? { colorscale: settings.selectedObs?.colors }
+            : {}),
         }) || [0, 0, 0, 100]
       );
     },
-    [data.values, obsIndices, getColor, isCategorical, max, min]
+    [
+      isPending,
+      sortedObsIndices,
+      getColor,
+      sortedData.values,
+      min,
+      max,
+      isCategorical,
+      useUnsColors,
+      settings.colorEncoding,
+      settings.selectedObs?.colors,
+    ]
   );
 
   // @TODO: add support for pseudospatial hover to reflect in radius
   const getRadius = useCallback(
     (_d, { index }) => {
-      const grayOut = obsIndices && !obsIndices.has(index);
+      const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
       return grayOut ? 1 : 3;
     },
-    [obsIndices]
+    [sortedObsIndices]
   );
 
   const memoizedLayers = useMemo(() => {
@@ -245,7 +295,7 @@ export function Scatterplot({
       new ScatterplotLayer({
         id: "cherita-layer-scatterplot",
         pickable: true,
-        data: data.positions,
+        data: sortedData.positions,
         radiusScale: radiusScale,
         radiusMinPixels: 1,
         getPosition: (d) => d,
@@ -289,7 +339,7 @@ export function Scatterplot({
       }),
     ];
   }, [
-    data.positions,
+    sortedData.positions,
     features,
     getFillColor,
     getRadius,
@@ -348,28 +398,36 @@ export function Scatterplot({
       settings.selectedObs &&
       !_.some(settings.labelObs, { name: settings.selectedObs.name })
     ) {
-      text.push(getLabel(settings.selectedObs, obsData.data?.[index]));
+      text.push(
+        getLabel(settings.selectedObs, data.values?.[getOriginalIndex(index)])
+      );
     }
 
     if (
       settings.colorEncoding === COLOR_ENCODINGS.VAR &&
       settings.selectedVar
     ) {
-      text.push(getLabel(settings.selectedVar, xData.data?.[index], true));
+      text.push(
+        getLabel(
+          settings.selectedVar,
+          data.values?.[getOriginalIndex(index)],
+          true
+        )
+      );
     }
 
     if (settings.labelObs.length) {
       text.push(
         ..._.map(labelObsData.data, (v, k) => {
           const labelObs = _.find(settings.labelObs, (o) => o.name === k);
-          return getLabel(labelObs, v[index]);
+          return getLabel(labelObs, v[getOriginalIndex(index)]);
         })
       );
     }
 
     if (!text.length) return;
 
-    const grayOut = obsIndices && !obsIndices.has(index);
+    const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
 
     return {
       text: text.length ? _.compact(text).join("\n") : null,
@@ -382,17 +440,14 @@ export function Scatterplot({
     };
   };
 
-  const isPending =
-    (isRendering || xData.isPending || obsmData.isPending) &&
-    !obsmData.isPending;
-
   const error =
     (settings.selectedObsm && obsmData.serverError?.length) ||
     (settings.colorEncoding === COLOR_ENCODINGS.VAR &&
       xData.serverError?.length) ||
     (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
       obsData.serverError?.length) ||
-    (settings.labelObs.lengh && labelObsData.serverError?.length);
+    (settings.labelObs.length && labelObsData.serverError?.length) ||
+    coordsError;
 
   return (
     <div className="cherita-container-scatterplot">
@@ -430,7 +485,7 @@ export function Scatterplot({
         />
         <div className="cherita-spatial-footer">
           <div className="cherita-toolbox-footer">
-            {error && !isPending && (
+            {!!error && !isRendering && (
               <Alert variant="danger">
                 <FontAwesomeIcon icon={faTriangleExclamation} />
                 &nbsp;Error loading data
@@ -444,7 +499,7 @@ export function Scatterplot({
                     ? settings.selectedObs?.name
                     : null
               }
-              obsLength={parseInt(obsmData.data?.length)}
+              obsLength={parseInt(data.positions?.length)}
               slicedLength={parseInt(slicedLength)}
             />
           </div>

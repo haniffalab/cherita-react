@@ -56,6 +56,7 @@ const initialDataset = {
   imageUrl: null,
   defaultSettings: {},
   canOverrideSettings: true,
+  useUnsColors: false,
 };
 
 export function DatasetProvider({ dataset_url, children, ...dataset_params }) {
