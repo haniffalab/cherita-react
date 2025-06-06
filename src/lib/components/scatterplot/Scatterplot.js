@@ -472,7 +472,7 @@ export function Scatterplot({
         />
         <div className="cherita-spatial-footer">
           <div className="cherita-toolbox-footer">
-            {error && !isRendering && (
+            {!!error && !isRendering && (
               <Alert variant="danger">
                 <FontAwesomeIcon icon={faTriangleExclamation} />
                 &nbsp;Error loading data
