@@ -30,7 +30,11 @@ export default defineConfig(({ mode }) => {
       },
     },
     define: {
-      "process.env": { ...process.env, ...loadEnv(mode, process.cwd(), "") },
+      "process.env": {
+        PACKAGE_VERSION: "dev",
+        ...process.env,
+        ...loadEnv(mode, process.cwd(), ""),
+      },
     },
   };
 });
