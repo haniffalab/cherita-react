@@ -155,6 +155,7 @@ export function FullPage({
             <ObsColsList
               {...props}
               showSelectedAsActive={showSelectedAsActive}
+              showHistograms={varMode === SELECTION_MODES.SINGLE}
             />
           </div>
           <div className="cherita-app-canvas">{plot}</div>
