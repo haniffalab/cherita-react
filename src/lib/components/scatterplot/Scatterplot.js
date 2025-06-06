@@ -24,6 +24,7 @@ import {
   SELECTED_POLYGON_FILLCOLOR,
   UNSELECTED_POLYGON_FILLCOLOR,
 } from "../../constants/constants";
+import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
 import {
   useSettings,
@@ -54,6 +55,7 @@ export function Scatterplot({
   setShowVars,
   isFullscreen = false,
 }) {
+  const { useUnsColors } = useDataset();
   const settings = useSettings();
   const { obsIndices, valueMin, valueMax, slicedLength } = useFilteredData();
   const dispatch = useSettingsDispatch();
@@ -245,6 +247,11 @@ export function Scatterplot({
           value: (sortedData.values[index] - min) / (max - min),
           categorical: isCategorical,
           grayOut: grayOut,
+          ...(useUnsColors &&
+          settings.colorEncoding === COLOR_ENCODINGS.OBS &&
+          settings.selectedObs?.colors
+            ? { colorscale: settings.selectedObs?.colors }
+            : {}),
         }) || [0, 0, 0, 100]
       );
     },
@@ -256,6 +263,9 @@ export function Scatterplot({
       min,
       max,
       isCategorical,
+      useUnsColors,
+      settings.colorEncoding,
+      settings.selectedObs?.colors,
     ]
   );
 
