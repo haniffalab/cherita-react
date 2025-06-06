@@ -11,6 +11,7 @@ import { VarListToolbar } from "./VarListToolbar";
 import { VarSet } from "./VarSet";
 import { SELECTION_MODES, VAR_SORT } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
+import { useFilteredData } from "../../context/FilterContext";
 import {
   useSettings,
   useSettingsDispatch,
@@ -18,15 +19,16 @@ import {
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
 
-const useVarMean = (varKeys, enabled = false) => {
+export const useVarMean = (varKeys, enabled = false) => {
   const ENDPOINT = "matrix/mean";
   const dataset = useDataset();
+  const { obsIndices } = useFilteredData();
   const [params, setParams] = useState({
     url: dataset.url,
     varKeys: _.map(varKeys, (v) =>
       v.isSet ? { name: v.name, indices: v.vars.map((v) => v.index) } : v.index
     ),
-    // obsIndices:
+    obsIndices: obsIndices,
     varNamesCol: dataset.varNamesCol,
   });
 
@@ -39,9 +41,10 @@ const useVarMean = (varKeys, enabled = false) => {
             ? { name: v.name, indices: v.vars.map((v) => v.index) }
             : v.index
         ),
+        obsIndices: obsIndices,
       };
     });
-  }, [varKeys]);
+  }, [obsIndices, varKeys]);
 
   return useFetch(ENDPOINT, params, {
     enabled: enabled,
@@ -50,7 +53,7 @@ const useVarMean = (varKeys, enabled = false) => {
 };
 
 // ensure nulls are lowest values
-const sortMeans = (i, means) => {
+export const sortMeans = (i, means) => {
   return means[i.name] || _.min(_.values(means)) - 1;
 };
 

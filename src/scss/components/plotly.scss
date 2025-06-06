@@ -1,30 +1,35 @@
 .js-plotly-plot .plotly .modebar {
-  border-radius: 5px;
-  background-color: rgba(0, 0, 0, 0.6);
-  padding: 0 4px !important;
 
   .modebar-group {
-    margin: 0 !important;
-    padding: 0 !important;
-    background-color: transparent !important;
+    @extend .bg-primary;
+    @extend .mx-1;
+    border-radius: 5px;
+    padding: 4px !important;
 
     .modebar-btn {
-      fill: white !important; /* Ensures white icons */
-      color: white !important; /* Ensures text/icons are visible */
+      display: inline-flex;
+      justify-content: center;
       position: relative;
-      font-size: 16px;
-      padding: 4px;
+      font-size: 1.25rem;
+      padding: 0.25rem;
       height: auto;
       cursor: pointer;
       line-height: normal;
 
       svg {
         position: relative;
-        top: auto;
-        bottom: auto;
-        left: auto;
-        right: auto;
+        top: 1px;
+
+        path {
+          fill: white !important;
+          color: white !important;
+        }
       }
     }
   }
+}
+
+.js-plotly-plot .plotly .modebar--hover > :not(.watermark) {
+  opacity: 0.5;
+  transition: opacity 0.3s;
 }

@@ -29,14 +29,20 @@ export default function Header() {
               Violin
             </Nav.Link>
             <NavDropdown title="Full Page" id="full-page-dropdown">
-              <NavDropdown.Item as={Link} to="full-page">
-                FullPage
+              <NavDropdown.Item as={Link} to="full-page/dotplot">
+                Dotplot
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="pseudospatial">
-                FullPagePseudospatial
+              <NavDropdown.Item as={Link} to="full-page/heatmap">
+                Heatmap
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="plots">
-                Plots
+              <NavDropdown.Item as={Link} to="full-page/matrixplot">
+                Matrixplot
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="full-page/scatterplot">
+                Scatterplot
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="full-page/violin">
+                Violin
               </NavDropdown.Item>
             </NavDropdown>
           </Nav>

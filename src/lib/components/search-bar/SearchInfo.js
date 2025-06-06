@@ -13,6 +13,7 @@ import {
 } from "../../context/SettingsContext";
 import { useFetch } from "../../utils/requests";
 import { VarDiseaseInfo } from "../var-list/VarItem";
+import { sortMeans, useVarMean } from "../var-list/VarList";
 
 export function VarInfo({ varItem }) {
   const ENDPOINT = "disease/gene";
@@ -51,42 +52,6 @@ export function VarInfo({ varItem }) {
     </div>
   );
 }
-
-const useVarMean = (varKeys, enabled = false) => {
-  const ENDPOINT = "matrix/mean";
-  const dataset = useDataset();
-  const [params, setParams] = useState({
-    url: dataset.url,
-    varKeys: _.map(varKeys, (v) =>
-      v.isSet ? { name: v.name, indices: v.vars.map((v) => v.index) } : v.index
-    ),
-    // obsIndices:
-    varNamesCol: dataset.varNamesCol,
-  });
-
-  useEffect(() => {
-    setParams((p) => {
-      return {
-        ...p,
-        varKeys: _.map(varKeys, (v) =>
-          v.isSet
-            ? { name: v.name, indices: v.vars.map((v) => v.index) }
-            : v.index
-        ),
-      };
-    });
-  }, [varKeys]);
-
-  return useFetch(ENDPOINT, params, {
-    enabled: enabled,
-    refetchOnMount: false,
-  });
-};
-
-// ensure nulls are lowest values
-const sortMeans = (i, means) => {
-  return means[i.name] || _.min(_.values(means)) - 1;
-};
 
 export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
   const ENDPOINT = "disease/genes";

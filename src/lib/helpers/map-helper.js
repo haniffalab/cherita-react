@@ -45,6 +45,6 @@ export class MapHelper {
       },
     });
 
-    return { longitude, latitude, zoom };
+    return { longitude, latitude, zoom, bounds };
   }
 }
