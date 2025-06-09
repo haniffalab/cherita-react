@@ -1,6 +1,6 @@
 {
   "name": "@haniffalab/cherita-react",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "author": "Haniffa Lab",
   "license": "MIT",
   "keywords": [
@@ -68,6 +68,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "babel-jest": "^29.7.0",
+    "babel-plugin-transform-define": "^2.1.4",
     "cpx": "^1.5.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.10.0",
@@ -90,7 +91,8 @@
     "build:babel": "npm run build:esm && npm run build:cjs",
     "build:scss": "sass --load-path=node_modules src/scss/cherita-bootstrap.scss dist/css/cherita.css",
     "copy:scss": "cpx 'src/scss/**/*' 'scss'",
-    "build": "npm run build:babel && npm run build:scss && npm run copy:scss",
+    "copy:assets": "cpx 'src/assets/**/*' 'dist/assets'",
+    "build": "npm run build:babel && npm run build:scss && npm run copy:scss && npm run copy:assets",
     "test": "jest --watchAll",
     "test:ci": "jest --coverage --ci --no-watch",
     "lint:scss": "stylelint 'src/**/*.scss' --fix",

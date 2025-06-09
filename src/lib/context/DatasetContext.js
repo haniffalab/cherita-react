@@ -45,7 +45,8 @@ const persistOptions = {
       return false;
     },
   },
-  // @TODO: add maxAge and buster (app and api version numbers as busters)
+  buster: process.env.PACKAGE_VERSION || "0.0.0",
+  // @TODO: add maxAge and api version numbers as buster
 };
 
 const initialDataset = {
@@ -56,6 +57,7 @@ const initialDataset = {
   imageUrl: null,
   defaultSettings: {},
   canOverrideSettings: true,
+  useUnsColors: false,
 };
 
 export function DatasetProvider({ dataset_url, children, ...dataset_params }) {

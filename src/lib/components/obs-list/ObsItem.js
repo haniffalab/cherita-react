@@ -45,7 +45,7 @@ function getContinuousLabel(code, binEdges) {
   )}${code === binEdges.length - 1 ? " ]" : " )"}`;
 }
 
-const useObsHistogram = (obs) => {
+const useObsHistogram = (obs, { enabled = true }) => {
   const ENDPOINT = "obs/histograms";
   const dataset = useDataset();
   const settings = useSettings();
@@ -88,7 +88,9 @@ const useObsHistogram = (obs) => {
 
   return useFetch(ENDPOINT, params, {
     enabled:
-      !!settings.selectedVar && settings.colorEncoding === COLOR_ENCODINGS.VAR,
+      enabled &&
+      !!settings.selectedVar &&
+      settings.colorEncoding === COLOR_ENCODINGS.VAR,
     refetchOnMount: false,
   });
 };
@@ -154,8 +156,10 @@ function CategoricalItem({
   histogramData = { data: null, isPending: false, altColor: false },
   filteredStats = { value_counts: null, pct: null },
   isSliced,
+  colors = null,
   showColor = true,
 }) {
+  const { useUnsColors } = useDataset();
   const { getColor } = useColor();
 
   return (
@@ -261,6 +265,7 @@ function CategoricalItem({
                       grayOut: isOmitted,
                       grayParams: { alpha: 1 },
                       colorEncoding: "obs",
+                      ...(useUnsColors ? { colorscale: colors } : {}),
                     })})`}
                   />
                 </svg>
@@ -278,6 +283,7 @@ export function CategoricalObs({
   toggleAll,
   toggleObs,
   showColor = true,
+  showHistograms = true,
 }) {
   const settings = useSettings();
   const { isSliced } = useFilteredData();
@@ -285,7 +291,7 @@ export function CategoricalObs({
   const min = _.min(_.values(obs.codes));
   const max = _.max(_.values(obs.codes));
 
-  const obsHistograms = useObsHistogram(obs);
+  const obsHistograms = useObsHistogram(obs, { enabled: showHistograms });
   const filteredObsData = useFilteredObsData(obs);
 
   const getDataAtIndex = useCallback(
@@ -300,7 +306,7 @@ export function CategoricalObs({
         isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
         label: obs.values[index],
         histogramData:
-          settings.colorEncoding === COLOR_ENCODINGS.VAR
+          showHistograms && settings.colorEncoding === COLOR_ENCODINGS.VAR
             ? {
                 data: obsHistograms.fetchedData?.[obs.values[index]],
                 isPending: obsHistograms.isPending,
@@ -312,20 +318,23 @@ export function CategoricalObs({
           pct: filteredObsData?.pct[obs.values[index]] || 0,
         },
         isSliced: isSliced,
+        colors: obs.colors,
       };
     },
     [
-      settings.colorEncoding,
-      filteredObsData?.pct,
-      filteredObsData?.value_counts,
-      isSliced,
-      obs.codes,
-      obs.omit,
-      obs.value_counts,
       obs.values,
+      obs.codes,
+      obs.value_counts,
+      obs.omit,
+      totalCounts,
+      showHistograms,
+      obs.colors,
+      settings.colorEncoding,
       obsHistograms.fetchedData,
       obsHistograms.isPending,
-      totalCounts,
+      isSliced,
+      filteredObsData?.value_counts,
+      filteredObsData?.pct,
     ]
   );
 
@@ -412,34 +421,65 @@ function ObsContinuousStats({ obs }) {
 }
 
 // @TODO: add bin controls
-// @TODO: add histogram
-export function ContinuousObs({ obs, toggleAll, toggleObs }) {
+export function ContinuousObs({
+  obs,
+  toggleAll,
+  toggleObs,
+  showHistograms = true,
+}) {
+  const settings = useSettings();
   const { isSliced } = useFilteredData();
   const totalCounts = _.sum(_.values(obs.value_counts));
   const min = _.min(_.values(obs.codes));
   const max = _.max(_.values(obs.codes));
 
+  const obsHistograms = useObsHistogram(obs, { enabled: showHistograms });
   const filteredObsData = useFilteredObsData(obs);
 
-  const getDataAtIndex = (index) => {
-    return {
-      value: obs.values[index],
-      code: obs.codes[obs.values[index]],
-      stats: {
-        value_counts: obs.value_counts[obs.values[index]],
-        pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
-      },
-      isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
-      label: isNaN(obs.values[index])
-        ? "NaN"
-        : getContinuousLabel(obs.codes[obs.values[index]], obs.bins.binEdges),
-      filteredStats: {
-        value_counts: filteredObsData?.value_counts[obs.values[index]] || 0,
-        pct: filteredObsData?.pct[obs.values[index]] || 0,
-      },
-      isSliced: isSliced,
-    };
-  };
+  const getDataAtIndex = useCallback(
+    (index) => {
+      return {
+        value: obs.values[index],
+        code: obs.codes[obs.values[index]],
+        stats: {
+          value_counts: obs.value_counts[obs.values[index]],
+          pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
+        },
+        isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
+        label: isNaN(obs.values[index])
+          ? "NaN"
+          : getContinuousLabel(obs.codes[obs.values[index]], obs.bins.binEdges),
+        histogramData:
+          showHistograms && settings.colorEncoding === COLOR_ENCODINGS.VAR
+            ? {
+                data: obsHistograms.fetchedData?.[obs.values[index]],
+                isPending: obsHistograms.isPending,
+                altColor: isSliced,
+              }
+            : { data: null, isPending: false },
+        filteredStats: {
+          value_counts: filteredObsData?.value_counts[obs.values[index]] || 0,
+          pct: filteredObsData?.pct[obs.values[index]] || 0,
+        },
+        isSliced: isSliced,
+      };
+    },
+    [
+      filteredObsData?.pct,
+      filteredObsData?.value_counts,
+      isSliced,
+      obs.bins.binEdges,
+      obs.codes,
+      obs.omit,
+      obs.value_counts,
+      obs.values,
+      obsHistograms.fetchedData,
+      obsHistograms.isPending,
+      settings.colorEncoding,
+      showHistograms,
+      totalCounts,
+    ]
+  );
 
   return (
     <>
@@ -456,6 +496,7 @@ export function ContinuousObs({ obs, toggleAll, toggleObs }) {
           max={max}
           onChange={toggleObs}
           showColor={false}
+          estimateSize={42}
         />
       </ListGroup>
       <ObsContinuousStats obs={obs} />
