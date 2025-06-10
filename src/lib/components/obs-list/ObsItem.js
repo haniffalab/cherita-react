@@ -165,11 +165,12 @@ function CategoricalItem({
   return (
     <div className="virtualized-list-wrapper">
       <ListGroup.Item key={value} className="obs-item">
-        <div className="d-flex align-items-center justify-content-between flex-wrap">
-          <div className="flex-grow-1 me-auto">
+        <div className="d-flex align-items-center flex-wrap">
+          <div className="flex-grow-1 me-auto mw-100">
             <Form.Check
               className="obs-value-list-check"
               type="switch"
+              title={label}
               label={label}
               checked={!isOmitted}
               onChange={() => onChange(value)}
