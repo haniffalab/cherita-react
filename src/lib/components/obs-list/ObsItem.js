@@ -165,8 +165,8 @@ function CategoricalItem({
   return (
     <div className="virtualized-list-wrapper">
       <ListGroup.Item key={value} className="obs-item">
-        <div className="d-flex align-items-center">
-          <div className="flex-grow-1">
+        <div className="d-flex align-items-center justify-content-between flex-wrap">
+          <div className="flex-grow-1 me-auto">
             <Form.Check
               className="obs-value-list-check"
               type="switch"
@@ -175,14 +175,16 @@ function CategoricalItem({
               onChange={() => onChange(value)}
             />
           </div>
-          <div className="d-flex align-items-center">
-            <div className="pl-1 m-0 flex-grow-1">
-              <Histogram
-                data={histogramData.data}
-                isPending={histogramData.isPending}
-                altColor={histogramData.altColor}
-              />
-            </div>
+          <div className="d-flex align-items-center ms-auto">
+            {(!!histogramData.data || histogramData.isPending) && (
+              <div className="pl-1 m-0">
+                <Histogram
+                  data={histogramData.data}
+                  isPending={histogramData.isPending}
+                  altColor={histogramData.altColor}
+                />
+              </div>
+            )}
             <div className="pl-1 m-0">
               <Tooltip
                 title={
