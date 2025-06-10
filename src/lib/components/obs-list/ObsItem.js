@@ -206,12 +206,16 @@ function CategoricalItem({
                 <div className="d-flex align-items-center">
                   <Badge className="value-count-badge">
                     {" "}
-                    {isSliced && (
-                      <>
-                        {formatNumerical(parseInt(filteredStats.value_counts))}{" "}
-                        out of{" "}
-                      </>
-                    )}
+                    {isSliced &&
+                      parseInt(filteredStats.value_counts) !==
+                        parseInt(stats.value_counts) && (
+                        <>
+                          {formatNumerical(
+                            parseInt(filteredStats.value_counts)
+                          )}{" "}
+                          out of{" "}
+                        </>
+                      )}
                     {formatNumerical(
                       parseInt(stats.value_counts),
                       FORMATS.EXPONENTIAL
