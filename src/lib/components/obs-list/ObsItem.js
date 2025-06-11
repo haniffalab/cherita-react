@@ -301,6 +301,11 @@ export function CategoricalObs({
   const obsHistograms = useObsHistogram(obs, { enabled: showHistograms });
   const filteredObsData = useFilteredObsData(obs);
 
+  const enabledHistograms = useMemo(
+    () => showHistograms && settings.colorEncoding === COLOR_ENCODINGS.VAR,
+    [settings.colorEncoding, showHistograms]
+  );
+
   const getDataAtIndex = useCallback(
     (index) => {
       return {
@@ -312,14 +317,13 @@ export function CategoricalObs({
         },
         isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
         label: obs.values[index],
-        histogramData:
-          showHistograms && settings.colorEncoding === COLOR_ENCODINGS.VAR
-            ? {
-                data: obsHistograms.fetchedData?.[obs.values[index]],
-                isPending: obsHistograms.isPending,
-                altColor: isSliced,
-              }
-            : { data: null, isPending: false },
+        histogramData: enabledHistograms
+          ? {
+              data: obsHistograms.fetchedData?.[obs.values[index]],
+              isPending: obsHistograms.isPending,
+              altColor: isSliced,
+            }
+          : { data: null, isPending: false },
         filteredStats: {
           value_counts: filteredObsData?.value_counts[obs.values[index]] || 0,
           pct: filteredObsData?.pct[obs.values[index]] || 0,
@@ -333,10 +337,9 @@ export function CategoricalObs({
       obs.codes,
       obs.value_counts,
       obs.omit,
-      totalCounts,
-      showHistograms,
       obs.colors,
-      settings.colorEncoding,
+      totalCounts,
+      enabledHistograms,
       obsHistograms.fetchedData,
       obsHistograms.isPending,
       isSliced,
@@ -361,7 +364,14 @@ export function CategoricalObs({
         max={max}
         onChange={toggleObs}
         showColor={showColor}
-        estimateSize={42}
+        estimateSize={(i) =>
+          // rough attempt to determine size based on label length
+          // estimate size of 68 pixels if label is long (>=25 chars if enabledHistograms, >=30 if showColor, >=35 otherwise), else 42
+          // TODO: consider isSliced as count badge will be longer ?
+          obs.values[i].length >= (enabledHistograms ? 25 : showColor ? 30 : 35)
+            ? 68
+            : 42
+        }
       />
     </ListGroup>
   );
@@ -443,6 +453,20 @@ export function ContinuousObs({
   const obsHistograms = useObsHistogram(obs, { enabled: showHistograms });
   const filteredObsData = useFilteredObsData(obs);
 
+  const enabledHistograms = useMemo(
+    () => showHistograms && settings.colorEncoding === COLOR_ENCODINGS.VAR,
+    [settings.colorEncoding, showHistograms]
+  );
+
+  const getLabel = useCallback(
+    (index) => {
+      return isNaN(obs.values[index])
+        ? "NaN"
+        : getContinuousLabel(obs.codes[obs.values[index]], obs.bins.binEdges);
+    },
+    [obs.bins.binEdges, obs.codes, obs.values]
+  );
+
   const getDataAtIndex = useCallback(
     (index) => {
       return {
@@ -453,17 +477,14 @@ export function ContinuousObs({
           pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
         },
         isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
-        label: isNaN(obs.values[index])
-          ? "NaN"
-          : getContinuousLabel(obs.codes[obs.values[index]], obs.bins.binEdges),
-        histogramData:
-          showHistograms && settings.colorEncoding === COLOR_ENCODINGS.VAR
-            ? {
-                data: obsHistograms.fetchedData?.[obs.values[index]],
-                isPending: obsHistograms.isPending,
-                altColor: isSliced,
-              }
-            : { data: null, isPending: false },
+        label: getLabel(index),
+        histogramData: enabledHistograms
+          ? {
+              data: obsHistograms.fetchedData?.[obs.values[index]],
+              isPending: obsHistograms.isPending,
+              altColor: isSliced,
+            }
+          : { data: null, isPending: false },
         filteredStats: {
           value_counts: filteredObsData?.value_counts[obs.values[index]] || 0,
           pct: filteredObsData?.pct[obs.values[index]] || 0,
@@ -472,18 +493,17 @@ export function ContinuousObs({
       };
     },
     [
+      enabledHistograms,
       filteredObsData?.pct,
       filteredObsData?.value_counts,
+      getLabel,
       isSliced,
-      obs.bins.binEdges,
       obs.codes,
       obs.omit,
       obs.value_counts,
       obs.values,
       obsHistograms.fetchedData,
       obsHistograms.isPending,
-      settings.colorEncoding,
-      showHistograms,
       totalCounts,
     ]
   );
@@ -503,7 +523,12 @@ export function ContinuousObs({
           max={max}
           onChange={toggleObs}
           showColor={false}
-          estimateSize={42}
+          estimateSize={(i) =>
+            // rough attempt to determine size based on label length
+            // estimate size of 68 pixels if label is long (>=20 chars if enabledHistograms, >=30 otherwise), else 42
+            // TODO: consider isSliced as count badge will be longer ?
+            getLabel(i).length >= (enabledHistograms ? 20 : 30) ? 68 : 42
+          }
         />
       </ListGroup>
       <ObsContinuousStats obs={obs} />

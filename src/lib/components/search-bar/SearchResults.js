@@ -94,7 +94,7 @@ export function VarSearchResults({
               count={deferredData.length}
               ItemComponent={ItemComponent}
               overscan={500}
-              estimateSize={42}
+              estimateSize={() => 42}
               maxHeight="70vh"
             />
           ) : (
@@ -182,7 +182,7 @@ export function DiseasesSearchResults({
               count={deferredData.length}
               ItemComponent={ItemComponent}
               overscan={250}
-              estimateSize={32}
+              estimateSize={() => 32}
               maxHeight="70vh"
             />
           ) : (
