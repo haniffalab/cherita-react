@@ -156,6 +156,7 @@ export function FullPage({
               {...props}
               showSelectedAsActive={showSelectedAsActive}
               showHistograms={varMode === SELECTION_MODES.SINGLE}
+              showColor={varMode === SELECTION_MODES.SINGLE}
             />
           </div>
           <div className="cherita-app-canvas">{plot}</div>
