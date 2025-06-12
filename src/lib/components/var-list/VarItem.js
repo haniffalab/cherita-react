@@ -197,31 +197,31 @@ export function SelectionItem({
   );
 }
 
+const select = (dispatch, mode, item) => {
+  if (mode === SELECTION_MODES.SINGLE) {
+    dispatch({
+      type: "select.var",
+      var: item,
+    });
+  } else if (mode === SELECTION_MODES.MULTIPLE) {
+    dispatch({
+      type: "select.multivar",
+      var: item,
+    });
+  }
+  dispatch({
+    type: "set.colorEncoding",
+    value: COLOR_ENCODINGS.VAR,
+  });
+};
+
+const debounceSelect = _.debounce(select, 200);
+
 export function VarItem({ item, active, mode = SELECTION_MODES.SINGLE }) {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
 
-  const selectVar = () => {
-    if (mode === SELECTION_MODES.SINGLE) {
-      dispatch({
-        type: "select.var",
-        var: item,
-      });
-      dispatch({
-        type: "set.colorEncoding",
-        value: COLOR_ENCODINGS.VAR,
-      });
-    } else if (mode === SELECTION_MODES.MULTIPLE) {
-      dispatch({
-        type: "select.multivar",
-        var: item,
-      });
-      dispatch({
-        type: "set.colorEncoding",
-        value: COLOR_ENCODINGS.VAR,
-      });
-    }
-  };
+  const selectVar = () => debounceSelect(dispatch, mode, item);
 
   const removeVar = () => {
     dispatch({

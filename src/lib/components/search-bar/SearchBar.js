@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
+import _ from "lodash";
 import { Button, Form, FormGroup, InputGroup, Modal } from "react-bootstrap";
 import Col from "react-bootstrap/Col";
 import Container from "react-bootstrap/Container";
@@ -13,7 +14,7 @@ import { DiseaseInfo, VarInfo } from "./SearchInfo";
 import { DiseasesSearchResults, VarSearchResults } from "./SearchResults";
 import { COLOR_ENCODINGS } from "../../constants/constants";
 
-function onVarSelect(dispatch, item) {
+const select = (dispatch, item) => {
   dispatch({
     type: "select.var",
     var: item,
@@ -26,6 +27,16 @@ function onVarSelect(dispatch, item) {
     type: "set.colorEncoding",
     value: COLOR_ENCODINGS.VAR,
   });
+};
+
+const debounceSelect = _.debounce(select, 300);
+
+function onVarSelect(dispatch, item) {
+  dispatch({
+    type: "add.var",
+    var: item,
+  });
+  debounceSelect(dispatch, item);
 }
 
 function addVarSet(dispatch, { name, vars }) {
