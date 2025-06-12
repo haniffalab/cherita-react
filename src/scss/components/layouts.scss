@@ -58,46 +58,6 @@
     height: 100%;
   }
 
-  .sidebar-plotselector {
-    padding: 6px;
-    border-bottom: 1px solid #dee2e6;
-
-    .plotselector-icon {
-      padding-bottom: 2px;
-      cursor: pointer;
-
-      .active {
-        opacity: 1;
-        border-bottom: 2px solid #007bff;
-      }
-    }
-  }
-
-  .sidebar-pseudospatial {
-    padding: 10px;
-    border-bottom: 1px solid #dee2e6;
-
-    .cherita-legend {
-      margin: 0 auto;
-    }
-  }
-
-  .sidebar-features {
-    padding: 10px;
-    margin-bottom: 10px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    min-height: 0;
-
-    .sidebar-features-list {
-      position: relative;
-      flex-grow: 1;
-      min-height: 0;
-    }
-  }
-
   .accordion-header-wrapper {
     cursor: pointer;
     padding: var(--geeks-accordion-btn-padding-y)
@@ -131,6 +91,63 @@
     &:after {
       background-image: var(--geeks-accordion-btn-active-icon);
       transform: var(--geeks-accordion-btn-icon-transform);
+    }
+  }
+}
+
+.sidebar-plotselector {
+  padding: 6px;
+  border-bottom: 1px solid #dee2e6;
+
+  .plotselector-icon {
+    padding-bottom: 2px;
+    cursor: pointer;
+
+    .active {
+      opacity: 1;
+      border-bottom: 2px solid #007bff;
+    }
+  }
+}
+
+.sidebar-pseudospatial {
+  padding: 10px;
+  border-bottom: 1px solid #dee2e6;
+
+  .cherita-legend {
+    margin: 0 auto;
+  }
+}
+
+.sidebar-features {
+  padding: 10px;
+  margin-bottom: 10px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
+
+  .sidebar-features-list {
+    position: relative;
+    flex-grow: 1;
+    min-height: 0;
+  }
+}
+
+.offcanvas-vars {
+  .offcanvas-header {
+    @extend .pb-0;
+  }
+  .offcanvas-body {
+    @extend .pt-1;
+
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    .sidebar-features {
+      @extend .px-0;
     }
   }
 }

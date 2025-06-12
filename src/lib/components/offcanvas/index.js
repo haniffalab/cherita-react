@@ -40,13 +40,17 @@ export function OffcanvasVars({
   mode = SELECTION_MODES.MULTIPLE,
 }) {
   return (
-    <Offcanvas show={show} onHide={handleClose}>
+    <Offcanvas show={show} onHide={handleClose} className="offcanvas-vars">
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Features</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
-        <SearchBar searchDiseases={true} />
-        <VarNamesList mode={mode} />
+        <div className="sidebar-features">
+          <SearchBar searchDiseases={true} />
+          <div className="sidebar-features-list">
+            <VarNamesList mode={mode} />
+          </div>
+        </div>
       </Offcanvas.Body>
     </Offcanvas>
   );
