@@ -123,8 +123,15 @@ export function SettingsProvider({
   const DATASET_STORAGE_KEY = `${LOCAL_STORAGE_KEY}-${dataset_url}`;
   // Use localStorage directly instead of useLocalStorage due to unnecessary re-renders
   // https://github.com/uidotdev/usehooks/issues/157
-  const localSettings =
+  let { buster, timestamp, ...localSettings } =
     JSON.parse(localStorage.getItem(DATASET_STORAGE_KEY)) || {};
+
+  // If the buster is not set or does not match the current package version,
+  // reset localSettings to avoid stale data
+  if (!buster || buster !== process.env.PACKAGE_VERSION) {
+    localSettings = {};
+  }
+
   const [settings, dispatch] = useReducer(
     settingsReducer,
     { canOverrideSettings, defaultSettings, localSettings },
@@ -134,7 +141,14 @@ export function SettingsProvider({
   useEffect(() => {
     if (canOverrideSettings) {
       try {
-        localStorage.setItem(DATASET_STORAGE_KEY, JSON.stringify(settings));
+        localStorage.setItem(
+          DATASET_STORAGE_KEY,
+          JSON.stringify({
+            buster: process.env.PACKAGE_VERSION || "0.0.0",
+            timestamp: Date.now(),
+            ...settings,
+          })
+        );
       } catch (err) {
         if (
           err.code === 22 ||
