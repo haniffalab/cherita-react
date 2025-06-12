@@ -64,14 +64,20 @@ export function ObsmKeysList() {
           }
         });
       }
+
+      if (settings.selectedObsm) {
+        // If selected obsm is not in keys list, reset to null
+        if (!_.includes(fetchedData, settings.selectedObsm)) {
+          dispatch({
+            type: "select.obsm",
+            obsm: null,
+          });
+        } else {
+          setActive(settings.selectedObsm);
+        }
+      }
     }
   }, [dispatch, fetchedData, isPending, serverError, settings.selectedObsm]);
-
-  useEffect(() => {
-    if (settings.selectedObsm) {
-      setActive(settings.selectedObsm);
-    }
-  }, [settings.selectedObsm]);
 
   const obsmList = obsmKeysList.map((item) => {
     return (
