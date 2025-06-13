@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import { Box, Slider, Typography } from "@mui/material";
 import _ from "lodash";
 import { ButtonGroup, Dropdown, Form } from "react-bootstrap";
 
@@ -170,8 +171,42 @@ function MaskSet() {
   );
 }
 
+function OpacitySlider({ opacity, setOpacity }) {
+  const [sliderValue, setSliderValue] = useState(opacity);
+
+  return (
+    <Box className="w-100">
+      <Typography id="opacity-range" gutterBottom>
+        Reference image opacity
+      </Typography>
+      <div className="px-4">
+        <Slider
+          aria-labelledby="opacity-range"
+          min={0}
+          max={1}
+          step={0.05}
+          value={sliderValue}
+          onChange={(_e, value) => setSliderValue(value)}
+          onChangeCommitted={(_e, value) => setOpacity(value)}
+          valueLabelDisplay="auto"
+          getAriaValueText={(value) => `${value * 100}%`}
+          valueLabelFormat={(value) => `${(value * 100).toFixed(0)}%`}
+          marks={[
+            { value: 0, label: "0%" },
+            { value: 1, label: "100%" },
+          ]}
+        />
+      </div>
+    </Box>
+  );
+}
+
 // @TODO: add colormap, colorbar slider
 export function PseudospatialToolbar({ plotType }) {
+  const { imageUrl } = useDataset();
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
+
   return (
     <div className="cherita-pseudospatial-toolbar">
       <ButtonGroup>
@@ -180,6 +215,17 @@ export function PseudospatialToolbar({ plotType }) {
       <ButtonGroup>
         {plotType === PLOT_TYPES.CATEGORICAL && <CategoricalMode />}
       </ButtonGroup>
+      {imageUrl && (
+        <OpacitySlider
+          opacity={settings.pseudospatial.refImg.opacity}
+          setOpacity={(opacity) => {
+            dispatch({
+              type: "set.pseudospatial.refImg.opacity",
+              opacity: opacity,
+            });
+          }}
+        />
+      )}
     </div>
   );
 }
