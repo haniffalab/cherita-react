@@ -161,7 +161,7 @@ export function FullPage({
           <div className="cherita-app-canvas">{plot}</div>
           <div className="cherita-app-sidebar p-3">
             <Card>
-              <Card.Body className="d-flex flex-column p-0">
+              <Card.Body>
                 <div className="sidebar-plotselector">
                   <PlotTypeSelector
                     currentType={plotType}
@@ -179,9 +179,11 @@ export function FullPage({
                 ) : (
                   <></>
                 )}
-                <div className="sidebar-features modern-scrollbars">
+                <div className="sidebar-features">
                   <SearchBar searchDiseases={searchDiseases} searchVar={true} />
-                  <VarNamesList mode={varMode} />
+                  <div className="sidebar-features-list">
+                    <VarNamesList mode={varMode} />
+                  </div>
                 </div>
               </Card.Body>
             </Card>
