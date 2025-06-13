@@ -6,7 +6,7 @@ export function VirtualizedList({
   getDataAtIndex,
   count,
   ItemComponent,
-  estimateSize = 45,
+  estimateSize = () => 45,
   overscan = 25,
   maxHeight = "65vh",
   ...props
@@ -16,7 +16,7 @@ export function VirtualizedList({
   const itemVirtualizer = useVirtualizer({
     count: count,
     getScrollElement: () => parentNode,
-    estimateSize: () => estimateSize,
+    estimateSize: (i) => estimateSize(i),
     overscan: overscan,
   });
 
