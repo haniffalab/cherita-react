@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 
+import _ from "lodash";
 import {
   Button,
   ButtonGroup,
@@ -9,6 +10,7 @@ import {
   Tooltip,
 } from "react-bootstrap";
 
+import { DEFAULT_OBSM_KEYS } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import {
   useSettings,
@@ -44,14 +46,38 @@ export function ObsmKeysList() {
   useEffect(() => {
     if (!isPending && !serverError && fetchedData) {
       setObsmKeysList(fetchedData);
-    }
-  }, [fetchedData, isPending, serverError]);
 
-  useEffect(() => {
-    if (settings.selectedObsm) {
-      setActive(settings.selectedObsm);
+      // Set default obsm if in keys list and not selected
+      if (!settings.selectedObsm && !!fetchedData.length) {
+        // Follow DEFAULT_OBSM_KEYS order
+        _.each(DEFAULT_OBSM_KEYS, (k) => {
+          const defaultObsm = _.find(
+            fetchedData,
+            (item) => item.toLowerCase() === k
+          );
+          if (defaultObsm) {
+            dispatch({
+              type: "select.obsm",
+              obsm: defaultObsm,
+            });
+            return false; // break
+          }
+        });
+      }
+
+      if (settings.selectedObsm) {
+        // If selected obsm is not in keys list, reset to null
+        if (!_.includes(fetchedData, settings.selectedObsm)) {
+          dispatch({
+            type: "select.obsm",
+            obsm: null,
+          });
+        } else {
+          setActive(settings.selectedObsm);
+        }
+      }
     }
-  }, [settings.selectedObsm]);
+  }, [dispatch, fetchedData, isPending, serverError, settings.selectedObsm]);
 
   const obsmList = obsmKeysList.map((item) => {
     return (
