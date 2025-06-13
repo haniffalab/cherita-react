@@ -19,12 +19,22 @@
     height: 20px;
     margin-right: 10px;
   }
-  .obs-accordion-header-title {
+  .obs-accordion-header-span {
     font-size: 1rem;
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    .accordion-header-title {
+      @extend .text-break;
+      @extend .me-1;
+    }
+
+    .accordion-header-toolbar {
+      @extend .d-flex;
+      @extend .flex-nowrap;
+    }
   }
   .active-icon {
     color: #0c63e4;
