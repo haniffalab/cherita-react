@@ -18,7 +18,10 @@ import {
 } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
-import { useSettings } from "../../context/SettingsContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { ImageViewer } from "../../utils/ImageViewer";
 import { Legend } from "../../utils/Legend";
@@ -123,12 +126,9 @@ export function Pseudospatial({
 }) {
   const { imageUrl } = useDataset();
   const settings = useSettings();
+  const dispatch = useSettingsDispatch();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
-  const [refImgProps, setRefImgProps] = useState({
-    opacity: 1,
-    visible: false,
-  });
   const { getColor } = useColor();
   const colorscale = useRef(settings.controls.colorScale);
 
@@ -248,12 +248,12 @@ export function Pseudospatial({
           xanchor: "center",
           yanchor: "middle",
           name: "Reference Image",
-          ...refImgProps,
+          ...settings.pseudospatial.refImg,
         },
       ];
     }
     return [];
-  }, [refImgProps, imageUrl]);
+  }, [imageUrl, settings.pseudospatial.refImg]);
 
   const modeBarButtons = useMemo(() => {
     return [
@@ -276,12 +276,14 @@ export function Pseudospatial({
                 path: faEye.icon[4],
               },
               click: () =>
-                setRefImgProps((prev) => ({ ...prev, visible: !prev.visible })),
+                dispatch({
+                  type: "toggle.pseudospatial.refImg.visible",
+                }),
             },
           ]
         : []),
     ];
-  }, [imageUrl, setShowControls]);
+  }, [dispatch, imageUrl, setShowControls]);
 
   if (!serverError) {
     return (
