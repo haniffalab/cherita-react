@@ -13,3 +13,14 @@
 );
 
 @import "@haniffalab/cherita-react/scss/cherita";
+
+.App {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+}
+
+header {
+  flex-shrink: 0;
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { useMediaQuery } from "@mui/material";
 import { Card, Container, Modal } from "react-bootstrap";
@@ -39,9 +39,6 @@ export function FullPage({
   defaultPlotType = PLOT_TYPES.SCATTERPLOT,
   ...props
 }) {
-  const appRef = useRef();
-  const [appDimensions, setAppDimensions] = useState({ width: 0, height: 0 });
-
   const [showObs, setShowObs] = useState(false);
   const [showObsm, setShowObsm] = useState(false);
   const [showVars, setShowVars] = useState(false);
@@ -62,29 +59,6 @@ export function FullPage({
   const XlBreakpoint = useMediaQuery(BREAKPOINTS.XL);
   const showObsBtn = LgBreakpoint;
   const showVarsBtn = XlBreakpoint;
-
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (appRef.current) {
-        // Get the distance from the top of the page to the target element
-        const rect = appRef.current.getBoundingClientRect();
-        const distanceFromTop = rect.top + window.scrollY;
-
-        // Calculate the available height for the Cherita app
-        const availableHeight = window.innerHeight - distanceFromTop;
-
-        // Update the dimensions to fit the viewport minus the navbar height
-        setAppDimensions({
-          width: appRef.current.offsetWidth,
-          height: availableHeight,
-        });
-      }
-    };
-
-    window.addEventListener("resize", updateDimensions);
-    updateDimensions();
-    return () => window.removeEventListener("resize", updateDimensions);
-  }, []);
 
   const { plotControls, varMode, showSelectedAsActive } = {
     [PLOT_TYPES.SCATTERPLOT]: {
@@ -140,17 +114,9 @@ export function FullPage({
   }, [plotType, showObsBtn, showVarsBtn]);
 
   return (
-    <div
-      ref={appRef}
-      className="cherita-app"
-      style={{ height: appDimensions.height }}
-    >
+    <div className="cherita-app">
       <DatasetProvider {...props}>
-        <Container
-          fluid
-          className="cherita-app-container"
-          style={{ height: appDimensions.height }}
-        >
+        <Container fluid className="cherita-app-container">
           <div className="cherita-app-obs modern-scrollbars border-end h-100">
             <ObsColsList
               {...props}

@@ -16,33 +16,35 @@ export default function DotplotDemo(props) {
   const [showVars, setShowVars] = useState(false);
   const [showControls, setShowControls] = useState(false);
   return (
-    <Container>
-      <div className="cherita-container">
-        <DatasetProvider {...props}>
-          <Toolbar
-            setShowObs={setShowObs}
-            setShowVars={setShowVars}
-            setShowControls={setShowControls}
-          />
-          <div className="cherita-container-plot">
-            <Dotplot />
-          </div>
-          <OffcanvasObs
-            show={showObs}
-            handleClose={() => setShowObs(false)}
-            showSelectedAsActive={true}
-          />
-          <OffcanvasVars
-            show={showVars}
-            handleClose={() => setShowVars(false)}
-          />
-          <OffcanvasControls
-            show={showControls}
-            handleClose={() => setShowControls(false)}
-            Controls={DotplotControls}
-          />
-        </DatasetProvider>
-      </div>
-    </Container>
+    <div className="h-100">
+      <Container>
+        <div className="cherita-container">
+          <DatasetProvider {...props}>
+            <Toolbar
+              setShowObs={setShowObs}
+              setShowVars={setShowVars}
+              setShowControls={setShowControls}
+            />
+            <div className="cherita-container-plot">
+              <Dotplot />
+            </div>
+            <OffcanvasObs
+              show={showObs}
+              handleClose={() => setShowObs(false)}
+              showSelectedAsActive={true}
+            />
+            <OffcanvasVars
+              show={showVars}
+              handleClose={() => setShowVars(false)}
+            />
+            <OffcanvasControls
+              show={showControls}
+              handleClose={() => setShowControls(false)}
+              Controls={DotplotControls}
+            />
+          </DatasetProvider>
+        </div>
+      </Container>
+    </div>
   );
 }
