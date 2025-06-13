@@ -6,8 +6,7 @@ import React, {
   useState,
 } from "react";
 
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faSliders } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faSliders } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
 import { Alert } from "react-bootstrap";
 import Plot from "react-plotly.js";
@@ -25,8 +24,6 @@ import { ImageViewer } from "../../utils/ImageViewer";
 import { Legend } from "../../utils/Legend";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
-
-library.add(faSliders);
 
 function usePseudospatialData(plotType) {
   const ENDPOINT = "pseudospatial";
@@ -124,9 +121,14 @@ export function Pseudospatial({
   plotType,
   setPlotType,
 }) {
+  const { imageUrl } = useDataset();
   const settings = useSettings();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
+  const [refImgProps, setRefImgProps] = useState({
+    opacity: 1,
+    visible: false,
+  });
   const { getColor } = useColor();
   const colorscale = useRef(settings.controls.colorScale);
 
@@ -229,7 +231,57 @@ export function Pseudospatial({
   ]);
 
   const hasSelections = !!plotType && !!settings.pseudospatial.maskSet;
-  const faSlidersPath = faSliders.icon[4];
+
+  const images = useMemo(() => {
+    if (imageUrl) {
+      return [
+        {
+          source: imageUrl,
+          xref: "paper",
+          yref: "paper",
+          x: 0.5,
+          y: 0.5,
+          sizex: 1,
+          sizey: 1,
+          sizing: "contain",
+          layer: "above",
+          xanchor: "center",
+          yanchor: "middle",
+          name: "Reference Image",
+          ...refImgProps,
+        },
+      ];
+    }
+    return [];
+  }, [refImgProps, imageUrl]);
+
+  const modeBarButtons = useMemo(() => {
+    return [
+      {
+        name: "Open plot controls",
+        icon: {
+          width: 512,
+          height: 512,
+          path: faSliders.icon[4],
+        },
+        click: () => setShowControls((prev) => !prev),
+      },
+      ...(imageUrl
+        ? [
+            {
+              name: "Toggle reference image",
+              icon: {
+                width: 512,
+                height: 512,
+                path: faEye.icon[4],
+              },
+              click: () =>
+                setRefImgProps((prev) => ({ ...prev, visible: !prev.visible })),
+            },
+          ]
+        : []),
+    ];
+  }, [imageUrl, setShowControls]);
 
   if (!serverError) {
     return (
@@ -240,25 +292,19 @@ export function Pseudospatial({
           {hasSelections && (
             <Plot
               data={data}
-              layout={{ ...layout, autosize: true, height: height }}
+              layout={{
+                ...layout,
+                autosize: true,
+                height: height,
+                margin: { l: 0, r: 0, t: 0, b: 0, pad: 0 },
+                images: images,
+              }}
               useResizeHandler={true}
               className="cherita-pseudospatial-plot"
               config={{
                 displaylogo: false,
                 displayModeBar: true,
-                modeBarButtonsToAdd: [
-                  {
-                    name: "Open plot controls",
-                    icon: {
-                      width: 512,
-                      height: 512,
-                      path: faSlidersPath,
-                      ascent: 512,
-                      descent: 0,
-                    },
-                    click: () => setShowControls((prev) => !prev),
-                  },
-                ],
+                modeBarButtonsToAdd: modeBarButtons,
               }}
             />
           )}
