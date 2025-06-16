@@ -125,17 +125,16 @@ export function SelectionItem({
   return (
     <>
       <div
-        className={`d-flex justify-content-between ${
-          hasDiseaseInfo ? "cursor-pointer" : ""
-        }`}
+        className={hasDiseaseInfo ? "cursor-pointer" : ""}
         onClick={() => {
           setOpenInfo((o) => !o);
         }}
       >
-        <div className="d-flex justify-content-between align-items-center w-100">
-          <div>{item.name}</div>
-
-          <div className="d-flex align-items-center gap-1">
+        <div className="d-flex align-items-center">
+          <div className="var-item-name" title={item.name}>
+            {item.name}
+          </div>
+          <div className="ms-auto d-flex align-items-center gap-1">
             {hasDiseaseInfo && <MoreVert />}
             <VarHistogram item={item} />
             {showSetColorEncoding && (

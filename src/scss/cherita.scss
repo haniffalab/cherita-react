@@ -21,6 +21,10 @@ $prefix: "bs-" !default;
   align-items: center;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 .cherita-container {
   margin: 40px auto;
   background-color: #fff;
@@ -411,4 +415,16 @@ $gauge-padding: 0.15rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.var-item-name {
+  @extend .me-auto;
+  padding-right: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+input[type="checkbox"] {
+  cursor: pointer;
 }
