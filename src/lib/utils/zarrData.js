@@ -65,7 +65,7 @@ export const useObsData = (obs = null) => {
   const dataset = useDataset();
   const settings = useSettings();
 
-  obs = obs || settings.selectedObs;
+  obs = obs || settings.data.obs[settings.selectedObs?.name] || null;
 
   const obsParams = useMemo(
     () => ({
@@ -88,6 +88,7 @@ export const useLabelObsData = () => {
   const labelObsParams = useMemo(
     () =>
       _.map(settings.labelObs, (obs) => {
+        obs = obs || settings.data.obs[obs.name] || null;
         return {
           url: dataset.url,
           path:
@@ -97,7 +98,7 @@ export const useLabelObsData = () => {
           key: obs.name,
         };
       }),
-    [dataset.url, settings.labelObs]
+    [dataset.url, settings.data.obs, settings.labelObs]
   );
 
   return useMultipleZarr(labelObsParams, GET_OPTIONS, {

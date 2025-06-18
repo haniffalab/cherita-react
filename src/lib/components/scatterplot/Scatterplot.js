@@ -71,6 +71,13 @@ export function Scatterplot({
   });
   const [coordsError, setCoordsError] = useState(null);
 
+  const selectedObs = useMemo(() => {
+    if (settings.selectedObs) {
+      return settings.data.obs[settings.selectedObs.name];
+    }
+    return null;
+  }, [settings.data.obs, settings.selectedObs]);
+
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
   const [features, setFeatures] = useState({
@@ -186,7 +193,7 @@ export function Scatterplot({
     if (
       (settings.colorEncoding === COLOR_ENCODINGS.VAR ||
         (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-          settings.selectedObs?.type === OBS_TYPES.CONTINUOUS)) &&
+          selectedObs?.type === OBS_TYPES.CONTINUOUS)) &&
       data.positions &&
       data.values &&
       data.positions.length === data.values.length
@@ -217,8 +224,8 @@ export function Scatterplot({
     data,
     identityGetOriginalIndex,
     identitySortedIndexMap,
+    selectedObs?.type,
     settings.colorEncoding,
-    settings.selectedObs?.type,
   ]);
 
   const sortedObsIndices = useMemo(() => {
@@ -230,13 +237,13 @@ export function Scatterplot({
   const isCategorical = useMemo(() => {
     if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
       return (
-        settings.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-        settings.selectedObs?.type === OBS_TYPES.BOOLEAN
+        selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+        selectedObs?.type === OBS_TYPES.BOOLEAN
       );
     } else {
       return false;
     }
-  }, [settings.colorEncoding, settings.selectedObs?.type]);
+  }, [settings.colorEncoding, selectedObs?.type]);
 
   useEffect(() => {
     dispatch({
@@ -261,8 +268,8 @@ export function Scatterplot({
           grayOut: grayOut,
           ...(useUnsColors &&
           settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-          settings.selectedObs?.colors
-            ? { colorscale: settings.selectedObs?.colors }
+          selectedObs?.colors
+            ? { colorscale: selectedObs?.colors }
             : {}),
         }) || [0, 0, 0, 100]
       );
@@ -277,7 +284,7 @@ export function Scatterplot({
       isCategorical,
       useUnsColors,
       settings.colorEncoding,
-      settings.selectedObs?.colors,
+      selectedObs?.colors,
     ]
   );
 
@@ -395,12 +402,10 @@ export function Scatterplot({
 
     if (
       settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-      settings.selectedObs &&
-      !_.some(settings.labelObs, { name: settings.selectedObs.name })
+      selectedObs &&
+      !_.some(settings.labelObs, { name: selectedObs.name })
     ) {
-      text.push(
-        getLabel(settings.selectedObs, data.values?.[getOriginalIndex(index)])
-      );
+      text.push(getLabel(selectedObs, data.values?.[getOriginalIndex(index)]));
     }
 
     if (
@@ -496,7 +501,7 @@ export function Scatterplot({
                 settings.colorEncoding === COLOR_ENCODINGS.VAR
                   ? settings.selectedVar?.name
                   : settings.colorEncoding === COLOR_ENCODINGS.OBS
-                    ? settings.selectedObs?.name
+                    ? selectedObs?.name
                     : null
               }
               obsLength={parseInt(data.positions?.length)}

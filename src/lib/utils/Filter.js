@@ -45,17 +45,24 @@ export const useFilter = (data) => {
   const settings = useSettings();
   const filterDataDispatch = useFilteredDataDispatch();
 
+  const selectedObs = useMemo(() => {
+    if (settings.selectedObs) {
+      return settings.data.obs[settings.selectedObs.name];
+    }
+    return null;
+  }, [settings.data.obs, settings.selectedObs]);
+
   const { obsmData, xData, obsData, isPending, serverError } = data;
 
   const isCategorical =
-    settings.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-    settings.selectedObs?.type === OBS_TYPES.BOOLEAN;
+    selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+    selectedObs?.type === OBS_TYPES.BOOLEAN;
 
-  const isContinuous = settings.selectedObs?.type === OBS_TYPES.CONTINUOUS;
+  const isContinuous = selectedObs?.type === OBS_TYPES.CONTINUOUS;
 
   const sliceByObs =
     (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-      !!settings.selectedObs?.omit.length) ||
+      !!selectedObs?.omit.length) ||
     settings.sliceBy.obs;
 
   const isInObsSlice = useCallback(
@@ -64,15 +71,15 @@ export const useFilter = (data) => {
 
       if (values && sliceByObs) {
         if (isCategorical) {
-          inSlice &= isInValues(settings.selectedObs?.omit, values[index]);
+          inSlice &= isInValues(selectedObs?.omit, values[index]);
         } else if (isContinuous) {
           if (isNaN(values[index])) {
-            inSlice &= isInValues(settings.selectedObs?.omit, -1);
+            inSlice &= isInValues(selectedObs?.omit, -1);
           } else {
             inSlice &= isInBins(
               values[index],
-              settings.selectedObs.bins.binEdges,
-              _.without(settings.selectedObs.omit, -1)
+              selectedObs?.bins?.binEdges,
+              _.without(selectedObs.omit, -1)
             );
           }
         }
@@ -80,11 +87,11 @@ export const useFilter = (data) => {
       return inSlice;
     },
     [
-      settings.selectedObs?.bins?.binEdges,
-      settings.selectedObs?.omit,
+      sliceByObs,
       isCategorical,
       isContinuous,
-      sliceByObs,
+      selectedObs?.omit,
+      selectedObs?.bins?.binEdges,
     ]
   );
 

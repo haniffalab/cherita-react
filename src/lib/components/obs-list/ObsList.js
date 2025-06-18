@@ -137,9 +137,7 @@ export function ObsColsList({
   };
 
   const toggleAll = (item) => {
-    const omit = item.omit.length
-      ? []
-      : _.map(item.values, (v) => item.codes[v]);
+    const omit = item.omit.length ? [] : item.values;
     setObsCols((o) => {
       return { ...o, [item.name]: { ...item, omit: omit } };
     });
@@ -171,10 +169,10 @@ export function ObsColsList({
 
   const toggleObs = (item, value) => {
     let omit;
-    if (_.includes(item.omit, item.codes[value])) {
-      omit = item.omit.filter((i) => i !== item.codes[value]);
+    if (_.includes(item.omit, value)) {
+      omit = item.omit.filter((i) => i !== value);
     } else {
-      omit = [...item.omit, item.codes[value]];
+      omit = [...item.omit, value];
     }
     setObsCols((o) => {
       return { ...o, [item.name]: { ...item, omit: omit } };

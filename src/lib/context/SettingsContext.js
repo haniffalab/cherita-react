@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useReducer } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useMemo,
+} from "react";
 
 import _ from "lodash";
 
@@ -13,23 +19,19 @@ import {
   VAR_SORT_ORDER,
   VIOLINPLOT_SCALES,
 } from "../constants/constants";
+import { useResolver } from "../utils/Resolver";
 
 export const SettingsContext = createContext(null);
 export const SettingsDispatchContext = createContext(null);
 
-// @TODO: consider splitting constant values and dataset-resolved values
-// e.g. store only obs name in selectedObs, and resolved obs data (counts, values, etc.) elsewhere
-// e.g. store only var name in selectedVar, and resolved var data (index, matrix_index) elsewhere
-// would simplify passing and validating defaultSettings and localSettings
 const initialSettings = {
-  selectedObs: null,
-  selectedVar: null,
-  selectedObsm: null,
-  selectedMultiObs: [],
-  selectedMultiVar: [],
+  selectedObs: null, // { name: "obs_name", omit: ["obs_item"] }
+  selectedVar: null, // { name: "var_name", isSet: false } or { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }
+  selectedObsm: null, // "obsm_name" (e.g. "X_umap")
+  selectedMultiVar: [], // [{ name: "var_name", isSet: false }, { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }]
+  labelObs: [], // [ "obs_name1", "obs_name2" ]
+  vars: [], // [{ name: "var_name", isSet: false }, { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }]
   colorEncoding: null,
-  labelObs: [],
-  vars: [],
   sliceBy: { obs: false, polygons: false },
   polygons: {},
   controls: {
@@ -53,6 +55,18 @@ const initialSettings = {
     maskSet: null,
     maskValues: null,
     categoricalMode: PSEUDOSPATIAL_CATEGORICAL_MODES.ACROSS.value,
+  },
+  // dataset resolved values
+  data: {
+    // store resolved obs and vars from selectedObs, selectedVar, selectedMultiVar, vars, labelObs
+    // with other settings storing an array of obs/var names, and resolved using names as keys
+    // remove from obs/vars when not in any selection
+    obs: {},
+    vars: {},
+    controls: {
+      valueRange: [0, 1], // depends on colorEncoding; `range` is slider value in settings
+      colorAxis: { dmin: 0, dmax: 1, cmin: 0, cmax: 1 }, // cmin/cmax depend on selections
+    },
   },
 };
 
@@ -132,11 +146,31 @@ export function SettingsProvider({
     localSettings = {};
   }
 
-  const [settings, dispatch] = useReducer(
+  const [reducerSettings, dispatch] = useReducer(
     settingsReducer,
     { canOverrideSettings, defaultSettings, localSettings },
     initializer
   );
+
+  const { obs, vars } = useResolver(reducerSettings);
+  console.log(obs, vars);
+
+  const settings = useMemo(() => {
+    return {
+      ...reducerSettings,
+      data: {
+        ...reducerSettings.data,
+        obs: {
+          ...reducerSettings.data.obs,
+          ...obs,
+        },
+        vars: {
+          ...reducerSettings.data.vars,
+          ...vars,
+        },
+      },
+    };
+  }, [obs, reducerSettings, vars]);
 
   useEffect(() => {
     if (canOverrideSettings) {
@@ -186,7 +220,27 @@ function settingsReducer(settings, action) {
     case "select.obs": {
       return {
         ...settings,
-        selectedObs: action.obs,
+        ...(action.obs
+          ? {
+              selectedObs: {
+                name: action.obs.name,
+                omit: action.obs.omit || [],
+              },
+              data: {
+                ...settings.data,
+                obs: {
+                  ...settings.data.obs,
+                  [action.obs.name]: {
+                    ...action.obs,
+                    omit: _.map(
+                      action.obs.omit || [],
+                      (o) => action.obs.codes[o]
+                    ),
+                  },
+                },
+              },
+            }
+          : { selectedObs: null }),
         controls: {
           ...settings.controls,
           range:
@@ -474,7 +528,10 @@ function settingsReducer(settings, action) {
       };
     }
     case "toggle.slice.obs": {
-      if (_.isEqual(settings.selectedObs, action.obs)) {
+      if (
+        settings.selectedObs &&
+        _.isEqual(settings.data.obs[settings.selectedObs.name], action.obs)
+      ) {
         return {
           ...settings,
           sliceBy: { ...settings.sliceBy, obs: !settings.sliceBy.obs },
@@ -482,7 +539,17 @@ function settingsReducer(settings, action) {
       } else {
         return {
           ...settings,
-          selectedObs: action.obs,
+          selectedObs: { name: action.obs.name, omit: action.obs.omit || [] },
+          data: {
+            ...settings.data,
+            obs: {
+              ...settings.data.obs,
+              [action.obs.name]: {
+                ...action.obs,
+                omit: _.map(action.obs.omit || [], (o) => action.obs.codes[o]),
+              },
+            },
+          },
           sliceBy: { ...settings.sliceBy, obs: true },
         };
       }
