@@ -13,6 +13,7 @@ import {
 } from "../../context/SettingsContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
+import { useSelectedMultiVar, useSelectedObs } from "../../utils/Resolver";
 import {
   ControlsPlotlyToolbar,
   ObsPlotlyToolbar,
@@ -36,16 +37,17 @@ export function Dotplot({
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
+
+  const selectedObs = useSelectedObs();
+  const selectedMultiVar = useSelectedMultiVar();
+
   const [params, setParams] = useState({
     url: dataset.url,
-    obsCol: settings.selectedObs,
-    obsValues: !settings.selectedObs?.omit.length
+    obsCol: selectedObs,
+    obsValues: !selectedObs?.omit.length
       ? null
-      : _.difference(
-          _.values(settings.selectedObs?.codes),
-          settings.selectedObs?.omit
-        ).map((c) => settings.selectedObs?.codesMap[c]),
-    varKeys: settings.selectedMultiVar.map((i) =>
+      : _.difference(selectedObs?.values, selectedObs?.omit),
+    varKeys: selectedMultiVar.map((i) =>
       i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
     ),
     obsIndices: isSliced ? [...(obsIndices || [])] : null,
@@ -57,7 +59,7 @@ export function Dotplot({
   // @TODO: set default scale
 
   useEffect(() => {
-    if (settings.selectedObs && settings.selectedMultiVar.length) {
+    if (selectedObs && selectedMultiVar.length) {
       setHasSelections(true);
     } else {
       setHasSelections(false);
@@ -66,14 +68,11 @@ export function Dotplot({
       return {
         ...p,
         url: dataset.url,
-        obsCol: settings.selectedObs,
-        obsValues: !settings.selectedObs?.omit.length
+        obsCol: selectedObs,
+        obsValues: !selectedObs?.omit.length
           ? null
-          : _.difference(
-              _.values(settings.selectedObs?.codes),
-              settings.selectedObs?.omit
-            ).map((c) => settings.selectedObs?.codesMap[c]),
-        varKeys: settings.selectedMultiVar.map((i) =>
+          : _.difference(selectedObs?.values, selectedObs?.omit),
+        varKeys: selectedMultiVar.map((i) =>
           i.isSet
             ? { name: i.name, indices: i.vars.map((v) => v.index) }
             : i.index
@@ -87,7 +86,7 @@ export function Dotplot({
     });
   }, [
     dataset.url,
-    settings.selectedObs,
+    selectedObs,
     settings.selectedMultiVar,
     settings.controls.scale.dotplot,
     settings.controls.meanOnlyExpressed,
@@ -95,6 +94,7 @@ export function Dotplot({
     dataset.varNamesCol,
     isSliced,
     obsIndices,
+    selectedMultiVar,
   ]);
 
   const updateColorscale = useCallback((colorscale) => {
