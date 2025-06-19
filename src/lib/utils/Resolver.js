@@ -95,26 +95,25 @@ export const useResolver = (initSettings) => {
   return resolvedSettings;
 };
 
-export const useSelectedObs = (obs = null) => {
+export const useSelectedObs = () => {
   const settings = useSettings();
 
   return useMemo(() => {
     return (
-      obs || {
+      {
         ...settings.selectedObs,
         ...settings.data.obs[settings.selectedObs?.name],
-      } ||
-      null
+      } || null
     );
-  }, [obs, settings.data.obs, settings.selectedObs]);
+  }, [settings.data.obs, settings.selectedObs]);
 };
 
-export const useSelectedVar = (v = null) => {
+export const useSelectedVar = () => {
   const settings = useSettings();
 
   return useMemo(() => {
     return (
-      v || {
+      {
         ...settings.selectedVar,
         ...settings.data.vars[settings.selectedVar?.name],
         vars: settings.selectedVar?.isSet
@@ -122,9 +121,9 @@ export const useSelectedVar = (v = null) => {
               ...settings.data.vars[vv.name],
             }))
           : [],
-      }
+      } || null
     );
-  }, [settings.data.vars, settings.selectedVar, v]);
+  }, [settings.data.vars, settings.selectedVar]);
 };
 
 export const useSelectedMultiVar = () => {

@@ -63,10 +63,11 @@ export const useXData = (agg = meanData) => {
   );
 };
 
-export const useObsData = (o = null) => {
+export const useObsData = (obs = null) => {
   const dataset = useDataset();
 
-  const obs = useSelectedObs(o);
+  const selectedObs = useSelectedObs();
+  obs = obs || selectedObs;
 
   const obsParams = useMemo(
     () => ({
