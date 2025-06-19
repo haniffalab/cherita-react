@@ -124,6 +124,7 @@ export function Pseudospatial({
   const [layout, setLayout] = useState({});
   const { getColor } = useColor();
   const colorscale = useRef(settings.controls.colorScale);
+  const { valueMin, valueMax } = useFilteredData();
 
   const selectedObs = useSelectedObs();
 
@@ -185,16 +186,8 @@ export function Pseudospatial({
   useEffect(() => {
     if (sharedScaleRange) {
       const { min, max } = {
-        min:
-          settings.controls.range[0] *
-            (settings.controls.valueRange[1] -
-              settings.controls.valueRange[0]) +
-          settings.controls.valueRange[0],
-        max:
-          settings.controls.range[1] *
-            (settings.controls.valueRange[1] -
-              settings.controls.valueRange[0]) +
-          settings.controls.valueRange[0],
+        min: settings.controls.range[0] * (valueMax - valueMin) + valueMin,
+        max: settings.controls.range[1] * (valueMax - valueMin) + valueMin,
       };
 
       setData((d) => {
@@ -220,9 +213,10 @@ export function Pseudospatial({
     settings.controls.range,
     settings.controls.valueMax,
     settings.controls.valueMin,
-    settings.controls.valueRange,
     getColor,
     sharedScaleRange,
+    valueMax,
+    valueMin,
   ]);
 
   const hasSelections = !!plotType && !!settings.pseudospatial.maskSet;

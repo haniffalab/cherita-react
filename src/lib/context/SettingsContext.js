@@ -36,8 +36,7 @@ const initialSettings = {
   polygons: {},
   controls: {
     colorScale: "Viridis",
-    valueRange: [0, 1],
-    range: [0, 1],
+    range: [0, 1], // normalized
     colorAxis: { dmin: 0, dmax: 1, cmin: 0, cmax: 1 },
     scale: {
       dotplot: DOTPLOT_SCALES.NONE.value,
@@ -65,7 +64,6 @@ const initialSettings = {
     vars: {},
     controls: {
       // should just be settings?
-      valueRange: [0, 1], // depends on colorEncoding; `range` is slider value in settings
       colorAxis: { dmin: 0, dmax: 1, cmin: 0, cmax: 1 }, // cmin/cmax depend on selections
     },
   },
@@ -457,12 +455,6 @@ function settingsReducer(settings, action) {
       return {
         ...settings,
         controls: { ...settings.controls, colorScale: action.colorScale },
-      };
-    }
-    case "set.controls.valueRange": {
-      return {
-        ...settings,
-        controls: { ...settings.controls, valueRange: action.valueRange },
       };
     }
     case "set.controls.range": {

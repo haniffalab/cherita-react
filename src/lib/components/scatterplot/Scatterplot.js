@@ -241,13 +241,6 @@ export function Scatterplot({
     }
   }, [settings.colorEncoding, selectedObs?.type]);
 
-  useEffect(() => {
-    dispatch({
-      type: "set.controls.valueRange",
-      valueRange: [valueMin, valueMax],
-    });
-  }, [dispatch, valueMax, valueMin]);
-
   const { min, max } = {
     min: settings.controls.range[0] * (valueMax - valueMin) + valueMin,
     max: settings.controls.range[1] * (valueMax - valueMin) + valueMin,
