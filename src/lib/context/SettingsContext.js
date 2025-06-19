@@ -3,7 +3,7 @@ import React, {
   useContext,
   useEffect,
   useReducer,
-  useMemo,
+  useRef,
 } from "react";
 
 import _ from "lodash";
@@ -25,7 +25,7 @@ export const SettingsContext = createContext(null);
 export const SettingsDispatchContext = createContext(null);
 
 const initialSettings = {
-  selectedObs: null, // { name: "obs_name", omit: ["obs_item"] }
+  selectedObs: null, // { name: "obs_name", omit: ["obs_item"], bins: {} }
   selectedVar: null, // { name: "var_name", isSet: false } or { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }
   selectedObsm: null, // "obsm_name" (e.g. "X_umap")
   selectedMultiVar: [], // [{ name: "var_name", isSet: false }, { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }]
@@ -64,6 +64,7 @@ const initialSettings = {
     obs: {},
     vars: {},
     controls: {
+      // should just be settings?
       valueRange: [0, 1], // depends on colorEncoding; `range` is slider value in settings
       colorAxis: { dmin: 0, dmax: 1, cmin: 0, cmax: 1 }, // cmin/cmax depend on selections
     },
@@ -128,6 +129,10 @@ const initializer = ({
   return validateSettings(mergedSettings);
 };
 
+const validate = (settings) => {
+  return settings ? validateSettings(settings) : null;
+};
+
 export function SettingsProvider({
   dataset_url,
   defaultSettings,
@@ -146,31 +151,31 @@ export function SettingsProvider({
     localSettings = {};
   }
 
-  const [reducerSettings, dispatch] = useReducer(
-    settingsReducer,
-    { canOverrideSettings, defaultSettings, localSettings },
-    initializer
+  const initSettings = useRef(
+    initializer({
+      canOverrideSettings,
+      defaultSettings,
+      localSettings,
+    })
   );
 
-  const { obs, vars } = useResolver(reducerSettings);
-  console.log(obs, vars);
+  const resolvedSettings = useResolver(initSettings.current);
 
-  const settings = useMemo(() => {
-    return {
-      ...reducerSettings,
-      data: {
-        ...reducerSettings.data,
-        obs: {
-          ...reducerSettings.data.obs,
-          ...obs,
-        },
-        vars: {
-          ...reducerSettings.data.vars,
-          ...vars,
-        },
-      },
-    };
-  }, [obs, reducerSettings, vars]);
+  const [settings, dispatch] = useReducer(
+    settingsReducer,
+    resolvedSettings,
+    validate
+  );
+
+  // @TODO: remove items in data if not in any selection
+
+  useEffect(() => {
+    // If resolvedSettings is null, do not update settings
+    if (resolvedSettings) {
+      const validatedSettings = validateSettings(resolvedSettings);
+      dispatch({ type: "init", settings: validatedSettings });
+    }
+  }, [resolvedSettings]);
 
   useEffect(() => {
     if (canOverrideSettings) {
@@ -180,6 +185,7 @@ export function SettingsProvider({
           JSON.stringify({
             buster: process.env.PACKAGE_VERSION || "0.0.0",
             timestamp: Date.now(),
+            // ..._.omit(settings, "data"),
             ...settings,
           })
         );
@@ -201,7 +207,7 @@ export function SettingsProvider({
   return (
     <SettingsContext.Provider value={settings}>
       <SettingsDispatchContext.Provider value={dispatch}>
-        {children}
+        {settings && children}
       </SettingsDispatchContext.Provider>
     </SettingsContext.Provider>
   );
@@ -215,8 +221,16 @@ export function useSettingsDispatch() {
   return useContext(SettingsDispatchContext);
 }
 
+// @TODO: finish populating keys to pick
+const pickObsData = (obs) => {
+  return _.pick(obs, ["name", "type", "bins", "codes", "codesMap"]);
+};
+
 function settingsReducer(settings, action) {
   switch (action.type) {
+    case "init": {
+      return action.settings;
+    }
     case "select.obs": {
       return {
         ...settings,
@@ -230,13 +244,7 @@ function settingsReducer(settings, action) {
                 ...settings.data,
                 obs: {
                   ...settings.data.obs,
-                  [action.obs.name]: {
-                    ...action.obs,
-                    omit: _.map(
-                      action.obs.omit || [],
-                      (o) => action.obs.codes[o]
-                    ),
-                  },
+                  [action.obs.name]: action.obs, // @TODO: pick relevant keys only
                 },
               },
             }
@@ -544,10 +552,7 @@ function settingsReducer(settings, action) {
             ...settings.data,
             obs: {
               ...settings.data.obs,
-              [action.obs.name]: {
-                ...action.obs,
-                omit: _.map(action.obs.omit || [], (o) => action.obs.codes[o]),
-              },
+              [action.obs.name]: action.obs, // @TODO: pick relevant keys only
             },
           },
           sliceBy: { ...settings.sliceBy, obs: true },
@@ -564,10 +569,20 @@ function settingsReducer(settings, action) {
       return { ...settings, sliceBy: { ...settings.sliceBy, polygons: false } };
     }
     case "add.label.obs": {
-      if (settings.labelObs.find((i) => _.isEqual(i, action.obs))) {
+      if (_.includes(settings.labelObs, action.obs.name)) {
         return settings;
       } else {
-        return { ...settings, labelObs: [...settings.labelObs, action.obs] };
+        return {
+          ...settings,
+          labelObs: [...settings.labelObs, action.obs.name],
+          data: {
+            ...settings.data,
+            obs: {
+              ...settings.data.obs,
+              [action.obs.name]: action.obs, // @TODO: pick relevant keys only
+            },
+          },
+        };
       }
     }
     case "remove.label.obs": {

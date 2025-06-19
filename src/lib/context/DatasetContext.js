@@ -8,7 +8,6 @@ import _ from "lodash";
 import { FilterProvider } from "./FilterContext";
 import { SettingsProvider } from "./SettingsContext";
 import { ZarrDataProvider } from "./ZarrDataContext";
-import { DataProvider } from "../utils/Resolver";
 
 export const DatasetContext = createContext(null);
 
@@ -73,17 +72,15 @@ export function DatasetProvider({ dataset_url, children, ...dataset_params }) {
         client={queryClient}
         persistOptions={persistOptions}
       >
-        <DataProvider>
-          <SettingsProvider
-            dataset_url={dataset.url}
-            defaultSettings={dataset.defaultSettings}
-            canOverrideSettings={dataset.canOverrideSettings}
-          >
-            <FilterProvider>
-              <ZarrDataProvider>{children}</ZarrDataProvider>
-            </FilterProvider>
-          </SettingsProvider>
-        </DataProvider>
+        <SettingsProvider
+          dataset_url={dataset.url}
+          defaultSettings={dataset.defaultSettings}
+          canOverrideSettings={dataset.canOverrideSettings}
+        >
+          <FilterProvider>
+            <ZarrDataProvider>{children}</ZarrDataProvider>
+          </FilterProvider>
+        </SettingsProvider>
       </PersistQueryClientProvider>
     </DatasetContext.Provider>
   );

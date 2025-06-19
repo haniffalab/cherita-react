@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import _ from "lodash";
 import { slice } from "zarr";
 
+import { useSelectedObs, useSelectedVar } from "./Resolver";
 import { OBS_TYPES } from "../constants/constants";
 import { useDataset } from "../context/DatasetContext";
 import { useSettings } from "../context/SettingsContext";
@@ -33,24 +34,25 @@ const meanData = (_i, data) => {
 
 export const useXData = (agg = meanData) => {
   const dataset = useDataset();
-  const settings = useSettings();
+
+  const selectedVar = useSelectedVar();
 
   const xParams = useMemo(
     () =>
-      !settings.selectedVar
+      !selectedVar
         ? []
-        : !settings.selectedVar?.isSet
+        : !selectedVar?.isSet
           ? [
               {
                 url: dataset.url,
                 path: "X",
-                s: [null, settings.selectedVar?.matrix_index],
+                s: [null, selectedVar?.matrix_index],
               },
             ]
-          : _.map(settings.selectedVar?.vars, (v) => {
+          : _.map(selectedVar?.vars, (v) => {
               return { url: dataset.url, path: "X", s: [null, v.matrix_index] };
             }),
-    [dataset.url, settings.selectedVar]
+    [dataset.url, selectedVar]
   );
 
   return useMultipleZarr(
@@ -61,11 +63,10 @@ export const useXData = (agg = meanData) => {
   );
 };
 
-export const useObsData = (obs = null) => {
+export const useObsData = (o = null) => {
   const dataset = useDataset();
-  const settings = useSettings();
 
-  obs = obs || settings.data.obs[settings.selectedObs?.name] || null;
+  const obs = useSelectedObs(o);
 
   const obsParams = useMemo(
     () => ({
@@ -87,17 +88,21 @@ export const useLabelObsData = () => {
 
   const labelObsParams = useMemo(
     () =>
-      _.map(settings.labelObs, (obs) => {
-        obs = obs || settings.data.obs[obs.name] || null;
-        return {
-          url: dataset.url,
-          path:
-            "obs/" +
-            obs.name +
-            (obs.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
-          key: obs.name,
-        };
-      }),
+      _.compact(
+        _.map(settings.labelObs, (obsName) => {
+          const obs = settings.data.obs[obsName] || null;
+          return (
+            obs && {
+              url: dataset.url,
+              path:
+                "obs/" +
+                obs.name +
+                (obs.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
+              key: obs.name,
+            }
+          );
+        })
+      ),
     [dataset.url, settings.data.obs, settings.labelObs]
   );
 

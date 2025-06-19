@@ -37,6 +37,7 @@ import { Legend } from "../../utils/Legend";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { formatNumerical } from "../../utils/string";
 import { useLabelObsData } from "../../utils/zarrData";
+import { useSelectedObs } from "../../utils/Resolver";
 
 window.deck.log.level = 1;
 
@@ -71,12 +72,7 @@ export function Scatterplot({
   });
   const [coordsError, setCoordsError] = useState(null);
 
-  const selectedObs = useMemo(() => {
-    if (settings.selectedObs) {
-      return settings.data.obs[settings.selectedObs.name];
-    }
-    return null;
-  }, [settings.data.obs, settings.selectedObs]);
+  const selectedObs = useSelectedObs();
 
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
@@ -403,7 +399,7 @@ export function Scatterplot({
     if (
       settings.colorEncoding === COLOR_ENCODINGS.OBS &&
       selectedObs &&
-      !_.some(settings.labelObs, { name: selectedObs.name })
+      !_.includes(settings.labelObs, selectedObs.name)
     ) {
       text.push(getLabel(selectedObs, data.values?.[getOriginalIndex(index)]));
     }
@@ -424,7 +420,7 @@ export function Scatterplot({
     if (settings.labelObs.length) {
       text.push(
         ..._.map(labelObsData.data, (v, k) => {
-          const labelObs = _.find(settings.labelObs, (o) => o.name === k);
+          const labelObs = settings.data.obs[k];
           return getLabel(labelObs, v[getOriginalIndex(index)]);
         })
       );

@@ -3,6 +3,7 @@ import { useEffect, useCallback, useMemo } from "react";
 import { booleanPointInPolygon, point } from "@turf/turf";
 import _ from "lodash";
 
+import { useSelectedObs } from "./Resolver";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../constants/constants";
 import { useFilteredDataDispatch } from "../context/FilterContext";
 import { useSettings } from "../context/SettingsContext";
@@ -45,12 +46,11 @@ export const useFilter = (data) => {
   const settings = useSettings();
   const filterDataDispatch = useFilteredDataDispatch();
 
-  const selectedObs = useMemo(() => {
-    if (settings.selectedObs) {
-      return settings.data.obs[settings.selectedObs.name];
-    }
-    return null;
-  }, [settings.data.obs, settings.selectedObs]);
+  const selectedObs = useSelectedObs();
+  const omitCodes = _.map(
+    selectedObs?.omit || [],
+    (o) => selectedObs?.codes?.[o]
+  );
 
   const { obsmData, xData, obsData, isPending, serverError } = data;
 
@@ -62,24 +62,23 @@ export const useFilter = (data) => {
 
   const sliceByObs =
     (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-      !!selectedObs?.omit.length) ||
+      !!selectedObs?.omit?.length) ||
     settings.sliceBy.obs;
 
   const isInObsSlice = useCallback(
     (index, values) => {
       let inSlice = true;
-
       if (values && sliceByObs) {
         if (isCategorical) {
-          inSlice &= isInValues(selectedObs?.omit, values[index]);
+          inSlice &= isInValues(omitCodes, values[index]);
         } else if (isContinuous) {
           if (isNaN(values[index])) {
-            inSlice &= isInValues(selectedObs?.omit, -1);
+            inSlice &= isInValues(omitCodes, -1);
           } else {
             inSlice &= isInBins(
               values[index],
               selectedObs?.bins?.binEdges,
-              _.without(selectedObs.omit, -1)
+              _.without(omitCodes, -1)
             );
           }
         }
@@ -90,7 +89,7 @@ export const useFilter = (data) => {
       sliceByObs,
       isCategorical,
       isContinuous,
-      selectedObs?.omit,
+      omitCodes,
       selectedObs?.bins?.binEdges,
     ]
   );
