@@ -87,7 +87,6 @@ export function Dotplot({
   }, [
     dataset.url,
     selectedObs,
-    settings.selectedMultiVar,
     settings.controls.scale.dotplot,
     settings.controls.meanOnlyExpressed,
     settings.controls.expressionCutoff,

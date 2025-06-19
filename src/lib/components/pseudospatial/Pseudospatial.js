@@ -25,6 +25,7 @@ import { ImageViewer } from "../../utils/ImageViewer";
 import { Legend } from "../../utils/Legend";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
+import { useSelectedObs, useSelectedVar } from "../../utils/Resolver";
 
 library.add(faSliders);
 
@@ -33,6 +34,9 @@ function usePseudospatialData(plotType) {
   const dataset = useDataset();
   const settings = useSettings();
   const { obsIndices, isSliced } = useFilteredData();
+
+  const selectedVar = useSelectedVar();
+  const selectedObs = useSelectedObs();
 
   const baseParams = useMemo(() => {
     return {
@@ -56,53 +60,44 @@ function usePseudospatialData(plotType) {
   const getPlotParams = useCallback(() => {
     if (plotType === PLOT_TYPES.GENE) {
       return {
-        varKey: settings.selectedVar?.isSet
+        varKey: selectedVar?.isSet
           ? {
-              name: settings.selectedVar?.name,
-              indices: settings.selectedVar?.vars.map((v) => v.index),
+              name: selectedVar?.name,
+              indices: selectedVar?.vars.map((v) => v.index),
             }
-          : settings.selectedVar?.index,
+          : selectedVar?.index,
         ...(settings.sliceBy.obs
           ? {
-              obsCol: settings.selectedObs,
-              obsValues: !settings.selectedObs?.omit.length
+              obsCol: selectedObs,
+              obsValues: !selectedObs?.omit.length
                 ? null
-                : _.difference(
-                    _.values(settings.selectedObs?.codes),
-                    settings.selectedObs?.omit
-                  ).map((c) => settings.selectedObs?.codesMap[c]),
+                : _.difference(selectedObs?.values, selectedObs?.omit),
             }
           : {}),
       };
     } else if (plotType === PLOT_TYPES.CATEGORICAL) {
       return {
-        obsCol: settings.selectedObs,
-        obsValues: !settings.selectedObs?.omit.length
+        obsCol: selectedObs,
+        obsValues: !selectedObs?.omit.length
           ? null
-          : _.difference(
-              _.values(settings.selectedObs?.codes),
-              settings.selectedObs?.omit
-            ).map((c) => settings.selectedObs?.codesMap[c]),
+          : _.difference(selectedObs?.values, selectedObs?.omit),
         mode: settings.pseudospatial.categoricalMode,
       };
     } else if (plotType === "continuous") {
       return {
-        obsCol: settings.selectedObs,
-        obsValues: !settings.selectedObs?.omit.length
+        obsCol: selectedObs,
+        obsValues: !selectedObs?.omit.length
           ? null
-          : _.difference(
-              _.values(settings.selectedObs?.codes),
-              settings.selectedObs?.omit
-            ).map((c) => settings.selectedObs?.codesMap[c]),
+          : _.difference(selectedObs?.values, selectedObs?.omit),
       };
     }
   }, [
     settings.pseudospatial.categoricalMode,
-    settings.selectedObs,
-    settings.selectedVar?.index,
-    settings.selectedVar?.isSet,
-    settings.selectedVar?.name,
-    settings.selectedVar?.vars,
+    selectedObs,
+    selectedVar?.index,
+    selectedVar?.isSet,
+    selectedVar?.name,
+    selectedVar?.vars,
     settings.sliceBy.obs,
     plotType,
   ]);
@@ -130,18 +125,20 @@ export function Pseudospatial({
   const { getColor } = useColor();
   const colorscale = useRef(settings.controls.colorScale);
 
+  const selectedObs = useSelectedObs();
+
   useEffect(() => {
     setPlotType(
       settings.colorEncoding === COLOR_ENCODINGS.VAR
         ? PLOT_TYPES.GENE
-        : settings.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-            settings.selectedObs?.type === OBS_TYPES.BOOLEAN
+        : selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+            selectedObs?.type === OBS_TYPES.BOOLEAN
           ? PLOT_TYPES.CATEGORICAL
-          : settings.selectedObs?.type === OBS_TYPES.CONTINUOUS
+          : selectedObs?.type === OBS_TYPES.CONTINUOUS
             ? PLOT_TYPES.CONTINUOUS
             : PLOT_TYPES.MASKS
     );
-  }, [settings.colorEncoding, settings.selectedObs?.type, setPlotType]);
+  }, [settings.colorEncoding, selectedObs?.type, setPlotType]);
 
   const updateColorscale = useCallback(
     (colorscale) => {
