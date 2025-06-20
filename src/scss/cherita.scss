@@ -21,6 +21,10 @@ $prefix: "bs-" !default;
   align-items: center;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 .cherita-container {
   margin: 40px auto;
   background-color: #fff;
@@ -151,6 +155,13 @@ $prefix: "bs-" !default;
   padding-right: 1rem;
   word-break: auto-phrase;
   overflow-wrap: anywhere;
+
+  .form-check-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
 }
 
 .grad-step {
@@ -404,4 +415,16 @@ $gauge-padding: 0.15rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.var-item-name {
+  @extend .me-auto;
+  padding-right: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+input[type="checkbox"] {
+  cursor: pointer;
 }

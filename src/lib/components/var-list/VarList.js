@@ -174,55 +174,53 @@ export function VarNamesList({
     varMeans.isPending && settings.varSort.var.sort === VAR_SORT.MATRIX;
 
   return (
-    <div className="position-relative">
-      <div className="overflow-auto mt-3">
-        <div className="d-flex justify-content-between mb-2">
-          <h5>{_.capitalize(displayName)}</h5>
-          <ButtonGroup aria-label="Feature options" size="sm">
-            <Button
-              variant="info"
-              onClick={() => {
-                dispatch({
-                  type: "add.var",
-                  var: {
-                    name: newSetName(),
-                    vars: [],
-                    isSet: true,
-                  },
-                });
-              }}
-            >
-              New set
-            </Button>
-            <Button
-              variant="info"
-              onClick={() => {
-                dispatch({
-                  type: "reset.vars",
-                });
-              }}
-            >
-              <FontAwesomeIcon icon={faTimes} className="me-1" />
-              Clear
-            </Button>
-          </ButtonGroup>
-        </div>
-        <>
-          {!varList.length ? (
-            <Alert variant="light">Search for a feature.</Alert>
-          ) : (
-            <>
-              <VarListToolbar />
-              <div className="position-relative">
-                {isPending && <LoadingSpinner />}
-                <ListGroup variant="flush" className="cherita-list">
-                  {varList}
-                </ListGroup>
-              </div>
-            </>
-          )}
-        </>
+    <div className="mt-3 d-flex flex-column h-100">
+      <div className="d-flex justify-content-between mb-2">
+        <h5>{_.capitalize(displayName)}</h5>
+        <ButtonGroup aria-label="Feature options" size="sm">
+          <Button
+            variant="info"
+            onClick={() => {
+              dispatch({
+                type: "add.var",
+                var: {
+                  name: newSetName(),
+                  vars: [],
+                  isSet: true,
+                },
+              });
+            }}
+          >
+            New set
+          </Button>
+          <Button
+            variant="info"
+            onClick={() => {
+              dispatch({
+                type: "reset.vars",
+              });
+            }}
+          >
+            <FontAwesomeIcon icon={faTimes} className="me-1" />
+            Clear
+          </Button>
+        </ButtonGroup>
       </div>
+      <>
+        {!varList.length ? (
+          <Alert variant="light">Search for a feature.</Alert>
+        ) : (
+          <>
+            <VarListToolbar />
+            <div className="overflow-auto flex-grow-1 modern-scrollbars">
+              {isPending && <LoadingSpinner />}
+              <ListGroup variant="flush" className="cherita-list">
+                {varList}
+              </ListGroup>
+            </div>
+          </>
+        )}
+      </>
     </div>
   );
 }

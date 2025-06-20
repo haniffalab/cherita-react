@@ -170,37 +170,46 @@ export function Violin({
   if (!serverError) {
     if (hasSelections) {
       return (
-        <div className="cherita-plot cherita-violin position-relative">
+        <div className="cherita-plot cherita-violin">
           {isPending && <LoadingSpinner />}
-          <Plot
-            data={data}
-            layout={layout}
-            useResizeHandler={true}
-            style={{ width: "100%", height: "100%" }}
-            config={{
-              displaylogo: false,
-              modeBarButtons: modeBarButtons,
-            }}
-          />
-          {fetchedData?.resampled && (
-            <Alert variant="warning">
-              <b>Warning:</b> For performance reasons this plot was generated
-              with resampled data. It will not be exactly the same as one
-              produced with the entire dataset. &nbsp;
-              <OverlayTrigger
-                placement="top"
-                overlay={
-                  <Tooltip>
-                    Resampled to 100K values following a Monte Carlo style
-                    approach to help ensure resampled data is a good
-                    representation of the original dataset's distribution.
-                  </Tooltip>
-                }
-              >
-                <FontAwesomeIcon icon={faCircleInfo}></FontAwesomeIcon>
-              </OverlayTrigger>
-            </Alert>
-          )}
+          <div className="d-flex flex-column h-100">
+            <div
+              className="flex-grow-1 position-relative"
+              style={{ minHeight: "0" }}
+            >
+              <Plot
+                data={data}
+                layout={layout}
+                useResizeHandler={true}
+                style={{ width: "100%", height: "100%" }}
+                config={{
+                  displaylogo: false,
+                  modeBarButtons: modeBarButtons,
+                }}
+              />
+            </div>
+            {fetchedData?.resampled && (
+              <div className="flex-shrink-0">
+                <Alert variant="warning" className="mb-1">
+                  <b>Warning:</b> For performance reasons this plot was
+                  generated with resampled data. It will not be exactly the same
+                  as one produced with the entire dataset. &nbsp;
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={
+                      <Tooltip>
+                        Resampled to 100K values following a Monte Carlo style
+                        approach to help ensure resampled data is a good
+                        representation of the original dataset's distribution.
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faCircleInfo}></FontAwesomeIcon>
+                  </OverlayTrigger>
+                </Alert>
+              </div>
+            )}
+          </div>
         </div>
       );
     }

@@ -161,7 +161,6 @@ export function Scatterplot({
       });
     }
   }, [
-    settings.selectedObsm,
     getRadiusScale,
     obsmData.data,
     obsmData.isPending,

@@ -125,17 +125,16 @@ export function SelectionItem({
   return (
     <>
       <div
-        className={`d-flex justify-content-between ${
-          hasDiseaseInfo ? "cursor-pointer" : ""
-        }`}
+        className={hasDiseaseInfo ? "cursor-pointer" : ""}
         onClick={() => {
           setOpenInfo((o) => !o);
         }}
       >
-        <div className="d-flex justify-content-between align-items-center w-100">
-          <div>{item.name}</div>
-
-          <div className="d-flex align-items-center gap-1">
+        <div className="d-flex align-items-center">
+          <div className="var-item-name" title={item.name}>
+            {item.name}
+          </div>
+          <div className="ms-auto d-flex align-items-center gap-1">
             {hasDiseaseInfo && <MoreVert />}
             <VarHistogram item={item} />
             {showSetColorEncoding && (
@@ -197,31 +196,31 @@ export function SelectionItem({
   );
 }
 
+const select = (dispatch, mode, item) => {
+  if (mode === SELECTION_MODES.SINGLE) {
+    dispatch({
+      type: "select.var",
+      var: item,
+    });
+  } else if (mode === SELECTION_MODES.MULTIPLE) {
+    dispatch({
+      type: "select.multivar",
+      var: item,
+    });
+  }
+  dispatch({
+    type: "set.colorEncoding",
+    value: COLOR_ENCODINGS.VAR,
+  });
+};
+
+const debounceSelect = _.debounce(select, 200);
+
 export function VarItem({ item, active, mode = SELECTION_MODES.SINGLE }) {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
 
-  const selectVar = () => {
-    if (mode === SELECTION_MODES.SINGLE) {
-      dispatch({
-        type: "select.var",
-        var: item,
-      });
-      dispatch({
-        type: "set.colorEncoding",
-        value: COLOR_ENCODINGS.VAR,
-      });
-    } else if (mode === SELECTION_MODES.MULTIPLE) {
-      dispatch({
-        type: "select.multivar",
-        var: item,
-      });
-      dispatch({
-        type: "set.colorEncoding",
-        value: COLOR_ENCODINGS.VAR,
-      });
-    }
-  };
+  const selectVar = () => debounceSelect(dispatch, mode, item);
 
   const removeVar = () => {
     dispatch({
