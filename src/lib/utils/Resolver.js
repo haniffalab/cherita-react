@@ -6,6 +6,53 @@ import { useFetch } from "./requests";
 import { useDataset } from "../context/DatasetContext";
 import { useSettings } from "../context/SettingsContext";
 
+const cleanSettings = (settings) => {
+  // Remove obs and vars from settings that are not in data
+
+  const selectedObs =
+    settings.selectedObs && settings.data.obs[settings.selectedObs.name]
+      ? settings.selectedObs
+      : null;
+
+  const labelObs = _.filter(
+    settings.labelObs,
+    (obsName) => settings.data.obs[obsName]
+  );
+
+  const selectedVar =
+    settings.selectedVar &&
+    (settings.selectedVar.isSet
+      ? _.every(settings.selectedVar.vars, (vv) => settings.data.vars[vv.name])
+      : settings.data.vars[settings.selectedVar.name])
+      ? settings.selectedVar
+      : null;
+
+  const selectedMultiVar = _.filter(settings.selectedMultiVar, (v) => {
+    if (v.isSet) {
+      return _.every(v.vars, (vv) => settings.data.vars[vv.name]);
+    } else {
+      return settings.data.vars[v.name];
+    }
+  });
+
+  const vars = _.filter(settings.vars, (v) => {
+    if (v.isSet) {
+      return _.every(v.vars, (vv) => settings.data.vars[vv.name]);
+    } else {
+      return settings.data.vars[v.name];
+    }
+  });
+
+  return {
+    ...settings,
+    selectedObs: selectedObs,
+    labelObs: labelObs,
+    selectedVar: selectedVar,
+    selectedMultiVar: selectedMultiVar,
+    vars: vars,
+  };
+};
+
 export const useResolver = (initSettings) => {
   const dataset = useDataset();
 
@@ -59,7 +106,12 @@ export const useResolver = (initSettings) => {
   });
 
   useEffect(() => {
-    if (!obsDataPending && !obsDataError) {
+    if (!obsDataPending) {
+      if (obsDataError) {
+        console.error("Error fetching obs data:", obsDataError);
+        setResolvedObs(true);
+        return;
+      }
       if (obsData) {
         setData((d) => ({
           ...d,
@@ -71,7 +123,12 @@ export const useResolver = (initSettings) => {
   }, [obsData, obsDataError, obsDataPending, initSettings.selectedObs.omit]);
 
   useEffect(() => {
-    if (!varDataPending && !varDataError) {
+    if (!varDataPending) {
+      if (varDataError) {
+        console.error("Error fetching var data:", varDataError);
+        setResolvedVars(true);
+        return;
+      }
       if (varData) {
         setData((d) => ({
           ...d,
@@ -82,13 +139,10 @@ export const useResolver = (initSettings) => {
     }
   }, [initSettings.vars, varData, varDataError, varDataPending]);
 
-  // @TODO: remove from settings the obs and vars not in dataset (not in response)
   useEffect(() => {
     if (resolvedObs && resolvedVars) {
-      setResolvedSettings({
-        ...initSettings,
-        data: data,
-      });
+      const cleanedSettings = cleanSettings({ ...initSettings, data: data });
+      setResolvedSettings(cleanedSettings);
     }
   }, [data, initSettings, resolvedObs, resolvedVars, setResolvedSettings]);
 
@@ -99,12 +153,12 @@ export const useSelectedObs = () => {
   const settings = useSettings();
 
   return useMemo(() => {
-    return (
-      {
-        ...settings.selectedObs,
-        ...settings.data.obs[settings.selectedObs?.name],
-      } || null
-    );
+    return settings.selectedObs
+      ? {
+          ...settings.selectedObs,
+          ...settings.data.obs[settings.selectedObs.name],
+        }
+      : null;
   }, [settings.data.obs, settings.selectedObs]);
 };
 
@@ -112,17 +166,23 @@ export const useSelectedVar = () => {
   const settings = useSettings();
 
   return useMemo(() => {
-    return (
-      {
-        ...settings.selectedVar,
-        ...settings.data.vars[settings.selectedVar?.name],
-        vars: settings.selectedVar?.isSet
-          ? settings.selectedVar.vars.map((vv) => ({
-              ...settings.data.vars[vv.name],
-            }))
-          : [],
-      } || null
-    );
+    if (settings.selectedVar) {
+      if (settings.selectedVar.isSet) {
+        return {
+          ...settings.selectedVar,
+          vars: settings.selectedVar.vars.map((v) => ({
+            ...settings.data.vars[v.name],
+          })),
+        };
+      } else {
+        return {
+          ...settings.selectedVar,
+          ...settings.data.vars[settings.selectedVar.name],
+        };
+      }
+    } else {
+      return null;
+    }
   }, [settings.data.vars, settings.selectedVar]);
 };
 
