@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
@@ -10,9 +10,9 @@ import Nav from "react-bootstrap/Nav";
 import Row from "react-bootstrap/Row";
 import Tab from "react-bootstrap/Tab";
 
+import { COLOR_ENCODINGS } from "../../constants/constants";
 import { DiseaseInfo, VarInfo } from "./SearchInfo";
 import { DiseasesSearchResults, VarSearchResults } from "./SearchResults";
-import { COLOR_ENCODINGS } from "../../constants/constants";
 
 const select = (dispatch, item) => {
   dispatch({
@@ -29,7 +29,7 @@ const select = (dispatch, item) => {
   });
 };
 
-const debounceSelect = _.debounce(select, 300);
+const debounceSelect = _.debounce(select, 2000);
 
 function onVarSelect(dispatch, item) {
   dispatch({
