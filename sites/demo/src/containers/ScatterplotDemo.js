@@ -17,29 +17,34 @@ export default function ScatterplotDemo(props) {
   const [showControls, setShowControls] = useState(false);
 
   return (
-    <Container>
-      <div className="cherita-container">
-        <DatasetProvider {...props}>
-          <div className="cherita-container-scatterplot">
-            <Scatterplot
-              setShowObs={setShowObs}
-              setShowVars={setShowVars}
-              isFullscreen={false}
+    <div className="h-100">
+      <Container>
+        <div className="cherita-container">
+          <DatasetProvider {...props}>
+            <div className="cherita-container-scatterplot">
+              <Scatterplot
+                setShowObs={setShowObs}
+                setShowVars={setShowVars}
+                isFullscreen={false}
+              />
+            </div>
+            <OffcanvasObs
+              show={showObs}
+              handleClose={() => setShowObs(false)}
             />
-          </div>
-          <OffcanvasObs show={showObs} handleClose={() => setShowObs(false)} />
-          <OffcanvasVars
-            show={showVars}
-            handleClose={() => setShowVars(false)}
-            mode={SELECTION_MODES.SINGLE}
-          />
-          <OffcanvasControls
-            show={showControls}
-            handleClose={() => setShowControls(false)}
-            Controls={ScatterplotControls}
-          />
-        </DatasetProvider>
-      </div>
-    </Container>
+            <OffcanvasVars
+              show={showVars}
+              handleClose={() => setShowVars(false)}
+              mode={SELECTION_MODES.SINGLE}
+            />
+            <OffcanvasControls
+              show={showControls}
+              handleClose={() => setShowControls(false)}
+              Controls={ScatterplotControls}
+            />
+          </DatasetProvider>
+        </div>
+      </Container>
+    </div>
   );
 }
