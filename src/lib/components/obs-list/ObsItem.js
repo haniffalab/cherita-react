@@ -14,6 +14,7 @@ import { useColor } from "../../helpers/color-helper";
 import { Histogram } from "../../utils/Histogram";
 import { LoadingLinear } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
+import { useSelectedVar } from "../../utils/Resolver";
 import { formatNumerical, FORMATS } from "../../utils/string";
 import { VirtualizedList } from "../../utils/VirtualizedList";
 import { useObsData } from "../../utils/zarrData";
@@ -50,15 +51,18 @@ const useObsHistogram = (obs, { enabled = true }) => {
   const dataset = useDataset();
   const settings = useSettings();
   const { obsIndices, isSliced } = useFilteredData();
+
+  const selectedVar = useSelectedVar();
+
   const [params, setParams] = useState({
     url: dataset.url,
     obsCol: _.omit(obs, "omit"), // avoid re-rendering when toggling unselected obs
-    varKey: settings.selectedVar?.isSet
+    varKey: selectedVar?.isSet
       ? {
-          name: settings.selectedVar?.name,
-          indices: settings.selectedVar?.vars.map((v) => v.index),
+          name: selectedVar?.name,
+          indices: selectedVar?.vars.map((v) => v.index),
         }
-      : settings.selectedVar?.index,
+      : selectedVar?.index,
     obsIndices: isSliced ? [...(obsIndices || [])] : null,
   });
 
@@ -67,20 +71,20 @@ const useObsHistogram = (obs, { enabled = true }) => {
       return {
         ...p,
         obsCol: _.omit(obs, "omit"),
-        varKey: settings.selectedVar?.isSet
+        varKey: selectedVar?.isSet
           ? {
-              name: settings.selectedVar?.name,
-              indices: settings.selectedVar?.vars.map((v) => v.index),
+              name: selectedVar?.name,
+              indices: selectedVar?.vars.map((v) => v.index),
             }
-          : settings.selectedVar?.index,
+          : selectedVar?.index,
         obsIndices: isSliced ? [...(obsIndices || [])] : null,
       };
     });
   }, [
-    settings.selectedVar?.index,
-    settings.selectedVar?.isSet,
-    settings.selectedVar?.name,
-    settings.selectedVar?.vars,
+    selectedVar?.index,
+    selectedVar?.isSet,
+    selectedVar?.name,
+    selectedVar?.vars,
     obsIndices,
     isSliced,
     obs,
@@ -89,7 +93,7 @@ const useObsHistogram = (obs, { enabled = true }) => {
   return useFetch(ENDPOINT, params, {
     enabled:
       enabled &&
-      !!settings.selectedVar &&
+      !!selectedVar &&
       settings.colorEncoding === COLOR_ENCODINGS.VAR,
     refetchOnMount: false,
   });
@@ -315,7 +319,7 @@ export function CategoricalObs({
           value_counts: obs.value_counts[obs.values[index]],
           pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
         },
-        isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
+        isOmitted: _.includes(obs.omit, obs.values[index]),
         label: obs.values[index],
         histogramData: enabledHistograms
           ? {
@@ -476,7 +480,7 @@ export function ContinuousObs({
           value_counts: obs.value_counts[obs.values[index]],
           pct: (obs.value_counts[obs.values[index]] / totalCounts) * 100,
         },
-        isOmitted: _.includes(obs.omit, obs.codes[obs.values[index]]),
+        isOmitted: _.includes(obs.omit, obs.values[index]),
         label: getLabel(index),
         histogramData: enabledHistograms
           ? {

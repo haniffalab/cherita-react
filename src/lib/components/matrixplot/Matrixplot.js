@@ -10,6 +10,7 @@ import { useFilteredData } from "../../context/FilterContext";
 import { useSettings } from "../../context/SettingsContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
+import { useSelectedMultiVar, useSelectedObs } from "../../utils/Resolver";
 import {
   ControlsPlotlyToolbar,
   ObsPlotlyToolbar,
@@ -32,16 +33,17 @@ export function Matrixplot({
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const [hasSelections, setHasSelections] = useState(false);
+
+  const selectedObs = useSelectedObs();
+  const selectedMultiVar = useSelectedMultiVar();
+
   const [params, setParams] = useState({
     url: dataset.url,
-    obsCol: settings.selectedObs,
-    obsValues: !settings.selectedObs?.omit.length
+    obsCol: selectedObs,
+    obsValues: !selectedObs?.omit.length
       ? null
-      : _.difference(
-          _.values(settings.selectedObs?.codes),
-          settings.selectedObs?.omit
-        ).map((c) => settings.selectedObs?.codesMap[c]),
-    varKeys: settings.selectedMultiVar.map((i) =>
+      : _.difference(selectedObs?.values, selectedObs?.omit),
+    varKeys: selectedMultiVar.map((i) =>
       i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
     ),
     obsIndices: isSliced ? [...(obsIndices || [])] : null,
@@ -50,7 +52,7 @@ export function Matrixplot({
   });
 
   useEffect(() => {
-    if (settings.selectedObs && settings.selectedMultiVar.length) {
+    if (selectedObs && selectedMultiVar.length) {
       setHasSelections(true);
     } else {
       setHasSelections(false);
@@ -59,14 +61,11 @@ export function Matrixplot({
       return {
         ...p,
         url: dataset.url,
-        obsCol: settings.selectedObs,
-        obsValues: !settings.selectedObs?.omit.length
+        obsCol: selectedObs,
+        obsValues: !selectedObs?.omit.length
           ? null
-          : _.difference(
-              _.values(settings.selectedObs?.codes),
-              settings.selectedObs?.omit
-            ).map((c) => settings.selectedObs?.codesMap[c]),
-        varKeys: settings.selectedMultiVar.map((i) =>
+          : _.difference(selectedObs?.values, selectedObs?.omit),
+        varKeys: selectedMultiVar.map((i) =>
           i.isSet
             ? { name: i.name, indices: i.vars.map((v) => v.index) }
             : i.index
@@ -78,8 +77,8 @@ export function Matrixplot({
     });
   }, [
     settings.controls.scale.matrixplot,
-    settings.selectedMultiVar,
-    settings.selectedObs,
+    selectedMultiVar,
+    selectedObs,
     dataset.url,
     dataset.varNamesCol,
     obsIndices,
