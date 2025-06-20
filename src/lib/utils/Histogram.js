@@ -1,9 +1,7 @@
-import React from "react";
-
 import {
-  SparkLineChart,
-  mangoFusionPalette,
   blueberryTwilightPalette,
+  mangoFusionPalette,
+  SparkLineChart,
 } from "@mui/x-charts";
 import _ from "lodash";
 
@@ -14,7 +12,9 @@ export function Histogram({ data, isPending, altColor = false }) {
   return (
     <div className="feature-histogram-container">
       {isPending ? (
-        <LoadingLinear />
+        <div className="m-1 w-100">
+          <LoadingLinear />
+        </div>
       ) : data ? (
         <div className="feature-histogram m-1">
           <SparkLineChart
