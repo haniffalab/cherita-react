@@ -103,3 +103,6 @@ export const BREAKPOINTS = {
   LG: "(max-width: 991.98px)",
   XL: "(max-width: 1199.98px)",
 };
+
+// In order of priority
+export const DEFAULT_OBSM_KEYS = ["x_umap", "x_tsne", "x_scvi", "x_pca"];
