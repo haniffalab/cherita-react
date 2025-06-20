@@ -649,12 +649,12 @@ function settingsReducer(settings, action) {
         const { settings: obsSettings, data: obsData } = splitObs(action.obs);
         return {
           ...settings,
-          labelObs: [...settings.labelObs, obsSettings],
+          labelObs: [...settings.labelObs, obsSettings.name],
           data: {
             ...settings.data,
             obs: {
               ...settings.data.obs,
-              obsData,
+              ...obsData,
             },
           },
         };

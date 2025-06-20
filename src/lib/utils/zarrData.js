@@ -89,21 +89,17 @@ export const useLabelObsData = () => {
 
   const labelObsParams = useMemo(
     () =>
-      _.compact(
-        _.map(settings.labelObs, (obsName) => {
-          const obs = settings.data.obs[obsName] || null;
-          return (
-            obs && {
-              url: dataset.url,
-              path:
-                "obs/" +
-                obs.name +
-                (obs.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
-              key: obs.name,
-            }
-          );
-        })
-      ),
+      _.map(settings.labelObs, (obsName) => {
+        const obs = settings.data.obs[obsName] || null;
+        return {
+          url: dataset.url,
+          path:
+            "obs/" +
+            obs.name +
+            (obs.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
+          key: obs.name,
+        };
+      }),
     [dataset.url, settings.data.obs, settings.labelObs]
   );
 
