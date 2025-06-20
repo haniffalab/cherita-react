@@ -151,6 +151,13 @@ $prefix: "bs-" !default;
   padding-right: 1rem;
   word-break: auto-phrase;
   overflow-wrap: anywhere;
+
+  .form-check-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
 }
 
 .grad-step {
