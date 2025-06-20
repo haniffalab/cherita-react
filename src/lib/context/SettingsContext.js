@@ -663,7 +663,7 @@ function settingsReducer(settings, action) {
     case "remove.label.obs": {
       return {
         ...settings,
-        labelObs: settings.labelObs.filter((a) => a.name !== action.obsName),
+        labelObs: settings.labelObs.filter((a) => a !== action.obsName),
       };
     }
     case "reset.label.obs": {
