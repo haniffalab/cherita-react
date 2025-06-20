@@ -35,9 +35,9 @@ import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
 import { Legend } from "../../utils/Legend";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useSelectedObs } from "../../utils/Resolver";
 import { formatNumerical } from "../../utils/string";
 import { useLabelObsData } from "../../utils/zarrData";
-import { useSelectedObs } from "../../utils/Resolver";
 
 window.deck.log.level = 1;
 

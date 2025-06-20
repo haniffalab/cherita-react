@@ -116,6 +116,7 @@ export function Dotplot({
     if (hasSelections && !isPending && !serverError) {
       setData(fetchedData.data);
       setLayout(fetchedData.layout);
+      // @TODO: keep colorAxis range from settings
       dispatch({
         type: "set.controls.colorAxis",
         colorAxis: {

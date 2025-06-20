@@ -120,7 +120,7 @@ export const useResolver = (initSettings) => {
       }
       setResolvedObs(true);
     }
-  }, [obsData, obsDataError, obsDataPending, initSettings.selectedObs.omit]);
+  }, [obsData, obsDataError, obsDataPending, initSettings.selectedObs?.omit]);
 
   useEffect(() => {
     if (!varDataPending) {
