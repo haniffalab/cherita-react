@@ -67,15 +67,20 @@ export const useResolver = (initSettings) => {
 
   // obs
   // all obs should be in initSettings.selectedObs and initSettings.labelObs
-  const initObs = _.compact([
-    initSettings.selectedObs,
-    ...initSettings.labelObs,
-  ]);
+  const initObs = _.uniqBy(
+    _.compact([
+      initSettings.selectedObs,
+      ..._.map(initSettings.labelObs, (o) => ({ name: o })),
+    ]),
+    "name"
+  );
   const initObsNames = _.map(initObs, (o) => o.name);
   const [obsParams] = useState({
     url: dataset.url,
     cols: initObsNames,
-    obsParams: _.fromPairs(_.map(initObs, (o) => [o.name, { bins: o.bins }])),
+    obsParams: _.fromPairs(
+      _.map(initObs, (o) => [o.name, { bins: o.bins || {} }])
+    ),
   });
   const {
     fetchedData: obsData,
