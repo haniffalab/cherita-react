@@ -111,6 +111,20 @@ const validateSettings = (settings) => {
 
   // @TODO: validate pseudospatial settings
 
+  // Keep only obs in use (selectedObs, labelObs) in data.obs
+  const obsNames = _.uniq(
+    _.compact([settings.selectedObs?.name, ...settings.labelObs])
+  );
+  const intersectionObs = _.intersection(_.keys(settings.data.obs), obsNames);
+  settings.data.obs = _.pick(settings.data.obs, intersectionObs);
+
+  // Keep only vars in use (settings.vars) in data.vars
+  const varNames = _.flatMap(settings.vars, (v) =>
+    v.isSet ? _.map(v.vars, (vv) => vv.name) : v.name
+  );
+  const intersectionVars = _.intersection(_.keys(settings.data.vars), varNames);
+  settings.data.vars = _.pick(settings.data.vars, intersectionVars);
+
   return settings;
 };
 
@@ -661,13 +675,13 @@ function settingsReducer(settings, action) {
       }
     }
     case "remove.label.obs": {
-      return {
+      return validateSettings({
         ...settings,
         labelObs: settings.labelObs.filter((a) => a !== action.obsName),
-      };
+      });
     }
     case "reset.label.obs": {
-      return { ...settings, labelObs: [] };
+      return validateSettings({ ...settings, labelObs: [] });
     }
     case "set.varSort": {
       return {
