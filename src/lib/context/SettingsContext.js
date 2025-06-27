@@ -196,7 +196,7 @@ export function SettingsProvider({
           JSON.stringify({
             buster: process.env.PACKAGE_VERSION || "0.0.0",
             timestamp: Date.now(),
-            // ..._.omit(settings, "data"),
+            ..._.omit(settings, "data"),
             ...settings,
           })
         );
