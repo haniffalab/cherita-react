@@ -12,8 +12,6 @@ export const mockDataset = {
     vars: [
       {
         name: "gene1",
-        index: "gene1",
-        matrix_index: 0,
       },
     ],
   },
@@ -27,6 +25,14 @@ jest.mock("../lib/utils/requests", () => ({
   useFetch: jest.fn(),
   useDebouncedFetch: jest.fn(),
 }));
+
+jest.mock("../lib/utils/Resolver", () => {
+  const actual = jest.requireActual("../lib/utils/Resolver");
+  return {
+    ...actual,
+    useResolver: jest.fn(),
+  };
+});
 
 export const Wrapper = ({ children }) => {
   const queryClient = new QueryClient({
