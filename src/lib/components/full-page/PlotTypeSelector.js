@@ -8,11 +8,11 @@ import violinIcon from "../../../assets/images/plots/violin.svg";
 import { PLOT_TYPES } from "../../constants/constants";
 
 const iconMap = {
-  [PLOT_TYPES.DOTPLOT]: dotplotIcon,
-  [PLOT_TYPES.MATRIXPLOT]: matrixplotIcon,
-  [PLOT_TYPES.VIOLINPLOT]: violinIcon,
   [PLOT_TYPES.SCATTERPLOT]: scatterplotIcon,
+  [PLOT_TYPES.MATRIXPLOT]: matrixplotIcon,
   [PLOT_TYPES.HEATMAP]: heatmapIcon,
+  [PLOT_TYPES.DOTPLOT]: dotplotIcon,
+  [PLOT_TYPES.VIOLINPLOT]: violinIcon,
 };
 
 const plotTypes = Object.entries(iconMap).map(([type, icon]) => ({
