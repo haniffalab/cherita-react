@@ -47,7 +47,7 @@ const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
           icon={isCurrentEventKey ? faChevronDown : faChevronRight}
         />
       </span>
-      <span className="obs-accordion-header-title">{children}</span>
+      <span className="obs-accordion-header-span">{children}</span>
     </div>
   );
 };
@@ -204,8 +204,8 @@ export function ObsColsList({
           eventKey={item.name}
           handleAccordionToggle={handleAccordionToggle}
         >
-          <div>{item.name}</div>
-          <div>
+          <div className="accordion-header-title">{item.name}</div>
+          <div className="accordion-header-toolbar">
             <span
               className={`mx-1 cursor-pointer ${inLabelObs ? "active-icon" : "text-muted opacity-50"}`}
               onClick={(event) => {
