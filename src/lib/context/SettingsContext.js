@@ -177,8 +177,6 @@ export function SettingsProvider({
     validate
   );
 
-  // @TODO: remove items in data if not in any selection
-
   useEffect(() => {
     // If resolvedSettings is null, do not update settings
     if (resolvedSettings) {
