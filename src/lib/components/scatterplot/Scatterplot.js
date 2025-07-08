@@ -35,6 +35,7 @@ import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { MapHelper } from "../../helpers/map-helper";
 import { Legend } from "../../utils/Legend";
 import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
+import { useSelectedObs } from "../../utils/Resolver";
 import { formatNumerical } from "../../utils/string";
 import { useLabelObsData } from "../../utils/zarrData";
 
@@ -70,6 +71,8 @@ export function Scatterplot({
     values: [],
   });
   const [coordsError, setCoordsError] = useState(null);
+
+  const selectedObs = useSelectedObs();
 
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
@@ -185,7 +188,7 @@ export function Scatterplot({
     if (
       (settings.colorEncoding === COLOR_ENCODINGS.VAR ||
         (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-          settings.selectedObs?.type === OBS_TYPES.CONTINUOUS)) &&
+          selectedObs?.type === OBS_TYPES.CONTINUOUS)) &&
       data.positions &&
       data.values &&
       data.positions.length === data.values.length
@@ -216,8 +219,8 @@ export function Scatterplot({
     data,
     identityGetOriginalIndex,
     identitySortedIndexMap,
+    selectedObs?.type,
     settings.colorEncoding,
-    settings.selectedObs?.type,
   ]);
 
   const sortedObsIndices = useMemo(() => {
@@ -229,20 +232,13 @@ export function Scatterplot({
   const isCategorical = useMemo(() => {
     if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
       return (
-        settings.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-        settings.selectedObs?.type === OBS_TYPES.BOOLEAN
+        selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+        selectedObs?.type === OBS_TYPES.BOOLEAN
       );
     } else {
       return false;
     }
-  }, [settings.colorEncoding, settings.selectedObs?.type]);
-
-  useEffect(() => {
-    dispatch({
-      type: "set.controls.valueRange",
-      valueRange: [valueMin, valueMax],
-    });
-  }, [dispatch, valueMax, valueMin]);
+  }, [settings.colorEncoding, selectedObs?.type]);
 
   const { min, max } = {
     min: settings.controls.range[0] * (valueMax - valueMin) + valueMin,
@@ -260,8 +256,8 @@ export function Scatterplot({
           grayOut: grayOut,
           ...(useUnsColors &&
           settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-          settings.selectedObs?.colors
-            ? { colorscale: settings.selectedObs?.colors }
+          selectedObs?.colors
+            ? { colorscale: selectedObs?.colors }
             : {}),
         }) || [0, 0, 0, 100]
       );
@@ -276,7 +272,7 @@ export function Scatterplot({
       isCategorical,
       useUnsColors,
       settings.colorEncoding,
-      settings.selectedObs?.colors,
+      selectedObs?.colors,
     ]
   );
 
@@ -394,12 +390,10 @@ export function Scatterplot({
 
     if (
       settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-      settings.selectedObs &&
-      !_.some(settings.labelObs, { name: settings.selectedObs.name })
+      selectedObs &&
+      !_.includes(settings.labelObs, selectedObs.name)
     ) {
-      text.push(
-        getLabel(settings.selectedObs, data.values?.[getOriginalIndex(index)])
-      );
+      text.push(getLabel(selectedObs, data.values?.[getOriginalIndex(index)]));
     }
 
     if (
@@ -418,7 +412,7 @@ export function Scatterplot({
     if (settings.labelObs.length) {
       text.push(
         ..._.map(labelObsData.data, (v, k) => {
-          const labelObs = _.find(settings.labelObs, (o) => o.name === k);
+          const labelObs = settings.data.obs[k];
           return getLabel(labelObs, v[getOriginalIndex(index)]);
         })
       );
@@ -495,7 +489,7 @@ export function Scatterplot({
                 settings.colorEncoding === COLOR_ENCODINGS.VAR
                   ? settings.selectedVar?.name
                   : settings.colorEncoding === COLOR_ENCODINGS.OBS
-                    ? settings.selectedObs?.name
+                    ? selectedObs?.name
                     : null
               }
               obsLength={parseInt(data.positions?.length)}

@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useReducer } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useRef,
+} from "react";
 
 import _ from "lodash";
 
@@ -13,29 +19,24 @@ import {
   VAR_SORT_ORDER,
   VIOLINPLOT_SCALES,
 } from "../constants/constants";
+import { useResolver } from "../utils/Resolver";
 
 export const SettingsContext = createContext(null);
 export const SettingsDispatchContext = createContext(null);
 
-// @TODO: consider splitting constant values and dataset-resolved values
-// e.g. store only obs name in selectedObs, and resolved obs data (counts, values, etc.) elsewhere
-// e.g. store only var name in selectedVar, and resolved var data (index, matrix_index) elsewhere
-// would simplify passing and validating defaultSettings and localSettings
 const initialSettings = {
-  selectedObs: null,
-  selectedVar: null,
-  selectedObsm: null,
-  selectedMultiObs: [],
-  selectedMultiVar: [],
+  selectedObs: null, // { name: "obs_name", omit: ["obs_item"], bins: {} }
+  selectedVar: null, // { name: "var_name", isSet: false } or { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }
+  selectedObsm: null, // "obsm_name" (e.g. "X_umap")
+  selectedMultiVar: [], // [{ name: "var_name", isSet: false }, { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }]
+  labelObs: [], // [ "obs_name1", "obs_name2" ]
+  vars: [], // [{ name: "var_name", isSet: false }, { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }]
   colorEncoding: null,
-  labelObs: [],
-  vars: [],
   sliceBy: { obs: false, polygons: false },
   polygons: {},
   controls: {
     colorScale: "Viridis",
-    valueRange: [0, 1],
-    range: [0, 1],
+    range: [0, 1], // normalized
     colorAxis: { dmin: 0, dmax: 1, cmin: 0, cmax: 1 },
     scale: {
       dotplot: DOTPLOT_SCALES.NONE.value,
@@ -53,6 +54,13 @@ const initialSettings = {
     maskSet: null,
     maskValues: null,
     categoricalMode: PSEUDOSPATIAL_CATEGORICAL_MODES.ACROSS.value,
+  },
+  // dataset resolved values
+  data: {
+    // store resolved obs and vars from selectedObs, selectedVar, selectedMultiVar, vars, labelObs
+    // keys to be removed when not in any selection
+    obs: {},
+    vars: {},
   },
 };
 
@@ -100,6 +108,23 @@ const validateSettings = (settings) => {
       settings.colorEncoding = null;
     }
   }
+
+  // @TODO: validate pseudospatial settings
+
+  // Keep only obs in use (selectedObs, labelObs) in data.obs
+  const obsNames = _.uniq(
+    _.compact([settings.selectedObs?.name, ...settings.labelObs])
+  );
+  const intersectionObs = _.intersection(_.keys(settings.data.obs), obsNames);
+  settings.data.obs = _.pick(settings.data.obs, intersectionObs);
+
+  // Keep only vars in use (settings.vars) in data.vars
+  const varNames = _.flatMap(settings.vars, (v) =>
+    v.isSet ? _.map(v.vars, (vv) => vv.name) : v.name
+  );
+  const intersectionVars = _.intersection(_.keys(settings.data.vars), varNames);
+  settings.data.vars = _.pick(settings.data.vars, intersectionVars);
+
   return settings;
 };
 
@@ -109,9 +134,13 @@ const initializer = ({
   localSettings,
 }) => {
   const mergedSettings = canOverrideSettings
-    ? _.assign({}, initialSettings, defaultSettings, localSettings)
-    : _.assign({}, initialSettings, defaultSettings);
+    ? _.defaultsDeep({}, localSettings, defaultSettings, initialSettings)
+    : _.defaultsDeep({}, defaultSettings, initialSettings);
   return validateSettings(mergedSettings);
+};
+
+const validate = (settings) => {
+  return settings ? validateSettings(settings) : null;
 };
 
 export function SettingsProvider({
@@ -132,11 +161,30 @@ export function SettingsProvider({
     localSettings = {};
   }
 
+  const initSettings = useRef(
+    initializer({
+      canOverrideSettings,
+      defaultSettings,
+      localSettings,
+    })
+  );
+
+  const resolvedSettings = useResolver(initSettings.current);
+
   const [settings, dispatch] = useReducer(
     settingsReducer,
-    { canOverrideSettings, defaultSettings, localSettings },
-    initializer
+    resolvedSettings,
+    validate
   );
+
+  useEffect(() => {
+    // If resolvedSettings is null, do not update settings
+    if (resolvedSettings) {
+      const validatedSettings = validateSettings(resolvedSettings);
+      console.log("Initial settings:", validatedSettings);
+      dispatch({ type: "init", settings: validatedSettings });
+    }
+  }, [resolvedSettings]);
 
   useEffect(() => {
     if (canOverrideSettings) {
@@ -146,6 +194,7 @@ export function SettingsProvider({
           JSON.stringify({
             buster: process.env.PACKAGE_VERSION || "0.0.0",
             timestamp: Date.now(),
+            ..._.omit(settings, "data"),
             ...settings,
           })
         );
@@ -167,7 +216,7 @@ export function SettingsProvider({
   return (
     <SettingsContext.Provider value={settings}>
       <SettingsDispatchContext.Provider value={dispatch}>
-        {children}
+        {settings && children}
       </SettingsDispatchContext.Provider>
     </SettingsContext.Provider>
   );
@@ -181,12 +230,73 @@ export function useSettingsDispatch() {
   return useContext(SettingsDispatchContext);
 }
 
+const OBS_DATA_KEYS = [
+  "name",
+  "type",
+  // categorical and numerical
+  "codes",
+  "codesMap",
+  "values",
+  "n_values",
+  "value_counts",
+  // numerical
+  "bins",
+  "min",
+  "max",
+  "mean",
+  "median",
+  "n_unique",
+];
+
+const splitObs = (obs) => {
+  if (!obs) return { settings: null, data: {} };
+  const settings = _.pick(obs, ["name", "omit", "bins"]);
+  const data = obs ? { [obs.name]: _.pick(obs, OBS_DATA_KEYS) } : {};
+  return { settings, data };
+};
+
+const splitVar = (v) => {
+  if (!v) return { settings: null, data: {} };
+  let settings, data;
+  if (v.isSet) {
+    settings = {
+      ..._.pick(v, ["name", "isSet"]),
+      vars: _.map(v.vars, (vv) => ({ name: vv.name })),
+    };
+    data = _.fromPairs(
+      _.map(v.vars, (vv) => [
+        vv.name,
+        _.pick(vv, ["name", "index", "matrix_index"]),
+      ])
+    );
+  } else {
+    settings = _.pick(v, ["name", "isSet"]);
+    data = { [v.name]: _.pick(v, ["name", "index", "matrix_index"]) };
+  }
+  return { settings, data };
+};
+
 function settingsReducer(settings, action) {
   switch (action.type) {
+    case "init": {
+      return action.settings;
+    }
     case "select.obs": {
+      const { settings: obsSettings, data: obsData } = splitObs(action.obs);
       return {
         ...settings,
-        selectedObs: action.obs,
+        ...(action.obs
+          ? {
+              selectedObs: obsSettings,
+              data: {
+                ...settings.data,
+                obs: {
+                  ...settings.data.obs,
+                  ...obsData,
+                },
+              },
+            }
+          : { selectedObs: null }),
         controls: {
           ...settings.controls,
           range:
@@ -208,9 +318,17 @@ function settingsReducer(settings, action) {
       return { ...settings, selectedObsm: action.obsm };
     }
     case "select.var": {
+      const { settings: varSettings, data: varData } = splitVar(action.var);
       return validateSettings({
         ...settings,
-        selectedVar: action.var,
+        selectedVar: varSettings,
+        data: {
+          ...settings.data,
+          vars: {
+            ...settings.data.vars,
+            ...varData,
+          },
+        },
       });
     }
     case "select.multivar": {
@@ -220,9 +338,17 @@ function settingsReducer(settings, action) {
       if (inMultiVar) {
         return validateSettings({ ...settings });
       } else {
+        const { settings: varSettings, data: varData } = splitVar(action.var);
         return validateSettings({
           ...settings,
-          selectedMultiVar: [...settings.selectedMultiVar, action.var],
+          selectedMultiVar: [...settings.selectedMultiVar, varSettings],
+          data: {
+            ...settings.data,
+            vars: {
+              ...settings.data.vars,
+              ...varData,
+            },
+          },
         });
       }
     }
@@ -246,9 +372,17 @@ function settingsReducer(settings, action) {
           ),
         });
       } else {
+        const { settings: varSettings, data: varData } = splitVar(action.var);
         return validateSettings({
           ...settings,
-          selectedMultiVar: [...settings.selectedMultiVar, action.var],
+          selectedMultiVar: [...settings.selectedMultiVar, varSettings],
+          data: {
+            ...settings.data,
+            vars: {
+              ...settings.data.vars,
+              ...varData,
+            },
+          },
         });
       }
     }
@@ -279,7 +413,18 @@ function settingsReducer(settings, action) {
       if (settings.vars.find((v) => v.name === action.var.name)) {
         return settings;
       } else {
-        return { ...settings, vars: [...settings.vars, action.var] };
+        const { settings: varSettings, data: varData } = splitVar(action.var);
+        return {
+          ...settings,
+          vars: [...settings.vars, varSettings],
+          data: {
+            ...settings.data,
+            vars: {
+              ...settings.data.vars,
+              ...varData,
+            },
+          },
+        };
       }
     }
     case "remove.var": {
@@ -307,7 +452,8 @@ function settingsReducer(settings, action) {
       if (varSet.vars.some((v) => v.name === action.var.name)) {
         return settings;
       } else {
-        const varSetVars = [...varSet.vars, action.var];
+        const { settings: varSettings, data: varData } = splitVar(action.var);
+        const varSetVars = [...varSet.vars, varSettings];
         const vars = settings.vars.map((v) => {
           if (v.name === varSet.name) {
             return { ...v, vars: varSetVars };
@@ -331,6 +477,13 @@ function settingsReducer(settings, action) {
           vars: vars,
           selectedVar: selectedVar,
           selectedMultiVar: selectedMultiVar,
+          data: {
+            ...settings.data,
+            vars: {
+              ...settings.data.vars,
+              ...varData,
+            },
+          },
         });
       }
     }
@@ -395,12 +548,6 @@ function settingsReducer(settings, action) {
       return {
         ...settings,
         controls: { ...settings.controls, colorScale: action.colorScale },
-      };
-    }
-    case "set.controls.valueRange": {
-      return {
-        ...settings,
-        controls: { ...settings.controls, valueRange: action.valueRange },
       };
     }
     case "set.controls.range": {
@@ -474,15 +621,26 @@ function settingsReducer(settings, action) {
       };
     }
     case "toggle.slice.obs": {
-      if (_.isEqual(settings.selectedObs, action.obs)) {
+      if (
+        settings.selectedObs &&
+        settings.selectedObs.name === action.obs.name
+      ) {
         return {
           ...settings,
           sliceBy: { ...settings.sliceBy, obs: !settings.sliceBy.obs },
         };
       } else {
+        const { settings: obsSettings, data: obsData } = splitObs(action.obs);
         return {
           ...settings,
-          selectedObs: action.obs,
+          selectedObs: obsSettings,
+          data: {
+            ...settings.data,
+            obs: {
+              ...settings.data.obs,
+              ...obsData,
+            },
+          },
           sliceBy: { ...settings.sliceBy, obs: true },
         };
       }
@@ -497,20 +655,31 @@ function settingsReducer(settings, action) {
       return { ...settings, sliceBy: { ...settings.sliceBy, polygons: false } };
     }
     case "add.label.obs": {
-      if (settings.labelObs.find((i) => _.isEqual(i, action.obs))) {
+      if (_.includes(settings.labelObs, action.obs.name)) {
         return settings;
       } else {
-        return { ...settings, labelObs: [...settings.labelObs, action.obs] };
+        const { settings: obsSettings, data: obsData } = splitObs(action.obs);
+        return {
+          ...settings,
+          labelObs: [...settings.labelObs, obsSettings.name],
+          data: {
+            ...settings.data,
+            obs: {
+              ...settings.data.obs,
+              ...obsData,
+            },
+          },
+        };
       }
     }
     case "remove.label.obs": {
-      return {
+      return validateSettings({
         ...settings,
-        labelObs: settings.labelObs.filter((a) => a.name !== action.obsName),
-      };
+        labelObs: settings.labelObs.filter((a) => a !== action.obsName),
+      });
     }
     case "reset.label.obs": {
-      return { ...settings, labelObs: [] };
+      return validateSettings({ ...settings, labelObs: [] });
     }
     case "set.varSort": {
       return {

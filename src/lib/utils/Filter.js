@@ -3,6 +3,7 @@ import { useEffect, useCallback, useMemo } from "react";
 import { booleanPointInPolygon, point } from "@turf/turf";
 import _ from "lodash";
 
+import { useSelectedObs } from "./Resolver";
 import { COLOR_ENCODINGS, OBS_TYPES } from "../constants/constants";
 import { useFilteredDataDispatch } from "../context/FilterContext";
 import { useSettings } from "../context/SettingsContext";
@@ -45,34 +46,39 @@ export const useFilter = (data) => {
   const settings = useSettings();
   const filterDataDispatch = useFilteredDataDispatch();
 
+  const selectedObs = useSelectedObs();
+  const omitCodes = _.map(
+    selectedObs?.omit || [],
+    (o) => selectedObs?.codes?.[o]
+  );
+
   const { obsmData, xData, obsData, isPending, serverError } = data;
 
   const isCategorical =
-    settings.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-    settings.selectedObs?.type === OBS_TYPES.BOOLEAN;
+    selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+    selectedObs?.type === OBS_TYPES.BOOLEAN;
 
-  const isContinuous = settings.selectedObs?.type === OBS_TYPES.CONTINUOUS;
+  const isContinuous = selectedObs?.type === OBS_TYPES.CONTINUOUS;
 
   const sliceByObs =
     (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-      !!settings.selectedObs?.omit.length) ||
+      !!selectedObs?.omit?.length) ||
     settings.sliceBy.obs;
 
   const isInObsSlice = useCallback(
     (index, values) => {
       let inSlice = true;
-
       if (values && sliceByObs) {
         if (isCategorical) {
-          inSlice &= isInValues(settings.selectedObs?.omit, values[index]);
+          inSlice &= isInValues(omitCodes, values[index]);
         } else if (isContinuous) {
           if (isNaN(values[index])) {
-            inSlice &= isInValues(settings.selectedObs?.omit, -1);
+            inSlice &= isInValues(omitCodes, -1);
           } else {
             inSlice &= isInBins(
               values[index],
-              settings.selectedObs.bins.binEdges,
-              _.without(settings.selectedObs.omit, -1)
+              selectedObs?.bins?.binEdges,
+              _.without(omitCodes, -1)
             );
           }
         }
@@ -80,11 +86,11 @@ export const useFilter = (data) => {
       return inSlice;
     },
     [
-      settings.selectedObs?.bins?.binEdges,
-      settings.selectedObs?.omit,
+      sliceByObs,
       isCategorical,
       isContinuous,
-      sliceByObs,
+      omitCodes,
+      selectedObs?.bins?.binEdges,
     ]
   );
 
