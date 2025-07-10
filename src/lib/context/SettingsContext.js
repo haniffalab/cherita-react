@@ -109,8 +109,8 @@ const initializer = ({
   localSettings,
 }) => {
   const mergedSettings = canOverrideSettings
-    ? _.assign({}, initialSettings, defaultSettings, localSettings)
-    : _.assign({}, initialSettings, defaultSettings);
+    ? _.defaultsDeep({}, localSettings, defaultSettings, initialSettings)
+    : _.defaultsDeep({}, defaultSettings, initialSettings);
   return validateSettings(mergedSettings);
 };
 
