@@ -70,6 +70,7 @@ export function Scatterplot({
     values: [],
   });
   const [coordsError, setCoordsError] = useState(null);
+  const [hasObsm, setHasObsm] = useState(true);
 
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
@@ -448,6 +449,19 @@ export function Scatterplot({
     (settings.labelObs.length && labelObsData.serverError?.length) ||
     coordsError;
 
+  if (!hasObsm) {
+    return (
+      <div className="cherita-container-scatterplot">
+        <div className="cherita-scatterplot d-flex h-100 w-100 align-items-center justify-content-center">
+          <Alert variant="warning">
+            This dataset does not contain embeddings. Please use a different
+            type of plot.
+          </Alert>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="cherita-container-scatterplot">
       <div className="cherita-scatterplot">
@@ -500,6 +514,7 @@ export function Scatterplot({
               }
               obsLength={parseInt(data.positions?.length)}
               slicedLength={parseInt(slicedLength)}
+              setHasObsm={setHasObsm}
             />
           </div>
           <Legend isCategorical={isCategorical} min={min} max={max} />

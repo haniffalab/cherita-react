@@ -5,11 +5,11 @@ import { Button, ButtonGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { formatNumerical } from "../../utils/string";
 import { ObsmKeysList } from "../obsm-list/ObsmList";
 
-export function Toolbox({ mode, obsLength, slicedLength }) {
+export function Toolbox({ mode, obsLength, slicedLength, setHasObsm }) {
   return (
     <div className="cherita-toolbox">
       <ButtonGroup>
-        <ObsmKeysList />
+        <ObsmKeysList setHasObsm={setHasObsm} />
         {(mode || !isNaN(obsLength)) &&
           (mode !== null &&
           !isNaN(slicedLength) &&
