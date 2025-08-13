@@ -4,10 +4,12 @@ import { Box, Slider, Typography } from "@mui/material";
 import { Form } from "react-bootstrap";
 
 import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
+import { useFilteredData } from "../../context/FilterContext";
 import {
   useSettings,
   useSettingsDispatch,
 } from "../../context/SettingsContext";
+import { useSelectedObs } from "../../utils/Resolver";
 import { ColorscaleSelect } from "../controls/Controls";
 
 export const ScatterplotControls = () => {
@@ -16,18 +18,17 @@ export const ScatterplotControls = () => {
   const [sliderValue, setSliderValue] = React.useState(
     settings.controls.range || [0, 1]
   );
+  const { valueMin, valueMax } = useFilteredData();
+
+  const selectedObs = useSelectedObs();
 
   const isCategorical =
     settings.colorEncoding === COLOR_ENCODINGS.OBS
-      ? settings.selectedObs?.type === OBS_TYPES.CATEGORICAL
+      ? selectedObs?.type === OBS_TYPES.CATEGORICAL
       : false;
 
   const valueLabelFormat = (value) => {
-    return (
-      value *
-        (settings.controls.valueRange[1] - settings.controls.valueRange[0]) +
-      settings.controls.valueRange[0]
-    ).toFixed(2);
+    return (value * (valueMax - valueMin) + valueMin).toFixed(2);
   };
 
   const marks = [
