@@ -29,7 +29,7 @@ const select = (dispatch, item) => {
   });
 };
 
-const debounceSelect = _.debounce(select, 2000);
+const debounceSelect = _.debounce(select, 500);
 
 function onVarSelect(dispatch, item) {
   dispatch({
