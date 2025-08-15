@@ -59,6 +59,7 @@ export function FullPage({
   const XlBreakpoint = useMediaQuery(BREAKPOINTS.XL);
   const showObsBtn = LgBreakpoint;
   const showVarsBtn = XlBreakpoint;
+  const showPlotBtn = showVarsBtn;
 
   const { plotControls, varMode, showSelectedAsActive } = {
     [PLOT_TYPES.SCATTERPLOT]: {
@@ -125,7 +126,17 @@ export function FullPage({
               showColor={varMode === SELECTION_MODES.SINGLE}
             />
           </div>
-          <div className="cherita-app-canvas">{plot}</div>
+          <div className="cherita-app-canvas">
+            {showPlotBtn && (
+              <div className="px-3 py-2">
+                <PlotTypeSelector
+                  currentType={plotType}
+                  onChange={(type) => setPlotType(type)}
+                />
+              </div>
+            )}
+            {plot}
+          </div>
           <div className="cherita-app-sidebar p-3">
             <Card>
               <Card.Body>
