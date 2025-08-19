@@ -19,7 +19,10 @@ import {
 } from "../../constants/constants";
 import { useDataset } from "../../context/DatasetContext";
 import { useFilteredData } from "../../context/FilterContext";
-import { useSettings } from "../../context/SettingsContext";
+import {
+  useSettings,
+  useSettingsDispatch,
+} from "../../context/SettingsContext";
 import { rgbToHex, useColor } from "../../helpers/color-helper";
 import { ImageViewer } from "../../utils/ImageViewer";
 import { Legend } from "../../utils/Legend";
@@ -120,6 +123,7 @@ export function Pseudospatial({
   setPlotType,
 }) {
   const settings = useSettings();
+  const dispatch = useSettingsDispatch();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
   const { getColor } = useColor();
@@ -127,6 +131,18 @@ export function Pseudospatial({
   const { valueMin, valueMax } = useFilteredData();
 
   const selectedObs = useSelectedObs();
+
+  useEffect(() => {
+    if (
+      _.keys(settings.data.pseudospatial).length &&
+      !settings.pseudospatial.maskSet
+    ) {
+      dispatch({
+        type: "set.pseudospatial.maskSet",
+        maskSet: _.keys(settings.data.pseudospatial)[0],
+      });
+    }
+  }, [dispatch, settings.data.pseudospatial, settings.pseudospatial.maskSet]);
 
   useEffect(() => {
     setPlotType(
@@ -222,10 +238,15 @@ export function Pseudospatial({
   const hasSelections = !!plotType && !!settings.pseudospatial.maskSet;
   const faSlidersPath = faSliders.icon[4];
 
-  if (!serverError) {
+  if (!_.keys(settings.data.pseudospatial).length) {
+    return (
+      <>
+        <Alert variant="warning">No pseudospatial data</Alert>
+      </>
+    );
+  } else if (!serverError) {
     return (
       <div className="cherita-pseudospatial">
-        {/* <PseudospatialToolbar plotType={plotType} /> */}
         <>
           {hasSelections && isPending && <LoadingSpinner />}
           {hasSelections && (

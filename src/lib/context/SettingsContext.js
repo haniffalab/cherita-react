@@ -61,6 +61,8 @@ const initialSettings = {
     // keys to be removed when not in any selection
     obs: {},
     vars: {},
+    // store maskSets and values
+    pseudospatial: {},
   },
 };
 
@@ -109,7 +111,10 @@ const validateSettings = (settings) => {
     }
   }
 
-  // @TODO: validate pseudospatial settings
+  // pseudospatial
+  if (!settings.pseudospatial.maskSet && settings.pseudospatial.maskValues) {
+    settings.pseudospatial.maskValues = null;
+  }
 
   // Keep only obs in use (selectedObs, labelObs) in data.obs
   const obsNames = _.uniq(
@@ -187,7 +192,7 @@ export function SettingsProvider({
   }, [resolvedSettings]);
 
   useEffect(() => {
-    if (canOverrideSettings) {
+    if (canOverrideSettings && settings) {
       try {
         localStorage.setItem(
           DATASET_STORAGE_KEY,
@@ -195,7 +200,6 @@ export function SettingsProvider({
             buster: process.env.PACKAGE_VERSION || "0.0.0",
             timestamp: Date.now(),
             ..._.omit(settings, "data"),
-            ...settings,
           })
         );
       } catch (err) {
