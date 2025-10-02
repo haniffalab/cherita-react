@@ -71,6 +71,7 @@ export function Scatterplot({
     values: [],
   });
   const [coordsError, setCoordsError] = useState(null);
+  const [dataError, setDataError] = useState(null);
 
   const selectedObs = useSelectedObs();
 
@@ -111,9 +112,21 @@ export function Scatterplot({
       setData((d) => {
         let values = d.values;
         if (settings.colorEncoding === COLOR_ENCODINGS.VAR) {
-          values = !xData.serverError ? xData.data : values;
+          if (!xData.serverError) {
+            values = xData.data;
+            setDataError(null);
+          } else {
+            values = [];
+            setDataError(xData.serverError);
+          }
         } else if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
-          values = !obsData.serverError ? obsData.data : values;
+          if (!obsData.serverError) {
+            values = obsData.data;
+            setDataError(null);
+          } else {
+            values = [];
+            setDataError(obsData.serverError);
+          }
         }
         if (!obsmData.serverError && obsmData.data) {
           if (obsmData.data[0].length !== 2) {
@@ -435,10 +448,7 @@ export function Scatterplot({
 
   const error =
     (settings.selectedObsm && obsmData.serverError?.length) ||
-    (settings.colorEncoding === COLOR_ENCODINGS.VAR &&
-      xData.serverError?.length) ||
-    (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-      obsData.serverError?.length) ||
+    dataError ||
     (settings.labelObs.length && labelObsData.serverError?.length) ||
     coordsError;
 
@@ -480,8 +490,11 @@ export function Scatterplot({
           <div className="cherita-toolbox-footer">
             {!!error && !isRendering && (
               <Alert variant="danger">
-                <FontAwesomeIcon icon={faTriangleExclamation} />
-                &nbsp;Error loading data
+                <Alert.Heading>
+                  <FontAwesomeIcon icon={faTriangleExclamation} />
+                  &nbsp;Error loading data
+                </Alert.Heading>
+                <p className="mb-0">{error.message}</p>
               </Alert>
             )}
             <Toolbox
@@ -496,7 +509,9 @@ export function Scatterplot({
               slicedLength={parseInt(slicedLength)}
             />
           </div>
-          <Legend isCategorical={isCategorical} min={min} max={max} />
+          {!error && (
+            <Legend isCategorical={isCategorical} min={min} max={max} />
+          )}
         </div>
       </div>
     </div>
