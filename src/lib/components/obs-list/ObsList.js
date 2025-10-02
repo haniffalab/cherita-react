@@ -118,13 +118,24 @@ export function ObsColsList({
       setObsCols(
         _.keyBy(
           _.map(filteredData, (d) => {
-            return { ...d, codesMap: _.invert(d.codes), omit: [] };
+            if (settings.selectedObs?.name === d.name) {
+              return { ...d, omit: settings.selectedObs.omit || [] };
+            }
+            return { ...d, omit: [] };
           }),
           "name"
         )
       );
     }
-  }, [fetchedData, isPending, obsGroups, serverError, enableGroups]);
+  }, [
+    fetchedData,
+    isPending,
+    obsGroups,
+    serverError,
+    enableGroups,
+    settings.selectedObs?.name,
+    settings.selectedObs?.omit,
+  ]);
 
   useEffect(() => {
     if (obsCols) {
@@ -144,9 +155,7 @@ export function ObsColsList({
   };
 
   const toggleAll = (item) => {
-    const omit = item.omit.length
-      ? []
-      : _.map(item.values, (v) => item.codes[v]);
+    const omit = item.omit.length ? [] : item.values;
     setObsCols((o) => {
       return { ...o, [item.name]: { ...item, omit: omit } };
     });
@@ -156,13 +165,13 @@ export function ObsColsList({
   };
 
   const toggleLabel = (item) => {
-    const inLabelObs = _.some(settings.labelObs, (i) => i.name === item.name);
+    const inLabelObs = _.includes(settings.labelObs, item.name);
     if (inLabelObs) {
       dispatch({ type: "remove.label.obs", obsName: item.name });
     } else {
       dispatch({
         type: "add.label.obs",
-        obs: { name: item.name, type: item.type, codesMap: item.codesMap },
+        obs: item,
       });
     }
   };
@@ -178,10 +187,10 @@ export function ObsColsList({
 
   const toggleObs = (item, value) => {
     let omit;
-    if (_.includes(item.omit, item.codes[value])) {
-      omit = item.omit.filter((i) => i !== item.codes[value]);
+    if (_.includes(item.omit, value)) {
+      omit = item.omit.filter((i) => i !== value);
     } else {
-      omit = [...item.omit, item.codes[value]];
+      omit = [...item.omit, value];
     }
     setObsCols((o) => {
       return { ...o, [item.name]: { ...item, omit: omit } };
@@ -198,7 +207,7 @@ export function ObsColsList({
     if (item.type === OBS_TYPES.DISCRETE) {
       return null;
     }
-    const inLabelObs = _.some(settings.labelObs, (i) => i.name === item.name);
+    const inLabelObs = _.includes(settings.labelObs, item.name);
     const inSliceObs =
       settings.sliceBy.obs && settings.selectedObs?.name === item.name;
     const isColorEncoding =

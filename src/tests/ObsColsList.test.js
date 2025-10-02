@@ -6,8 +6,13 @@ import { render, screen } from "@testing-library/react";
 import { Wrapper } from "./setupTests";
 import { ObsColsList } from "../lib/components/obs-list/ObsList";
 import { useFetch } from "../lib/utils/requests";
+import { useResolver } from "../lib/utils/Resolver";
 
 test("renders ObsColsList component", () => {
+  useResolver.mockImplementation((initSettings) => {
+    return initSettings;
+  });
+
   useFetch.mockReturnValue({
     fetchedData: null,
     isPending: true,
