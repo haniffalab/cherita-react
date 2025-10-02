@@ -18,6 +18,11 @@ import {
 } from "../../context/SettingsContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useFetch } from "../../utils/requests";
+import {
+  useSelectedMultiVar,
+  useSelectedVar,
+  useSettingsVars,
+} from "../../utils/Resolver";
 
 export const useVarMean = (varKeys, enabled = false) => {
   const ENDPOINT = "matrix/mean";
@@ -26,7 +31,9 @@ export const useVarMean = (varKeys, enabled = false) => {
   const [params, setParams] = useState({
     url: dataset.url,
     varKeys: _.map(varKeys, (v) =>
-      v.isSet ? { name: v.name, indices: v.vars.map((v) => v.index) } : v.index
+      v.isSet
+        ? { name: v.name, indices: v.vars.map((vv) => vv.index) }
+        : v.index
     ),
     obsIndices: obsIndices,
     varNamesCol: dataset.varNamesCol,
@@ -38,7 +45,7 @@ export const useVarMean = (varKeys, enabled = false) => {
         ...p,
         varKeys: _.map(varKeys, (v) =>
           v.isSet
-            ? { name: v.name, indices: v.vars.map((v) => v.index) }
+            ? { name: v.name, indices: v.vars.map((vv) => vv.index) }
             : v.index
         ),
         obsIndices: obsIndices,
@@ -63,29 +70,32 @@ export function VarNamesList({
 }) {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
+
+  const selectedVar = useSelectedVar();
+  const selectedMultiVar = useSelectedMultiVar();
+  const settingsVars = useSettingsVars();
+
   const [active, setActive] = useState(
     mode === SELECTION_MODES.SINGLE
-      ? settings.selectedVar?.matrix_index || settings.selectedVar?.name
-      : settings.selectedMultiVar.map((i) => i.matrix_index || i.name)
+      ? selectedVar?.matrix_index || selectedVar?.name
+      : selectedMultiVar.map((i) => i.matrix_index || i.name)
   );
   const [sortedVars, setSortedVars] = useState([]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.SINGLE) {
-      setActive(
-        settings.selectedVar?.matrix_index || settings.selectedVar?.name
-      );
+      setActive(selectedVar?.matrix_index || selectedVar?.name);
     }
-  }, [mode, settings.selectedVar]);
+  }, [mode, selectedVar]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.MULTIPLE) {
-      setActive(settings.selectedMultiVar.map((i) => i.matrix_index || i.name));
+      setActive(selectedMultiVar.map((i) => i.matrix_index || i.name));
     }
-  }, [mode, settings.selectedMultiVar]);
+  }, [mode, selectedMultiVar]);
 
   const varMeans = useVarMean(
-    settings.vars,
+    settingsVars,
     settings.varSort.var.sort === VAR_SORT.MATRIX
   );
 
@@ -99,7 +109,7 @@ export function VarNamesList({
       ) {
         setSortedVars(
           _.orderBy(
-            settings.vars,
+            settingsVars,
             (o) => {
               return sortMeans(o, varMeans.fetchedData);
             },
@@ -109,10 +119,10 @@ export function VarNamesList({
       }
     } else if (settings.varSort.var.sort === VAR_SORT.NAME) {
       setSortedVars(
-        _.orderBy(settings.vars, "name", settings.varSort.var.sortOrder)
+        _.orderBy(settingsVars, "name", settings.varSort.var.sortOrder)
       );
     } else {
-      setSortedVars(settings.vars);
+      setSortedVars(settingsVars);
     }
   }, [
     settings.varSort.var.sort,
@@ -120,7 +130,7 @@ export function VarNamesList({
     varMeans.isPending,
     varMeans.serverError,
     varMeans.fetchedData,
-    settings.vars,
+    settingsVars,
   ]);
 
   const makeListItem = (item) => {
@@ -164,55 +174,53 @@ export function VarNamesList({
     varMeans.isPending && settings.varSort.var.sort === VAR_SORT.MATRIX;
 
   return (
-    <div className="position-relative">
-      <div className="overflow-auto mt-3">
-        <div className="d-flex justify-content-between mb-2">
-          <h5>{_.capitalize(displayName)}</h5>
-          <ButtonGroup aria-label="Feature options" size="sm">
-            <Button
-              variant="info"
-              onClick={() => {
-                dispatch({
-                  type: "add.var",
-                  var: {
-                    name: newSetName(),
-                    vars: [],
-                    isSet: true,
-                  },
-                });
-              }}
-            >
-              New set
-            </Button>
-            <Button
-              variant="info"
-              onClick={() => {
-                dispatch({
-                  type: "reset.vars",
-                });
-              }}
-            >
-              <FontAwesomeIcon icon={faTimes} className="me-1" />
-              Clear
-            </Button>
-          </ButtonGroup>
-        </div>
-        <>
-          {!varList.length ? (
-            <Alert variant="light">Search for a feature.</Alert>
-          ) : (
-            <>
-              <VarListToolbar />
-              <div className="position-relative">
-                {isPending && <LoadingSpinner />}
-                <ListGroup variant="flush" className="cherita-list">
-                  {varList}
-                </ListGroup>
-              </div>
-            </>
-          )}
-        </>
+    <div className="mt-3 d-flex flex-column h-100">
+      <div className="d-flex justify-content-between mb-2">
+        <h5>{_.capitalize(displayName)}</h5>
+        <ButtonGroup aria-label="Feature options" size="sm">
+          <Button
+            variant="info"
+            onClick={() => {
+              dispatch({
+                type: "add.var",
+                var: {
+                  name: newSetName(),
+                  vars: [],
+                  isSet: true,
+                },
+              });
+            }}
+          >
+            New set
+          </Button>
+          <Button
+            variant="info"
+            onClick={() => {
+              dispatch({
+                type: "reset.vars",
+              });
+            }}
+          >
+            <FontAwesomeIcon icon={faTimes} className="me-1" />
+            Clear
+          </Button>
+        </ButtonGroup>
       </div>
+      <>
+        {!varList.length ? (
+          <Alert variant="light">Search for a feature.</Alert>
+        ) : (
+          <>
+            <VarListToolbar />
+            <div className="overflow-auto flex-grow-1 modern-scrollbars">
+              {isPending && <LoadingSpinner />}
+              <ListGroup variant="flush" className="cherita-list">
+                {varList}
+              </ListGroup>
+            </div>
+          </>
+        )}
+      </>
     </div>
   );
 }

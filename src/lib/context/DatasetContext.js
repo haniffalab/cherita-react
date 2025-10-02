@@ -68,20 +68,20 @@ export function DatasetProvider({ dataset_url, children, ...dataset_params }) {
 
   return (
     <DatasetContext.Provider value={dataset}>
-      <SettingsProvider
-        dataset_url={dataset.url}
-        defaultSettings={dataset.defaultSettings}
-        canOverrideSettings={dataset.canOverrideSettings}
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={persistOptions}
       >
-        <PersistQueryClientProvider
-          client={queryClient}
-          persistOptions={persistOptions}
+        <SettingsProvider
+          dataset_url={dataset.url}
+          defaultSettings={dataset.defaultSettings}
+          canOverrideSettings={dataset.canOverrideSettings}
         >
           <FilterProvider>
             <ZarrDataProvider>{children}</ZarrDataProvider>
           </FilterProvider>
-        </PersistQueryClientProvider>
-      </SettingsProvider>
+        </SettingsProvider>
+      </PersistQueryClientProvider>
     </DatasetContext.Provider>
   );
 }
