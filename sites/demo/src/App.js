@@ -1,6 +1,4 @@
-import React from "react";
-
-import { FullPage, PLOT_TYPES } from "@haniffalab/cherita-react";
+import { FullPage, PerturbGen, PLOT_TYPES } from "@haniffalab/cherita-react";
 import { Route, Routes } from "react-router-dom";
 
 import Footer from "./components/Footer";
@@ -66,6 +64,11 @@ export default function App(props) {
           element={
             <FullPage {...props} defaultPlotType={PLOT_TYPES.VIOLINPLOT} />
           }
+        ></Route>
+        <Route
+          exact
+          path="/apps/perturbgen"
+          element={<PerturbGen {...props} />}
         ></Route>
       </Routes>
       <Footer />
