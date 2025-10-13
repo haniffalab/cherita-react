@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 
 import _ from "lodash";
 import { Alert, Button } from "react-bootstrap";
@@ -37,19 +43,32 @@ export function Matrixplot({
   const selectedObs = useSelectedObs();
   const selectedMultiVar = useSelectedMultiVar();
 
-  const [params, setParams] = useState({
-    url: dataset.url,
-    obsCol: selectedObs,
-    obsValues: !selectedObs?.omit.length
-      ? null
-      : _.difference(selectedObs?.values, selectedObs?.omit),
-    varKeys: selectedMultiVar.map((i) =>
-      i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
-    ),
-    obsIndices: isSliced ? [...(obsIndices || [])] : null,
-    standardScale: settings.controls.scale.matrixplot,
-    varNamesCol: dataset.varNamesCol,
-  });
+  const params = useMemo(
+    () => ({
+      url: dataset.url,
+      obsCol: selectedObs,
+      obsValues: !selectedObs?.omit.length
+        ? null
+        : _.difference(selectedObs?.values, selectedObs?.omit),
+      varKeys: selectedMultiVar.map((i) =>
+        i.isSet
+          ? { name: i.name, indices: i.vars.map((v) => v.index) }
+          : i.index
+      ),
+      obsIndices: isSliced ? [...(obsIndices || [])] : null,
+      standardScale: settings.controls.scale.matrixplot,
+      varNamesCol: dataset.varNamesCol,
+    }),
+    [
+      dataset.url,
+      dataset.varNamesCol,
+      isSliced,
+      obsIndices,
+      selectedMultiVar,
+      selectedObs,
+      settings.controls.scale.matrixplot,
+    ]
+  );
 
   useEffect(() => {
     if (selectedObs && selectedMultiVar.length) {
@@ -57,33 +76,7 @@ export function Matrixplot({
     } else {
       setHasSelections(false);
     }
-    setParams((p) => {
-      return {
-        ...p,
-        url: dataset.url,
-        obsCol: selectedObs,
-        obsValues: !selectedObs?.omit.length
-          ? null
-          : _.difference(selectedObs?.values, selectedObs?.omit),
-        varKeys: selectedMultiVar.map((i) =>
-          i.isSet
-            ? { name: i.name, indices: i.vars.map((v) => v.index) }
-            : i.index
-        ),
-        obsIndices: isSliced ? [...(obsIndices || [])] : null,
-        standardScale: settings.controls.scale.matrixplot,
-        varNamesCol: dataset.varNamesCol,
-      };
-    });
-  }, [
-    settings.controls.scale.matrixplot,
-    selectedMultiVar,
-    selectedObs,
-    dataset.url,
-    dataset.varNamesCol,
-    obsIndices,
-    isSliced,
-  ]);
+  }, [selectedMultiVar.length, selectedObs]);
 
   const updateColorscale = useCallback((colorscale) => {
     setLayout((l) => {
@@ -98,14 +91,17 @@ export function Matrixplot({
     ENDPOINT,
     params,
     500,
-    { enabled: !!params.obsCol && !!params.varKeys.length }
+    { isEnabled: (params) => !!params.obsCol && !!params.varKeys.length }
   );
 
   useEffect(() => {
-    if (hasSelections && !isPending && !serverError) {
+    if (hasSelections && !!fetchedData && !isPending && !serverError) {
       setData(fetchedData.data);
       setLayout(fetchedData.layout);
       updateColorscale(colorscale.current);
+    } else {
+      setData([]);
+      setLayout({});
     }
   }, [fetchedData, hasSelections, isPending, serverError, updateColorscale]);
 

@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 
 import _ from "lodash";
 import { Alert, Button } from "react-bootstrap";
@@ -41,21 +47,36 @@ export function Dotplot({
   const selectedObs = useSelectedObs();
   const selectedMultiVar = useSelectedMultiVar();
 
-  const [params, setParams] = useState({
-    url: dataset.url,
-    obsCol: selectedObs,
-    obsValues: !selectedObs?.omit.length
-      ? null
-      : _.difference(selectedObs?.values, selectedObs?.omit),
-    varKeys: selectedMultiVar.map((i) =>
-      i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
-    ),
-    obsIndices: isSliced ? [...(obsIndices || [])] : null,
-    standardScale: settings.controls.scale.dotplot,
-    meanOnlyExpressed: settings.controls.meanOnlyExpressed,
-    expressionCutoff: settings.controls.expressionCutoff,
-    varNamesCol: dataset.varNamesCol,
-  });
+  const params = useMemo(
+    () => ({
+      url: dataset.url,
+      obsCol: selectedObs,
+      obsValues: !selectedObs?.omit.length
+        ? null
+        : _.difference(selectedObs?.values, selectedObs?.omit),
+      varKeys: selectedMultiVar.map((i) =>
+        i.isSet
+          ? { name: i.name, indices: i.vars.map((v) => v.index) }
+          : i.index
+      ),
+      obsIndices: isSliced ? [...(obsIndices || [])] : null,
+      standardScale: settings.controls.scale.dotplot,
+      meanOnlyExpressed: settings.controls.meanOnlyExpressed,
+      expressionCutoff: settings.controls.expressionCutoff,
+      varNamesCol: dataset.varNamesCol,
+    }),
+    [
+      dataset.url,
+      dataset.varNamesCol,
+      isSliced,
+      obsIndices,
+      selectedMultiVar,
+      selectedObs,
+      settings.controls.expressionCutoff,
+      settings.controls.meanOnlyExpressed,
+      settings.controls.scale.dotplot,
+    ]
+  );
   // @TODO: set default scale
 
   useEffect(() => {
@@ -64,26 +85,6 @@ export function Dotplot({
     } else {
       setHasSelections(false);
     }
-    setParams((p) => {
-      return {
-        ...p,
-        url: dataset.url,
-        obsCol: selectedObs,
-        obsValues: !selectedObs?.omit.length
-          ? null
-          : _.difference(selectedObs?.values, selectedObs?.omit),
-        varKeys: selectedMultiVar.map((i) =>
-          i.isSet
-            ? { name: i.name, indices: i.vars.map((v) => v.index) }
-            : i.index
-        ),
-        obsIndices: isSliced ? [...(obsIndices || [])] : null,
-        standardScale: settings.controls.scale.dotplot,
-        meanOnlyExpressed: settings.controls.meanOnlyExpressed,
-        expressionCutoff: settings.controls.expressionCutoff,
-        varNamesCol: dataset.varNamesCol,
-      };
-    });
   }, [
     dataset.url,
     selectedObs,
@@ -109,11 +110,11 @@ export function Dotplot({
     ENDPOINT,
     params,
     500,
-    { enabled: !!params.obsCol && !!params.varKeys.length }
+    { isEnabled: (params) => !!params.obsCol && !!params.varKeys.length }
   );
 
   useEffect(() => {
-    if (hasSelections && !isPending && !serverError) {
+    if (hasSelections && !!fetchedData && !isPending && !serverError) {
       setData(fetchedData.data);
       setLayout(fetchedData.layout);
       // @TODO: keep colorAxis range from settings
@@ -127,6 +128,9 @@ export function Dotplot({
         },
       });
       updateColorscale(colorscale.current);
+    } else {
+      setData([]);
+      setLayout({});
     }
   }, [
     fetchedData,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -47,69 +47,22 @@ export function Violin({
   const selectedVar = useSelectedVar();
   const selectedObs = useSelectedObs();
 
-  const [params, setParams] = useState({
-    url: dataset.url,
-    mode: mode,
-    scale: settings.controls.scale.violinplot,
-    varNamesCol: dataset.varNamesCol,
-    ...{
-      [VIOLIN_MODES.MULTIKEY]: {
-        varKeys: selectedMultiVar.map((i) =>
-          i.isSet
-            ? { name: i.name, indices: i.vars.map((v) => v.index) }
-            : i.index
-        ),
-        obsKeys: [], // @TODO: implement
-      },
-      [VIOLIN_MODES.GROUPBY]: {
-        varKey: selectedVar?.isSet
-          ? {
-              name: selectedVar?.name,
-              indices: selectedVar?.vars.map((v) => v.index),
-            }
-          : selectedVar?.index,
-        obsCol: selectedObs,
-        obsValues: !selectedObs?.omit.length
-          ? null
-          : _.difference(selectedObs?.values, selectedObs?.omit),
-        obsIndices: isSliced ? [...(obsIndices || [])] : null,
-      },
-    }[mode],
-  });
-  // @TODO: set default scale
-
-  useEffect(() => {
-    if (mode === VIOLIN_MODES.MULTIKEY) {
-      if (selectedMultiVar.length) {
-        setHasSelections(true);
-      } else {
-        setHasSelections(false);
-      }
-      setParams((p) => {
-        return {
-          ...p,
-          url: dataset.url,
-          mode: mode,
+  const params = useMemo(
+    () => ({
+      url: dataset.url,
+      mode: mode,
+      scale: settings.controls.scale.violinplot,
+      varNamesCol: dataset.varNamesCol,
+      ...{
+        [VIOLIN_MODES.MULTIKEY]: {
           varKeys: selectedMultiVar.map((i) =>
             i.isSet
               ? { name: i.name, indices: i.vars.map((v) => v.index) }
               : i.index
           ),
-          scale: settings.controls.scale.violinplot,
-          varNamesCol: dataset.varNamesCol,
-        };
-      });
-    } else if (mode === VIOLIN_MODES.GROUPBY) {
-      if (selectedObs && selectedVar) {
-        setHasSelections(true);
-      } else {
-        setHasSelections(false);
-      }
-      setParams((p) => {
-        return {
-          ...p,
-          url: dataset.url,
-          mode: mode,
+          obsKeys: [], // @TODO: implement
+        },
+        [VIOLIN_MODES.GROUPBY]: {
           varKey: selectedVar?.isSet
             ? {
                 name: selectedVar?.name,
@@ -121,10 +74,39 @@ export function Violin({
             ? null
             : _.difference(selectedObs?.values, selectedObs?.omit),
           obsIndices: isSliced ? [...(obsIndices || [])] : null,
-          scale: settings.controls.scale.violinplot,
-          varNamesCol: dataset.varNamesCol,
-        };
-      });
+        },
+      }[mode],
+    }),
+    [
+      dataset.url,
+      dataset.varNamesCol,
+      isSliced,
+      mode,
+      obsIndices,
+      selectedMultiVar,
+      selectedObs,
+      selectedVar?.index,
+      selectedVar?.isSet,
+      selectedVar?.name,
+      selectedVar?.vars,
+      settings.controls.scale.violinplot,
+    ]
+  );
+  // @TODO: set default scale
+
+  useEffect(() => {
+    if (mode === VIOLIN_MODES.MULTIKEY) {
+      if (selectedMultiVar.length) {
+        setHasSelections(true);
+      } else {
+        setHasSelections(false);
+      }
+    } else if (mode === VIOLIN_MODES.GROUPBY) {
+      if (selectedObs && selectedVar) {
+        setHasSelections(true);
+      } else {
+        setHasSelections(false);
+      }
     }
   }, [
     settings.controls.scale.violinplot,
@@ -143,17 +125,21 @@ export function Violin({
     params,
     500,
     {
-      enabled:
+      isEnabled:
         (mode === VIOLIN_MODES.MULTIKEY &&
-          (!!params.varKeys.length || !!params.obsKeys.length)) ||
-        (mode === VIOLIN_MODES.GROUPBY && !!params.varKey && !!params.obsCol),
+          ((params) => !!params.varKeys.length || !!params.obsKeys.length)) ||
+        (mode === VIOLIN_MODES.GROUPBY &&
+          ((params) => !!params.varKey && !!params.obsCol)),
     }
   );
 
   useEffect(() => {
-    if (hasSelections && !isPending && !serverError) {
+    if (hasSelections && !!fetchedData && !isPending && !serverError) {
       setData(fetchedData.data);
       setLayout(fetchedData.layout);
+    } else {
+      setData([]);
+      setLayout({});
     }
   }, [fetchedData, hasSelections, isPending, serverError]);
 

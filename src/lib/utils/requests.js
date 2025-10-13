@@ -70,9 +70,14 @@ export const useDebouncedFetch = (
   endpoint,
   params,
   delay = 500,
-  opts = { refetchOnMount: false, refetchOnWindowFocus: false },
+  opts = {
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  },
   apiUrl = null
 ) => {
+  // Optional isEnabled function to determine if enabled based on debouncedParams instead of params
+  const { enabled = true, isEnabled = () => true } = opts;
   const debouncedParams = useDebounce(params, delay);
 
   const {
@@ -88,6 +93,7 @@ export const useDebouncedFetch = (
       return failureCount < 3;
     },
     ...opts,
+    enabled: enabled && isEnabled(debouncedParams),
   });
 
   return { fetchedData, isPending, serverError: parseError(serverError) };
