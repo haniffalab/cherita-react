@@ -65,7 +65,6 @@ export function ObsColsList({
   const [enableGroups, setEnableGroups] = useState(enableObsGroups);
   const [obsCols, setObsCols] = useState(null);
   const [active, setActive] = useState([...[settings.selectedObs?.name]]);
-  const [params, setParams] = useState({ url: dataset.url });
   const obsGroups = useMemo(
     () => ({
       default: _.union(DEFAULT_OBS_GROUP, dataset.obsGroups?.default),
@@ -73,12 +72,20 @@ export function ObsColsList({
     }),
     [dataset.obsGroups]
   );
+  const [params, setParams] = useState({
+    url: dataset.url,
+    ...(enableGroups ? { cols: _.flatten(_.values(obsGroups)) } : {}),
+  });
 
   useEffect(() => {
     setParams((p) => {
-      return { ...p, url: dataset.url };
+      return {
+        ...p,
+        url: dataset.url,
+        ...(enableGroups ? { cols: _.flatten(_.values(obsGroups)) } : {}),
+      };
     });
-  }, [dataset.url]);
+  }, [dataset.url, enableGroups, obsGroups]);
 
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
     refetchOnMount: false,
