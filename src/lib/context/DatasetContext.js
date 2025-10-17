@@ -1,7 +1,7 @@
-import React, { createContext, useContext } from "react";
+import { createContext, useContext } from "react";
 
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
-import { QueryClient, QueryCache } from "@tanstack/react-query";
+import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import _ from "lodash";
 
@@ -52,6 +52,7 @@ const persistOptions = {
 const initialDataset = {
   url: null,
   varNamesCol: null,
+  obsSearchCol: null,
   diseaseDatasets: [],
   obsGroups: null,
   imageUrl: null,

@@ -209,7 +209,7 @@ export function SearchModal({
                               })
                             }
                             setResultsLength={setVarResultsLength}
-                            handleClose={handleClose} // <- pass modal close function
+                            handleClose={handleClose}
                           />
                         </Tab.Pane>
                       )}

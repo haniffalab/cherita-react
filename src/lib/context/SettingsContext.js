@@ -1,4 +1,4 @@
-import React, {
+import {
   createContext,
   useContext,
   useEffect,
@@ -26,6 +26,7 @@ export const SettingsDispatchContext = createContext(null);
 
 const initialSettings = {
   selectedObs: null, // { name: "obs_name", omit: ["obs_item"], bins: {} }
+  selectedObsIndex: null,
   selectedVar: null, // { name: "var_name", isSet: false } or { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }
   selectedObsm: null, // "obsm_name" (e.g. "X_umap")
   selectedMultiVar: [], // [{ name: "var_name", isSet: false }, { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }]
@@ -312,6 +313,12 @@ function settingsReducer(settings, action) {
           ...settings.sliceBy,
           obs: action.obs ? settings.sliceBy.obs : false,
         },
+      };
+    }
+    case "set.selectedObsIndex": {
+      return {
+        ...settings,
+        selectedObsIndex: action.index,
       };
     }
     case "select.obsm": {

@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { useFetch } from "./requests";
 import { useDataset } from "../context/DatasetContext";
+import { useFetch } from "./requests";
 
 export const useDiseaseSearch = () => {
   const ENDPOINT = "diseases";
@@ -30,6 +30,27 @@ export const useVarSearch = () => {
   const [params, setParams] = useState({
     url: dataset.url,
     col: dataset.varNamesCol,
+    text: "",
+  });
+
+  const data = useFetch(ENDPOINT, params, {
+    enabled: !!params.text.length,
+    refetchOnMount: true,
+  });
+
+  return {
+    params,
+    setParams,
+    data,
+  };
+};
+
+export const useObsSearch = () => {
+  const ENDPOINT = "obs/values";
+  const dataset = useDataset();
+  const [params, setParams] = useState({
+    url: dataset.url,
+    col: dataset.obsSearchCol,
     text: "",
   });
 
