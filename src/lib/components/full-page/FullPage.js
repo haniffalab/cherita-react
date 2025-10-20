@@ -34,7 +34,6 @@ import { Violin } from "../violin/Violin";
 import { ViolinControls } from "../violin/ViolinControls";
 
 export function FullPage({
-  isPseudospatial = false,
   searchDiseases = true,
   defaultPlotType = PLOT_TYPES.SCATTERPLOT,
   ...props
@@ -50,6 +49,8 @@ export function FullPage({
   const [showPseudospatialControls, setShowPseudospatialControls] =
     useState(false);
   const [pseudospatialPlotType, setpseudospatialPlotType] = useState(null);
+
+  const { isPseudospatial = false } = props;
 
   useEffect(() => {
     setPlotType(defaultPlotType || PLOT_TYPES.SCATTERPLOT);

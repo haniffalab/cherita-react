@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import _ from "lodash";
 
 import { useFetch } from "./requests";
+import { PSEUDOSPATIAL_CATEGORICAL_MODES } from "../constants/constants";
 import { useDataset } from "../context/DatasetContext";
 import { useSettings } from "../context/SettingsContext";
 
@@ -43,6 +44,35 @@ const cleanSettings = (settings) => {
     }
   });
 
+  let pseudospatial = settings.pseudospatial;
+  if (!_.keys(settings.data.pseudospatial).length) {
+    pseudospatial = {
+      maskSet: null,
+      maskValues: null,
+      categoricalMode: PSEUDOSPATIAL_CATEGORICAL_MODES.ACROSS.value,
+    };
+  }
+  if (
+    pseudospatial.maskSet &&
+    !_.includes(_.keys(settings.data.pseudospatial), pseudospatial.maskSet)
+  ) {
+    pseudospatial = {
+      ...pseudospatial,
+      maskSet: null,
+    };
+  }
+  if (
+    pseudospatial.maskValues &&
+    !!_.difference(
+      pseudospatial.maskValues,
+      settings.data.pseudospatial?.[pseudospatial.maskSet] || []
+    ).length
+  ) {
+    pseudospatial = {
+      ...pseudospatial,
+      maskValues: null,
+    };
+  }
   return {
     ...settings,
     selectedObs: selectedObs,
@@ -50,18 +80,15 @@ const cleanSettings = (settings) => {
     selectedVar: selectedVar,
     selectedMultiVar: selectedMultiVar,
     vars: vars,
+    pseudospatial: pseudospatial,
   };
 };
 
 export const useResolver = (initSettings) => {
   const dataset = useDataset();
+  const { isPseudospatial = false } = dataset;
 
-  const [data, setData] = useState({
-    obs: {},
-    vars: {},
-  });
-  const [resolvedObs, setResolvedObs] = useState(false);
-  const [resolvedVars, setResolvedVars] = useState(false);
+  const [isPending, setisPending] = useState(true);
 
   const [resolvedSettings, setResolvedSettings] = useState(null);
 
@@ -110,46 +137,77 @@ export const useResolver = (initSettings) => {
     enabled: !!varParams.names.length,
   });
 
-  useEffect(() => {
-    if (!obsDataPending) {
-      if (obsDataError) {
-        console.error("Error fetching obs data:", obsDataError);
-        setResolvedObs(true);
-        return;
-      }
-      if (obsData) {
-        setData((d) => ({
-          ...d,
-          obs: _.fromPairs(_.map(obsData, (o) => [o.name, o])),
-        }));
-      }
-      setResolvedObs(true);
-    }
-  }, [obsData, obsDataError, obsDataPending, initSettings.selectedObs?.omit]);
+  // pseudospatial
+  const [pseudospatialParams] = useState({
+    url: dataset.url,
+  });
+  const pseudospatialEnabled = isPseudospatial;
 
-  useEffect(() => {
-    if (!varDataPending) {
-      if (varDataError) {
-        console.error("Error fetching var data:", varDataError);
-        setResolvedVars(true);
-        return;
-      }
-      if (varData) {
-        setData((d) => ({
-          ...d,
-          vars: _.fromPairs(_.map(varData, (v) => [v.name, v])),
-        }));
-      }
-      setResolvedVars(true);
-    }
-  }, [initSettings.vars, varData, varDataError, varDataPending]);
+  const {
+    fetchedData: pseudospatialData,
+    isPending: pseudospatialDataPending,
+    serverError: pseudospatialDataError,
+  } = useFetch("masks", pseudospatialParams, {
+    enabled: pseudospatialEnabled,
+    retry: false,
+  });
 
+  // Use isPending to help set initial state to true
   useEffect(() => {
-    if (resolvedObs && resolvedVars) {
-      const cleanedSettings = cleanSettings({ ...initSettings, data: data });
-      setResolvedSettings(cleanedSettings);
+    setisPending(obsDataPending || varDataPending || pseudospatialDataPending);
+  }, [obsDataPending, pseudospatialDataPending, varDataPending]);
+
+  // Use isPending along with other pending states
+  // to ensure they've all converged after state updates
+  useEffect(() => {
+    if (
+      isPending ||
+      obsDataPending ||
+      varDataPending ||
+      pseudospatialDataPending
+    ) {
+      return;
     }
-  }, [data, initSettings, resolvedObs, resolvedVars, setResolvedSettings]);
+
+    if (obsDataError) {
+      console.error("Error fetching obs data:", obsDataError);
+    }
+    if (varDataError) {
+      console.error("Error fetching var data:", varDataError);
+    }
+    if (pseudospatialDataError) {
+      console.error(
+        "Error fetching pseudospatial masks data:",
+        pseudospatialDataError
+      );
+    }
+
+    const data = {
+      obs: obsData ? _.fromPairs(_.map(obsData, (o) => [o.name, o])) : {},
+      vars: varData ? _.fromPairs(_.map(varData, (v) => [v.name, v])) : {},
+      pseudospatial: pseudospatialData || {},
+    };
+
+    const cleanedSettings = cleanSettings({
+      ...initSettings,
+      data: data,
+    });
+
+    setResolvedSettings(cleanedSettings);
+  }, [
+    initSettings,
+    isPending,
+    obsData,
+    obsDataError,
+    obsDataPending,
+    pseudospatialData,
+    pseudospatialDataError,
+    pseudospatialDataPending,
+    pseudospatialEnabled,
+    varData,
+    varDataError,
+    varDataPending,
+  ]);
 
   return resolvedSettings;
 };
