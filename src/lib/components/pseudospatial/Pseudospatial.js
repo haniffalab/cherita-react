@@ -275,9 +275,6 @@ export function Pseudospatial({
                 width: 600,
                 height: 512,
                 path: faEye.icon[4],
-                transform: "translate(0,0)",
-                // Use fill to indicate toggle state
-                fill: isRefImgVisible ? "#0d6efd" : "#6c757d", // blue = active, grey = inactive
               },
               click: () =>
                 dispatch({
