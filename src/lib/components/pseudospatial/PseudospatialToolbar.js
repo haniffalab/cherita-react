@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
 import _ from "lodash";
 import { ButtonGroup, Dropdown, Form } from "react-bootstrap";
@@ -7,12 +7,10 @@ import {
   PSEUDOSPATIAL_CATEGORICAL_MODES as MODES,
   PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
 } from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
 import {
   useSettings,
   useSettingsDispatch,
 } from "../../context/SettingsContext";
-import { useFetch } from "../../utils/requests";
 
 function CategoricalMode() {
   const settings = useSettings();
@@ -45,29 +43,9 @@ function CategoricalMode() {
 }
 
 function MaskSet() {
-  const ENDPOINT = "masks";
-  const dataset = useDataset();
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
-  const [maskSets, setMaskSets] = useState(null);
-
-  const [params, setParams] = useState({ url: dataset.url });
-
-  useEffect(() => {
-    setParams((p) => {
-      return { ...p, url: dataset.url };
-    });
-  }, [dataset.url]);
-
-  const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
-    refetchOnMount: false,
-  });
-
-  useEffect(() => {
-    if (!isPending && !serverError) {
-      setMaskSets(fetchedData);
-    }
-  }, [fetchedData, isPending, serverError]);
+  const { pseudospatial: maskSets } = settings.data;
 
   const maskSetList = _.map(maskSets, (ms, key) => (
     <Dropdown.Item
