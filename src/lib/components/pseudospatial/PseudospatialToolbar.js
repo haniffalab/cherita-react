@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 
 import { Box, Slider, Typography } from "@mui/material";
 import _ from "lodash";
@@ -8,6 +8,7 @@ import {
   PSEUDOSPATIAL_CATEGORICAL_MODES as MODES,
   PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
 } from "../../constants/constants";
+import { useDataset } from "../../context/DatasetContext";
 import {
   useSettings,
   useSettingsDispatch,

@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { faEye, faSliders } from "@fortawesome/free-solid-svg-icons";
 import _ from "lodash";
@@ -259,6 +253,8 @@ export function Pseudospatial({
   }, [imageUrl, settings.pseudospatial.refImg]);
 
   const modeBarButtons = useMemo(() => {
+    const isRefImgVisible = settings.pseudospatial?.refImg?.visible;
+
     return [
       {
         name: "Open plot controls",
@@ -272,11 +268,16 @@ export function Pseudospatial({
       ...(imageUrl
         ? [
             {
-              name: "Toggle reference image",
+              name: isRefImgVisible
+                ? "Hide reference image"
+                : "Show reference image",
               icon: {
-                width: 512,
+                width: 600,
                 height: 512,
                 path: faEye.icon[4],
+                transform: "translate(0,0)",
+                // Use fill to indicate toggle state
+                fill: isRefImgVisible ? "#0d6efd" : "#6c757d", // blue = active, grey = inactive
               },
               click: () =>
                 dispatch({
@@ -286,7 +287,12 @@ export function Pseudospatial({
           ]
         : []),
     ];
-  }, [dispatch, imageUrl, setShowControls]);
+  }, [
+    dispatch,
+    imageUrl,
+    setShowControls,
+    settings.pseudospatial?.refImg?.visible,
+  ]);
 
   if (!_.keys(settings.data.pseudospatial).length) {
     return (
