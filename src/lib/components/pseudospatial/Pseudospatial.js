@@ -131,6 +131,18 @@ export function Pseudospatial({
   const selectedObs = useSelectedObs();
 
   useEffect(() => {
+    if (
+      _.keys(settings.data.pseudospatial).length &&
+      !settings.pseudospatial.maskSet
+    ) {
+      dispatch({
+        type: "set.pseudospatial.maskSet",
+        maskSet: _.keys(settings.data.pseudospatial)[0],
+      });
+    }
+  }, [dispatch, settings.data.pseudospatial, settings.pseudospatial.maskSet]);
+
+  useEffect(() => {
     setPlotType(
       settings.colorEncoding === COLOR_ENCODINGS.VAR
         ? PLOT_TYPES.GENE
@@ -276,10 +288,15 @@ export function Pseudospatial({
     ];
   }, [dispatch, imageUrl, setShowControls]);
 
-  if (!serverError) {
+  if (!_.keys(settings.data.pseudospatial).length) {
+    return (
+      <>
+        <Alert variant="warning">No pseudospatial data</Alert>
+      </>
+    );
+  } else if (!serverError) {
     return (
       <div className="cherita-pseudospatial">
-        {/* <PseudospatialToolbar plotType={plotType} /> */}
         <>
           {hasSelections && isPending && <LoadingSpinner />}
           {hasSelections && (
