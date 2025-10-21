@@ -1,11 +1,24 @@
 .cherita-spatial-controls {
   position: absolute;
-  z-index: 10;
   top: 1rem;
   left: 1rem;
+  z-index: 10;
   width: 3rem;
+
+  // Target buttons inside the controls
   .btn {
     padding-left: 0;
     padding-right: 0;
+  }
+}
+
+.plotselector {
+  padding: 0 10px;
+  border-bottom: 1px solid #dee2e6;
+
+  // Individual plot selector icons
+  .plotselector-icon {
+    padding: 6px;
+    cursor: pointer;
   }
 }

@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import _ from "lodash";
-import { Alert, Button } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
 import { PLOTLY_MODEBAR_BUTTONS } from "../../constants/constants";
@@ -11,6 +11,7 @@ import { useSettings } from "../../context/SettingsContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 import { useSelectedMultiVar, useSelectedObs } from "../../utils/Resolver";
+import { PlotAlert } from "../full-page/PlotAlert";
 import {
   ControlsPlotlyToolbar,
   ObsPlotlyToolbar,
@@ -24,6 +25,8 @@ export function Heatmap({
   setShowObs,
   setShowVars,
   setShowControls,
+  plotType,
+  setPlotType,
 }) {
   const ENDPOINT = "heatmap";
   const dataset = useDataset();
@@ -140,9 +143,14 @@ export function Heatmap({
       );
     }
     return (
-      <div className="cherita-heatmap">
-        <Alert variant="light">
-          Select{" "}
+      <PlotAlert
+        variant="info"
+        heading="Heatmap"
+        plotType={plotType}
+        setPlotType={setPlotType}
+      >
+        <p className="p-0 m-0">
+          Select one or more{" "}
           {showVarsBtn ? (
             <Button
               variant="link"
@@ -154,7 +162,7 @@ export function Heatmap({
           ) : (
             "features"
           )}{" "}
-          and a{" "}
+          to display their expression, then choose a{" "}
           {showObsBtn ? (
             <Button
               variant="link"
@@ -165,15 +173,22 @@ export function Heatmap({
             </Button>
           ) : (
             "category"
-          )}
-        </Alert>
-      </div>
+          )}{" "}
+          to group observations in the heatmap.
+        </p>
+      </PlotAlert>
     );
   } else {
     return (
-      <div>
-        <Alert variant="danger">{serverError.message}</Alert>
-      </div>
+      <PlotAlert
+        variant="danger"
+        heading="Heatmap"
+        plotType={plotType}
+        setPlotType={setPlotType}
+      >
+        {serverError.message ||
+          "An unexpected error occurred while generating the plot."}
+      </PlotAlert>
     );
   }
 }

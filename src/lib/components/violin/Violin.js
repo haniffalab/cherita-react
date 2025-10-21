@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { Alert, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
 import {
@@ -20,6 +20,8 @@ import {
   useSelectedObs,
   useSelectedVar,
 } from "../../utils/Resolver";
+import { StyledTooltip } from "../../utils/StyledTooltip";
+import { PlotAlert } from "../full-page/PlotAlert";
 import {
   ControlsPlotlyToolbar,
   ObsPlotlyToolbar,
@@ -34,6 +36,8 @@ export function Violin({
   setShowObs,
   setShowVars,
   setShowControls,
+  plotType,
+  setPlotType,
 }) {
   const ENDPOINT = "violin";
   const dataset = useDataset();
@@ -189,24 +193,24 @@ export function Violin({
               />
             </div>
             {fetchedData?.resampled && (
-              <div className="flex-shrink-0">
-                <Alert variant="warning" className="mb-1">
-                  <b>Warning:</b> For performance reasons this plot was
-                  generated with resampled data. It will not be exactly the same
-                  as one produced with the entire dataset. &nbsp;
-                  <OverlayTrigger
-                    placement="top"
-                    overlay={
-                      <Tooltip>
-                        Resampled to 100K values following a Monte Carlo style
-                        approach to help ensure resampled data is a good
-                        representation of the original dataset's distribution.
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faCircleInfo}></FontAwesomeIcon>
-                  </OverlayTrigger>
-                </Alert>
+              <div className="resampled-tooltip-container">
+                <StyledTooltip
+                  title={
+                    <>
+                      <strong>Note:</strong> This plot uses resampled data to
+                      improve performance, so values may differ slightly from
+                      the full dataset. Data were randomly resampled (up to 100K
+                      points) to provide a representative view of the full
+                      distribution while reducing processing time.
+                    </>
+                  }
+                  placement="bottom"
+                >
+                  <Button variant="light">
+                    <FontAwesomeIcon icon={faCircleInfo} />
+                    <span className="d-none d-lg-inline ms-2">Resampled</span>
+                  </Button>
+                </StyledTooltip>
               </div>
             )}
           </div>
@@ -214,10 +218,15 @@ export function Violin({
       );
     }
     return (
-      <div className="cherita-violin">
+      <PlotAlert
+        variant="info"
+        heading="Violin plot"
+        plotType={plotType}
+        setPlotType={setPlotType}
+      >
         {mode === VIOLIN_MODES.MULTIKEY && (
-          <Alert variant="light">
-            Select{" "}
+          <p className="p-0 m-0">
+            To begin, select one or more{" "}
             {showVarsBtn ? (
               <Button
                 variant="link"
@@ -228,24 +237,25 @@ export function Violin({
               </Button>
             ) : (
               "features"
-            )}
-          </Alert>
+            )}{" "}
+            to display their expression distributions across all observations.
+          </p>
         )}
         {mode === VIOLIN_MODES.GROUPBY && (
-          <Alert variant="light">
-            Select{" "}
+          <p className="p-0 m-0">
+            To begin, select a{" "}
             {showObsBtn ? (
               <Button
                 variant="link"
                 className="border-0 p-0 align-baseline"
                 onClick={setShowObs}
               >
-                categories
+                category
               </Button>
             ) : (
-              "categories"
+              "category"
             )}{" "}
-            and a{" "}
+            to group observations, and choose a{" "}
             {showVarsBtn ? (
               <Button
                 variant="link"
@@ -256,16 +266,23 @@ export function Violin({
               </Button>
             ) : (
               "feature"
-            )}
-          </Alert>
+            )}{" "}
+            to view its distribution within each group.
+          </p>
         )}
-      </div>
+      </PlotAlert>
     );
   } else {
     return (
-      <div>
-        <Alert variant="danger">{serverError.message}</Alert>
-      </div>
+      <PlotAlert
+        variant="danger"
+        heading="Violin plot"
+        plotType={plotType}
+        setPlotType={setPlotType}
+      >
+        {serverError.message ||
+          "An unexpected error occurred while generating the plot."}
+      </PlotAlert>
     );
   }
 }

@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import _ from "lodash";
-import { Alert, Button } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
 import { PLOTLY_MODEBAR_BUTTONS } from "../../constants/constants";
@@ -11,6 +11,7 @@ import { useSettings } from "../../context/SettingsContext";
 import { LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useDebouncedFetch } from "../../utils/requests";
 import { useSelectedMultiVar, useSelectedObs } from "../../utils/Resolver";
+import { PlotAlert } from "../full-page/PlotAlert";
 import {
   ControlsPlotlyToolbar,
   ObsPlotlyToolbar,
@@ -24,6 +25,8 @@ export function Matrixplot({
   setShowObs,
   setShowVars,
   setShowControls,
+  plotType,
+  setPlotType,
 }) {
   const ENDPOINT = "matrixplot";
   const dataset = useDataset();
@@ -143,9 +146,26 @@ export function Matrixplot({
       );
     }
     return (
-      <div className="cherita-matrixplot">
-        <Alert variant="light">
-          Select{" "}
+      <PlotAlert
+        variant="info"
+        heading="Matrixplot"
+        plotType={plotType}
+        setPlotType={setPlotType}
+      >
+        <p className="p-0 m-0">
+          Select a{" "}
+          {showObsBtn ? (
+            <Button
+              variant="link"
+              className="border-0 p-0 align-baseline"
+              onClick={setShowObs}
+            >
+              category
+            </Button>
+          ) : (
+            "category"
+          )}{" "}
+          to group observations, then choose one or more{" "}
           {showVarsBtn ? (
             <Button
               variant="link"
@@ -157,26 +177,21 @@ export function Matrixplot({
           ) : (
             "features"
           )}{" "}
-          and a{" "}
-          {showObsBtn ? (
-            <Button
-              variant="link"
-              className="border-0 p-0 align-baseline"
-              onClick={setShowObs}
-            >
-              category
-            </Button>
-          ) : (
-            "category"
-          )}
-        </Alert>
-      </div>
+          to display the matrix plot.
+        </p>
+      </PlotAlert>
     );
   } else {
     return (
-      <div>
-        <Alert variant="danger">{serverError.message}</Alert>
-      </div>
+      <PlotAlert
+        variant="danger"
+        heading="Matrixplot"
+        plotType={plotType}
+        setPlotType={setPlotType}
+      >
+        {serverError.message ||
+          "An unexpected error occurred while generating the plot."}
+      </PlotAlert>
     );
   }
 }

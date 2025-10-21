@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useMediaQuery } from "@mui/material";
 import { Card, Container, Modal } from "react-bootstrap";
@@ -95,9 +95,11 @@ export function FullPage({
       showObsBtn,
       showVarsBtn,
       showCtrlsBtn: true,
+      plotType,
       setShowObs,
       setShowVars,
       setShowControls,
+      setPlotType,
     };
 
     switch (plotType) {
@@ -127,21 +129,11 @@ export function FullPage({
               showColor={varMode === SELECTION_MODES.SINGLE}
             />
           </div>
-          <div className="cherita-app-canvas">
-            {showPlotBtn && (
-              <div className="px-3 py-2">
-                <PlotTypeSelector
-                  currentType={plotType}
-                  onChange={(type) => setPlotType(type)}
-                />
-              </div>
-            )}
-            {plot}
-          </div>
+          <div className="cherita-app-canvas">{plot}</div>
           <div className="cherita-app-sidebar p-3">
             <Card>
               <Card.Body>
-                <div className="sidebar-plotselector">
+                <div className="plotselector">
                   <PlotTypeSelector
                     currentType={plotType}
                     onChange={(type) => setPlotType(type)}
