@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import React, { createContext, useContext } from "react";
 
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
