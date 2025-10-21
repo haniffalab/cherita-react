@@ -429,3 +429,21 @@ $gauge-padding: 0.15rem;
 input[type="checkbox"] {
   cursor: pointer;
 }
+
+.ps-xs-1 {
+  padding-left: 0.15rem !important;
+}
+
+.resampled-tooltip-container {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 10;
+  width: max-content;
+
+  @media (min-width: 991px) {
+    top: 16px;
+    left: 16px;
+    bottom: auto;
+  }
+}

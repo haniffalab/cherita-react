@@ -97,21 +97,6 @@
   }
 }
 
-.sidebar-plotselector {
-  padding: 6px;
-  border-bottom: 1px solid #dee2e6;
-
-  .plotselector-icon {
-    padding-bottom: 2px;
-    cursor: pointer;
-
-    .active {
-      opacity: 1;
-      border-bottom: 2px solid #007bff;
-    }
-  }
-}
-
 .sidebar-pseudospatial {
   padding: 10px;
   border-bottom: 1px solid #dee2e6;
@@ -182,9 +167,9 @@
   }
 
   .cherita-app-canvas {
-    @extend .p-1;
+    @extend .p-0;
     flex: 1 1 auto;
-    min-width: 400px;
+    min-width: 375px;
     position: relative;
     max-height: 100%;
     display: flex;
@@ -210,8 +195,4 @@
       max-width: 25%;
     }
   }
-}
-
-.ps-xs-1 {
-  padding-left: 0.15rem !important;
 }
