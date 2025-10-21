@@ -59,6 +59,7 @@ const initialDataset = {
   defaultSettings: {},
   canOverrideSettings: true,
   useUnsColors: false,
+  isPseudospatial: false,
 };
 
 export function DatasetProvider({ dataset_url, children, ...dataset_params }) {
