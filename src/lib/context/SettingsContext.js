@@ -54,6 +54,10 @@ const initialSettings = {
     maskSet: null,
     maskValues: null,
     categoricalMode: PSEUDOSPATIAL_CATEGORICAL_MODES.ACROSS.value,
+    refImg: {
+      visible: false,
+      opacity: 1,
+    },
   },
   // dataset resolved values
   data: {
@@ -742,6 +746,30 @@ function settingsReducer(settings, action) {
         pseudospatial: {
           ...settings.pseudospatial,
           categoricalMode: action.categoricalMode,
+        },
+      };
+    }
+    case "toggle.pseudospatial.refImg.visible": {
+      return {
+        ...settings,
+        pseudospatial: {
+          ...settings.pseudospatial,
+          refImg: {
+            ...settings.pseudospatial.refImg,
+            visible: !settings.pseudospatial.refImg.visible,
+          },
+        },
+      };
+    }
+    case "set.pseudospatial.refImg.opacity": {
+      return {
+        ...settings,
+        pseudospatial: {
+          ...settings.pseudospatial,
+          refImg: {
+            ...settings.pseudospatial.refImg,
+            opacity: action.opacity,
+          },
         },
       };
     }

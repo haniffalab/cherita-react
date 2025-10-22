@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import _ from "lodash";
-import { Button } from "react-bootstrap";
+import { Badge, Button } from "react-bootstrap";
 import Plot from "react-plotly.js";
 
 import {
@@ -199,17 +199,20 @@ export function Violin({
                     <>
                       <strong>Note:</strong> This plot uses resampled data to
                       improve performance, so values may differ slightly from
-                      the full dataset. Data were randomly resampled (up to 100K
-                      points) to provide a representative view of the full
-                      distribution while reducing processing time.
+                      the full dataset. The data were resampled to exactly
+                      100,000 values using a Monte Carlo–style approach to
+                      provide a representative view of the full distribution
+                      while reducing processing time.
                     </>
                   }
                   placement="bottom"
                 >
-                  <Button variant="light">
-                    <FontAwesomeIcon icon={faCircleInfo} />
-                    <span className="d-none d-lg-inline ms-2">Resampled</span>
-                  </Button>
+                  <Badge bg="info">
+                    <FontAwesomeIcon className="fs-6" icon={faCircleInfo} />
+                    <span className="d-none d-lg-inline ms-2 fs-6 text-uppercase">
+                      Resampled
+                    </span>
+                  </Badge>
                 </StyledTooltip>
               </div>
             )}
