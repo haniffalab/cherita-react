@@ -145,7 +145,7 @@ export function Heatmap({
     return (
       <PlotAlert
         variant="info"
-        heading="Heatmap"
+        heading="Set up your heatmap"
         plotType={plotType}
         setPlotType={setPlotType}
       >
@@ -182,7 +182,7 @@ export function Heatmap({
     return (
       <PlotAlert
         variant="danger"
-        heading="Heatmap"
+        heading="Error displaying the heatmap"
         plotType={plotType}
         setPlotType={setPlotType}
       >

@@ -19,7 +19,7 @@ import {
 import { useFetch } from "../../utils/requests";
 import { ObsmKeysListBtn } from "../../utils/Skeleton";
 
-export function ObsmKeysList() {
+export function ObsmKeysList({ setHasObsm }) {
   const ENDPOINT = "obsm/keys";
   const dataset = useDataset();
   const settings = useSettings();
@@ -44,30 +44,35 @@ export function ObsmKeysList() {
   });
 
   useEffect(() => {
-    if (!isPending && !serverError && fetchedData) {
-      setObsmKeysList(fetchedData);
+    if (!isPending && !serverError) {
+      if (!fetchedData || !fetchedData.length) {
+        setHasObsm(false);
+      } else {
+        setHasObsm(true);
+        setObsmKeysList(fetchedData);
 
-      // Set default obsm if in keys list and not selected
-      if (!settings.selectedObsm && !!fetchedData.length) {
-        // Follow DEFAULT_OBSM_KEYS order
-        _.each(DEFAULT_OBSM_KEYS, (k) => {
-          const defaultObsm = _.find(
-            fetchedData,
-            (item) => item.toLowerCase() === k
-          );
-          if (defaultObsm) {
-            dispatch({
-              type: "select.obsm",
-              obsm: defaultObsm,
-            });
-            return false; // break
-          }
-        });
+        // Set default obsm if in keys list and not selected
+        if (!settings.selectedObsm) {
+          // Follow DEFAULT_OBSM_KEYS order
+          _.each(DEFAULT_OBSM_KEYS, (k) => {
+            const defaultObsm = _.find(
+              fetchedData,
+              (item) => item.toLowerCase() === k
+            );
+            if (defaultObsm) {
+              dispatch({
+                type: "select.obsm",
+                obsm: defaultObsm,
+              });
+              return false; // break
+            }
+          });
+        }
       }
 
       if (settings.selectedObsm) {
         // If selected obsm is not in keys list, reset to null
-        if (!_.includes(fetchedData, settings.selectedObsm)) {
+        if (!_.includes(fetchedData || [], settings.selectedObsm)) {
           dispatch({
             type: "select.obsm",
             obsm: null,
@@ -77,7 +82,14 @@ export function ObsmKeysList() {
         }
       }
     }
-  }, [dispatch, fetchedData, isPending, serverError, settings.selectedObsm]);
+  }, [
+    dispatch,
+    fetchedData,
+    isPending,
+    serverError,
+    setHasObsm,
+    settings.selectedObsm,
+  ]);
 
   const obsmList = obsmKeysList.map((item) => {
     return (

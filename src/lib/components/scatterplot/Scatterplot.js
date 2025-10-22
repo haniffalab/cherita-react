@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback,
   useDeferredValue,
   useEffect,
@@ -16,8 +16,6 @@ import { EditableGeoJsonLayer } from "@nebula.gl/layers";
 import _ from "lodash";
 import { Alert } from "react-bootstrap";
 
-import { SpatialControls } from "./SpatialControls";
-import { Toolbox } from "./Toolbox";
 import {
   COLOR_ENCODINGS,
   OBS_TYPES,
@@ -38,6 +36,9 @@ import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useSelectedObs } from "../../utils/Resolver";
 import { formatNumerical } from "../../utils/string";
 import { useLabelObsData } from "../../utils/zarrData";
+import { PlotAlert } from "../full-page/PlotAlert";
+import { SpatialControls } from "./SpatialControls";
+import { Toolbox } from "./Toolbox";
 
 window.deck.log.level = 1;
 
@@ -54,6 +55,8 @@ export function Scatterplot({
   radius = null,
   setShowObs,
   setShowVars,
+  plotType,
+  setPlotType,
   isFullscreen = false,
 }) {
   const { useUnsColors } = useDataset();
@@ -71,6 +74,7 @@ export function Scatterplot({
     values: [],
   });
   const [coordsError, setCoordsError] = useState(null);
+  const [hasObsm, setHasObsm] = useState(true);
   const [dataError, setDataError] = useState(null);
 
   const selectedObs = useSelectedObs();
@@ -452,6 +456,20 @@ export function Scatterplot({
     (settings.labelObs.length && labelObsData.serverError?.length) ||
     coordsError;
 
+  if (!hasObsm) {
+    return (
+      <PlotAlert
+        variant="info"
+        heading="Scatterplot unavailable for this dataset"
+        plotType={plotType}
+        setPlotType={setPlotType}
+      >
+        This dataset does not include any embeddings, so a scatterplot cannot be
+        displayed. Please choose a different plot type to explore the data.
+      </PlotAlert>
+    );
+  }
+
   return (
     <div className="cherita-container-scatterplot">
       <div className="cherita-scatterplot">
@@ -507,6 +525,7 @@ export function Scatterplot({
               }
               obsLength={parseInt(data.positions?.length)}
               slicedLength={parseInt(slicedLength)}
+              setHasObsm={setHasObsm}
             />
           </div>
           {!error && (
