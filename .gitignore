@@ -5,6 +5,6 @@ build/
 .env
 .DS_Store
 coverage/
-.vscode/
 .sass-cache/
 /scss/
+*.tgz

@@ -93,7 +93,7 @@
     "copy:scss": "cpx 'src/scss/**/*' 'scss'",
     "copy:assets": "cpx 'src/assets/**/*' 'dist/assets'",
     "build": "npm run build:babel && npm run build:scss && npm run copy:scss && npm run copy:assets",
-    "test": "jest --watchAll",
+    "test": "jest",
     "test:ci": "jest --coverage --ci --no-watch",
     "lint:scss": "stylelint 'src/**/*.scss' --fix",
     "lint:js": "eslint 'src/**/*.js' --fix",
