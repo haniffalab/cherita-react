@@ -1,18 +1,18 @@
-import { useState } from "react";
+import React, { useState } from 'react';
 
-import { Box, Slider, Typography } from "@mui/material";
-import _ from "lodash";
-import { ButtonGroup, Dropdown, Form } from "react-bootstrap";
+import { Box, Slider, Typography } from '@mui/material';
+import _ from 'lodash';
+import { ButtonGroup, Dropdown, Form } from 'react-bootstrap';
 
 import {
   PSEUDOSPATIAL_CATEGORICAL_MODES as MODES,
   PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
-} from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
+} from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
+} from '../../context/SettingsContext';
 
 function CategoricalMode() {
   const settings = useSettings();
@@ -23,7 +23,7 @@ function CategoricalMode() {
       active={settings.pseudospatial.categoricalMode === m}
       onClick={() => {
         dispatch({
-          type: "set.pseudospatial.categoricalMode",
+          type: 'set.pseudospatial.categoricalMode',
           categoricalMode: m.value,
         });
       }}
@@ -54,7 +54,7 @@ function MaskSet() {
       key={key}
       active={settings.pseudospatial.maskSet === key}
       onClick={() => {
-        dispatch({ type: "set.pseudospatial.maskSet", maskSet: key });
+        dispatch({ type: 'set.pseudospatial.maskSet', maskSet: key });
       }}
     >
       {_.capitalize(key)}
@@ -77,7 +77,7 @@ function MaskSet() {
       newMasks = null;
     }
 
-    dispatch({ type: "set.pseudospatial.maskValues", maskValues: newMasks });
+    dispatch({ type: 'set.pseudospatial.maskValues', maskValues: newMasks });
   };
 
   const toggleMasks = () => {
@@ -86,9 +86,9 @@ function MaskSet() {
       settings.pseudospatial.maskValues?.length ===
         maskSets?.[settings.pseudospatial?.maskSet]?.length
     ) {
-      dispatch({ type: "set.pseudospatial.maskValues", maskValues: [] });
+      dispatch({ type: 'set.pseudospatial.maskValues', maskValues: [] });
     } else {
-      dispatch({ type: "set.pseudospatial.maskValues", maskValues: null });
+      dispatch({ type: 'set.pseudospatial.maskValues', maskValues: null });
     }
   };
 
@@ -106,12 +106,12 @@ function MaskSet() {
           onChange={() => handleMaskChange(mask)}
         />
       </Dropdown.ItemText>
-    )
+    ),
   );
 
   const nMasks = settings.pseudospatial.maskValues
     ? settings.pseudospatial.maskValues?.length
-    : maskSets?.[settings.pseudospatial?.maskSet]?.length || "No";
+    : maskSets?.[settings.pseudospatial?.maskSet]?.length || 'No';
 
   const toggleAllChecked =
     !settings.pseudospatial.maskValues ||
@@ -122,7 +122,7 @@ function MaskSet() {
     <>
       <Dropdown>
         <Dropdown.Toggle variant="light">
-          {_.capitalize(settings.pseudospatial.maskSet || "Select a mask set")}
+          {_.capitalize(settings.pseudospatial.maskSet || 'Select a mask set')}
         </Dropdown.Toggle>
         <Dropdown.Menu>
           <Dropdown.Header>Mask set</Dropdown.Header>
@@ -171,8 +171,8 @@ function OpacitySlider({ opacity, setOpacity }) {
           getAriaValueText={(value) => `${value * 100}%`}
           valueLabelFormat={(value) => `${(value * 100).toFixed(0)}%`}
           marks={[
-            { value: 0, label: "0%" },
-            { value: 1, label: "100%" },
+            { value: 0, label: '0%' },
+            { value: 1, label: '100%' },
           ]}
         />
       </div>
@@ -199,7 +199,7 @@ export function PseudospatialToolbar({ plotType }) {
           opacity={settings.pseudospatial.refImg.opacity}
           setOpacity={(opacity) => {
             dispatch({
-              type: "set.pseudospatial.refImg.opacity",
+              type: 'set.pseudospatial.refImg.opacity',
               opacity: opacity,
             });
           }}

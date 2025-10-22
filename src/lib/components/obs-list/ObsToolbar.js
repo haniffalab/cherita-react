@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-import { Form } from "react-bootstrap";
+import { Form } from 'react-bootstrap';
 
 export function ObsToolbar({ item, showToggleAllObs = true, onToggleAllObs }) {
   const allToggledOn = !item.omit.length;

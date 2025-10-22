@@ -1,9 +1,9 @@
-@use "bootstrap/scss/bootstrap" with (
+@use 'bootstrap/scss/bootstrap' with (
   $primary: #0071a7,
   $secondary: #061826,
   $body-bg: #fff,
   $body-color: #333,
-  $breadcrumb-divider: quote(">"),
+  $breadcrumb-divider: quote('>'),
   $breadcrumb-padding-y: 3px,
   $breadcrumb-padding-x: 10px,
   $breadcrumb-margin-bottom: 0,
@@ -11,8 +11,7 @@
   $accordion-button-active-bg: #e7edf0,
   $dropdown-border-color: none
 );
-
-@import "@haniffalab/cherita-react/scss/cherita";
+@import '@haniffalab/cherita-react/scss/cherita';
 
 .App {
   display: flex;

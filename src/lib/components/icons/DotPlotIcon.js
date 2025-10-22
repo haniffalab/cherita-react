@@ -1,6 +1,8 @@
+import React from 'react';
+
 export default function DotPlotIcon({
   size = 40,
-  colour = "#000",
+  colour = '#000',
   gap = 20,
   ...props
 }) {

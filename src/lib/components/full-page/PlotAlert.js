@@ -1,11 +1,13 @@
-import { useMediaQuery } from "@mui/material";
-import { Alert } from "react-bootstrap";
+import React from 'react';
 
-import { BREAKPOINTS, PLOT_TYPES } from "../../constants/constants";
-import { PlotTypeSelector } from "./PlotTypeSelector";
+import { useMediaQuery } from '@mui/material';
+import { Alert } from 'react-bootstrap';
+
+import { PlotTypeSelector } from './PlotTypeSelector';
+import { BREAKPOINTS, PLOT_TYPES } from '../../constants/constants';
 
 export function PlotAlert({
-  variant = "warning",
+  variant = 'warning',
   plotType = PLOT_TYPES.SCATTERPLOT,
   setPlotType,
   heading,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 import {
   DatasetProvider,
@@ -8,8 +8,8 @@ import {
   OffcanvasVars,
   OffcanvasControls,
   Toolbar,
-} from "@haniffalab/cherita-react";
-import Container from "react-bootstrap/Container";
+} from '@haniffalab/cherita-react';
+import Container from 'react-bootstrap/Container';
 
 export default function HeatmapDemo(props) {
   const [showObs, setShowObs] = useState(false);

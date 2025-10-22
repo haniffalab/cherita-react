@@ -1,30 +1,36 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
-import { faEye, faSliders } from "@fortawesome/free-solid-svg-icons";
-import _ from "lodash";
-import { Alert } from "react-bootstrap";
-import Plot from "react-plotly.js";
+import { faEye, faSliders } from '@fortawesome/free-solid-svg-icons';
+import _ from 'lodash';
+import { Alert } from 'react-bootstrap';
+import Plot from 'react-plotly.js';
 
 import {
   COLOR_ENCODINGS,
   OBS_TYPES,
   PSEUDOSPATIAL_PLOT_TYPES as PLOT_TYPES,
-} from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
-import { useFilteredData } from "../../context/FilterContext";
+} from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
+import { useFilteredData } from '../../context/FilterContext';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
-import { rgbToHex, useColor } from "../../helpers/color-helper";
-import { ImageViewer } from "../../utils/ImageViewer";
-import { Legend } from "../../utils/Legend";
-import { LoadingSpinner } from "../../utils/LoadingIndicators";
-import { useDebouncedFetch } from "../../utils/requests";
-import { useSelectedObs, useSelectedVar } from "../../utils/Resolver";
+} from '../../context/SettingsContext';
+import { rgbToHex, useColor } from '../../helpers/color-helper';
+import { ImageViewer } from '../../utils/ImageViewer';
+import { Legend } from '../../utils/Legend';
+import { LoadingSpinner } from '../../utils/LoadingIndicators';
+import { useDebouncedFetch } from '../../utils/requests';
+import { useSelectedObs, useSelectedVar } from '../../utils/Resolver';
 
 function usePseudospatialData(plotType) {
-  const ENDPOINT = "pseudospatial";
+  const ENDPOINT = 'pseudospatial';
   const dataset = useDataset();
   const settings = useSettings();
   const { obsIndices, isSliced } = useFilteredData();
@@ -40,7 +46,7 @@ function usePseudospatialData(plotType) {
       obsIndices: isSliced ? [...(obsIndices || [])] : null,
       varNamesCol: dataset.varNamesCol,
       showColorbar: false,
-      format: "json",
+      format: 'json',
     };
   }, [
     dataset.url,
@@ -77,7 +83,7 @@ function usePseudospatialData(plotType) {
           : _.difference(selectedObs?.values, selectedObs?.omit),
         mode: settings.pseudospatial.categoricalMode,
       };
-    } else if (plotType === "continuous") {
+    } else if (plotType === 'continuous') {
       return {
         obsCol: selectedObs,
         obsValues: !selectedObs?.omit.length
@@ -100,7 +106,7 @@ function usePseudospatialData(plotType) {
     return { ...baseParams, ...getPlotParams() };
   }, [baseParams, getPlotParams]);
 
-  return useDebouncedFetch(ENDPOINT + "/" + plotType, params, 500, {
+  return useDebouncedFetch(ENDPOINT + '/' + plotType, params, 500, {
     enabled: !!plotType && !!settings.pseudospatial.maskSet,
   });
 }
@@ -130,7 +136,7 @@ export function Pseudospatial({
       !settings.pseudospatial.maskSet
     ) {
       dispatch({
-        type: "set.pseudospatial.maskSet",
+        type: 'set.pseudospatial.maskSet',
         maskSet: _.keys(settings.data.pseudospatial)[0],
       });
     }
@@ -145,7 +151,7 @@ export function Pseudospatial({
           ? PLOT_TYPES.CATEGORICAL
           : selectedObs?.type === OBS_TYPES.CONTINUOUS
             ? PLOT_TYPES.CONTINUOUS
-            : PLOT_TYPES.MASKS
+            : PLOT_TYPES.MASKS,
     );
   }, [settings.colorEncoding, selectedObs?.type, setPlotType]);
 
@@ -172,7 +178,7 @@ export function Pseudospatial({
         });
       });
     },
-    [getColor, layout?.coloraxis?.cmax, layout?.coloraxis?.cmin]
+    [getColor, layout?.coloraxis?.cmax, layout?.coloraxis?.cmin],
   );
 
   const { fetchedData, isPending, serverError } =
@@ -234,17 +240,17 @@ export function Pseudospatial({
       return [
         {
           source: imageUrl,
-          xref: "paper",
-          yref: "paper",
+          xref: 'paper',
+          yref: 'paper',
           x: 0.5,
           y: 0.5,
           sizex: 1,
           sizey: 1,
-          sizing: "contain",
-          layer: "above",
-          xanchor: "center",
-          yanchor: "middle",
-          name: "Reference Image",
+          sizing: 'contain',
+          layer: 'above',
+          xanchor: 'center',
+          yanchor: 'middle',
+          name: 'Reference Image',
           ...settings.pseudospatial.refImg,
         },
       ];
@@ -257,7 +263,7 @@ export function Pseudospatial({
 
     return [
       {
-        name: "Open plot controls",
+        name: 'Open plot controls',
         icon: {
           width: 512,
           height: 512,
@@ -269,8 +275,8 @@ export function Pseudospatial({
         ? [
             {
               name: isRefImgVisible
-                ? "Hide reference image"
-                : "Show reference image",
+                ? 'Hide reference image'
+                : 'Show reference image',
               icon: {
                 width: 600,
                 height: 512,
@@ -278,7 +284,7 @@ export function Pseudospatial({
               },
               click: () =>
                 dispatch({
-                  type: "toggle.pseudospatial.refImg.visible",
+                  type: 'toggle.pseudospatial.refImg.visible',
                 }),
             },
           ]
@@ -327,12 +333,12 @@ export function Pseudospatial({
               max={layout?.coloraxis?.cmax}
               addText={
                 plotType === PLOT_TYPES.GENE
-                  ? " - Mean expression"
+                  ? ' - Mean expression'
                   : plotType === PLOT_TYPES.CATEGORICAL
-                    ? " - %"
+                    ? ' - %'
                     : plotType === PLOT_TYPES.CONTINUOUS
-                      ? " - Mean value"
-                      : ""
+                      ? ' - Mean value'
+                      : ''
               }
             />
           )}

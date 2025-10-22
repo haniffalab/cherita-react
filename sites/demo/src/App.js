@@ -1,15 +1,15 @@
-import React from "react";
+import React from 'react';
 
-import { FullPage, PLOT_TYPES } from "@haniffalab/cherita-react";
-import { Route, Routes } from "react-router-dom";
+import { FullPage, PLOT_TYPES } from '@haniffalab/cherita-react';
+import { Route, Routes } from 'react-router-dom';
 
-import Footer from "./components/Footer";
-import Header from "./components/Header";
-import DotplotDemo from "./containers/DotplotDemo";
-import HeatmapDemo from "./containers/HeatmapDemo";
-import MatrixplotDemo from "./containers/MatrixplotDemo";
-import ScatterplotDemo from "./containers/ScatterplotDemo";
-import ViolinDemo from "./containers/ViolinDemo";
+import Footer from './components/Footer';
+import Header from './components/Header';
+import DotplotDemo from './containers/DotplotDemo';
+import HeatmapDemo from './containers/HeatmapDemo';
+import MatrixplotDemo from './containers/MatrixplotDemo';
+import ScatterplotDemo from './containers/ScatterplotDemo';
+import ViolinDemo from './containers/ViolinDemo';
 
 export default function App(props) {
   return (

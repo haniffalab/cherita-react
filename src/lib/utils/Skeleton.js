@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react';
 
-import { Button, Placeholder } from "react-bootstrap";
+import { Button, Placeholder } from 'react-bootstrap';
 
 export const ObsmKeysListBtn = () => {
   return (
@@ -8,7 +8,7 @@ export const ObsmKeysListBtn = () => {
       <Placeholder
         xs={6}
         style={{
-          width: "40px",
+          width: '40px',
         }}
       />
     </Placeholder>

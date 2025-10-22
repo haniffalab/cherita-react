@@ -1,4 +1,4 @@
-import React, { useReducer, createContext, useContext } from "react";
+import React, { useReducer, createContext, useContext } from 'react';
 
 export const FilteredDataContext = createContext(null);
 export const FilteredDataDispatchContext = createContext(null);
@@ -35,7 +35,7 @@ export function useFilteredDataDispatch() {
 
 function filterReducer(filteredData, action) {
   switch (action.type) {
-    case "set.obs.indices": {
+    case 'set.obs.indices': {
       return {
         ...filteredData,
         obsIndices: action.indices,
@@ -46,7 +46,7 @@ function filterReducer(filteredData, action) {
       };
     }
     default: {
-      throw Error("Unknown action: " + action.type);
+      throw Error('Unknown action: ' + action.type);
     }
   }
 }

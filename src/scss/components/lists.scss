@@ -1,11 +1,13 @@
 .list-group.cherita-list {
   .virtualized-list-wrapper {
-    padding: 0 0.25rem 0.25rem 0.25rem;
+    padding: 0 0.25rem 0.25rem;
   }
+
   .list-group-item.unstyled {
     background-color: transparent;
     padding-left: 1rem;
   }
+
   .list-group-item {
     border: 0;
     padding: 0.375rem 0.75rem;
@@ -14,13 +16,15 @@
     background-color: var(--#{$prefix}tertiary-bg);
     border-radius: var(--#{$prefix}border-radius);
   }
+
   .list-group-item.active {
     background-color: var(--#{$prefix}secondary-bg);
   }
 }
+
 .obs-statistics {
   border: 0;
-  margin: 0 0.25rem 0.25rem 0.25rem;
+  margin: 0 0.25rem 0.25rem;
   padding: 0.375rem 0.75rem;
   line-height: 1.5;
   color: var(--#{$prefix}body-color);

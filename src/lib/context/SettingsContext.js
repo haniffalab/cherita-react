@@ -4,9 +4,9 @@ import React, {
   useEffect,
   useReducer,
   useRef,
-} from "react";
+} from 'react';
 
-import _ from "lodash";
+import _ from 'lodash';
 
 import {
   COLOR_ENCODINGS,
@@ -18,8 +18,8 @@ import {
   VAR_SORT,
   VAR_SORT_ORDER,
   VIOLINPLOT_SCALES,
-} from "../constants/constants";
-import { useResolver } from "../utils/Resolver";
+} from '../constants/constants';
+import { useResolver } from '../utils/Resolver';
 
 export const SettingsContext = createContext(null);
 export const SettingsDispatchContext = createContext(null);
@@ -35,7 +35,7 @@ const initialSettings = {
   sliceBy: { obs: false, polygons: false },
   polygons: {},
   controls: {
-    colorScale: "Viridis",
+    colorScale: 'Viridis',
     range: [0, 1], // normalized
     colorAxis: { dmin: 0, dmax: 1, cmin: 0, cmax: 1 },
     scale: {
@@ -76,7 +76,7 @@ const validateSettings = (settings) => {
   if (settings.selectedVar) {
     const inVars = _.some(
       settings.vars,
-      (v) => v.name === settings.selectedVar.name
+      (v) => v.name === settings.selectedVar.name,
     );
     if (!inVars) {
       settings.vars = [...settings.vars, settings.selectedVar];
@@ -88,7 +88,7 @@ const validateSettings = (settings) => {
     const notInVars = _.differenceBy(
       settings.selectedMultiVar,
       settings.vars,
-      "name"
+      'name',
     );
     if (notInVars.length) {
       settings.vars = [...settings.vars, ...notInVars];
@@ -122,14 +122,14 @@ const validateSettings = (settings) => {
 
   // Keep only obs in use (selectedObs, labelObs) in data.obs
   const obsNames = _.uniq(
-    _.compact([settings.selectedObs?.name, ...settings.labelObs])
+    _.compact([settings.selectedObs?.name, ...settings.labelObs]),
   );
   const intersectionObs = _.intersection(_.keys(settings.data.obs), obsNames);
   settings.data.obs = _.pick(settings.data.obs, intersectionObs);
 
   // Keep only vars in use (settings.vars) in data.vars
   const varNames = _.flatMap(settings.vars, (v) =>
-    v.isSet ? _.map(v.vars, (vv) => vv.name) : v.name
+    v.isSet ? _.map(v.vars, (vv) => vv.name) : v.name,
   );
   const intersectionVars = _.intersection(_.keys(settings.data.vars), varNames);
   settings.data.vars = _.pick(settings.data.vars, intersectionVars);
@@ -175,7 +175,7 @@ export function SettingsProvider({
       canOverrideSettings,
       defaultSettings,
       localSettings,
-    })
+    }),
   );
 
   const resolvedSettings = useResolver(initSettings.current);
@@ -183,15 +183,15 @@ export function SettingsProvider({
   const [settings, dispatch] = useReducer(
     settingsReducer,
     resolvedSettings,
-    validate
+    validate,
   );
 
   useEffect(() => {
     // If resolvedSettings is null, do not update settings
     if (resolvedSettings) {
       const validatedSettings = validateSettings(resolvedSettings);
-      console.log("Initial settings:", validatedSettings);
-      dispatch({ type: "init", settings: validatedSettings });
+      console.log('Initial settings:', validatedSettings);
+      dispatch({ type: 'init', settings: validatedSettings });
     }
   }, [resolvedSettings]);
 
@@ -201,19 +201,19 @@ export function SettingsProvider({
         localStorage.setItem(
           DATASET_STORAGE_KEY,
           JSON.stringify({
-            buster: process.env.PACKAGE_VERSION || "0.0.0",
+            buster: process.env.PACKAGE_VERSION || '0.0.0',
             timestamp: Date.now(),
-            ..._.omit(settings, "data"),
-          })
+            ..._.omit(settings, 'data'),
+          }),
         );
       } catch (err) {
         if (
           err.code === 22 ||
           err.code === 1014 ||
-          err.name === "QuotaExceededError" ||
-          err.name === "NS_ERROR_DOM_QUOTA_REACHED"
+          err.name === 'QuotaExceededError' ||
+          err.name === 'NS_ERROR_DOM_QUOTA_REACHED'
         ) {
-          console.err("Browser storage quota exceeded");
+          console.err('Browser storage quota exceeded');
         } else {
           console.err(err);
         }
@@ -239,26 +239,26 @@ export function useSettingsDispatch() {
 }
 
 const OBS_DATA_KEYS = [
-  "name",
-  "type",
+  'name',
+  'type',
   // categorical and numerical
-  "codes",
-  "codesMap",
-  "values",
-  "n_values",
-  "value_counts",
+  'codes',
+  'codesMap',
+  'values',
+  'n_values',
+  'value_counts',
   // numerical
-  "bins",
-  "min",
-  "max",
-  "mean",
-  "median",
-  "n_unique",
+  'bins',
+  'min',
+  'max',
+  'mean',
+  'median',
+  'n_unique',
 ];
 
 const splitObs = (obs) => {
   if (!obs) return { settings: null, data: {} };
-  const settings = _.pick(obs, ["name", "omit", "bins"]);
+  const settings = _.pick(obs, ['name', 'omit', 'bins']);
   const data = obs ? { [obs.name]: _.pick(obs, OBS_DATA_KEYS) } : {};
   return { settings, data };
 };
@@ -268,28 +268,28 @@ const splitVar = (v) => {
   let settings, data;
   if (v.isSet) {
     settings = {
-      ..._.pick(v, ["name", "isSet"]),
+      ..._.pick(v, ['name', 'isSet']),
       vars: _.map(v.vars, (vv) => ({ name: vv.name })),
     };
     data = _.fromPairs(
       _.map(v.vars, (vv) => [
         vv.name,
-        _.pick(vv, ["name", "index", "matrix_index"]),
-      ])
+        _.pick(vv, ['name', 'index', 'matrix_index']),
+      ]),
     );
   } else {
-    settings = _.pick(v, ["name", "isSet"]);
-    data = { [v.name]: _.pick(v, ["name", "index", "matrix_index"]) };
+    settings = _.pick(v, ['name', 'isSet']);
+    data = { [v.name]: _.pick(v, ['name', 'index', 'matrix_index']) };
   }
   return { settings, data };
 };
 
 function settingsReducer(settings, action) {
   switch (action.type) {
-    case "init": {
+    case 'init': {
       return action.settings;
     }
-    case "select.obs": {
+    case 'select.obs': {
       const { settings: obsSettings, data: obsData } = splitObs(action.obs);
       return {
         ...settings,
@@ -322,10 +322,10 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "select.obsm": {
+    case 'select.obsm': {
       return { ...settings, selectedObsm: action.obsm };
     }
-    case "select.var": {
+    case 'select.var': {
       const { settings: varSettings, data: varData } = splitVar(action.var);
       return validateSettings({
         ...settings,
@@ -339,9 +339,9 @@ function settingsReducer(settings, action) {
         },
       });
     }
-    case "select.multivar": {
+    case 'select.multivar': {
       const inMultiVar = settings.selectedMultiVar.some(
-        (v) => v.name === action.var.name
+        (v) => v.name === action.var.name,
       );
       if (inMultiVar) {
         return validateSettings({ ...settings });
@@ -360,23 +360,23 @@ function settingsReducer(settings, action) {
         });
       }
     }
-    case "deselect.multivar": {
+    case 'deselect.multivar': {
       return validateSettings({
         ...settings,
         selectedMultiVar: settings.selectedMultiVar.filter(
-          (v) => v !== action.var.name
+          (v) => v !== action.var.name,
         ),
       });
     }
-    case "toggle.multivar": {
+    case 'toggle.multivar': {
       const inMultiVar = settings.selectedMultiVar.some(
-        (v) => v.name === action.var.name
+        (v) => v.name === action.var.name,
       );
       if (inMultiVar) {
         return validateSettings({
           ...settings,
           selectedMultiVar: settings.selectedMultiVar.filter(
-            (v) => v.name !== action.var.name
+            (v) => v.name !== action.var.name,
           ),
         });
       } else {
@@ -394,10 +394,10 @@ function settingsReducer(settings, action) {
         });
       }
     }
-    case "set.colorEncoding": {
+    case 'set.colorEncoding': {
       return validateSettings({ ...settings, colorEncoding: action.value });
     }
-    case "reset.vars": {
+    case 'reset.vars': {
       return validateSettings({
         ...settings,
         vars: [],
@@ -405,19 +405,19 @@ function settingsReducer(settings, action) {
         selectedMultiVar: [],
       });
     }
-    case "reset.multiVar": {
+    case 'reset.multiVar': {
       return validateSettings({
         ...settings,
         selectedMultiVar: [],
       });
     }
-    case "reset.var": {
+    case 'reset.var': {
       return validateSettings({
         ...settings,
         selectedVar: null,
       });
     }
-    case "add.var": {
+    case 'add.var': {
       if (settings.vars.find((v) => v.name === action.var.name)) {
         return settings;
       } else {
@@ -435,13 +435,13 @@ function settingsReducer(settings, action) {
         };
       }
     }
-    case "remove.var": {
+    case 'remove.var': {
       const selectedVar =
         settings.selectedVar?.name === action.var.name
           ? null
           : settings.selectedVar;
       const selectedMultiVar = settings.selectedMultiVar.filter(
-        (v) => v.name !== action.var.name
+        (v) => v.name !== action.var.name,
       );
       return validateSettings({
         ...settings,
@@ -450,9 +450,9 @@ function settingsReducer(settings, action) {
         selectedMultiVar: selectedMultiVar,
       });
     }
-    case "add.varSet.var": {
+    case 'add.varSet.var': {
       const varSet = settings.vars.find(
-        (s) => s.isSet && s.name === action.varSet.name
+        (s) => s.isSet && s.name === action.varSet.name,
       );
       if (!varSet) {
         return settings;
@@ -495,9 +495,9 @@ function settingsReducer(settings, action) {
         });
       }
     }
-    case "remove.varSet.var": {
+    case 'remove.varSet.var': {
       const varSet = settings.vars.find(
-        (s) => s.isSet && s.name === action.varSet.name
+        (s) => s.isSet && s.name === action.varSet.name,
       );
       if (!varSet) {
         return settings;
@@ -506,7 +506,7 @@ function settingsReducer(settings, action) {
         return settings;
       } else {
         const varSetVars = varSet.vars.filter(
-          (v) => v.name !== action.var.name
+          (v) => v.name !== action.var.name,
         );
         const vars = settings.vars.map((v) => {
           if (v.name === varSet.name) {
@@ -522,7 +522,7 @@ function settingsReducer(settings, action) {
               ? null
               : settings.selectedVar;
           const selectedMultiVar = settings.selectedMultiVar.filter(
-            (v) => v.name !== action.varSet.name
+            (v) => v.name !== action.varSet.name,
           );
           return validateSettings({
             ...settings,
@@ -552,25 +552,25 @@ function settingsReducer(settings, action) {
         }
       }
     }
-    case "set.controls.colorScale": {
+    case 'set.controls.colorScale': {
       return {
         ...settings,
         controls: { ...settings.controls, colorScale: action.colorScale },
       };
     }
-    case "set.controls.range": {
+    case 'set.controls.range': {
       return {
         ...settings,
         controls: { ...settings.controls, range: action.range },
       };
     }
-    case "set.controls.colorAxis": {
+    case 'set.controls.colorAxis': {
       return {
         ...settings,
         controls: { ...settings.controls, colorAxis: action.colorAxis },
       };
     }
-    case "set.controls.colorAxis.crange": {
+    case 'set.controls.colorAxis.crange': {
       return {
         ...settings,
         controls: {
@@ -583,7 +583,7 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "set.controls.colorAxis.cmin": {
+    case 'set.controls.colorAxis.cmin': {
       return {
         ...settings,
         controls: {
@@ -592,7 +592,7 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "set.controls.colorAxis.cmax": {
+    case 'set.controls.colorAxis.cmax': {
       return {
         ...settings,
         controls: {
@@ -601,7 +601,7 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "set.controls.scale": {
+    case 'set.controls.scale': {
       return {
         ...settings,
         controls: {
@@ -610,7 +610,7 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "set.controls.meanOnlyExpressed": {
+    case 'set.controls.meanOnlyExpressed': {
       return {
         ...settings,
         controls: {
@@ -619,7 +619,7 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "set.controls.expressionCutoff": {
+    case 'set.controls.expressionCutoff': {
       return {
         ...settings,
         controls: {
@@ -628,7 +628,7 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "toggle.slice.obs": {
+    case 'toggle.slice.obs': {
       if (
         settings.selectedObs &&
         settings.selectedObs.name === action.obs.name
@@ -653,16 +653,16 @@ function settingsReducer(settings, action) {
         };
       }
     }
-    case "toggle.slice.polygons": {
+    case 'toggle.slice.polygons': {
       return {
         ...settings,
         sliceBy: { ...settings.sliceBy, polygons: !settings.sliceBy.polygons },
       };
     }
-    case "disable.slice.polygons": {
+    case 'disable.slice.polygons': {
       return { ...settings, sliceBy: { ...settings.sliceBy, polygons: false } };
     }
-    case "add.label.obs": {
+    case 'add.label.obs': {
       if (_.includes(settings.labelObs, action.obs.name)) {
         return settings;
       } else {
@@ -680,16 +680,16 @@ function settingsReducer(settings, action) {
         };
       }
     }
-    case "remove.label.obs": {
+    case 'remove.label.obs': {
       return validateSettings({
         ...settings,
         labelObs: settings.labelObs.filter((a) => a !== action.obsName),
       });
     }
-    case "reset.label.obs": {
+    case 'reset.label.obs': {
       return validateSettings({ ...settings, labelObs: [] });
     }
-    case "set.varSort": {
+    case 'set.varSort': {
       return {
         ...settings,
         varSort: {
@@ -698,7 +698,7 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "set.varSort.sort": {
+    case 'set.varSort.sort': {
       return {
         ...settings,
         varSort: {
@@ -707,7 +707,7 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "set.varSort.sortOrder": {
+    case 'set.varSort.sortOrder': {
       return {
         ...settings,
         varSort: {
@@ -719,19 +719,19 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "set.polygons": {
+    case 'set.polygons': {
       return {
         ...settings,
         polygons: { ...settings.polygons, [action.obsm]: action.polygons },
       };
     }
-    case "set.pseudospatial.maskSet": {
+    case 'set.pseudospatial.maskSet': {
       return {
         ...settings,
         pseudospatial: { ...settings.pseudospatial, maskSet: action.maskSet },
       };
     }
-    case "set.pseudospatial.maskValues": {
+    case 'set.pseudospatial.maskValues': {
       return {
         ...settings,
         pseudospatial: {
@@ -740,7 +740,7 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "set.pseudospatial.categoricalMode": {
+    case 'set.pseudospatial.categoricalMode': {
       return {
         ...settings,
         pseudospatial: {
@@ -749,7 +749,7 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "toggle.pseudospatial.refImg.visible": {
+    case 'toggle.pseudospatial.refImg.visible': {
       return {
         ...settings,
         pseudospatial: {
@@ -761,7 +761,7 @@ function settingsReducer(settings, action) {
         },
       };
     }
-    case "set.pseudospatial.refImg.opacity": {
+    case 'set.pseudospatial.refImg.opacity': {
       return {
         ...settings,
         pseudospatial: {
@@ -774,7 +774,7 @@ function settingsReducer(settings, action) {
       };
     }
     default: {
-      throw Error("Unknown action: " + action.type);
+      throw Error('Unknown action: ' + action.type);
     }
   }
 }

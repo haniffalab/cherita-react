@@ -1,23 +1,23 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Tooltip } from "@mui/material";
-import { Gauge, SparkLineChart } from "@mui/x-charts";
-import _ from "lodash";
-import { Badge, Form, ListGroup } from "react-bootstrap";
+import { Tooltip } from '@mui/material';
+import { Gauge, SparkLineChart } from '@mui/x-charts';
+import _ from 'lodash';
+import { Badge, Form, ListGroup } from 'react-bootstrap';
 
-import { ObsToolbar } from "./ObsToolbar";
-import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
-import { useFilteredData } from "../../context/FilterContext";
-import { useSettings } from "../../context/SettingsContext";
-import { useColor } from "../../helpers/color-helper";
-import { Histogram } from "../../utils/Histogram";
-import { LoadingLinear } from "../../utils/LoadingIndicators";
-import { useFetch } from "../../utils/requests";
-import { useSelectedVar } from "../../utils/Resolver";
-import { formatNumerical, FORMATS } from "../../utils/string";
-import { VirtualizedList } from "../../utils/VirtualizedList";
-import { useObsData } from "../../utils/zarrData";
+import { ObsToolbar } from './ObsToolbar';
+import { COLOR_ENCODINGS, OBS_TYPES } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
+import { useFilteredData } from '../../context/FilterContext';
+import { useSettings } from '../../context/SettingsContext';
+import { useColor } from '../../helpers/color-helper';
+import { Histogram } from '../../utils/Histogram';
+import { LoadingLinear } from '../../utils/LoadingIndicators';
+import { useFetch } from '../../utils/requests';
+import { useSelectedVar } from '../../utils/Resolver';
+import { formatNumerical, FORMATS } from '../../utils/string';
+import { VirtualizedList } from '../../utils/VirtualizedList';
+import { useObsData } from '../../utils/zarrData';
 
 // const N_BINS = 5;
 
@@ -42,12 +42,12 @@ import { useObsData } from "../../utils/zarrData";
 function getContinuousLabel(code, binEdges) {
   return `[ ${formatNumerical(binEdges[code][0])}, ${formatNumerical(
     binEdges[code][1],
-    FORMATS.EXPONENTIAL
-  )}${code === binEdges.length - 1 ? " ]" : " )"}`;
+    FORMATS.EXPONENTIAL,
+  )}${code === binEdges.length - 1 ? ' ]' : ' )'}`;
 }
 
 const useObsHistogram = (obs, { enabled = true }) => {
-  const ENDPOINT = "obs/histograms";
+  const ENDPOINT = 'obs/histograms';
   const dataset = useDataset();
   const settings = useSettings();
   const { obsIndices, isSliced } = useFilteredData();
@@ -56,7 +56,7 @@ const useObsHistogram = (obs, { enabled = true }) => {
 
   const [params, setParams] = useState({
     url: dataset.url,
-    obsCol: _.omit(obs, "omit"), // avoid re-rendering when toggling unselected obs
+    obsCol: _.omit(obs, 'omit'), // avoid re-rendering when toggling unselected obs
     varKey: selectedVar?.isSet
       ? {
           name: selectedVar?.name,
@@ -70,7 +70,7 @@ const useObsHistogram = (obs, { enabled = true }) => {
     setParams((p) => {
       return {
         ...p,
-        obsCol: _.omit(obs, "omit"),
+        obsCol: _.omit(obs, 'omit'),
         varKey: selectedVar?.isSet
           ? {
               name: selectedVar?.name,
@@ -195,7 +195,7 @@ function CategoricalItem({
                 title={
                   isSliced ? (
                     <>
-                      Filtered:{" "}
+                      Filtered:{' '}
                       {formatNumerical(filteredStats.pct, FORMATS.EXPONENTIAL)}%
                       <br />
                       Total: {formatNumerical(stats.pct, FORMATS.EXPONENTIAL)}%
@@ -209,20 +209,20 @@ function CategoricalItem({
               >
                 <div className="d-flex align-items-center">
                   <Badge className="value-count-badge">
-                    {" "}
+                    {' '}
                     {isSliced &&
                       parseInt(filteredStats.value_counts) !==
                         parseInt(stats.value_counts) && (
                         <>
                           {formatNumerical(
-                            parseInt(filteredStats.value_counts)
-                          )}{" "}
-                          out of{" "}
+                            parseInt(filteredStats.value_counts),
+                          )}{' '}
+                          out of{' '}
                         </>
                       )}
                     {formatNumerical(
                       parseInt(stats.value_counts),
-                      FORMATS.EXPONENTIAL
+                      FORMATS.EXPONENTIAL,
                     )}
                   </Badge>
                   <div className="value-pct-gauge-container">
@@ -232,15 +232,15 @@ function CategoricalItem({
                           className="pct-gauge filtered-pct-gauge"
                           value={filteredStats.pct}
                           text={null}
-                          innerRadius={"50%"}
-                          outerRadius={"75%"}
+                          innerRadius={'50%'}
+                          outerRadius={'75%'}
                           margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
                         />
                         <Gauge
                           className="pct-gauge"
                           value={stats.pct}
                           text={null}
-                          innerRadius={"75%"}
+                          innerRadius={'75%'}
                           margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
                         />
                       </>
@@ -248,7 +248,7 @@ function CategoricalItem({
                       <Gauge
                         value={stats.pct}
                         text={null}
-                        innerRadius={"50%"}
+                        innerRadius={'50%'}
                         margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
                       />
                     )}
@@ -275,7 +275,7 @@ function CategoricalItem({
                       categorical: true,
                       grayOut: isOmitted,
                       grayParams: { alpha: 1 },
-                      colorEncoding: "obs",
+                      colorEncoding: 'obs',
                       ...(useUnsColors ? { colorscale: colors } : {}),
                     })})`}
                   />
@@ -307,7 +307,7 @@ export function CategoricalObs({
 
   const enabledHistograms = useMemo(
     () => showHistograms && settings.colorEncoding === COLOR_ENCODINGS.VAR,
-    [settings.colorEncoding, showHistograms]
+    [settings.colorEncoding, showHistograms],
   );
 
   const getDataAtIndex = useCallback(
@@ -349,7 +349,7 @@ export function CategoricalObs({
       isSliced,
       filteredObsData?.value_counts,
       filteredObsData?.pct,
-    ]
+    ],
   );
 
   showColor &= settings.colorEncoding === COLOR_ENCODINGS.OBS;
@@ -382,7 +382,7 @@ export function CategoricalObs({
 }
 
 function ObsContinuousStats({ obs }) {
-  const ENDPOINT = "obs/distribution";
+  const ENDPOINT = 'obs/distribution';
   const dataset = useDataset();
   const params = { url: dataset.url, obsColname: obs.name };
 
@@ -412,7 +412,7 @@ function ObsContinuousStats({ obs }) {
                   `${formatNumerical(v, FORMATS.EXPONENTIAL)}`
                 }
                 slotProps={{
-                  popper: { className: "feature-histogram-tooltip" },
+                  popper: { className: 'feature-histogram-tooltip' },
                 }}
               />
             </div>
@@ -420,19 +420,19 @@ function ObsContinuousStats({ obs }) {
         </div>
         <div className="col-md-5 d-flex flex-column text-end">
           <div className="d-flex justify-content-between">
-            <span>Min</span>{" "}
+            <span>Min</span>{' '}
             <span>{formatNumerical(obs.min, FORMATS.EXPONENTIAL)}</span>
           </div>
           <div className="d-flex justify-content-between">
-            <span>Max</span>{" "}
+            <span>Max</span>{' '}
             <span>{formatNumerical(obs.max, FORMATS.EXPONENTIAL)}</span>
           </div>
           <div className="d-flex justify-content-between">
-            <span>Mean</span>{" "}
+            <span>Mean</span>{' '}
             <span>{formatNumerical(obs.mean, FORMATS.EXPONENTIAL)}</span>
           </div>
           <div className="d-flex justify-content-between">
-            <span>Median</span>{" "}
+            <span>Median</span>{' '}
             <span>{formatNumerical(obs.median, FORMATS.EXPONENTIAL)}</span>
           </div>
         </div>
@@ -459,16 +459,16 @@ export function ContinuousObs({
 
   const enabledHistograms = useMemo(
     () => showHistograms && settings.colorEncoding === COLOR_ENCODINGS.VAR,
-    [settings.colorEncoding, showHistograms]
+    [settings.colorEncoding, showHistograms],
   );
 
   const getLabel = useCallback(
     (index) => {
       return isNaN(obs.values[index])
-        ? "NaN"
+        ? 'NaN'
         : getContinuousLabel(obs.codes[obs.values[index]], obs.bins.binEdges);
     },
-    [obs.bins.binEdges, obs.codes, obs.values]
+    [obs.bins.binEdges, obs.codes, obs.values],
   );
 
   const getDataAtIndex = useCallback(
@@ -509,7 +509,7 @@ export function ContinuousObs({
       obsHistograms.fetchedData,
       obsHistograms.isPending,
       totalCounts,
-    ]
+    ],
   );
 
   return (

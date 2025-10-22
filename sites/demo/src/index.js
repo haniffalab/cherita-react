@@ -1,16 +1,16 @@
-import React from "react";
+import React from 'react';
 
-import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 
-import App from "./App";
-import "./App.scss";
+import App from './App';
+import './App.scss';
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
     <BrowserRouter>
       <App dataset_url="https://storage.googleapis.com/haniffalab/test/tmp-breast_cancer-visium-extended.zarr" />
     </BrowserRouter>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

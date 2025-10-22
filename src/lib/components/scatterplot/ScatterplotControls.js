@@ -1,22 +1,22 @@
-import React, { useEffect } from "react";
+import React, { useEffect } from 'react';
 
-import { Box, Slider, Typography } from "@mui/material";
-import { Form } from "react-bootstrap";
+import { Box, Slider, Typography } from '@mui/material';
+import { Form } from 'react-bootstrap';
 
-import { COLOR_ENCODINGS, OBS_TYPES } from "../../constants/constants";
-import { useFilteredData } from "../../context/FilterContext";
+import { COLOR_ENCODINGS, OBS_TYPES } from '../../constants/constants';
+import { useFilteredData } from '../../context/FilterContext';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
-import { useSelectedObs } from "../../utils/Resolver";
-import { ColorscaleSelect } from "../controls/Controls";
+} from '../../context/SettingsContext';
+import { useSelectedObs } from '../../utils/Resolver';
+import { ColorscaleSelect } from '../controls/Controls';
 
 export const ScatterplotControls = () => {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
   const [sliderValue, setSliderValue] = React.useState(
-    settings.controls.range || [0, 1]
+    settings.controls.range || [0, 1],
   );
   const { valueMin, valueMax } = useFilteredData();
 
@@ -43,7 +43,7 @@ export const ScatterplotControls = () => {
   const updateRange = (_e, value) => {
     setSliderValue(value);
     dispatch({
-      type: "set.controls.range",
+      type: 'set.controls.range',
       range: sliderValue,
     });
   };

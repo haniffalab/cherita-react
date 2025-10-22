@@ -1,12 +1,12 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import { Alert } from "react-bootstrap";
+import { Alert } from 'react-bootstrap';
 
-export const ImageViewer = ({ src, alt, className = "img-fluid" }) => {
+export const ImageViewer = ({ src, alt, className = 'img-fluid' }) => {
   const [error, setError] = useState(false);
 
   const handleError = () => {
-    console.error("Error loading image from src:", src);
+    console.error('Error loading image from src:', src);
     setError(true);
   };
 

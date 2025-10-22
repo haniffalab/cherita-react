@@ -1,25 +1,25 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import _ from "lodash";
-import { Button } from "react-bootstrap";
-import Plot from "react-plotly.js";
+import _ from 'lodash';
+import { Button } from 'react-bootstrap';
+import Plot from 'react-plotly.js';
 
-import { PLOTLY_MODEBAR_BUTTONS } from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
-import { useFilteredData } from "../../context/FilterContext";
+import { PLOTLY_MODEBAR_BUTTONS } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
+import { useFilteredData } from '../../context/FilterContext';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
-import { LoadingSpinner } from "../../utils/LoadingIndicators";
-import { useDebouncedFetch } from "../../utils/requests";
-import { useSelectedMultiVar, useSelectedObs } from "../../utils/Resolver";
-import { PlotAlert } from "../full-page/PlotAlert";
+} from '../../context/SettingsContext';
+import { LoadingSpinner } from '../../utils/LoadingIndicators';
+import { useDebouncedFetch } from '../../utils/requests';
+import { useSelectedMultiVar, useSelectedObs } from '../../utils/Resolver';
+import { PlotAlert } from '../full-page/PlotAlert';
 import {
   ControlsPlotlyToolbar,
   ObsPlotlyToolbar,
   VarPlotlyToolbar,
-} from "../toolbar/Toolbar";
+} from '../toolbar/Toolbar';
 
 export function Dotplot({
   showObsBtn = false,
@@ -31,7 +31,7 @@ export function Dotplot({
   plotType,
   setPlotType,
 }) {
-  const ENDPOINT = "dotplot";
+  const ENDPOINT = 'dotplot';
   const dataset = useDataset();
   const settings = useSettings();
   const { obsIndices, isSliced } = useFilteredData();
@@ -51,7 +51,7 @@ export function Dotplot({
       ? null
       : _.difference(selectedObs?.values, selectedObs?.omit),
     varKeys: selectedMultiVar.map((i) =>
-      i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
+      i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index,
     ),
     obsIndices: isSliced ? [...(obsIndices || [])] : null,
     standardScale: settings.controls.scale.dotplot,
@@ -78,7 +78,7 @@ export function Dotplot({
         varKeys: selectedMultiVar.map((i) =>
           i.isSet
             ? { name: i.name, indices: i.vars.map((v) => v.index) }
-            : i.index
+            : i.index,
         ),
         obsIndices: isSliced ? [...(obsIndices || [])] : null,
         standardScale: settings.controls.scale.dotplot,
@@ -112,7 +112,7 @@ export function Dotplot({
     ENDPOINT,
     params,
     500,
-    { enabled: !!params.obsCol && !!params.varKeys.length }
+    { enabled: !!params.obsCol && !!params.varKeys.length },
   );
 
   useEffect(() => {
@@ -121,7 +121,7 @@ export function Dotplot({
       setLayout(fetchedData.layout);
       // @TODO: keep colorAxis range from settings
       dispatch({
-        type: "set.controls.colorAxis",
+        type: 'set.controls.colorAxis',
         colorAxis: {
           dmin: fetchedData.range.min.toFixed(1),
           dmax: fetchedData.range.max.toFixed(1),
@@ -177,7 +177,7 @@ export function Dotplot({
             data={data}
             layout={layout}
             useResizeHandler={true}
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: '100%', height: '100%' }}
             config={{
               displaylogo: false,
               modeBarButtons: modeBarButtons,
@@ -194,7 +194,7 @@ export function Dotplot({
         setPlotType={setPlotType}
       >
         <p className="p-0 m-0">
-          Select one or more{" "}
+          Select one or more{' '}
           {showVarsBtn ? (
             <Button
               variant="link"
@@ -204,9 +204,9 @@ export function Dotplot({
               features
             </Button>
           ) : (
-            "features"
-          )}{" "}
-          to display their expression across groups, then choose a{" "}
+            'features'
+          )}{' '}
+          to display their expression across groups, then choose a{' '}
           {showObsBtn ? (
             <Button
               variant="link"
@@ -216,8 +216,8 @@ export function Dotplot({
               category
             </Button>
           ) : (
-            "category"
-          )}{" "}
+            'category'
+          )}{' '}
           to group observations in the dotplot.
         </p>
       </PlotAlert>
@@ -231,7 +231,7 @@ export function Dotplot({
         setPlotType={setPlotType}
       >
         {serverError.message ||
-          "An unexpected error occurred while generating the plot."}
+          'An unexpected error occurred while generating the plot.'}
       </PlotAlert>
     );
   }

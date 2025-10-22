@@ -1,9 +1,7 @@
-import React from "react";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import '@testing-library/jest-dom';
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import "@testing-library/jest-dom";
-
-import { DatasetProvider } from "../lib/context/DatasetContext";
+import { DatasetProvider } from '../lib/context/DatasetContext';
 
 // Mock the context or props
 export const mockDataset = {
@@ -11,23 +9,23 @@ export const mockDataset = {
   defaultSettings: {
     vars: [
       {
-        name: "gene1",
+        name: 'gene1',
       },
     ],
   },
 };
 
-jest.mock("@tanstack/react-query-persist-client", () => ({
+jest.mock('@tanstack/react-query-persist-client', () => ({
   PersistQueryClientProvider: ({ children }) => <>{children}</>,
 }));
 
-jest.mock("../lib/utils/requests", () => ({
+jest.mock('../lib/utils/requests', () => ({
   useFetch: jest.fn(),
   useDebouncedFetch: jest.fn(),
 }));
 
-jest.mock("../lib/utils/Resolver", () => {
-  const actual = jest.requireActual("../lib/utils/Resolver");
+jest.mock('../lib/utils/Resolver', () => {
+  const actual = jest.requireActual('../lib/utils/Resolver');
   return {
     ...actual,
     useResolver: jest.fn(),
@@ -44,7 +42,7 @@ export const Wrapper = ({ children }) => {
     logger: {
       log: console.log,
       warn: console.warn,
-      error: process.env.NODE_ENV === "test" ? () => {} : console.error,
+      error: process.env.NODE_ENV === 'test' ? () => {} : console.error,
     },
   });
 

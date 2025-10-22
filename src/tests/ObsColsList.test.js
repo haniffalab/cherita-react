@@ -1,14 +1,12 @@
-import React from "react";
+import '@testing-library/jest-dom';
+import { render, screen } from '@testing-library/react';
 
-import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
+import { Wrapper } from './setupTests';
+import { ObsColsList } from '../lib/components/obs-list/ObsList';
+import { useFetch } from '../lib/utils/requests';
+import { useResolver } from '../lib/utils/Resolver';
 
-import { Wrapper } from "./setupTests";
-import { ObsColsList } from "../lib/components/obs-list/ObsList";
-import { useFetch } from "../lib/utils/requests";
-import { useResolver } from "../lib/utils/Resolver";
-
-test("renders ObsColsList component", () => {
+test('renders ObsColsList component', () => {
   useResolver.mockImplementation((initSettings) => {
     return initSettings;
   });
@@ -20,11 +18,11 @@ test("renders ObsColsList component", () => {
   });
 
   render(<ObsColsList />, { wrapper: Wrapper });
-  const element = screen.getByRole("progressbar");
+  const element = screen.getByRole('progressbar');
   expect(element).toBeInTheDocument();
 });
 
-test("fetches data and renders ObsColsList", async () => {
+test('fetches data and renders ObsColsList', async () => {
   const mockData = [
     {
       codes: {
@@ -32,13 +30,13 @@ test("fetches data and renders ObsColsList", async () => {
         True: 1,
       },
       n_values: 2,
-      name: "boolean",
-      type: "boolean",
+      name: 'boolean',
+      type: 'boolean',
       value_counts: {
         False: 10,
         True: 5,
       },
-      values: ["False", "True"],
+      values: ['False', 'True'],
     },
   ];
 
@@ -50,6 +48,6 @@ test("fetches data and renders ObsColsList", async () => {
 
   render(<ObsColsList />, { wrapper: Wrapper });
 
-  const element = await screen.findByText("boolean");
+  const element = await screen.findByText('boolean');
   expect(element).toBeInTheDocument();
 });

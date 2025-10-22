@@ -5,39 +5,39 @@ import React, {
   useMemo,
   useRef,
   useState,
-} from "react";
+} from 'react';
 
-import { ScatterplotLayer } from "@deck.gl/layers";
-import { DeckGL } from "@deck.gl/react";
-import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ViewMode } from "@nebula.gl/edit-modes";
-import { EditableGeoJsonLayer } from "@nebula.gl/layers";
-import _ from "lodash";
-import { Alert } from "react-bootstrap";
+import { ScatterplotLayer } from '@deck.gl/layers';
+import { DeckGL } from '@deck.gl/react';
+import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ViewMode } from '@nebula.gl/edit-modes';
+import { EditableGeoJsonLayer } from '@nebula.gl/layers';
+import _ from 'lodash';
+import { Alert } from 'react-bootstrap';
 
-import { SpatialControls } from "./SpatialControls";
-import { Toolbox } from "./Toolbox";
+import { SpatialControls } from './SpatialControls';
+import { Toolbox } from './Toolbox';
 import {
   COLOR_ENCODINGS,
   OBS_TYPES,
   SELECTED_POLYGON_FILLCOLOR,
   UNSELECTED_POLYGON_FILLCOLOR,
-} from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
-import { useFilteredData } from "../../context/FilterContext";
+} from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
+import { useFilteredData } from '../../context/FilterContext';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
-import { useZarrData } from "../../context/ZarrDataContext";
-import { rgbToHex, useColor } from "../../helpers/color-helper";
-import { MapHelper } from "../../helpers/map-helper";
-import { Legend } from "../../utils/Legend";
-import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
-import { useSelectedObs } from "../../utils/Resolver";
-import { formatNumerical } from "../../utils/string";
-import { useLabelObsData } from "../../utils/zarrData";
+} from '../../context/SettingsContext';
+import { useZarrData } from '../../context/ZarrDataContext';
+import { rgbToHex, useColor } from '../../helpers/color-helper';
+import { MapHelper } from '../../helpers/map-helper';
+import { Legend } from '../../utils/Legend';
+import { LoadingLinear, LoadingSpinner } from '../../utils/LoadingIndicators';
+import { useSelectedObs } from '../../utils/Resolver';
+import { formatNumerical } from '../../utils/string';
+import { useLabelObsData } from '../../utils/zarrData';
 
 window.deck.log.level = 1;
 
@@ -78,7 +78,7 @@ export function Scatterplot({
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
   const [features, setFeatures] = useState({
-    type: "FeatureCollection",
+    type: 'FeatureCollection',
     features: settings.polygons[settings.selectedObsm] || [],
   });
   const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
@@ -97,7 +97,7 @@ export function Scatterplot({
       const rs = (0.01 / minDim) * 111111;
       return rs;
     },
-    [radius]
+    [radius],
   );
 
   useEffect(() => {
@@ -130,7 +130,7 @@ export function Scatterplot({
         }
         if (!obsmData.serverError && obsmData.data) {
           if (obsmData.data[0].length !== 2) {
-            setCoordsError("Invalid coordinates. Expected 2D coordinates");
+            setCoordsError('Invalid coordinates. Expected 2D coordinates');
             return { positions: [], values: [] };
           }
           setCoordsError(null);
@@ -166,7 +166,7 @@ export function Scatterplot({
         {
           width: deckRef?.current?.deck?.width,
           height: deckRef?.current?.deck?.height,
-        }
+        },
       );
       setRadiusScale(getRadiusScale(bounds));
       setViewState((v) => {
@@ -187,7 +187,7 @@ export function Scatterplot({
       {
         width: deckRef?.current?.deck?.width,
         height: deckRef?.current?.deck?.height,
-      }
+      },
     );
 
     return { latitude, longitude, zoom };
@@ -207,13 +207,13 @@ export function Scatterplot({
       data.positions.length === data.values.length
     ) {
       const sortedIndices = _.map(data.values, (_v, i) => i).sort(
-        (a, b) => data.values[a] - data.values[b]
+        (a, b) => data.values[a] - data.values[b],
       );
       const sortedIndexMap = new Map(
         _.map(sortedIndices, (originalIndex, sortedIndex) => [
           originalIndex,
           sortedIndex,
-        ])
+        ]),
       );
       return {
         sortedData: _.mapValues(data, (v, _k) => {
@@ -286,7 +286,7 @@ export function Scatterplot({
       useUnsColors,
       settings.colorEncoding,
       selectedObs?.colors,
-    ]
+    ],
   );
 
   // @TODO: add support for pseudospatial hover to reflect in radius
@@ -295,13 +295,13 @@ export function Scatterplot({
       const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
       return grayOut ? 1 : 3;
     },
-    [sortedObsIndices]
+    [sortedObsIndices],
   );
 
   const memoizedLayers = useMemo(() => {
     return [
       new ScatterplotLayer({
-        id: "cherita-layer-scatterplot",
+        id: 'cherita-layer-scatterplot',
         pickable: true,
         data: sortedData.positions,
         radiusScale: radiusScale,
@@ -312,14 +312,14 @@ export function Scatterplot({
         updateTriggers: { getFillColor: getFillColor, getRadius: getRadius },
       }),
       new EditableGeoJsonLayer({
-        id: "cherita-layer-draw",
+        id: 'cherita-layer-draw',
         data: features,
         mode: mode,
         selectedFeatureIndexes,
         onEdit: ({ updatedData, editType, editContext }) => {
           setFeatures(updatedData);
           let updatedSelectedFeatureIndexes = selectedFeatureIndexes;
-          if (editType === "addFeature") {
+          if (editType === 'addFeature') {
             const { featureIndexes } = editContext;
             updatedSelectedFeatureIndexes = [
               ...selectedFeatureIndexes,
@@ -334,7 +334,7 @@ export function Scatterplot({
             getFillColor: (feature) => {
               if (
                 selectedFeatureIndexes.some(
-                  (i) => features.features[i] === feature
+                  (i) => features.features[i] === feature,
                 )
               ) {
                 return SELECTED_POLYGON_FILLCOLOR;
@@ -357,18 +357,18 @@ export function Scatterplot({
   ]);
 
   const layers = useDeferredValue(
-    mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers
+    mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers,
   ); // draw scatterplot on top of polygons when in ViewMode
 
   useEffect(() => {
     if (!features?.features?.length) {
-      dispatch({ type: "disable.slice.polygons" });
+      dispatch({ type: 'disable.slice.polygons' });
     }
   }, [dispatch, features?.features?.length]);
 
   useEffect(() => {
     dispatch({
-      type: "set.polygons",
+      type: 'set.polygons',
       obsm: settings.selectedObsm,
       polygons: features?.features || [],
     });
@@ -382,10 +382,10 @@ export function Scatterplot({
 
     setSelectedFeatureIndexes((f) =>
       info.object
-        ? info.layer.id === "cherita-layer-draw"
+        ? info.layer.id === 'cherita-layer-draw'
           ? [info.index]
           : f
-        : []
+        : [],
     );
   }
 
@@ -398,7 +398,7 @@ export function Scatterplot({
   };
 
   const getTooltip = ({ object, index }) => {
-    if (!object || object?.type === "Feature") return;
+    if (!object || object?.type === 'Feature') return;
     const text = [];
 
     if (
@@ -417,8 +417,8 @@ export function Scatterplot({
         getLabel(
           settings.selectedVar,
           data.values?.[getOriginalIndex(index)],
-          true
-        )
+          true,
+        ),
       );
     }
 
@@ -427,7 +427,7 @@ export function Scatterplot({
         ..._.map(labelObsData.data, (v, k) => {
           const labelObs = settings.data.obs[k];
           return getLabel(labelObs, v[getOriginalIndex(index)]);
-        })
+        }),
       );
     }
 
@@ -436,13 +436,13 @@ export function Scatterplot({
     const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
 
     return {
-      text: text.length ? _.compact(text).join("\n") : null,
-      className: grayOut ? "tooltip-grayout" : "deck-tooltip",
+      text: text.length ? _.compact(text).join('\n') : null,
+      className: grayOut ? 'tooltip-grayout' : 'deck-tooltip',
       style: !grayOut
         ? {
-            "border-left": `3px solid ${rgbToHex(getFillColor(null, { index }))}`,
+            'border-left': `3px solid ${rgbToHex(getFillColor(null, { index }))}`,
           }
-        : { "border-left": "none" },
+        : { 'border-left': 'none' },
     };
   };
 
@@ -469,7 +469,7 @@ export function Scatterplot({
           }}
           useDevicePixels={false}
           getCursor={({ isDragging }) =>
-            mode !== ViewMode ? "crosshair" : isDragging ? "grabbing" : "grab"
+            mode !== ViewMode ? 'crosshair' : isDragging ? 'grabbing' : 'grab'
           }
           ref={deckRef}
         ></DeckGL>

@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
-import { faDroplet, faPlus, faTrash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MoreVert } from "@mui/icons-material";
-import _ from "lodash";
-import { Button, Collapse, ListGroup, Table } from "react-bootstrap";
+import { faDroplet, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { MoreVert } from '@mui/icons-material';
+import _ from 'lodash';
+import { Button, Collapse, ListGroup, Table } from 'react-bootstrap';
 
-import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
-import { useFilteredData } from "../../context/FilterContext";
+import { COLOR_ENCODINGS, SELECTION_MODES } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
+import { useFilteredData } from '../../context/FilterContext';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
-import { Histogram } from "../../utils/Histogram";
-import { useDebouncedFetch, useFetch } from "../../utils/requests";
+} from '../../context/SettingsContext';
+import { Histogram } from '../../utils/Histogram';
+import { useDebouncedFetch, useFetch } from '../../utils/requests';
 
 function VarHistogram({ item }) {
-  const ENDPOINT = "var/histograms";
+  const ENDPOINT = 'var/histograms';
   const dataset = useDataset();
   const settings = useSettings();
   const { obsIndices } = useFilteredData();
@@ -44,7 +44,7 @@ function VarHistogram({ item }) {
     params,
     {
       refetchOnMount: false,
-    }
+    },
   );
 
   return (
@@ -64,11 +64,11 @@ function VarDiseaseInfoItem(item) {
         <tbody>
           <tr>
             <td>Confidence</td>
-            <td>{item.confidence || "unknown"}</td>
+            <td>{item.confidence || 'unknown'}</td>
           </tr>
           <tr>
-            <td>Organ{item.organs.length > 1 ? "s" : ""}</td>
-            <td>{item.organs.map((o) => o.name).join(", ")}</td>
+            <td>Organ{item.organs.length > 1 ? 's' : ''}</td>
+            <td>{item.organs.map((o) => o.name).join(', ')}</td>
           </tr>
           {!_.isEmpty(item.metadata) &&
             _.map(item.metadata, (value, key) => {
@@ -106,7 +106,7 @@ export function SelectionItem({
   showRemove = true,
   isMultiple = false,
 }) {
-  const ENDPOINT = "disease/gene";
+  const ENDPOINT = 'disease/gene';
   const [openInfo, setOpenInfo] = useState(false);
   const dataset = useDataset();
   const params = {
@@ -125,7 +125,7 @@ export function SelectionItem({
   return (
     <>
       <div
-        className={hasDiseaseInfo ? "cursor-pointer" : ""}
+        className={hasDiseaseInfo ? 'cursor-pointer' : ''}
         onClick={() => {
           setOpenInfo((o) => !o);
         }}
@@ -143,10 +143,10 @@ export function SelectionItem({
                 key={item.matrix_index}
                 variant={
                   isActive
-                    ? "primary"
+                    ? 'primary'
                     : isNotInData
-                      ? "outline-secondary"
-                      : "outline-primary"
+                      ? 'outline-secondary'
+                      : 'outline-primary'
                 }
                 className="m-0 p-0 px-1"
                 onClick={(e) => {
@@ -155,7 +155,7 @@ export function SelectionItem({
                 }}
                 disabled={isNotInData}
                 title={
-                  isNotInData ? "Not present in data" : "Set as color encoding"
+                  isNotInData ? 'Not present in data' : 'Set as color encoding'
                 }
               >
                 <FontAwesomeIcon icon={faDroplet} />
@@ -199,17 +199,17 @@ export function SelectionItem({
 const select = (dispatch, mode, item) => {
   if (mode === SELECTION_MODES.SINGLE) {
     dispatch({
-      type: "select.var",
+      type: 'select.var',
       var: item,
     });
   } else if (mode === SELECTION_MODES.MULTIPLE) {
     dispatch({
-      type: "select.multivar",
+      type: 'select.multivar',
       var: item,
     });
   }
   dispatch({
-    type: "set.colorEncoding",
+    type: 'set.colorEncoding',
     value: COLOR_ENCODINGS.VAR,
   });
 };
@@ -224,19 +224,19 @@ export function VarItem({ item, active, mode = SELECTION_MODES.SINGLE }) {
 
   const removeVar = () => {
     dispatch({
-      type: "remove.var",
+      type: 'remove.var',
       var: item,
     });
     if (mode === SELECTION_MODES.SINGLE) {
       if (active === item.matrix_index) {
         dispatch({
-          type: "reset.var",
+          type: 'reset.var',
         });
       }
     } else if (mode === SELECTION_MODES.MULTIPLE) {
       if (active.includes(item.matrix_index)) {
         dispatch({
-          type: "deselect.multivar",
+          type: 'deselect.multivar',
           var: item,
         });
       }
@@ -245,7 +245,7 @@ export function VarItem({ item, active, mode = SELECTION_MODES.SINGLE }) {
 
   const toggleVar = () => {
     dispatch({
-      type: "toggle.multivar",
+      type: 'toggle.multivar',
       var: item,
     });
   };

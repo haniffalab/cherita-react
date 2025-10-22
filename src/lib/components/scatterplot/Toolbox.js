@@ -1,9 +1,9 @@
-import React from "react";
+import React from 'react';
 
-import { Button, ButtonGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Button, ButtonGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
-import { formatNumerical } from "../../utils/string";
-import { ObsmKeysList } from "../obsm-list/ObsmList";
+import { formatNumerical } from '../../utils/string';
+import { ObsmKeysList } from '../obsm-list/ObsmList';
 
 export function Toolbox({ mode, obsLength, slicedLength }) {
   return (
@@ -18,7 +18,7 @@ export function Toolbox({ mode, obsLength, slicedLength }) {
               placement="top"
               overlay={
                 <Tooltip id="tooltip-dropped-mode">
-                  You have selected {formatNumerical(slicedLength)} out of{" "}
+                  You have selected {formatNumerical(slicedLength)} out of{' '}
                   {formatNumerical(obsLength)} cells
                 </Tooltip>
               }
@@ -26,10 +26,10 @@ export function Toolbox({ mode, obsLength, slicedLength }) {
               <Button
                 size="sm"
                 variant="primary"
-                style={{ cursor: "default" }}
+                style={{ cursor: 'default' }}
                 aria-disabled="true"
               >
-                {formatNumerical(slicedLength)} of {formatNumerical(obsLength)}{" "}
+                {formatNumerical(slicedLength)} of {formatNumerical(obsLength)}{' '}
                 cells
               </Button>
             </OverlayTrigger>
@@ -45,7 +45,7 @@ export function Toolbox({ mode, obsLength, slicedLength }) {
               <Button
                 size="sm"
                 variant="primary"
-                style={{ cursor: "default" }}
+                style={{ cursor: 'default' }}
                 aria-disabled="true"
               >
                 {formatNumerical(obsLength)} cells

@@ -1,6 +1,8 @@
+import React from 'react';
+
 export default function MatrixPlotIcon({
   size = 40,
-  colour = "#000",
+  colour = '#000',
   gap = 2,
   ...props
 }) {

@@ -1,8 +1,8 @@
-import React from "react";
+import React from 'react';
 
-import { faList, faSearch, faSliders } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Container, Nav, Navbar } from "react-bootstrap";
+import { faList, faSearch, faSliders } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Container, Nav, Navbar } from 'react-bootstrap';
 
 export const Toolbar = ({
   showObsBtn = true,
@@ -51,7 +51,7 @@ export const Toolbar = ({
 
 export const ObsPlotlyToolbar = ({ onClick }) => {
   return {
-    name: "Categories",
+    name: 'Categories',
     icon: {
       width: 512,
       height: 512,
@@ -63,7 +63,7 @@ export const ObsPlotlyToolbar = ({ onClick }) => {
 
 export const VarPlotlyToolbar = ({ onClick }) => {
   return {
-    name: "Features",
+    name: 'Features',
     icon: {
       width: 512,
       height: 512,
@@ -75,7 +75,7 @@ export const VarPlotlyToolbar = ({ onClick }) => {
 
 export const ControlsPlotlyToolbar = ({ onClick }) => {
   return {
-    name: "Controls",
+    name: 'Controls',
     icon: {
       width: 512,
       height: 512,

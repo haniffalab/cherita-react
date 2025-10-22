@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { useVirtualizer } from "@tanstack/react-virtual";
+import { useVirtualizer } from '@tanstack/react-virtual';
 
 export function VirtualizedList({
   getDataAtIndex,
@@ -8,7 +8,7 @@ export function VirtualizedList({
   ItemComponent,
   estimateSize = () => 45,
   overscan = 25,
-  maxHeight = "65vh",
+  maxHeight = '65vh',
   ...props
 }) {
   const [parentNode, setParentNode] = useState(null);
@@ -33,23 +33,23 @@ export function VirtualizedList({
   return (
     <div
       ref={refCallback}
-      style={{ overflowY: "auto", maxHeight: maxHeight }}
+      style={{ overflowY: 'auto', maxHeight: maxHeight }}
       className="modern-scrollbars"
     >
       <div
         style={{
           height: `${itemVirtualizer.getTotalSize()}px`,
-          width: "100%",
-          position: "relative",
-          willChange: "transform",
+          width: '100%',
+          position: 'relative',
+          willChange: 'transform',
         }}
       >
         <div
           style={{
-            position: "absolute",
+            position: 'absolute',
             top: 0,
             left: 0,
-            width: "100%",
+            width: '100%',
             transform: `translateY(${virtualItems[0]?.start ?? 0}px)`,
           }}
         >

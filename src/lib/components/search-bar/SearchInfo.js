@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import _ from "lodash";
-import { Button, ListGroup } from "react-bootstrap";
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import _ from 'lodash';
+import { Button, ListGroup } from 'react-bootstrap';
 
-import { VAR_SORT } from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
+import { VAR_SORT } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
-import { useFetch } from "../../utils/requests";
-import { VarDiseaseInfo } from "../var-list/VarItem";
-import { sortMeans, useVarMean } from "../var-list/VarList";
+} from '../../context/SettingsContext';
+import { useFetch } from '../../utils/requests';
+import { VarDiseaseInfo } from '../var-list/VarItem';
+import { sortMeans, useVarMean } from '../var-list/VarList';
 
 export function VarInfo({ varItem }) {
-  const ENDPOINT = "disease/gene";
+  const ENDPOINT = 'disease/gene';
   const dataset = useDataset();
   const [params, setParams] = useState({
     geneName: varItem.name,
@@ -54,7 +54,7 @@ export function VarInfo({ varItem }) {
 }
 
 export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
-  const ENDPOINT = "disease/genes";
+  const ENDPOINT = 'disease/genes';
   const dataset = useDataset();
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
@@ -86,7 +86,7 @@ export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
 
   const varMeans = useVarMean(
     diseaseVars,
-    !!diseaseVars?.length && settings.varSort.disease.sort === VAR_SORT.MATRIX
+    !!diseaseVars?.length && settings.varSort.disease.sort === VAR_SORT.MATRIX,
   );
 
   useEffect(() => {
@@ -98,13 +98,13 @@ export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
             (o) => {
               return sortMeans(o, varMeans.fetchedData);
             },
-            settings.varSort.disease.sortOrder
-          )
+            settings.varSort.disease.sortOrder,
+          ),
         );
       }
     } else if (settings.varSort.disease.sort === VAR_SORT.NAME) {
       setSortedDiseaseVars(
-        _.orderBy(diseaseVars, "name", settings.varSort.disease.sortOrder)
+        _.orderBy(diseaseVars, 'name', settings.varSort.disease.sortOrder),
       );
     } else {
       setSortedDiseaseVars(diseaseVars);

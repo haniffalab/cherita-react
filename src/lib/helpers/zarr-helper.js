@@ -1,7 +1,7 @@
-import { useCallback } from "react";
+import { useCallback } from 'react';
 
-import { useQueries, useQuery } from "@tanstack/react-query";
-import { ArrayNotFoundError, GroupNotFoundError, openArray } from "zarr";
+import { useQueries, useQuery } from '@tanstack/react-query';
+import { ArrayNotFoundError, GroupNotFoundError, openArray } from 'zarr';
 
 export const GET_OPTIONS = {
   concurrencyLimit: 10, // max number of concurrent requests (default 10)
@@ -12,7 +12,7 @@ export const GET_OPTIONS = {
 
 export class ZarrHelper {
   async open(url, path) {
-    const z = await openArray({ store: url, path: path, mode: "r" });
+    const z = await openArray({ store: url, path: path, mode: 'r' });
     return z;
   }
 }
@@ -37,14 +37,14 @@ const fetchDataFromZarr = async (url, path, s, opts) => {
 export const useZarr = (
   { url, path, s = null },
   options = GET_OPTIONS,
-  opts = {}
+  opts = {},
 ) => {
   const {
     data = null,
     isLoading: isPending = false,
     error: serverError = null,
   } = useQuery({
-    queryKey: ["zarr", url, path, s],
+    queryKey: ['zarr', url, path, s],
     queryFn: () => fetchDataFromZarr(url, path, s, options),
     retry: (failureCount, { error }) => {
       if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
@@ -69,20 +69,20 @@ export const useMultipleZarr = (
   inputs,
   options = GET_OPTIONS,
   opts = {},
-  agg = aggregateData
+  agg = aggregateData,
 ) => {
   const combine = useCallback(
     (results) => {
       return {
         data: agg(
           inputs,
-          results.map((result) => result.data)
+          results.map((result) => result.data),
         ),
         isLoading: results.some((result) => result.isLoading),
         serverError: results.find((result) => result.error),
       };
     },
-    [agg, inputs]
+    [agg, inputs],
   );
 
   const {
@@ -91,7 +91,7 @@ export const useMultipleZarr = (
     serverError = null,
   } = useQueries({
     queries: inputs.map((input) => ({
-      queryKey: ["zarr", input.url, input.path, input.s],
+      queryKey: ['zarr', input.url, input.path, input.s],
       queryFn: () => fetchDataFromZarr(input.url, input.path, input.s, options),
       retry: (failureCount, { error }) => {
         if ([400, 401, 403, 404, 422].includes(error?.status)) return false;

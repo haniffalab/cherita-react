@@ -1,22 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
-import _ from "lodash";
-import { Button } from "react-bootstrap";
-import Plot from "react-plotly.js";
+import _ from 'lodash';
+import { Button } from 'react-bootstrap';
+import Plot from 'react-plotly.js';
 
-import { PLOTLY_MODEBAR_BUTTONS } from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
-import { useFilteredData } from "../../context/FilterContext";
-import { useSettings } from "../../context/SettingsContext";
-import { LoadingSpinner } from "../../utils/LoadingIndicators";
-import { useDebouncedFetch } from "../../utils/requests";
-import { useSelectedMultiVar, useSelectedObs } from "../../utils/Resolver";
-import { PlotAlert } from "../full-page/PlotAlert";
+import { PLOTLY_MODEBAR_BUTTONS } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
+import { useFilteredData } from '../../context/FilterContext';
+import { useSettings } from '../../context/SettingsContext';
+import { LoadingSpinner } from '../../utils/LoadingIndicators';
+import { useDebouncedFetch } from '../../utils/requests';
+import { useSelectedMultiVar, useSelectedObs } from '../../utils/Resolver';
+import { PlotAlert } from '../full-page/PlotAlert';
 import {
   ControlsPlotlyToolbar,
   ObsPlotlyToolbar,
   VarPlotlyToolbar,
-} from "../toolbar/Toolbar";
+} from '../toolbar/Toolbar';
 
 export function Heatmap({
   showObsBtn = false,
@@ -28,7 +28,7 @@ export function Heatmap({
   plotType,
   setPlotType,
 }) {
-  const ENDPOINT = "heatmap";
+  const ENDPOINT = 'heatmap';
   const dataset = useDataset();
   const settings = useSettings();
   const { obsIndices, isSliced } = useFilteredData();
@@ -47,7 +47,7 @@ export function Heatmap({
       ? null
       : _.difference(selectedObs?.values, selectedObs?.omit),
     varKeys: selectedMultiVar.map((i) =>
-      i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
+      i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index,
     ),
     obsIndices: isSliced ? [...(obsIndices || [])] : null,
     varNamesCol: dataset.varNamesCol,
@@ -70,7 +70,7 @@ export function Heatmap({
         varKeys: selectedMultiVar.map((i) =>
           i.isSet
             ? { name: i.name, indices: i.vars.map((v) => v.index) }
-            : i.index
+            : i.index,
         ),
         obsIndices: isSliced ? [...(obsIndices || [])] : null,
         varNamesCol: dataset.varNamesCol,
@@ -98,7 +98,7 @@ export function Heatmap({
     ENDPOINT,
     params,
     500,
-    { enabled: !!params.obsCol && !!params.varKeys.length }
+    { enabled: !!params.obsCol && !!params.varKeys.length },
   );
 
   useEffect(() => {
@@ -133,7 +133,7 @@ export function Heatmap({
             data={data}
             layout={layout}
             useResizeHandler={true}
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: '100%', height: '100%' }}
             config={{
               displaylogo: false,
               modeBarButtons: modeBarButtons,
@@ -150,7 +150,7 @@ export function Heatmap({
         setPlotType={setPlotType}
       >
         <p className="p-0 m-0">
-          Select one or more{" "}
+          Select one or more{' '}
           {showVarsBtn ? (
             <Button
               variant="link"
@@ -160,9 +160,9 @@ export function Heatmap({
               features
             </Button>
           ) : (
-            "features"
-          )}{" "}
-          to display their expression, then choose a{" "}
+            'features'
+          )}{' '}
+          to display their expression, then choose a{' '}
           {showObsBtn ? (
             <Button
               variant="link"
@@ -172,8 +172,8 @@ export function Heatmap({
               category
             </Button>
           ) : (
-            "category"
-          )}{" "}
+            'category'
+          )}{' '}
           to group observations in the heatmap.
         </p>
       </PlotAlert>
@@ -187,7 +187,7 @@ export function Heatmap({
         setPlotType={setPlotType}
       >
         {serverError.message ||
-          "An unexpected error occurred while generating the plot."}
+          'An unexpected error occurred while generating the plot.'}
       </PlotAlert>
     );
   }

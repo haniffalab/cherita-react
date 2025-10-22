@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 
-import _ from "lodash";
+import _ from 'lodash';
 import {
   Button,
   ButtonGroup,
@@ -8,19 +8,19 @@ import {
   DropdownButton,
   OverlayTrigger,
   Tooltip,
-} from "react-bootstrap";
+} from 'react-bootstrap';
 
-import { DEFAULT_OBSM_KEYS } from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
+import { DEFAULT_OBSM_KEYS } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
-import { useFetch } from "../../utils/requests";
-import { ObsmKeysListBtn } from "../../utils/Skeleton";
+} from '../../context/SettingsContext';
+import { useFetch } from '../../utils/requests';
+import { ObsmKeysListBtn } from '../../utils/Skeleton';
 
 export function ObsmKeysList() {
-  const ENDPOINT = "obsm/keys";
+  const ENDPOINT = 'obsm/keys';
   const dataset = useDataset();
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
@@ -53,11 +53,11 @@ export function ObsmKeysList() {
         _.each(DEFAULT_OBSM_KEYS, (k) => {
           const defaultObsm = _.find(
             fetchedData,
-            (item) => item.toLowerCase() === k
+            (item) => item.toLowerCase() === k,
           );
           if (defaultObsm) {
             dispatch({
-              type: "select.obsm",
+              type: 'select.obsm',
               obsm: defaultObsm,
             });
             return false; // break
@@ -69,7 +69,7 @@ export function ObsmKeysList() {
         // If selected obsm is not in keys list, reset to null
         if (!_.includes(fetchedData, settings.selectedObsm)) {
           dispatch({
-            type: "select.obsm",
+            type: 'select.obsm',
             obsm: null,
           });
         } else {
@@ -83,10 +83,10 @@ export function ObsmKeysList() {
     return (
       <Dropdown.Item
         key={item}
-        className={`custom ${active === item && "active"}`}
+        className={`custom ${active === item && 'active'}`}
         onClick={() => {
           dispatch({
-            type: "select.obsm",
+            type: 'select.obsm',
             obsm: item,
           });
         }}
@@ -104,8 +104,8 @@ export function ObsmKeysList() {
     return (
       <DropdownButton
         as={ButtonGroup}
-        title={settings.selectedObsm || "Select an embedding"}
-        variant={settings.selectedObsm ? "primary" : "warning"}
+        title={settings.selectedObsm || 'Select an embedding'}
+        variant={settings.selectedObsm ? 'primary' : 'warning'}
         id="bg-nested-dropdown"
         size="sm"
       >

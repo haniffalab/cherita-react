@@ -1,6 +1,8 @@
+import React from 'react';
+
 export default function ScatterplotIcon({
   size = 40,
-  colour = "#000",
+  colour = '#000',
   ...props
 }) {
   // Points with cluster assignments

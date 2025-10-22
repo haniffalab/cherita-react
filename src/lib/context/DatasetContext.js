@@ -1,13 +1,13 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext } from 'react';
 
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
-import { QueryClient, QueryCache } from "@tanstack/react-query";
-import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import _ from "lodash";
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister';
+import { QueryClient, QueryCache } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import _ from 'lodash';
 
-import { FilterProvider } from "./FilterContext";
-import { SettingsProvider } from "./SettingsContext";
-import { ZarrDataProvider } from "./ZarrDataContext";
+import { FilterProvider } from './FilterContext';
+import { SettingsProvider } from './SettingsContext';
+import { ZarrDataProvider } from './ZarrDataContext';
 
 export const DatasetContext = createContext(null);
 
@@ -29,23 +29,23 @@ const queryClient = new QueryClient({
 });
 // Type of queries to store responses
 const persistKeys = [
-  "obs/cols",
-  "var/names",
-  "obsm/keys",
-  "obs/bins",
-  "obs/distribution",
+  'obs/cols',
+  'var/names',
+  'obsm/keys',
+  'obs/bins',
+  'obs/distribution',
 ];
 const persistOptions = {
   persister: createSyncStoragePersister({ storage: window.localStorage }),
   dehydrateOptions: {
     shouldDehydrateQuery: ({ queryKey, state }) => {
-      if (state.status === "success") {
+      if (state.status === 'success') {
         return persistKeys.includes(queryKey?.[0]);
       }
       return false;
     },
   },
-  buster: process.env.PACKAGE_VERSION || "0.0.0",
+  buster: process.env.PACKAGE_VERSION || '0.0.0',
   // @TODO: add maxAge and api version numbers as buster
 };
 

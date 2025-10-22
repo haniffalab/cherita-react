@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 import {
   faCrosshairs,
@@ -11,10 +11,10 @@ import {
   faSearch,
   faSliders,
   faTrash,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { JoinInner } from "@mui/icons-material";
-import useMediaQuery from "@mui/material/useMediaQuery";
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { JoinInner } from '@mui/icons-material';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import {
   DrawLineStringMode,
   DrawPolygonByDraggingMode,
@@ -22,19 +22,19 @@ import {
   DrawRectangleMode,
   ModifyMode,
   ViewMode,
-} from "@nebula.gl/edit-modes";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import Button from "react-bootstrap/Button";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
-import Dropdown from "react-bootstrap/Dropdown";
+} from '@nebula.gl/edit-modes';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Dropdown from 'react-bootstrap/Dropdown';
 
-import { OffcanvasControls } from "../offcanvas";
-import { ScatterplotControls } from "./ScatterplotControls";
-import { BREAKPOINTS } from "../../constants/constants";
+import { OffcanvasControls } from '../offcanvas';
+import { ScatterplotControls } from './ScatterplotControls';
+import { BREAKPOINTS } from '../../constants/constants';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
+} from '../../context/SettingsContext';
 
 export function SpatialControls({
   mode,
@@ -61,21 +61,21 @@ export function SpatialControls({
   const showObsBtn = isFullscreen ? LgBreakpoint : true;
   const showVarsBtn = isFullscreen ? XlBreakpoint : true;
 
-  const onSelect = (eventKey, event) => {
+  const onSelect = (eventKey) => {
     switch (eventKey) {
-      case "DrawPolygonMode":
+      case 'DrawPolygonMode':
         setMode(() => DrawPolygonMode);
         break;
-      case "DrawLineStringMode":
+      case 'DrawLineStringMode':
         setMode(() => DrawLineStringMode);
         break;
-      case "DrawPolygonByDraggingMode":
+      case 'DrawPolygonByDraggingMode':
         setMode(() => DrawPolygonByDraggingMode);
         break;
-      case "DrawRectangleMode":
+      case 'DrawRectangleMode':
         setMode(() => DrawRectangleMode);
         break;
-      case "ModifyMode":
+      case 'ModifyMode':
         setMode(() => ModifyMode);
         break;
       default:
@@ -85,7 +85,7 @@ export function SpatialControls({
 
   const deleteFeatures = (_eventKey, _event) => {
     setFeatures({
-      type: "FeatureCollection",
+      type: 'FeatureCollection',
       features: [],
     });
   };
@@ -98,7 +98,7 @@ export function SpatialControls({
         onClick={() => {
           setMode(() => ViewMode);
           dispatch({
-            type: "toggle.slice.polygons",
+            type: 'toggle.slice.polygons',
           });
         }}
       >
@@ -108,10 +108,10 @@ export function SpatialControls({
         title="Delete selected polygons"
         onClick={() => {
           const newFeatures = features.features.filter(
-            (_f, i) => !selectedFeatureIndexes.includes(i)
+            (_f, i) => !selectedFeatureIndexes.includes(i),
           );
           setFeatures({
-            type: "FeatureCollection",
+            type: 'FeatureCollection',
             features: newFeatures,
           });
         }}
@@ -174,7 +174,7 @@ export function SpatialControls({
         >
           <Dropdown.Toggle
             id="dropdown-autoclose-outside"
-            className={`caret-off ${mode === DrawPolygonByDraggingMode || mode === ModifyMode ? "active" : ""}`}
+            className={`caret-off ${mode === DrawPolygonByDraggingMode || mode === ModifyMode ? 'active' : ''}`}
           >
             <FontAwesomeIcon icon={faDrawPolygon} />
           </Dropdown.Toggle>

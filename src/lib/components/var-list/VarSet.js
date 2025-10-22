@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 import {
   faChevronDown,
@@ -7,30 +7,30 @@ import {
   faDroplet,
   faPlus,
   faTrash,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import _ from "lodash";
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import _ from 'lodash';
 import {
   Button,
   Collapse,
   ListGroup,
   OverlayTrigger,
   Tooltip,
-} from "react-bootstrap";
+} from 'react-bootstrap';
 
-import { SelectionItem } from "./VarItem";
-import { COLOR_ENCODINGS, SELECTION_MODES } from "../../constants/constants";
+import { SelectionItem } from './VarItem';
+import { COLOR_ENCODINGS, SELECTION_MODES } from '../../constants/constants';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
-import { SearchModal } from "../search-bar/SearchBar";
+} from '../../context/SettingsContext';
+import { SearchModal } from '../search-bar/SearchBar';
 
 // @TODO: add button to score genes and plot
 
 const addVarToSet = (dispatch, set, v) => {
   dispatch({
-    type: "add.varSet.var",
+    type: 'add.varSet.var',
     varSet: set,
     var: v,
   });
@@ -46,7 +46,7 @@ function SelectionSet({
 }) {
   const [openSet, setOpenSet] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState('');
 
   const varList = set.vars.length ? (
     _.map(set.vars, (v) => {
@@ -114,7 +114,7 @@ function SelectionSet({
             </Button>
             <Button
               type="button"
-              variant={isActive ? "primary" : "outline-primary"}
+              variant={isActive ? 'primary' : 'outline-primary'}
               className="m-0 p-0 px-1"
               onClick={(e) => {
                 e.stopPropagation();
@@ -155,7 +155,7 @@ function SelectionSet({
         handleClose={() => setShowModal(false)}
         text={searchText}
         setText={setSearchText}
-        displayText={"features"}
+        displayText={'features'}
         handleSelect={(d, i) => {
           addVarToSet(d, set, i);
         }}
@@ -173,16 +173,16 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
   const selectSet = () => {
     if (mode === SELECTION_MODES.SINGLE) {
       dispatch({
-        type: "select.var",
+        type: 'select.var',
         var: set,
       });
       dispatch({
-        type: "set.colorEncoding",
-        value: "var",
+        type: 'set.colorEncoding',
+        value: 'var',
       });
     } else if (mode === SELECTION_MODES.MULTIPLE) {
       dispatch({
-        type: "select.multivar",
+        type: 'select.multivar',
         var: set,
       });
     }
@@ -192,26 +192,26 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
     if (mode === SELECTION_MODES.SINGLE) {
       if (active === set.name) {
         dispatch({
-          type: "reset.var",
+          type: 'reset.var',
         });
       }
     } else if (mode === SELECTION_MODES.MULTIPLE) {
       if (active.includes(set.name)) {
         dispatch({
-          type: "deselect.multivar",
+          type: 'deselect.multivar',
           var: set,
         });
       }
     }
     dispatch({
-      type: "remove.var",
+      type: 'remove.var',
       var: set,
     });
   };
 
   const removeSetVar = (v) => {
     dispatch({
-      type: "remove.varSet.var",
+      type: 'remove.varSet.var',
       varSet: set,
       var: v,
     });
@@ -219,7 +219,7 @@ export function VarSet({ set, active, mode = SELECTION_MODES.SINGLE }) {
 
   const toggleSet = () => {
     dispatch({
-      type: "toggle.multivar",
+      type: 'toggle.multivar',
       var: set,
     });
   };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 import {
   DatasetProvider,
@@ -8,8 +8,8 @@ import {
   Scatterplot,
   ScatterplotControls,
   SELECTION_MODES,
-} from "@haniffalab/cherita-react";
-import Container from "react-bootstrap/Container";
+} from '@haniffalab/cherita-react';
+import Container from 'react-bootstrap/Container';
 
 export default function ScatterplotDemo(props) {
   const [showObs, setShowObs] = useState(false);
