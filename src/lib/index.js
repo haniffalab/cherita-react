@@ -1,3 +1,4 @@
+export { PerturbGen } from "./apps/perturbgen/PerturbGen";
 export { Dotplot } from "./components/dotplot/Dotplot";
 export { DotplotControls } from "./components/dotplot/DotplotControls";
 export { FullPage } from "./components/full-page/FullPage";

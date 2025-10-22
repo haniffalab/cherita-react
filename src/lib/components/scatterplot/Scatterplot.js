@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback,
   useDeferredValue,
   useEffect,
@@ -7,6 +7,7 @@ import React, {
   useState,
 } from "react";
 
+import { LinearInterpolator } from "@deck.gl/core";
 import { ScatterplotLayer } from "@deck.gl/layers";
 import { DeckGL } from "@deck.gl/react";
 import { faTriangleExclamation } from "@fortawesome/free-solid-svg-icons";
@@ -16,8 +17,6 @@ import { EditableGeoJsonLayer } from "@nebula.gl/layers";
 import _ from "lodash";
 import { Alert } from "react-bootstrap";
 
-import { SpatialControls } from "./SpatialControls";
-import { Toolbox } from "./Toolbox";
 import {
   COLOR_ENCODINGS,
   OBS_TYPES,
@@ -38,6 +37,8 @@ import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useSelectedObs } from "../../utils/Resolver";
 import { formatNumerical } from "../../utils/string";
 import { useLabelObsData } from "../../utils/zarrData";
+import { SpatialControls } from "./SpatialControls";
+import { Toolbox } from "./Toolbox";
 
 window.deck.log.level = 1;
 
@@ -55,6 +56,7 @@ export function Scatterplot({
   setShowObs,
   setShowVars,
   isFullscreen = false,
+  pointInteractionEnabled = false,
 }) {
   const { useUnsColors } = useDataset();
   const settings = useSettings();
@@ -74,6 +76,10 @@ export function Scatterplot({
   const [dataError, setDataError] = useState(null);
 
   const selectedObs = useSelectedObs();
+  const selectedObsIndex = settings.selectedObsIndex;
+
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+  const [isHoveringPoint, setIsHoveringPoint] = useState(false);
 
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
@@ -180,6 +186,30 @@ export function Scatterplot({
     obsmData.serverError,
     data.positions,
   ]);
+
+  useEffect(() => {
+    if (!pointInteractionEnabled) return;
+    if (selectedObsIndex == null) return;
+    if (!data.positions || !data.positions.length) return;
+
+    // Get coordinates of the selected observation
+    const coords = data.positions[selectedObsIndex];
+    if (!coords) return;
+
+    // Update viewState to centre on this point
+    setViewState((v) => ({
+      ...v,
+      longitude: coords[0],
+      latitude: coords[1],
+      zoom: Math.max(v.zoom, 6),
+      transitionDuration: 500,
+      transitionInterpolator: new LinearInterpolator([
+        "longitude",
+        "latitude",
+        "zoom",
+      ]), //@TODO: switch to easing interpolator
+    }));
+  }, [pointInteractionEnabled, selectedObsIndex, data.positions]);
 
   const getBounds = useCallback(() => {
     const { latitude, longitude, zoom } = new MapHelper().fitBounds(
@@ -293,9 +323,23 @@ export function Scatterplot({
   const getRadius = useCallback(
     (_d, { index }) => {
       const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
-      return grayOut ? 1 : 3;
+
+      if (
+        pointInteractionEnabled &&
+        (index === hoveredIndex || getOriginalIndex(index) === selectedObsIndex)
+      ) {
+        return grayOut ? 200 : 200;
+      }
+
+      return grayOut ? 1 : 60;
     },
-    [sortedObsIndices]
+    [
+      sortedObsIndices,
+      hoveredIndex,
+      selectedObsIndex,
+      getOriginalIndex,
+      pointInteractionEnabled,
+    ]
   );
 
   const memoizedLayers = useMemo(() => {
@@ -309,7 +353,14 @@ export function Scatterplot({
         getPosition: (d) => d,
         getFillColor: getFillColor,
         getRadius: getRadius,
-        updateTriggers: { getFillColor: getFillColor, getRadius: getRadius },
+        updateTriggers: {
+          getFillColor: getFillColor,
+          getRadius: [getRadius, hoveredIndex, selectedObsIndex],
+        },
+        transitions: {
+          getRadius: 200,
+          getFillColor: 200,
+        },
       }),
       new EditableGeoJsonLayer({
         id: "cherita-layer-draw",
@@ -375,18 +426,25 @@ export function Scatterplot({
   }, [settings.selectedObsm, dispatch, features.features]);
 
   function onLayerClick(info) {
-    if (mode !== ViewMode) {
-      // don't change selection while editing
+    if (mode !== ViewMode) return;
+
+    if (!info.object) {
+      // clicked empty space
+      setSelectedFeatureIndexes([]);
       return;
     }
 
-    setSelectedFeatureIndexes((f) =>
-      info.object
-        ? info.layer.id === "cherita-layer-draw"
-          ? [info.index]
-          : f
-        : []
-    );
+    if (info.layer.id === "cherita-layer-draw") {
+      // clicked a drawn polygon
+      setSelectedFeatureIndexes([info.index]);
+    } else if (
+      info.layer.id === "cherita-layer-scatterplot" &&
+      pointInteractionEnabled
+    ) {
+      // clicked a scatterplot point
+      const originalIndex = getOriginalIndex(info.index);
+      dispatch({ type: "set.selectedObsIndex", index: originalIndex });
+    }
   }
 
   const getLabel = (o, v, isVar = false) => {
@@ -468,9 +526,17 @@ export function Scatterplot({
             setIsRendering(false);
           }}
           useDevicePixels={false}
-          getCursor={({ isDragging }) =>
-            mode !== ViewMode ? "crosshair" : isDragging ? "grabbing" : "grab"
-          }
+          onHover={({ object, index }) => {
+            const active = pointInteractionEnabled && !!object;
+            setHoveredIndex(active ? index : null);
+            setIsHoveringPoint(active);
+          }}
+          getCursor={({ isDragging }) => {
+            if (mode !== ViewMode) return "crosshair";
+            if (isDragging) return "grabbing";
+            if (isHoveringPoint) return "pointer";
+            return "grab";
+          }}
           ref={deckRef}
         ></DeckGL>
         <SpatialControls
