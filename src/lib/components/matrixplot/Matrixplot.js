@@ -148,7 +148,7 @@ export function Matrixplot({
     return (
       <PlotAlert
         variant="info"
-        heading="Matrixplot"
+        heading="Set up your matrix plot"
         plotType={plotType}
         setPlotType={setPlotType}
       >
@@ -185,7 +185,7 @@ export function Matrixplot({
     return (
       <PlotAlert
         variant="danger"
-        heading="Matrixplot"
+        heading="Error displaying the matrix plot"
         plotType={plotType}
         setPlotType={setPlotType}
       >

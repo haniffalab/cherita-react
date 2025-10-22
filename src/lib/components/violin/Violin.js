@@ -220,13 +220,13 @@ export function Violin({
     return (
       <PlotAlert
         variant="info"
-        heading="Violin plot"
+        heading="Set up your violin plot"
         plotType={plotType}
         setPlotType={setPlotType}
       >
         {mode === VIOLIN_MODES.MULTIKEY && (
           <p className="p-0 m-0">
-            To begin, select one or more{" "}
+            Select one or more{" "}
             {showVarsBtn ? (
               <Button
                 variant="link"
@@ -243,7 +243,7 @@ export function Violin({
         )}
         {mode === VIOLIN_MODES.GROUPBY && (
           <p className="p-0 m-0">
-            To begin, select a{" "}
+            Select a{" "}
             {showObsBtn ? (
               <Button
                 variant="link"
@@ -276,7 +276,7 @@ export function Violin({
     return (
       <PlotAlert
         variant="danger"
-        heading="Violin plot"
+        heading="Error displaying the violin plot"
         plotType={plotType}
         setPlotType={setPlotType}
       >

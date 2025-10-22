@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback,
   useDeferredValue,
   useEffect,
@@ -16,8 +16,6 @@ import { EditableGeoJsonLayer } from "@nebula.gl/layers";
 import _ from "lodash";
 import { Alert } from "react-bootstrap";
 
-import { SpatialControls } from "./SpatialControls";
-import { Toolbox } from "./Toolbox";
 import {
   COLOR_ENCODINGS,
   OBS_TYPES,
@@ -38,6 +36,9 @@ import { LoadingLinear, LoadingSpinner } from "../../utils/LoadingIndicators";
 import { useSelectedObs } from "../../utils/Resolver";
 import { formatNumerical } from "../../utils/string";
 import { useLabelObsData } from "../../utils/zarrData";
+import { PlotAlert } from "../full-page/PlotAlert";
+import { SpatialControls } from "./SpatialControls";
+import { Toolbox } from "./Toolbox";
 
 window.deck.log.level = 1;
 
@@ -54,6 +55,8 @@ export function Scatterplot({
   radius = null,
   setShowObs,
   setShowVars,
+  plotType,
+  setPlotType,
   isFullscreen = false,
 }) {
   const { useUnsColors } = useDataset();
@@ -455,14 +458,15 @@ export function Scatterplot({
 
   if (!hasObsm) {
     return (
-      <div className="cherita-container-scatterplot">
-        <div className="cherita-scatterplot d-flex h-100 w-100 align-items-center justify-content-center">
-          <Alert variant="warning">
-            This dataset does not contain embeddings. Please use a different
-            type of plot.
-          </Alert>
-        </div>
-      </div>
+      <PlotAlert
+        variant="info"
+        heading="Scatterplot unavailable for this dataset"
+        plotType={plotType}
+        setPlotType={setPlotType}
+      >
+        This dataset does not include any embeddings, so a scatterplot cannot be
+        displayed. Please choose a different plot type to explore the data.
+      </PlotAlert>
     );
   }
 

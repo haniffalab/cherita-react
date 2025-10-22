@@ -189,7 +189,7 @@ export function Dotplot({
     return (
       <PlotAlert
         variant="info"
-        heading="Dotplot"
+        heading="Set up your dotplot"
         plotType={plotType}
         setPlotType={setPlotType}
       >
@@ -226,7 +226,7 @@ export function Dotplot({
     return (
       <PlotAlert
         variant="danger"
-        heading="Dotplot"
+        heading="Error displaying the dotplot"
         plotType={plotType}
         setPlotType={setPlotType}
       >
