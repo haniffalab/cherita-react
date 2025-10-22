@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useMediaQuery } from "@mui/material";
 import { Card, Container, Modal } from "react-bootstrap";
@@ -60,6 +60,7 @@ export function FullPage({
   const XlBreakpoint = useMediaQuery(BREAKPOINTS.XL);
   const showObsBtn = LgBreakpoint;
   const showVarsBtn = XlBreakpoint;
+  const showPlotBtn = showVarsBtn;
 
   const { plotControls, varMode, showSelectedAsActive } = {
     [PLOT_TYPES.SCATTERPLOT]: {
@@ -94,9 +95,11 @@ export function FullPage({
       showObsBtn,
       showVarsBtn,
       showCtrlsBtn: true,
+      plotType,
       setShowObs,
       setShowVars,
       setShowControls,
+      setPlotType,
     };
 
     switch (plotType) {
@@ -130,7 +133,7 @@ export function FullPage({
           <div className="cherita-app-sidebar p-3">
             <Card>
               <Card.Body>
-                <div className="sidebar-plotselector">
+                <div className="plotselector">
                   <PlotTypeSelector
                     currentType={plotType}
                     onChange={(type) => setPlotType(type)}
