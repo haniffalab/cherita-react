@@ -64,7 +64,9 @@ export function ObsColsList({
   const dispatch = useSettingsDispatch();
   const [enableGroups, setEnableGroups] = useState(enableObsGroups);
   const [obsCols, setObsCols] = useState(null);
-  const [active, setActive] = useState([...[settings.selectedObs?.name]]);
+  const [active, setActive] = useState([
+    ...(settings.selectedObs ? [settings.selectedObs?.name] : []),
+  ]);
   const [params, setParams] = useState({ url: dataset.url });
   const obsGroups = useMemo(
     () => ({
@@ -120,13 +122,16 @@ export function ObsColsList({
   }, [fetchedData, isPending, obsGroups, serverError, enableGroups]);
 
   useEffect(() => {
-    if (obsCols) {
-      if (!obsCols[settings.selectedObs?.name]) {
-        setActive([]);
+    if (obsCols && settings.selectedObs) {
+      const { name } = settings.selectedObs;
+      if (!obsCols[name]) {
         dispatch({ type: "select.obs", obs: null });
+        if (active.includes(name)) {
+          setActive((prev) => _.without(prev, name));
+        }
       }
     }
-  }, [settings.selectedObs, dispatch, obsCols]);
+  }, [settings.selectedObs, dispatch, obsCols, active]);
 
   const handleAccordionToggle = (itemName, isCurrentEventKey) => {
     if (isCurrentEventKey) {
