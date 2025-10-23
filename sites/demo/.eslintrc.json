@@ -3,40 +3,12 @@
 		"react-app",
 		"prettier",
 		"plugin:import/errors",
-		"plugin:import/warnings"
+		"plugin:import/warnings",
+		"plugin:prettier/recommended"
 	],
-	"rules": {
-		"import/order": [
-			"error",
-			{
-				"groups": [
-					"builtin",
-					"external",
-					"internal",
-					[
-						"parent",
-						"sibling"
-					],
-					"index"
-				],
-				"pathGroups": [
-					{
-						"pattern": "react",
-						"group": "external",
-						"position": "before"
-					}
-				],
-				"pathGroupsExcludedImportTypes": [
-					"react"
-				],
-				"newlines-between": "always",
-				"alphabetize": {
-					"order": "asc",
-					"caseInsensitive": true
-				}
-			}
-		]
-	},
+	"plugins": [
+		"unused-imports"
+	],
 	"settings": {
 		"import/resolver": {
 			"node": {
@@ -68,5 +40,46 @@
 				]
 			}
 		}
+	},
+	"rules": {
+		"import/order": [
+			"error",
+			{
+				"groups": [
+					"builtin",
+					"external",
+					"internal",
+					[
+						"parent",
+						"sibling"
+					],
+					"index"
+				],
+				"pathGroups": [
+					{
+						"pattern": "react",
+						"group": "external",
+						"position": "before"
+					}
+				],
+				"pathGroupsExcludedImportTypes": [
+					"react"
+				],
+				"newlines-between": "always",
+				"alphabetize": {
+					"order": "asc",
+					"caseInsensitive": true
+				}
+			}
+		],
+		"prettier/prettier": [
+			"error",
+			{
+				"singleQuote": true,
+				"tabWidth": 2,
+				"useTabs": false
+			}
+		],
+		"unused-imports/no-unused-imports": "error"
 	}
 }
