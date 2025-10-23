@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import _ from "lodash";
 import { Button } from "react-bootstrap";
@@ -40,18 +40,30 @@ export function Heatmap({
   const selectedObs = useSelectedObs();
   const selectedMultiVar = useSelectedMultiVar();
 
-  const [params, setParams] = useState({
-    url: dataset.url,
-    obsCol: selectedObs,
-    obsValues: !selectedObs?.omit.length
-      ? null
-      : _.difference(selectedObs?.values, selectedObs?.omit),
-    varKeys: selectedMultiVar.map((i) =>
-      i.isSet ? { name: i.name, indices: i.vars.map((v) => v.index) } : i.index
-    ),
-    obsIndices: isSliced ? [...(obsIndices || [])] : null,
-    varNamesCol: dataset.varNamesCol,
-  });
+  const params = useMemo(
+    () => ({
+      url: dataset.url,
+      obsCol: selectedObs,
+      obsValues: !selectedObs?.omit.length
+        ? null
+        : _.difference(selectedObs?.values, selectedObs?.omit),
+      varKeys: selectedMultiVar.map((i) =>
+        i.isSet
+          ? { name: i.name, indices: i.vars.map((v) => v.index) }
+          : i.index
+      ),
+      obsIndices: isSliced ? [...(obsIndices || [])] : null,
+      varNamesCol: dataset.varNamesCol,
+    }),
+    [
+      dataset.url,
+      dataset.varNamesCol,
+      isSliced,
+      obsIndices,
+      selectedMultiVar,
+      selectedObs,
+    ]
+  );
 
   useEffect(() => {
     if (selectedObs && selectedMultiVar.length) {
@@ -59,23 +71,6 @@ export function Heatmap({
     } else {
       setHasSelections(false);
     }
-    setParams((p) => {
-      return {
-        ...p,
-        url: dataset.url,
-        obsCol: selectedObs,
-        obsValues: !selectedObs?.omit.length
-          ? null
-          : _.difference(selectedObs?.values, selectedObs?.omit),
-        varKeys: selectedMultiVar.map((i) =>
-          i.isSet
-            ? { name: i.name, indices: i.vars.map((v) => v.index) }
-            : i.index
-        ),
-        obsIndices: isSliced ? [...(obsIndices || [])] : null,
-        varNamesCol: dataset.varNamesCol,
-      };
-    });
   }, [
     selectedMultiVar,
     selectedObs,
@@ -98,14 +93,17 @@ export function Heatmap({
     ENDPOINT,
     params,
     500,
-    { enabled: !!params.obsCol && !!params.varKeys.length }
+    { isEnabled: (params) => !!params.obsCol && !!params.varKeys.length }
   );
 
   useEffect(() => {
-    if (hasSelections && !isPending && !serverError) {
+    if (hasSelections && !!fetchedData && !isPending && !serverError) {
       setData(fetchedData.data);
       setLayout(fetchedData.layout);
       updateColorscale(colorscale.current);
+    } else {
+      setData([]);
+      setLayout({});
     }
   }, [fetchedData, hasSelections, isPending, serverError, updateColorscale]);
 
