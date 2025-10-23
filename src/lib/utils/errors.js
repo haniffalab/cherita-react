@@ -12,7 +12,7 @@ export const parseError = (err) => {
     case "InvalidVar":
       return { ...err, message: "Feature not found in dataset" };
     case "InvalidKey":
-      return { ...err, message: "Key not found in datset" };
+      return { ...err, message: "Key not found in dataset" };
     case "BadRequest":
       return { ...err, message: "Invalid request to server" };
     case "InternalServerError":
