@@ -276,20 +276,24 @@ $gauge-padding: 0.15rem;
   background-color: #dedede;
 }
 
+.feature-histogram-tooltip td > p {
+  font-size: 0.85rem !important;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
 .feature-histogram-tooltip .MuiChartsTooltip-markCell,
+/* stylelint-disable-next-line selector-class-pattern */
 .MuiChartsTooltip-labelCell {
   display: none;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .feature-histogram-tooltip .MuiChartsTooltip-valueCell {
   padding: 0.5rem !important;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .feature-histogram-tooltip .MuiChartsTooltip-valueCell > p {
-  font-size: 0.85rem !important;
-}
-
-.feature-histogram-tooltip td > p {
   font-size: 0.85rem !important;
 }
 

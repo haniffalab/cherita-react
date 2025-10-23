@@ -3,6 +3,7 @@
   "plugins": ["stylelint-prettier"],
   "rules": {
     "prettier/prettier": [true, { "singleQuote": true }],
-    "no-empty-source": null
+    "no-empty-source": null,
+    "scss/at-extend-no-missing-placeholder": null
   }
 }
