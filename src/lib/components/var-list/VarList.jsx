@@ -1,31 +1,31 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { faTimes } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import _ from "lodash";
-import { Alert, Button, ListGroup } from "react-bootstrap";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
+import { faTimes } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import _ from 'lodash';
+import { Alert, Button, ListGroup } from 'react-bootstrap';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 
-import { VarItem } from "./VarItem";
-import { VarListToolbar } from "./VarListToolbar";
-import { VarSet } from "./VarSet";
-import { SELECTION_MODES, VAR_SORT } from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
-import { useFilteredData } from "../../context/FilterContext";
+import { VarItem } from './VarItem';
+import { VarListToolbar } from './VarListToolbar';
+import { VarSet } from './VarSet';
+import { SELECTION_MODES, VAR_SORT } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
+import { useFilteredData } from '../../context/FilterContext';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
-import { LoadingSpinner } from "../../utils/LoadingIndicators";
-import { useFetch } from "../../utils/requests";
+} from '../../context/SettingsContext';
+import { LoadingSpinner } from '../../utils/LoadingIndicators';
+import { useFetch } from '../../utils/requests';
 import {
   useSelectedMultiVar,
   useSelectedVar,
   useSettingsVars,
-} from "../../utils/Resolver";
+} from '../../utils/Resolver';
 
 export const useVarMean = (varKeys, enabled = false) => {
-  const ENDPOINT = "matrix/mean";
+  const ENDPOINT = 'matrix/mean';
   const dataset = useDataset();
   const { obsIndices } = useFilteredData();
   const [params, setParams] = useState({
@@ -33,7 +33,7 @@ export const useVarMean = (varKeys, enabled = false) => {
     varKeys: _.map(varKeys, (v) =>
       v.isSet
         ? { name: v.name, indices: v.vars.map((vv) => vv.index) }
-        : v.index
+        : v.index,
     ),
     obsIndices: obsIndices,
     varNamesCol: dataset.varNamesCol,
@@ -46,7 +46,7 @@ export const useVarMean = (varKeys, enabled = false) => {
         varKeys: _.map(varKeys, (v) =>
           v.isSet
             ? { name: v.name, indices: v.vars.map((vv) => vv.index) }
-            : v.index
+            : v.index,
         ),
         obsIndices: obsIndices,
       };
@@ -66,7 +66,7 @@ export const sortMeans = (i, means) => {
 
 export function VarNamesList({
   mode = SELECTION_MODES.SINGLE,
-  displayName = "genes",
+  displayName = 'genes',
 }) {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
@@ -78,7 +78,7 @@ export function VarNamesList({
   const [active, setActive] = useState(
     mode === SELECTION_MODES.SINGLE
       ? selectedVar?.matrix_index || selectedVar?.name
-      : selectedMultiVar.map((i) => i.matrix_index || i.name)
+      : selectedMultiVar.map((i) => i.matrix_index || i.name),
   );
   const [sortedVars, setSortedVars] = useState([]);
 
@@ -96,7 +96,7 @@ export function VarNamesList({
 
   const varMeans = useVarMean(
     settingsVars,
-    settings.varSort.var.sort === VAR_SORT.MATRIX
+    settings.varSort.var.sort === VAR_SORT.MATRIX,
   );
 
   // @TODO: deferr sortedVars ?
@@ -113,13 +113,13 @@ export function VarNamesList({
             (o) => {
               return sortMeans(o, varMeans.fetchedData);
             },
-            settings.varSort.var.sortOrder
-          )
+            settings.varSort.var.sortOrder,
+          ),
         );
       }
     } else if (settings.varSort.var.sort === VAR_SORT.NAME) {
       setSortedVars(
-        _.orderBy(settingsVars, "name", settings.varSort.var.sortOrder)
+        _.orderBy(settingsVars, 'name', settings.varSort.var.sortOrder),
       );
     } else {
       setSortedVars(settingsVars);
@@ -182,7 +182,7 @@ export function VarNamesList({
             variant="info"
             onClick={() => {
               dispatch({
-                type: "add.var",
+                type: 'add.var',
                 var: {
                   name: newSetName(),
                   vars: [],
@@ -197,7 +197,7 @@ export function VarNamesList({
             variant="info"
             onClick={() => {
               dispatch({
-                type: "reset.vars",
+                type: 'reset.vars',
               });
             }}
           >

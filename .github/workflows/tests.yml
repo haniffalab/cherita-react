@@ -15,7 +15,7 @@ jobs:
       # Setup Node.js
       - uses: actions/setup-node@v3
         with:
-          node-version: "18.x"
+          node-version: '18.x'
       # Install dependencies, bypassing peer dependency check
       - run: npm ci --legacy-peer-deps
       # Manually install peer dependencies (react and react-dom) as dev dependencies

@@ -1,16 +1,16 @@
-import _ from "lodash";
-import { Form } from "react-bootstrap";
+import _ from 'lodash';
+import { Form } from 'react-bootstrap';
 
-import { COLORSCALES } from "../../constants/colorscales";
+import { COLORSCALES } from '../../constants/colorscales';
 import {
   DOTPLOT_SCALES,
   MATRIXPLOT_SCALES,
   VIOLINPLOT_SCALES,
-} from "../../constants/constants";
+} from '../../constants/constants';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
+} from '../../context/SettingsContext';
 
 export const ColorscaleSelect = () => {
   const settings = useSettings();
@@ -23,7 +23,7 @@ export const ColorscaleSelect = () => {
         value={settings.controls.colorScale}
         onChange={(e) => {
           dispatch({
-            type: "set.controls.colorScale",
+            type: 'set.controls.colorScale',
             colorScale: e.target.value,
           });
         }}
@@ -51,17 +51,17 @@ export const ScaleSelect = ({ plot }) => {
     <Form.Group className="mb-2">
       <Form.Label>Standard scale</Form.Label>
       <Form.Select
-        value={settings.controls.scale[plot] || ""}
+        value={settings.controls.scale[plot] || ''}
         onChange={(e) => {
           dispatch({
-            type: "set.controls.scale",
+            type: 'set.controls.scale',
             plot: plot,
             scale: !e.target.value.length ? null : e.target.value,
           });
         }}
       >
         {_.values(SCALES[plot]).map((scale) => (
-          <option key={scale.value} value={scale.value || ""}>
+          <option key={scale.value} value={scale.value || ''}>
             {scale.name}
           </option>
         ))}

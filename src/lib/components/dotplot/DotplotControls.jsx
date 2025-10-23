@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
-import { Button, Form, InputGroup } from "react-bootstrap";
+import { Button, Form, InputGroup } from 'react-bootstrap';
 
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
-import { ColorscaleSelect, ScaleSelect } from "../controls/Controls";
+} from '../../context/SettingsContext';
+import { ColorscaleSelect, ScaleSelect } from '../controls/Controls';
 
 export function DotplotControls() {
   const settings = useSettings();
@@ -81,7 +81,7 @@ export function DotplotControls() {
               variant="outline-primary"
               onClick={() =>
                 dispatch({
-                  type: "set.controls.colorAxis.crange",
+                  type: 'set.controls.colorAxis.crange',
                   cmin: controls.colorAxis.cmin,
                   cmax: controls.colorAxis.cmax,
                 })
@@ -93,7 +93,7 @@ export function DotplotControls() {
               variant="outline-primary"
               onClick={() =>
                 dispatch({
-                  type: "set.controls.colorAxis.crange",
+                  type: 'set.controls.colorAxis.crange',
                   cmin: settings.controls.colorAxis.dmin,
                   cmax: settings.controls.colorAxis.dmax,
                 })
@@ -110,7 +110,7 @@ export function DotplotControls() {
             <Form.Control
               size="sm"
               type="number"
-              step={"0.1"}
+              step={'0.1'}
               min={0.0}
               value={controls.expressionCutoff}
               onChange={(e) => {
@@ -121,7 +121,7 @@ export function DotplotControls() {
               variant="outline-primary"
               onClick={() =>
                 dispatch({
-                  type: "set.controls.expressionCutoff",
+                  type: 'set.controls.expressionCutoff',
                   expressionCutoff: parseFloat(controls.expressionCutoff),
                 })
               }
@@ -138,7 +138,7 @@ export function DotplotControls() {
             checked={settings.controls.meanOnlyExpressed}
             onChange={() => {
               dispatch({
-                type: "set.controls.meanOnlyExpressed",
+                type: 'set.controls.meanOnlyExpressed',
                 meanOnlyExpressed: !settings.controls.meanOnlyExpressed,
               });
             }}

@@ -1,22 +1,22 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import _ from "lodash";
-import { Button } from "react-bootstrap";
-import Plot from "react-plotly.js";
+import _ from 'lodash';
+import { Button } from 'react-bootstrap';
+import Plot from 'react-plotly.js';
 
-import { PLOTLY_MODEBAR_BUTTONS } from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
-import { useFilteredData } from "../../context/FilterContext";
-import { useSettings } from "../../context/SettingsContext";
-import { LoadingSpinner } from "../../utils/LoadingIndicators";
-import { useDebouncedFetch } from "../../utils/requests";
-import { useSelectedMultiVar, useSelectedObs } from "../../utils/Resolver";
-import { PlotAlert } from "../full-page/PlotAlert";
+import { PLOTLY_MODEBAR_BUTTONS } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
+import { useFilteredData } from '../../context/FilterContext';
+import { useSettings } from '../../context/SettingsContext';
+import { LoadingSpinner } from '../../utils/LoadingIndicators';
+import { useDebouncedFetch } from '../../utils/requests';
+import { useSelectedMultiVar, useSelectedObs } from '../../utils/Resolver';
+import { PlotAlert } from '../full-page/PlotAlert';
 import {
   ControlsPlotlyToolbar,
   ObsPlotlyToolbar,
   VarPlotlyToolbar,
-} from "../toolbar/Toolbar";
+} from '../toolbar/Toolbar';
 
 export function Matrixplot({
   showObsBtn = false,
@@ -28,7 +28,7 @@ export function Matrixplot({
   plotType,
   setPlotType,
 }) {
-  const ENDPOINT = "matrixplot";
+  const ENDPOINT = 'matrixplot';
   const dataset = useDataset();
   const settings = useSettings();
   const { obsIndices, isSliced } = useFilteredData();
@@ -50,7 +50,7 @@ export function Matrixplot({
       varKeys: selectedMultiVar.map((i) =>
         i.isSet
           ? { name: i.name, indices: i.vars.map((v) => v.index) }
-          : i.index
+          : i.index,
       ),
       obsIndices: isSliced ? [...(obsIndices || [])] : null,
       standardScale: settings.controls.scale.matrixplot,
@@ -64,7 +64,7 @@ export function Matrixplot({
       selectedMultiVar,
       selectedObs,
       settings.controls.scale.matrixplot,
-    ]
+    ],
   );
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export function Matrixplot({
     ENDPOINT,
     params,
     500,
-    { isEnabled: (params) => !!params.obsCol && !!params.varKeys.length }
+    { isEnabled: (params) => !!params.obsCol && !!params.varKeys.length },
   );
 
   useEffect(() => {
@@ -126,7 +126,7 @@ export function Matrixplot({
             data={data}
             layout={layout}
             useResizeHandler={true}
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: '100%', height: '100%' }}
             config={{
               displaylogo: false,
               modeBarButtons: modeBarButtons,
@@ -143,7 +143,7 @@ export function Matrixplot({
         setPlotType={setPlotType}
       >
         <p className="p-0 m-0">
-          Select a{" "}
+          Select a{' '}
           {showObsBtn ? (
             <Button
               variant="link"
@@ -153,9 +153,9 @@ export function Matrixplot({
               category
             </Button>
           ) : (
-            "category"
-          )}{" "}
-          to group observations, then choose one or more{" "}
+            'category'
+          )}{' '}
+          to group observations, then choose one or more{' '}
           {showVarsBtn ? (
             <Button
               variant="link"
@@ -165,8 +165,8 @@ export function Matrixplot({
               features
             </Button>
           ) : (
-            "features"
-          )}{" "}
+            'features'
+          )}{' '}
           to display the matrix plot.
         </p>
       </PlotAlert>
@@ -180,7 +180,7 @@ export function Matrixplot({
         setPlotType={setPlotType}
       >
         {serverError.message ||
-          "An unexpected error occurred while generating the plot."}
+          'An unexpected error occurred while generating the plot.'}
       </PlotAlert>
     );
   }

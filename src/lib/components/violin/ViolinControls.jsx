@@ -1,6 +1,6 @@
-import { Form } from "react-bootstrap";
+import { Form } from 'react-bootstrap';
 
-import { ScaleSelect } from "../controls/Controls";
+import { ScaleSelect } from '../controls/Controls';
 
 export function ViolinControls() {
   return (

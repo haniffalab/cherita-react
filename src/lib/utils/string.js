@@ -1,9 +1,9 @@
-import numbro from "numbro";
+import numbro from 'numbro';
 
 export const FORMATS = {
-  EXPONENTIAL: "exponential",
-  ABBREVIATION: "abbreviation",
-  THOUSAND: "thousand",
+  EXPONENTIAL: 'exponential',
+  ABBREVIATION: 'abbreviation',
+  THOUSAND: 'thousand',
 };
 
 function formatThousand(n, precision = 3) {
@@ -34,9 +34,9 @@ function formatAbbreviation(n, precision = 3) {
 
 export function formatNumerical(n, format = FORMATS.THOUSAND, precision = 3) {
   if (n === 0) {
-    return "0";
+    return '0';
   } else if (!n || n === undefined || isNaN(n)) {
-    return "NaN";
+    return 'NaN';
   }
 
   switch (format) {
@@ -59,5 +59,5 @@ export function formatNumerical(n, format = FORMATS.THOUSAND, precision = 3) {
 }
 
 export function formatString(s) {
-  return s.trim().replace(/_/g, " ");
+  return s.trim().replace(/_/g, ' ');
 }

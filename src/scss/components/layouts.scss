@@ -17,8 +17,9 @@
     left: 0;
     right: 0;
     border-radius: 0.25rem;
-    @media (min-width: 992px) and (max-width: 1199px) {
-      margin-left: calc(33.33333333% + 1rem) !important;
+
+    @media (width >= 992px) and (width <= 1199px) {
+      margin-left: calc(33.3333% + 1rem) !important;
     }
   }
 }
@@ -73,8 +74,8 @@
     align-items: center;
     width: 100%;
 
-    &:after {
-      content: "";
+    &::after {
+      content: '';
       flex-shrink: 0;
       width: var(--geeks-accordion-btn-icon-width);
       height: var(--geeks-accordion-btn-icon-width);
@@ -90,7 +91,7 @@
     color: var(--geeks-accordion-active-color);
     background-color: var(--geeks-accordion-active-bg);
 
-    &:after {
+    &::after {
       background-image: var(--geeks-accordion-btn-active-icon);
       transform: var(--geeks-accordion-btn-icon-transform);
     }
@@ -126,6 +127,7 @@
   .offcanvas-header {
     @extend .pb-0;
   }
+
   .offcanvas-body {
     @extend .pt-1;
 
@@ -154,6 +156,7 @@
 
 .cherita-app-container {
   @extend .p-0;
+
   display: flex;
   flex-wrap: nowrap;
   width: 100%;
@@ -168,6 +171,7 @@
 
   .cherita-app-canvas {
     @extend .p-0;
+
     flex: 1 1 auto;
     min-width: 375px;
     position: relative;
@@ -178,6 +182,7 @@
     .cherita-navbar {
       @extend .m-0;
       @extend .d-block;
+
       position: relative;
     }
   }
@@ -189,7 +194,7 @@
     position: relative;
   }
 
-  @media (max-width: 1400px) {
+  @media (width <= 1400px) {
     .cherita-app-obs,
     .cherita-app-sidebar {
       max-width: 25%;

@@ -1,20 +1,20 @@
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
-import { faDroplet } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import _ from "lodash";
+import { faDroplet } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import _ from 'lodash';
 
-import { formatNumerical, FORMATS } from "./string";
-import { COLOR_ENCODINGS } from "../constants/constants";
-import { useSettings } from "../context/SettingsContext";
-import { rgbToHex, useColor } from "../helpers/color-helper";
+import { formatNumerical, FORMATS } from './string';
+import { COLOR_ENCODINGS } from '../constants/constants';
+import { useSettings } from '../context/SettingsContext';
+import { rgbToHex, useColor } from '../helpers/color-helper';
 
 export function Legend({
   isCategorical = false,
   min = 0,
   max = 1,
   colorscale = null,
-  addText = "",
+  addText = '',
 }) {
   const settings = useSettings();
   const { getColor } = useColor();
@@ -26,7 +26,7 @@ export function Legend({
           value: i / 100,
           categorical: isCategorical,
           colorscale: colorscale,
-        })
+        }),
       );
       return (
         <span

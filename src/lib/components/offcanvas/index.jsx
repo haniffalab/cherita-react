@@ -1,10 +1,10 @@
-import Offcanvas from "react-bootstrap/Offcanvas";
+import Offcanvas from 'react-bootstrap/Offcanvas';
 
-import { SELECTION_MODES } from "../../constants/constants";
-import { ObsColsList } from "../obs-list/ObsList";
-import { ObsmKeysList } from "../obsm-list/ObsmList";
-import { SearchBar } from "../search-bar/SearchBar";
-import { VarNamesList } from "../var-list/VarList";
+import { SELECTION_MODES } from '../../constants/constants';
+import { ObsColsList } from '../obs-list/ObsList';
+import { ObsmKeysList } from '../obsm-list/ObsmList';
+import { SearchBar } from '../search-bar/SearchBar';
+import { VarNamesList } from '../var-list/VarList';
 
 export function OffcanvasObs({ show, handleClose, ...props }) {
   return (

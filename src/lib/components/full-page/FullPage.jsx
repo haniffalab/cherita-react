@@ -1,37 +1,37 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from 'react';
 
-import { useMediaQuery } from "@mui/material";
-import { Card, Container, Modal } from "react-bootstrap";
+import { useMediaQuery } from '@mui/material';
+import { Card, Container, Modal } from 'react-bootstrap';
 
-import { PlotTypeSelector } from "./PlotTypeSelector";
 import {
   BREAKPOINTS,
   PLOT_TYPES,
   SELECTION_MODES,
   VIOLIN_MODES,
-} from "../../constants/constants";
-import { DatasetProvider } from "../../context/DatasetContext";
-import { Dotplot } from "../dotplot/Dotplot";
-import { DotplotControls } from "../dotplot/DotplotControls";
-import { Heatmap } from "../heatmap/Heatmap";
-import { HeatmapControls } from "../heatmap/HeatmapControls";
-import { Matrixplot } from "../matrixplot/Matrixplot";
-import { MatrixplotControls } from "../matrixplot/MatrixplotControls";
-import { ObsColsList } from "../obs-list/ObsList";
+} from '../../constants/constants';
+import { DatasetProvider } from '../../context/DatasetContext';
+import { Dotplot } from '../dotplot/Dotplot';
+import { DotplotControls } from '../dotplot/DotplotControls';
+import { Heatmap } from '../heatmap/Heatmap';
+import { HeatmapControls } from '../heatmap/HeatmapControls';
+import { Matrixplot } from '../matrixplot/Matrixplot';
+import { MatrixplotControls } from '../matrixplot/MatrixplotControls';
+import { ObsColsList } from '../obs-list/ObsList';
 import {
   OffcanvasControls,
   OffcanvasObs,
   OffcanvasObsm,
   OffcanvasVars,
-} from "../offcanvas";
-import { Pseudospatial } from "../pseudospatial/Pseudospatial";
-import { PseudospatialToolbar } from "../pseudospatial/PseudospatialToolbar";
-import { Scatterplot } from "../scatterplot/Scatterplot";
-import { ScatterplotControls } from "../scatterplot/ScatterplotControls";
-import { SearchBar } from "../search-bar/SearchBar";
-import { VarNamesList } from "../var-list/VarList";
-import { Violin } from "../violin/Violin";
-import { ViolinControls } from "../violin/ViolinControls";
+} from '../offcanvas';
+import { PlotTypeSelector } from './PlotTypeSelector';
+import { Pseudospatial } from '../pseudospatial/Pseudospatial';
+import { PseudospatialToolbar } from '../pseudospatial/PseudospatialToolbar';
+import { Scatterplot } from '../scatterplot/Scatterplot';
+import { ScatterplotControls } from '../scatterplot/ScatterplotControls';
+import { SearchBar } from '../search-bar/SearchBar';
+import { VarNamesList } from '../var-list/VarList';
+import { Violin } from '../violin/Violin';
+import { ViolinControls } from '../violin/ViolinControls';
 
 export function FullPage({
   searchDiseases = true,
@@ -44,7 +44,7 @@ export function FullPage({
   const [showControls, setShowControls] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [plotType, setPlotType] = useState(
-    defaultPlotType || PLOT_TYPES.SCATTERPLOT
+    defaultPlotType || PLOT_TYPES.SCATTERPLOT,
   );
   const [showPseudospatialControls, setShowPseudospatialControls] =
     useState(false);
@@ -60,7 +60,6 @@ export function FullPage({
   const XlBreakpoint = useMediaQuery(BREAKPOINTS.XL);
   const showObsBtn = LgBreakpoint;
   const showVarsBtn = XlBreakpoint;
-  const showPlotBtn = showVarsBtn;
 
   const { plotControls, varMode, showSelectedAsActive } = {
     [PLOT_TYPES.SCATTERPLOT]: {

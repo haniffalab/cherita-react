@@ -1,6 +1,6 @@
-import { Form } from "react-bootstrap";
+import { Form } from 'react-bootstrap';
 
-import { ColorscaleSelect, ScaleSelect } from "../controls/Controls";
+import { ColorscaleSelect, ScaleSelect } from '../controls/Controls';
 
 export function MatrixplotControls() {
   return (

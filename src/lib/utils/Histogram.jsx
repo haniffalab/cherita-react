@@ -2,11 +2,11 @@ import {
   SparkLineChart,
   mangoFusionPalette,
   blueberryTwilightPalette,
-} from "@mui/x-charts";
-import _ from "lodash";
+} from '@mui/x-charts';
+import _ from 'lodash';
 
-import { LoadingLinear } from "./LoadingIndicators";
-import { formatNumerical, FORMATS } from "./string";
+import { LoadingLinear } from './LoadingIndicators';
+import { formatNumerical, FORMATS } from './string';
 
 export function Histogram({ data, isPending, altColor = false }) {
   return (
@@ -35,14 +35,14 @@ export function Histogram({ data, isPending, altColor = false }) {
               valueFormatter: (v) =>
                 `Bin [${formatNumerical(
                   data.bin_edges[v][0],
-                  FORMATS.EXPONENTIAL
+                  FORMATS.EXPONENTIAL,
                 )}, ${formatNumerical(data.bin_edges[v][1], FORMATS.EXPONENTIAL)}${
-                  v === data.bin_edges.length - 1 ? "]" : ")"
+                  v === data.bin_edges.length - 1 ? ']' : ')'
                 }`,
             }}
             slotProps={{
               popper: {
-                className: "feature-histogram-tooltip",
+                className: 'feature-histogram-tooltip',
               },
             }}
           />

@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 import {
   DatasetProvider,
-  Violin,
-  ViolinControls,
+  OffcanvasControls,
   OffcanvasObs,
   OffcanvasVars,
-  OffcanvasControls,
   Toolbar,
-} from "@haniffalab/cherita-react";
-import Container from "react-bootstrap/Container";
+  Violin,
+  ViolinControls,
+} from '@haniffalab/cherita-react';
+import Container from 'react-bootstrap/Container';
 
 export default function ViolinDemo(props) {
   const [showObs, setShowObs] = useState(false);
