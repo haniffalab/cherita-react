@@ -1,13 +1,13 @@
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from 'react';
 
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import _ from "lodash";
-import { Button, ListGroup } from "react-bootstrap";
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import _ from 'lodash';
+import { Button, ListGroup } from 'react-bootstrap';
 
-import { useSettingsDispatch } from "../../context/SettingsContext";
-import { useDiseaseSearch, useVarSearch } from "../../utils/search";
-import { VirtualizedList } from "../../utils/VirtualizedList";
+import { useSettingsDispatch } from '../../context/SettingsContext';
+import { useDiseaseSearch, useVarSearch } from '../../utils/search';
+import { VirtualizedList } from '../../utils/VirtualizedList';
 
 export function VarSearchResults({
   text,
@@ -100,12 +100,12 @@ export function VarSearchResults({
           ) : (
             <ListGroup.Item key="empty" as="button" disabled>
               {!text.length
-                ? "Search features"
+                ? 'Search features'
                 : !serverError
                   ? isStale || isPending
-                    ? "Loading..."
-                    : "No items found"
-                  : "Failed to fetch data"}
+                    ? 'Loading...'
+                    : 'No items found'
+                  : 'Failed to fetch data'}
             </ListGroup.Item>
           )}
         </ListGroup>
@@ -188,12 +188,12 @@ export function DiseasesSearchResults({
           ) : (
             <ListGroup.Item key="empty" as="button" disabled>
               {!text.length
-                ? "Search diseases"
+                ? 'Search diseases'
                 : !serverError
                   ? isStale || isPending
-                    ? "Loading..."
-                    : "No items found"
-                  : "Failed to fetch data"}
+                    ? 'Loading...'
+                    : 'No items found'
+                  : 'Failed to fetch data'}
             </ListGroup.Item>
           )}
         </ListGroup>

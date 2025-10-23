@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 import {
   DatasetProvider,
   Matrixplot,
   MatrixplotControls,
+  OffcanvasControls,
   OffcanvasObs,
   OffcanvasVars,
-  OffcanvasControls,
   Toolbar,
-} from "@haniffalab/cherita-react";
-import Container from "react-bootstrap/Container";
+} from '@haniffalab/cherita-react';
+import Container from 'react-bootstrap/Container';
 
 export default function MatrixplotDemo(props) {
   const [showObs, setShowObs] = useState(false);

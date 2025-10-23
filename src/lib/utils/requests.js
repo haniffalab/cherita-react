@@ -1,26 +1,26 @@
-import { useQuery } from "@tanstack/react-query";
-import { useDebounce } from "@uidotdev/usehooks";
+import { useQuery } from '@tanstack/react-query';
+import { useDebounce } from '@uidotdev/usehooks';
 
-import { parseError } from "./errors";
+import { parseError } from './errors';
 
 export async function fetchData(
   endpoint,
   params,
   signal = null,
   ms = 300000,
-  apiUrl = null
+  apiUrl = null,
 ) {
   apiUrl = apiUrl || process.env.REACT_APP_API_URL;
   const controller = new AbortController();
   const timeout = setTimeout(() => {
     controller.abort(DOMException.TIMEOUT_ERR);
   }, ms || 300000);
-  if (signal) signal.addEventListener("abort", () => controller.abort());
+  if (signal) signal.addEventListener('abort', () => controller.abort());
 
   const response = await fetch(new URL(endpoint, apiUrl), {
-    method: "POST",
-    mode: "cors",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    method: 'POST',
+    mode: 'cors',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify(params),
     signal: controller.signal,
   })
@@ -48,7 +48,7 @@ export const useFetch = (
   endpoint,
   params,
   opts = { refetchOnMount: false, refetchOnWindowFocus: false },
-  apiUrl = null
+  apiUrl = null,
 ) => {
   const { retry = null } = opts;
   const {
@@ -78,7 +78,7 @@ export const useDebouncedFetch = (
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   },
-  apiUrl = null
+  apiUrl = null,
 ) => {
   // Optional isEnabled function to determine if enabled based on debouncedParams instead of params
   const { enabled = true, isEnabled = () => true } = opts;

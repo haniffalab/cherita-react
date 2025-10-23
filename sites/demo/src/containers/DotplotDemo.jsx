@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 import {
   DatasetProvider,
@@ -8,8 +8,8 @@ import {
   OffcanvasObs,
   OffcanvasVars,
   Toolbar,
-} from "@haniffalab/cherita-react";
-import Container from "react-bootstrap/Container";
+} from '@haniffalab/cherita-react';
+import Container from 'react-bootstrap/Container';
 
 export default function DotplotDemo(props) {
   const [showObs, setShowObs] = useState(false);

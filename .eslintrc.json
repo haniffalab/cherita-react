@@ -3,8 +3,40 @@
 		"react-app",
 		"prettier",
 		"plugin:import/errors",
-		"plugin:import/warnings"
+		"plugin:import/warnings",
+		"plugin:prettier/recommended"
 	],
+	"plugins": [
+		"unused-imports"
+	],
+	"settings": {
+		"import/resolver": {
+			"node": {
+				"extensions": [
+					".js",
+					".jsx",
+					".ts",
+					".tsx",
+					".json"
+				]
+			},
+			"alias": {
+				"map": [
+					[
+						"@app",
+						"./src"
+					]
+				],
+				"extensions": [
+					".js",
+					".jsx",
+					".ts",
+					".tsx",
+					".json"
+				]
+			}
+		}
+	},
 	"rules": {
 		"import/order": [
 			"error",
@@ -35,19 +67,15 @@
 					"caseInsensitive": true
 				}
 			}
-		]
-	},
-	"settings": {
-		"import/resolver": {
-			"node": {
-				"extensions": [
-					".js",
-					".jsx",
-					".ts",
-					".tsx",
-					".json"
-				]
+		],
+		"prettier/prettier": [
+			"error",
+			{
+				"singleQuote": true,
+				"tabWidth": 2,
+				"useTabs": false
 			}
-		}
+		],
+		"unused-imports/no-unused-imports": "error"
 	}
 }

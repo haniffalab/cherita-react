@@ -1,32 +1,32 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from 'react';
 
-import { faCircleInfo } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import _ from "lodash";
-import { Badge, Button } from "react-bootstrap";
-import Plot from "react-plotly.js";
+import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import _ from 'lodash';
+import { Badge, Button } from 'react-bootstrap';
+import Plot from 'react-plotly.js';
 
 import {
   PLOTLY_MODEBAR_BUTTONS,
   VIOLIN_MODES,
-} from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
-import { useFilteredData } from "../../context/FilterContext";
-import { useSettings } from "../../context/SettingsContext";
-import { LoadingSpinner } from "../../utils/LoadingIndicators";
-import { useDebouncedFetch } from "../../utils/requests";
+} from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
+import { useFilteredData } from '../../context/FilterContext';
+import { useSettings } from '../../context/SettingsContext';
+import { LoadingSpinner } from '../../utils/LoadingIndicators';
+import { useDebouncedFetch } from '../../utils/requests';
 import {
   useSelectedMultiVar,
   useSelectedObs,
   useSelectedVar,
-} from "../../utils/Resolver";
-import { StyledTooltip } from "../../utils/StyledTooltip";
-import { PlotAlert } from "../full-page/PlotAlert";
+} from '../../utils/Resolver';
+import { StyledTooltip } from '../../utils/StyledTooltip';
+import { PlotAlert } from '../full-page/PlotAlert';
 import {
   ControlsPlotlyToolbar,
   ObsPlotlyToolbar,
   VarPlotlyToolbar,
-} from "../toolbar/Toolbar";
+} from '../toolbar/Toolbar';
 
 export function Violin({
   mode = VIOLIN_MODES.MULTIKEY,
@@ -39,7 +39,7 @@ export function Violin({
   plotType,
   setPlotType,
 }) {
-  const ENDPOINT = "violin";
+  const ENDPOINT = 'violin';
   const dataset = useDataset();
   const settings = useSettings();
   const { obsIndices, isSliced } = useFilteredData();
@@ -62,7 +62,7 @@ export function Violin({
           varKeys: selectedMultiVar.map((i) =>
             i.isSet
               ? { name: i.name, indices: i.vars.map((v) => v.index) }
-              : i.index
+              : i.index,
           ),
           obsKeys: [], // @TODO: implement
         },
@@ -94,7 +94,7 @@ export function Violin({
       selectedVar?.name,
       selectedVar?.vars,
       settings.controls.scale.violinplot,
-    ]
+    ],
   );
   // @TODO: set default scale
 
@@ -134,7 +134,7 @@ export function Violin({
           ((params) => !!params.varKeys.length || !!params.obsKeys.length)) ||
         (mode === VIOLIN_MODES.GROUPBY &&
           ((params) => !!params.varKey && !!params.obsCol)),
-    }
+    },
   );
 
   useEffect(() => {
@@ -165,13 +165,13 @@ export function Violin({
           <div className="d-flex flex-column h-100">
             <div
               className="flex-grow-1 position-relative"
-              style={{ minHeight: "0" }}
+              style={{ minHeight: '0' }}
             >
               <Plot
                 data={data}
                 layout={layout}
                 useResizeHandler={true}
-                style={{ width: "100%", height: "100%" }}
+                style={{ width: '100%', height: '100%' }}
                 config={{
                   displaylogo: false,
                   modeBarButtons: modeBarButtons,
@@ -215,7 +215,7 @@ export function Violin({
       >
         {mode === VIOLIN_MODES.MULTIKEY && (
           <p className="p-0 m-0">
-            Select one or more{" "}
+            Select one or more{' '}
             {showVarsBtn ? (
               <Button
                 variant="link"
@@ -225,14 +225,14 @@ export function Violin({
                 features
               </Button>
             ) : (
-              "features"
-            )}{" "}
+              'features'
+            )}{' '}
             to display their expression distributions across all observations.
           </p>
         )}
         {mode === VIOLIN_MODES.GROUPBY && (
           <p className="p-0 m-0">
-            Select a{" "}
+            Select a{' '}
             {showObsBtn ? (
               <Button
                 variant="link"
@@ -242,9 +242,9 @@ export function Violin({
                 category
               </Button>
             ) : (
-              "category"
-            )}{" "}
-            to group observations, and choose a{" "}
+              'category'
+            )}{' '}
+            to group observations, and choose a{' '}
             {showVarsBtn ? (
               <Button
                 variant="link"
@@ -254,8 +254,8 @@ export function Violin({
                 feature
               </Button>
             ) : (
-              "feature"
-            )}{" "}
+              'feature'
+            )}{' '}
             to view its distribution within each group.
           </p>
         )}
@@ -270,7 +270,7 @@ export function Violin({
         setPlotType={setPlotType}
       >
         {serverError.message ||
-          "An unexpected error occurred while generating the plot."}
+          'An unexpected error occurred while generating the plot.'}
       </PlotAlert>
     );
   }

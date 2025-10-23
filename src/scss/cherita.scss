@@ -1,12 +1,12 @@
 // Define $prefix only if it hasn't been set already
-$prefix: "bs-" !default;
+$prefix: 'bs-' !default;
 
-@import "components/accordions";
-@import "components/lists";
-@import "components/layouts";
-@import "components/plotly";
-@import "components/plots";
-@import "components/scrollbars";
+@import 'components/accordions';
+@import 'components/lists';
+@import 'components/layouts';
+@import 'components/plotly';
+@import 'components/plots';
+@import 'components/scrollbars';
 
 .loading-spinner {
   @extend .bg-light;
@@ -119,6 +119,7 @@ $prefix: "bs-" !default;
   white-space: nowrap;
   text-overflow: ellipsis;
   pointer-events: auto;
+
   .legend-text {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -128,7 +129,7 @@ $prefix: "bs-" !default;
   }
 }
 
-@media (max-width: 600px) {
+@media (width <= 600px) {
   .cherita-spatial-footer {
     flex-direction: column;
     align-items: center;
@@ -232,13 +233,14 @@ $prefix: "bs-" !default;
 }
 
 .value-count-badge {
-  color: #000000 !important;
+  color: #000 !important;
   background-color: #dedede !important;
   font-weight: lighter;
 }
 
 .filtered-value-count-badge {
-  color: #ffffff !important;
+  color: #fff !important;
+
   // background-color: $alt-color !important;
   font-weight: normal;
 }
@@ -269,25 +271,29 @@ $gauge-padding: 0.15rem;
 
 .feature-histogram {
   @extend .feature-histogram-container;
-  border-radius: 5px;
 
+  border-radius: 5px;
   background-color: #dedede;
 }
 
+.feature-histogram-tooltip td > p {
+  font-size: 0.85rem !important;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
 .feature-histogram-tooltip .MuiChartsTooltip-markCell,
+/* stylelint-disable-next-line selector-class-pattern */
 .MuiChartsTooltip-labelCell {
   display: none;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .feature-histogram-tooltip .MuiChartsTooltip-valueCell {
   padding: 0.5rem !important;
 }
 
+/* stylelint-disable-next-line selector-class-pattern */
 .feature-histogram-tooltip .MuiChartsTooltip-valueCell > p {
-  font-size: 0.85rem !important;
-}
-
-.feature-histogram-tooltip td > p {
   font-size: 0.85rem !important;
 }
 
@@ -420,13 +426,14 @@ $gauge-padding: 0.15rem;
 
 .var-item-name {
   @extend .me-auto;
+
   padding-right: 0.5rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-input[type="checkbox"] {
+input[type='checkbox'] {
   cursor: pointer;
 }
 
@@ -441,7 +448,7 @@ input[type="checkbox"] {
   z-index: 10;
   width: max-content;
 
-  @media (min-width: 991px) {
+  @media (width >= 991px) {
     top: 16px;
     left: 16px;
     bottom: auto;

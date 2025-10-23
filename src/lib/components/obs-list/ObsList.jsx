@@ -1,32 +1,32 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from 'react';
 
 import {
   faChevronDown,
   faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import CommentIcon from "@mui/icons-material/Comment";
-import JoinInnerIcon from "@mui/icons-material/JoinInner";
-import WaterDropIcon from "@mui/icons-material/WaterDrop";
-import _ from "lodash";
-import { Alert } from "react-bootstrap";
-import Accordion from "react-bootstrap/Accordion";
-import { useAccordionButton } from "react-bootstrap/AccordionButton";
-import AccordionContext from "react-bootstrap/AccordionContext";
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import CommentIcon from '@mui/icons-material/Comment';
+import JoinInnerIcon from '@mui/icons-material/JoinInner';
+import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import _ from 'lodash';
+import { Alert } from 'react-bootstrap';
+import Accordion from 'react-bootstrap/Accordion';
+import { useAccordionButton } from 'react-bootstrap/AccordionButton';
+import AccordionContext from 'react-bootstrap/AccordionContext';
 
-import { CategoricalObs, ContinuousObs } from "./ObsItem";
+import { CategoricalObs, ContinuousObs } from './ObsItem';
 import {
   COLOR_ENCODINGS,
   DEFAULT_OBS_GROUP,
   OBS_TYPES,
-} from "../../constants/constants";
-import { useDataset } from "../../context/DatasetContext";
+} from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
 import {
   useSettings,
   useSettingsDispatch,
-} from "../../context/SettingsContext";
-import { LoadingSpinner } from "../../utils/LoadingIndicators";
-import { useFetch } from "../../utils/requests";
+} from '../../context/SettingsContext';
+import { LoadingSpinner } from '../../utils/LoadingIndicators';
+import { useFetch } from '../../utils/requests';
 
 const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
   const { activeEventKey } = useContext(AccordionContext);
@@ -39,7 +39,7 @@ const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
 
   return (
     <div
-      className={`obs-accordion-header ${isCurrentEventKey ? "active" : ""}`}
+      className={`obs-accordion-header ${isCurrentEventKey ? 'active' : ''}`}
       onClick={decoratedOnClick}
     >
       <span className="obs-accordion-header-chevron">
@@ -58,7 +58,7 @@ export function ObsColsList({
   showSelectedAsActive = false,
   showHistograms = true,
 }) {
-  const ENDPOINT = "obs/cols";
+  const ENDPOINT = 'obs/cols';
   const dataset = useDataset();
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
@@ -68,9 +68,9 @@ export function ObsColsList({
   const obsGroups = useMemo(
     () => ({
       default: _.union(DEFAULT_OBS_GROUP, dataset.obsGroups?.default),
-      ..._.omit(dataset.obsGroups, "default"),
+      ..._.omit(dataset.obsGroups, 'default'),
     }),
-    [dataset.obsGroups]
+    [dataset.obsGroups],
   );
   const [params, setParams] = useState({
     url: dataset.url,
@@ -103,7 +103,7 @@ export function ObsColsList({
         if (!!filteredData.length && !groupFiltered.length) {
           setEnableGroups(false);
           console.warn(
-            `No obs found in obsGroups ${JSON.stringify(obsGroups)}, disabling obsGroups`
+            `No obs found in obsGroups ${JSON.stringify(obsGroups)}, disabling obsGroups`,
           );
         } else {
           filteredData = groupFiltered;
@@ -123,8 +123,8 @@ export function ObsColsList({
             }
             return { ...d, omit: [] };
           }),
-          "name"
-        )
+          'name',
+        ),
       );
     }
   }, [
@@ -141,7 +141,7 @@ export function ObsColsList({
     if (obsCols) {
       if (!obsCols[settings.selectedObs?.name]) {
         setActive([]);
-        dispatch({ type: "select.obs", obs: null });
+        dispatch({ type: 'select.obs', obs: null });
       }
     }
   }, [settings.selectedObs, dispatch, obsCols]);
@@ -160,29 +160,29 @@ export function ObsColsList({
       return { ...o, [item.name]: { ...item, omit: omit } };
     });
     if (settings.selectedObs?.name === item.name) {
-      dispatch({ type: "select.obs", obs: { ...item, omit: omit } });
+      dispatch({ type: 'select.obs', obs: { ...item, omit: omit } });
     }
   };
 
   const toggleLabel = (item) => {
     const inLabelObs = _.includes(settings.labelObs, item.name);
     if (inLabelObs) {
-      dispatch({ type: "remove.label.obs", obsName: item.name });
+      dispatch({ type: 'remove.label.obs', obsName: item.name });
     } else {
       dispatch({
-        type: "add.label.obs",
+        type: 'add.label.obs',
         obs: item,
       });
     }
   };
 
   const toggleSlice = (item) => {
-    dispatch({ type: "toggle.slice.obs", obs: item });
+    dispatch({ type: 'toggle.slice.obs', obs: item });
   };
 
   const toggleColor = (item) => {
-    dispatch({ type: "select.obs", obs: item });
-    dispatch({ type: "set.colorEncoding", value: COLOR_ENCODINGS.OBS });
+    dispatch({ type: 'select.obs', obs: item });
+    dispatch({ type: 'set.colorEncoding', value: COLOR_ENCODINGS.OBS });
   };
 
   const toggleObs = (item, value) => {
@@ -196,7 +196,7 @@ export function ObsColsList({
       return { ...o, [item.name]: { ...item, omit: omit } };
     });
     if (settings.selectedObs?.name === item.name) {
-      dispatch({ type: "select.obs", obs: { ...item, omit: omit } });
+      dispatch({ type: 'select.obs', obs: { ...item, omit: omit } });
     }
   };
 
@@ -223,7 +223,7 @@ export function ObsColsList({
           <div className="accordion-header-title">{item.name}</div>
           <div className="accordion-header-toolbar">
             <span
-              className={`mx-1 cursor-pointer ${inLabelObs ? "active-icon" : "text-muted opacity-50"}`}
+              className={`mx-1 cursor-pointer ${inLabelObs ? 'active-icon' : 'text-muted opacity-50'}`}
               onClick={(event) => {
                 event.stopPropagation();
                 toggleLabel(item);
@@ -233,7 +233,7 @@ export function ObsColsList({
               <CommentIcon />
             </span>
             <span
-              className={`mx-1 cursor-pointer ${inSliceObs ? "active-icon" : "text-muted opacity-50"}`}
+              className={`mx-1 cursor-pointer ${inSliceObs ? 'active-icon' : 'text-muted opacity-50'}`}
               onClick={(event) => {
                 event.stopPropagation();
                 toggleSlice(item);
@@ -243,12 +243,12 @@ export function ObsColsList({
               <JoinInnerIcon />
             </span>
             <span
-              className={`mx-1 cursor-pointer ${isColorEncoding ? "active-icon" : "text-muted opacity-50"}`}
+              className={`mx-1 cursor-pointer ${isColorEncoding ? 'active-icon' : 'text-muted opacity-50'}`}
               onClick={(event) => {
                 event.stopPropagation();
                 toggleColor(item);
               }}
-              title={showSelectedAsActive ? "Is selected" : "Is color encoding"}
+              title={showSelectedAsActive ? 'Is selected' : 'Is color encoding'}
             >
               <WaterDropIcon />
             </span>
@@ -295,10 +295,10 @@ export function ObsColsList({
         _.sortBy(obsGroups[group], (o) => _.lowerCase(o.name)),
         (item) => {
           return obsItem(obsCols?.[item]);
-        }
-      )
+        },
+      ),
     );
-    if (group === "default") {
+    if (group === 'default') {
       return groupItems;
     } else {
       return (
@@ -323,7 +323,7 @@ export function ObsColsList({
   ) : (
     _.map(
       _.sortBy(obsCols, (o) => _.lowerCase(o.name)),
-      (item) => obsItem(item)
+      (item) => obsItem(item),
     )
   );
 

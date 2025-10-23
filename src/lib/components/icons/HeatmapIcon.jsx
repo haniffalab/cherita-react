@@ -1,6 +1,6 @@
 export default function HeatmapIcon({
   size = 40,
-  colour = "#000",
+  colour = '#000',
   gap = 1,
   ...props
 }) {
@@ -39,7 +39,7 @@ export default function HeatmapIcon({
             fill={colour}
             fillOpacity={value}
           />
-        ))
+        )),
       )}
     </svg>
   );

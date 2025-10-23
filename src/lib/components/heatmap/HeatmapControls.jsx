@@ -1,6 +1,6 @@
-import { Form } from "react-bootstrap";
+import { Form } from 'react-bootstrap';
 
-import { ColorscaleSelect } from "../controls/Controls";
+import { ColorscaleSelect } from '../controls/Controls';
 
 export function HeatmapControls() {
   return (
