@@ -43,12 +43,14 @@ export async function fetchData(
   return await response.json();
 }
 
+// @TODO: update to match isLoading
 export const useFetch = (
   endpoint,
   params,
   opts = { refetchOnMount: false, refetchOnWindowFocus: false },
   apiUrl = null
 ) => {
+  const { retry = null } = opts;
   const {
     data: fetchedData = null,
     isLoading: isPending = false,
@@ -56,10 +58,12 @@ export const useFetch = (
   } = useQuery({
     queryKey: [endpoint, params],
     queryFn: ({ signal }) => fetchData(endpoint, params, signal, apiUrl),
-    retry: (failureCount, { error }) => {
-      if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
-      return failureCount < 3;
-    },
+    retry:
+      retry ||
+      ((failureCount, { error }) => {
+        if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
+        return failureCount < 3;
+      }),
     ...opts,
   });
 

@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     esbuild: {
       loader: "jsx",
-      include: /\/src\/.*\.js$/,
+      include: /\/src\/.*\.(js|jsx|ts|tsx)$/,
       exclude: [],
     },
     resolve: {
@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
     },
     optimizeDeps: {
       esbuildOptions: {
-        loader: { ".js": "jsx" },
+        loader: { ".js": "jsx", ".jsx": "jsx", ".ts": "ts", ".tsx": "tsx" },
       },
     },
     define: {
