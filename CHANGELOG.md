@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.3](https://github.com/haniffalab/cherita-react/compare/v1.4.2...v1.4.3) (2025-10-29)
+
+
+### Bug Fixes
+
+* include CITATION.cff as release asset ([9a7d080](https://github.com/haniffalab/cherita-react/commit/9a7d080623a2eecf92af547ea9d3aef45305355c))
+
 ## [1.4.2](https://github.com/haniffalab/cherita-react/compare/v1.4.1...v1.4.2) (2025-10-29)
 
 
