@@ -14,7 +14,6 @@ import Accordion from 'react-bootstrap/Accordion';
 import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 import AccordionContext from 'react-bootstrap/AccordionContext';
 
-import { CategoricalObs, ContinuousObs } from './ObsItem';
 import {
   COLOR_ENCODINGS,
   DEFAULT_OBS_GROUP,
@@ -27,6 +26,7 @@ import {
 } from '../../context/SettingsContext';
 import { LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useFetch } from '../../utils/requests';
+import { CategoricalObs, ContinuousObs } from './ObsItem';
 
 const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
   const { activeEventKey } = useContext(AccordionContext);
@@ -64,7 +64,10 @@ export function ObsColsList({
   const dispatch = useSettingsDispatch();
   const [enableGroups, setEnableGroups] = useState(enableObsGroups);
   const [obsCols, setObsCols] = useState(null);
-  const [active, setActive] = useState([...[settings.selectedObs?.name]]);
+  const [active, setActive] = useState([
+    ...(settings.selectedObs ? [settings.selectedObs?.name] : []),
+  ]);
+  const [params, setParams] = useState({ url: dataset.url });
   const obsGroups = useMemo(
     () => ({
       default: _.union(DEFAULT_OBS_GROUP, dataset.obsGroups?.default),
@@ -138,13 +141,16 @@ export function ObsColsList({
   ]);
 
   useEffect(() => {
-    if (obsCols) {
-      if (!obsCols[settings.selectedObs?.name]) {
-        setActive([]);
+    if (obsCols && settings.selectedObs) {
+      const { name } = settings.selectedObs;
+      if (!obsCols[name]) {
         dispatch({ type: 'select.obs', obs: null });
+        if (active.includes(name)) {
+          setActive((prev) => _.without(prev, name));
+        }
       }
     }
-  }, [settings.selectedObs, dispatch, obsCols]);
+  }, [settings.selectedObs, dispatch, obsCols, active]);
 
   const handleAccordionToggle = (itemName, isCurrentEventKey) => {
     if (isCurrentEventKey) {
