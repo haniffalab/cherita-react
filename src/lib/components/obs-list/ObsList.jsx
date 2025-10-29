@@ -67,7 +67,6 @@ export function ObsColsList({
   const [active, setActive] = useState([
     ...(settings.selectedObs ? [settings.selectedObs?.name] : []),
   ]);
-  const [params, setParams] = useState({ url: dataset.url });
   const obsGroups = useMemo(
     () => ({
       default: _.union(DEFAULT_OBS_GROUP, dataset.obsGroups?.default),
