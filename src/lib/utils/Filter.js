@@ -1,11 +1,12 @@
-import { useEffect, useCallback, useMemo } from "react";
+import { useEffect, useCallback, useMemo } from 'react';
 
-import { booleanPointInPolygon, point } from "@turf/turf";
-import _ from "lodash";
+import { booleanPointInPolygon, point } from '@turf/turf';
+import _ from 'lodash';
 
-import { COLOR_ENCODINGS, OBS_TYPES } from "../constants/constants";
-import { useFilteredDataDispatch } from "../context/FilterContext";
-import { useSettings } from "../context/SettingsContext";
+import { useSelectedObs } from './Resolver';
+import { COLOR_ENCODINGS, OBS_TYPES } from '../constants/constants';
+import { useFilteredDataDispatch } from '../context/FilterContext';
+import { useSettings } from '../context/SettingsContext';
 
 const EPSILON = 1e-6;
 
@@ -29,7 +30,7 @@ const isInPolygons = (polygons, positions, index) => {
   return _.some(polygons, (_f, i) => {
     return booleanPointInPolygon(
       point([positions[index][0], positions[index][1]]),
-      polygons[i]
+      polygons[i],
     );
   });
 };
@@ -45,34 +46,39 @@ export const useFilter = (data) => {
   const settings = useSettings();
   const filterDataDispatch = useFilteredDataDispatch();
 
+  const selectedObs = useSelectedObs();
+  const omitCodes = _.map(
+    selectedObs?.omit || [],
+    (o) => selectedObs?.codes?.[o],
+  );
+
   const { obsmData, xData, obsData, isPending, serverError } = data;
 
   const isCategorical =
-    settings.selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-    settings.selectedObs?.type === OBS_TYPES.BOOLEAN;
+    selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+    selectedObs?.type === OBS_TYPES.BOOLEAN;
 
-  const isContinuous = settings.selectedObs?.type === OBS_TYPES.CONTINUOUS;
+  const isContinuous = selectedObs?.type === OBS_TYPES.CONTINUOUS;
 
   const sliceByObs =
     (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-      !!settings.selectedObs?.omit.length) ||
+      !!selectedObs?.omit?.length) ||
     settings.sliceBy.obs;
 
   const isInObsSlice = useCallback(
     (index, values) => {
       let inSlice = true;
-
       if (values && sliceByObs) {
         if (isCategorical) {
-          inSlice &= isInValues(settings.selectedObs?.omit, values[index]);
+          inSlice &= isInValues(omitCodes, values[index]);
         } else if (isContinuous) {
           if (isNaN(values[index])) {
-            inSlice &= isInValues(settings.selectedObs?.omit, -1);
+            inSlice &= isInValues(omitCodes, -1);
           } else {
             inSlice &= isInBins(
               values[index],
-              settings.selectedObs.bins.binEdges,
-              _.without(settings.selectedObs.omit, -1)
+              selectedObs?.bins?.binEdges,
+              _.without(omitCodes, -1),
             );
           }
         }
@@ -80,12 +86,12 @@ export const useFilter = (data) => {
       return inSlice;
     },
     [
-      settings.selectedObs?.bins?.binEdges,
-      settings.selectedObs?.omit,
+      sliceByObs,
       isCategorical,
       isContinuous,
-      sliceByObs,
-    ]
+      omitCodes,
+      selectedObs?.bins?.binEdges,
+    ],
   );
 
   const isInPolygonsSlice = useCallback(
@@ -96,19 +102,19 @@ export const useFilter = (data) => {
         inSlice &= isInPolygons(
           settings.polygons[settings.selectedObsm],
           positions,
-          index
+          index,
         );
       }
       return inSlice;
     },
-    [settings.polygons, settings.selectedObsm, settings.sliceBy.polygons]
+    [settings.polygons, settings.selectedObsm, settings.sliceBy.polygons],
   );
 
   const isInSlice = useCallback(
     (index, values, positions) => {
       return isInObsSlice(index, values) && isInPolygonsSlice(index, positions);
     },
-    [isInObsSlice, isInPolygonsSlice]
+    [isInObsSlice, isInPolygonsSlice],
   );
 
   const { filteredIndices, valueMin, valueMax, slicedLength } = useMemo(() => {
@@ -130,7 +136,7 @@ export const useFilter = (data) => {
           }
           return acc;
         },
-        { filtered: [], filteredIndices: new Set() }
+        { filtered: [], filteredIndices: new Set() },
       );
       return {
         filteredIndices: filteredIndices,
@@ -148,7 +154,7 @@ export const useFilter = (data) => {
           }
           return acc;
         },
-        { filtered: [], filteredIndices: new Set() }
+        { filtered: [], filteredIndices: new Set() },
       );
       return {
         filteredIndices: filteredIndices,
@@ -181,7 +187,7 @@ export const useFilter = (data) => {
   useEffect(() => {
     if (!isPending && !serverError) {
       filterDataDispatch({
-        type: "set.obs.indices",
+        type: 'set.obs.indices',
         indices: isSliced ? filteredIndices : null,
         valueMin: valueMin,
         valueMax: valueMax,

@@ -3,9 +3,7 @@
   display: flex;
   flex-direction: column;
   overflow: auto;
-}
 
-.cherita-app {
   .cherita-navbar {
     @extend .m-3;
     @extend .d-block;
@@ -17,14 +15,11 @@
     left: 0;
     right: 0;
     border-radius: 0.25rem;
-    @media (min-width: 992px) and (max-width: 1199px) {
-      margin-left: calc(33.33333333% + 1rem) !important;
+
+    @media (width >= 992px) and (width <= 1199px) {
+      margin-left: calc(33.3333% + 1rem) !important;
     }
   }
-}
-
-.cherita-app-canvas {
-  position: relative;
 }
 
 .cherita-app-obs {
@@ -73,8 +68,8 @@
     align-items: center;
     width: 100%;
 
-    &:after {
-      content: "";
+    &::after {
+      content: '';
       flex-shrink: 0;
       width: var(--geeks-accordion-btn-icon-width);
       height: var(--geeks-accordion-btn-icon-width);
@@ -90,24 +85,9 @@
     color: var(--geeks-accordion-active-color);
     background-color: var(--geeks-accordion-active-bg);
 
-    &:after {
+    &::after {
       background-image: var(--geeks-accordion-btn-active-icon);
       transform: var(--geeks-accordion-btn-icon-transform);
-    }
-  }
-}
-
-.sidebar-plotselector {
-  padding: 6px;
-  border-bottom: 1px solid #dee2e6;
-
-  .plotselector-icon {
-    padding-bottom: 2px;
-    cursor: pointer;
-
-    .active {
-      opacity: 1;
-      border-bottom: 2px solid #007bff;
     }
   }
 }
@@ -141,6 +121,7 @@
   .offcanvas-header {
     @extend .pb-0;
   }
+
   .offcanvas-body {
     @extend .pt-1;
 
@@ -160,6 +141,8 @@
 }
 
 .cherita-app-canvas {
+  position: relative;
+
   .cherita-plot {
     position: relative;
     height: 100%;
@@ -169,6 +152,7 @@
 
 .cherita-app-container {
   @extend .p-0;
+
   display: flex;
   flex-wrap: nowrap;
   width: 100%;
@@ -182,9 +166,10 @@
   }
 
   .cherita-app-canvas {
-    @extend .p-1;
+    @extend .p-0;
+
     flex: 1 1 auto;
-    min-width: 400px;
+    min-width: 375px;
     position: relative;
     max-height: 100%;
     display: flex;
@@ -193,6 +178,7 @@
     .cherita-navbar {
       @extend .m-0;
       @extend .d-block;
+
       position: relative;
     }
   }
@@ -204,14 +190,10 @@
     position: relative;
   }
 
-  @media (max-width: 1400px) {
+  @media (width <= 1400px) {
     .cherita-app-obs,
     .cherita-app-sidebar {
       max-width: 25%;
     }
   }
-}
-
-.ps-xs-1 {
-  padding-left: 0.15rem !important;
 }

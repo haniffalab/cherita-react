@@ -19,6 +19,7 @@
     height: 20px;
     margin-right: 10px;
   }
+
   .obs-accordion-header-span {
     font-size: 1rem;
     width: 100%;
@@ -36,6 +37,7 @@
       @extend .flex-nowrap;
     }
   }
+
   .active-icon {
     color: #0c63e4;
   }
@@ -43,5 +45,6 @@
 
 .obs-group-accordion-body {
   @extend .accordion-flush;
+
   padding: 0;
 }

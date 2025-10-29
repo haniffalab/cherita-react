@@ -1,8 +1,9 @@
 {
-  "extends": ["stylelint-config-standard-scss", "stylelint-config-prettier"],
+  "extends": ["stylelint-config-standard-scss"],
+  "plugins": ["stylelint-prettier"],
   "rules": {
-    "scss/indentation": 2,
-    "color-hex-format": "lower",
-    "no-empty-source": null
+    "prettier/prettier": [true, { "singleQuote": true }],
+    "no-empty-source": null,
+    "scss/at-extend-no-missing-placeholder": null
   }
 }
