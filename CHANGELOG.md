@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.4](https://github.com/haniffalab/cherita-react/compare/v1.4.3...v1.4.4) (2025-10-29)
+
+
+### Bug Fixes
+
+* add @semantic-release/exec ([fe40bed](https://github.com/haniffalab/cherita-react/commit/fe40bedafc4407469f21ffddae5cbbf5e1325892))
+
 ## [1.4.3](https://github.com/haniffalab/cherita-react/compare/v1.4.2...v1.4.3) (2025-10-29)
 
 
