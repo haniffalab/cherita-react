@@ -21,14 +21,10 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm ci
 
       - name: Semantic Release
-        uses: actions/retry@v3
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        run: npx semantic-release
