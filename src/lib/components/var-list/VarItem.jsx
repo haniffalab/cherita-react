@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 
-import { faDroplet, faPlus, faTrash } from '@fortawesome/free-solid-svg-icons';
+import {
+  faDroplet,
+  faMinus,
+  faPlus,
+  faTrash,
+} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MoreVert } from '@mui/icons-material';
 import _ from 'lodash';
@@ -161,7 +166,7 @@ export function SelectionItem({
                 <FontAwesomeIcon icon={faDroplet} />
                 {isMultiple && (
                   <FontAwesomeIcon
-                    icon={faPlus}
+                    icon={isActive ? faMinus : faPlus}
                     size="xs"
                     className="ps-xs-1"
                   />

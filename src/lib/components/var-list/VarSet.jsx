@@ -5,6 +5,7 @@ import {
   faChevronUp,
   faCircleInfo,
   faDroplet,
+  faMinus,
   faPlus,
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
@@ -125,7 +126,11 @@ function SelectionSet({
             >
               <FontAwesomeIcon icon={faDroplet} />
               {isMultiple && (
-                <FontAwesomeIcon icon={faPlus} size="xs" className="ps-xs-1" />
+                <FontAwesomeIcon
+                  icon={isActive ? faMinus : faPlus}
+                  size="xs"
+                  className="ps-xs-1"
+                />
               )}
             </Button>
             <Button
