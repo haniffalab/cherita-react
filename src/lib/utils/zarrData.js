@@ -1,13 +1,13 @@
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
-import _ from "lodash";
-import { slice } from "zarr";
+import _ from 'lodash';
+import { slice } from 'zarr';
 
-import { useSelectedObs, useSelectedVar } from "./Resolver";
-import { OBS_TYPES } from "../constants/constants";
-import { useDataset } from "../context/DatasetContext";
-import { useSettings } from "../context/SettingsContext";
-import { GET_OPTIONS, useZarr, useMultipleZarr } from "../helpers/zarr-helper";
+import { useSelectedObs, useSelectedVar } from './Resolver';
+import { OBS_TYPES } from '../constants/constants';
+import { useDataset } from '../context/DatasetContext';
+import { useSettings } from '../context/SettingsContext';
+import { GET_OPTIONS, useZarr, useMultipleZarr } from '../helpers/zarr-helper';
 
 // @TODO: support specifying slice to load from context
 export const useObsmData = (obsm = null) => {
@@ -19,10 +19,10 @@ export const useObsmData = (obsm = null) => {
   const obsmParams = useMemo(
     () => ({
       url: dataset.url,
-      path: "obsm/" + obsm,
+      path: 'obsm/' + obsm,
       s: [null, slice(null, 2)], // load only [:, :2]
     }),
-    [dataset.url, obsm]
+    [dataset.url, obsm],
   );
 
   return useZarr(obsmParams, GET_OPTIONS, { enabled: !!obsm });
@@ -45,21 +45,21 @@ export const useXData = (agg = meanData) => {
           ? [
               {
                 url: dataset.url,
-                path: "X",
+                path: 'X',
                 s: [null, selectedVar?.matrix_index],
               },
             ]
           : _.map(selectedVar?.vars, (v) => {
-              return { url: dataset.url, path: "X", s: [null, v.matrix_index] };
+              return { url: dataset.url, path: 'X', s: [null, v.matrix_index] };
             }),
-    [dataset.url, selectedVar]
+    [dataset.url, selectedVar],
   );
 
   return useMultipleZarr(
     xParams,
     GET_OPTIONS,
     { enabled: !!xParams.length },
-    agg
+    agg,
   );
 };
 
@@ -73,11 +73,11 @@ export const useObsData = (obs = null) => {
     () => ({
       url: dataset.url,
       path:
-        "obs/" +
+        'obs/' +
         obs?.name +
-        (obs?.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
+        (obs?.type === OBS_TYPES.CATEGORICAL ? '/codes' : ''),
     }),
-    [dataset.url, obs?.name, obs?.type]
+    [dataset.url, obs?.name, obs?.type],
   );
 
   return useZarr(obsParams, GET_OPTIONS, { enabled: !!obs });
@@ -94,13 +94,13 @@ export const useLabelObsData = () => {
         return {
           url: dataset.url,
           path:
-            "obs/" +
+            'obs/' +
             obs.name +
-            (obs.type === OBS_TYPES.CATEGORICAL ? "/codes" : ""),
+            (obs.type === OBS_TYPES.CATEGORICAL ? '/codes' : ''),
           key: obs.name,
         };
       }),
-    [dataset.url, settings.data.obs, settings.labelObs]
+    [dataset.url, settings.data.obs, settings.labelObs],
   );
 
   return useMultipleZarr(labelObsParams, GET_OPTIONS, {

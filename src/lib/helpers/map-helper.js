@@ -1,10 +1,10 @@
-import { WebMercatorViewport } from "@deck.gl/core";
-import _ from "lodash";
+import { WebMercatorViewport } from '@deck.gl/core';
+import _ from 'lodash';
 
 export class MapHelper {
   fitBounds(
     coords,
-    { width = 400, height = 600 } = { width: 400, height: 600 }
+    { width = 400, height = 600 } = { width: 400, height: 600 },
   ) {
     let view = new WebMercatorViewport({
       width: width,

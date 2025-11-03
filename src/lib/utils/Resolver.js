@@ -1,11 +1,11 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from 'react';
 
-import _ from "lodash";
+import _ from 'lodash';
 
-import { useFetch } from "./requests";
-import { PSEUDOSPATIAL_CATEGORICAL_MODES } from "../constants/constants";
-import { useDataset } from "../context/DatasetContext";
-import { useSettings } from "../context/SettingsContext";
+import { useFetch } from './requests';
+import { PSEUDOSPATIAL_CATEGORICAL_MODES } from '../constants/constants';
+import { useDataset } from '../context/DatasetContext';
+import { useSettings } from '../context/SettingsContext';
 
 const cleanSettings = (settings) => {
   // Remove obs and vars from settings that are not in data
@@ -17,7 +17,7 @@ const cleanSettings = (settings) => {
 
   const labelObs = _.filter(
     settings.labelObs,
-    (obsName) => settings.data.obs[obsName]
+    (obsName) => settings.data.obs[obsName],
   );
 
   const selectedVar =
@@ -65,7 +65,7 @@ const cleanSettings = (settings) => {
     pseudospatial.maskValues &&
     !!_.difference(
       pseudospatial.maskValues,
-      settings.data.pseudospatial?.[pseudospatial.maskSet] || []
+      settings.data.pseudospatial?.[pseudospatial.maskSet] || [],
     ).length
   ) {
     pseudospatial = {
@@ -99,21 +99,21 @@ export const useResolver = (initSettings) => {
       initSettings.selectedObs,
       ..._.map(initSettings.labelObs, (o) => ({ name: o })),
     ]),
-    "name"
+    'name',
   );
   const initObsNames = _.map(initObs, (o) => o.name);
   const [obsParams] = useState({
     url: dataset.url,
     cols: initObsNames,
     obsParams: _.fromPairs(
-      _.map(initObs, (o) => [o.name, { bins: o.bins || {} }])
+      _.map(initObs, (o) => [o.name, { bins: o.bins || {} }]),
     ),
   });
   const {
     fetchedData: obsData,
     isPending: obsDataPending,
     serverError: obsDataError,
-  } = useFetch("obs/cols", obsParams, {
+  } = useFetch('obs/cols', obsParams, {
     enabled: !!initObsNames.length,
   });
 
@@ -121,7 +121,7 @@ export const useResolver = (initSettings) => {
   // all vars should be in initSettings.vars from validation
   const initVars = initSettings.vars;
   const initVarsNames = _.flatMap(initVars, (v) =>
-    v.isSet ? _.map(v.vars, (vv) => vv.name) : v.name
+    v.isSet ? _.map(v.vars, (vv) => vv.name) : v.name,
   );
   const [varParams] = useState({
     url: dataset.url,
@@ -133,7 +133,7 @@ export const useResolver = (initSettings) => {
     fetchedData: varData,
     isPending: varDataPending,
     serverError: varDataError,
-  } = useFetch("var/cols/names", varParams, {
+  } = useFetch('var/cols/names', varParams, {
     enabled: !!varParams.names.length,
   });
 
@@ -147,7 +147,7 @@ export const useResolver = (initSettings) => {
     fetchedData: pseudospatialData,
     isPending: pseudospatialDataPending,
     serverError: pseudospatialDataError,
-  } = useFetch("masks", pseudospatialParams, {
+  } = useFetch('masks', pseudospatialParams, {
     enabled: pseudospatialEnabled,
     retry: false,
   });
@@ -170,15 +170,15 @@ export const useResolver = (initSettings) => {
     }
 
     if (obsDataError) {
-      console.error("Error fetching obs data:", obsDataError);
+      console.error('Error fetching obs data:', obsDataError);
     }
     if (varDataError) {
-      console.error("Error fetching var data:", varDataError);
+      console.error('Error fetching var data:', varDataError);
     }
     if (pseudospatialDataError) {
       console.error(
-        "Error fetching pseudospatial masks data:",
-        pseudospatialDataError
+        'Error fetching pseudospatial masks data:',
+        pseudospatialDataError,
       );
     }
 

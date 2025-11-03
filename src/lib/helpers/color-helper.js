@@ -1,7 +1,7 @@
-import { useCallback } from "react";
+import { useCallback } from 'react';
 
-import { COLORSCALES } from "../constants/colorscales";
-import { useSettings } from "../context/SettingsContext";
+import { COLORSCALES } from '../constants/colorscales';
+import { useSettings } from '../context/SettingsContext';
 
 const GRAY = [214, 212, 212];
 
@@ -40,7 +40,7 @@ const computeColor = (colormap, value) => {
 
 export const rgbToHex = (color) => {
   const [r, g, b] = color || [0, 0, 0, 0];
-  return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 };
 
 export const useColor = () => {
@@ -57,7 +57,7 @@ export const useColor = () => {
     }) => {
       const colormap =
         colorscale ||
-        COLORSCALES[categorical ? "Accent" : settings.controls.colorScale];
+        COLORSCALES[categorical ? 'Accent' : settings.controls.colorScale];
       if (colorEncoding) {
         if (grayOut) {
           // Mix color with gray manually instead of chroma.mix to get better performance with deck.gl
@@ -75,7 +75,7 @@ export const useColor = () => {
         return null;
       }
     },
-    [settings.colorEncoding, settings.controls.colorScale]
+    [settings.colorEncoding, settings.controls.colorScale],
   );
 
   return { getColor };

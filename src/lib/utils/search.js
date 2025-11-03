@@ -1,15 +1,15 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { useDataset } from "../context/DatasetContext";
-import { useFetch } from "./requests";
+import { useDataset } from '../context/DatasetContext';
+import { useFetch } from './requests';
 
 export const useDiseaseSearch = () => {
-  const ENDPOINT = "diseases";
+  const ENDPOINT = 'diseases';
   const dataset = useDataset();
   const [params, setParams] = useState({
     url: dataset.url,
     diseaseDatasets: dataset.diseaseDatasets,
-    text: "",
+    text: '',
   });
 
   const data = useFetch(ENDPOINT, params, {
@@ -25,12 +25,12 @@ export const useDiseaseSearch = () => {
 };
 
 export const useVarSearch = () => {
-  const ENDPOINT = "var/names";
+  const ENDPOINT = 'var/names';
   const dataset = useDataset();
   const [params, setParams] = useState({
     url: dataset.url,
     col: dataset.varNamesCol,
-    text: "",
+    text: '',
   });
 
   const data = useFetch(ENDPOINT, params, {
@@ -46,12 +46,12 @@ export const useVarSearch = () => {
 };
 
 export const useObsSearch = () => {
-  const ENDPOINT = "obs/values";
+  const ENDPOINT = 'obs/values';
   const dataset = useDataset();
   const [params, setParams] = useState({
     url: dataset.url,
     col: dataset.obsSearchCol,
-    text: "",
+    text: '',
   });
 
   const data = useFetch(ENDPOINT, params, {

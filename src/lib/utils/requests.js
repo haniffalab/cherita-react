@@ -1,26 +1,26 @@
-import { useQuery } from "@tanstack/react-query";
-import { useDebounce } from "@uidotdev/usehooks";
+import { useQuery } from '@tanstack/react-query';
+import { useDebounce } from '@uidotdev/usehooks';
 
-import { parseError } from "./errors";
+import { parseError } from './errors';
 
 export async function fetchData(
   endpoint,
   params,
   signal = null,
   ms = 300000,
-  apiUrl = null
+  apiUrl = null,
 ) {
   apiUrl = apiUrl || process.env.REACT_APP_API_URL;
   const controller = new AbortController();
   const timeout = setTimeout(() => {
     controller.abort(DOMException.TIMEOUT_ERR);
   }, ms || 300000);
-  if (signal) signal.addEventListener("abort", () => controller.abort());
+  if (signal) signal.addEventListener('abort', () => controller.abort());
 
   const response = await fetch(new URL(endpoint, apiUrl), {
-    method: "POST",
-    mode: "cors",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    method: 'POST',
+    mode: 'cors',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify(params),
     signal: controller.signal,
   })
@@ -48,7 +48,7 @@ export const useFetch = (
   endpoint,
   params,
   opts = { refetchOnMount: false, refetchOnWindowFocus: false },
-  apiUrl = null
+  apiUrl = null,
 ) => {
   const { retry = null } = opts;
   const {
@@ -74,10 +74,14 @@ export const useDebouncedFetch = (
   endpoint,
   params,
   delay = 500,
-  opts = { refetchOnMount: false, refetchOnWindowFocus: false },
-  apiUrl = null
+  opts = {
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+  },
+  apiUrl = null,
 ) => {
-  const { retry = null } = opts;
+  // Optional isEnabled function to determine if enabled based on debouncedParams instead of params
+  const { enabled = true, isEnabled = () => true } = opts;
   const debouncedParams = useDebounce(params, delay);
 
   const {
@@ -88,13 +92,12 @@ export const useDebouncedFetch = (
     queryKey: [endpoint, debouncedParams],
     queryFn: ({ signal }) =>
       fetchData(endpoint, debouncedParams, signal, apiUrl),
-    retry:
-      retry ||
-      ((failureCount, { error }) => {
-        if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
-        return failureCount < 3;
-      }),
+    retry: (failureCount, { error }) => {
+      if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
+      return failureCount < 3;
+    },
     ...opts,
+    enabled: enabled && isEnabled(debouncedParams),
   });
 
   return { fetchedData, isPending, serverError: parseError(serverError) };
