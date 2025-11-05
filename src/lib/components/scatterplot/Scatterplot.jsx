@@ -95,6 +95,8 @@ export function Scatterplot({
 
   const { obsmData, xData, obsData } = useZarrData();
   const labelObsData = useLabelObsData();
+  const clickedInsideRef = useRef(false);
+
   // @TODO: assert length of obsmData, xData, obsData is equal
 
   const getRadiusScale = useCallback(
@@ -194,9 +196,14 @@ export function Scatterplot({
   useEffect(() => {
     if (!pointInteractionEnabled) return;
     if (selectedObsIndex == null) return;
-    if (!data.positions || !data.positions.length) return;
+    if (!data.positions?.length) return;
 
-    // Get coordinates of the selected observation
+    // If the selection came from a click inside this plot, skip recentering
+    if (clickedInsideRef.current) {
+      clickedInsideRef.current = false;
+      return;
+    }
+
     const coords = data.positions[selectedObsIndex];
     if (!coords) return;
 
@@ -270,6 +277,24 @@ export function Scatterplot({
     settings.colorEncoding,
   ]);
 
+  const hoverLayer =
+    typeof hoveredIndex === 'number' &&
+    Array.isArray(sortedData?.positions) &&
+    hoveredIndex < sortedData.positions.length
+      ? new ScatterplotLayer({
+          id: 'hover-highlight',
+          data: [sortedData.positions[hoveredIndex]],
+          getPosition: (d) => d,
+          getFillColor: [255, 215, 0, 180],
+          getRadius: 10,
+          radiusMinPixels: 15,
+          radiusScale: 1,
+          pointSizeUnits: 'pixels',
+          pickable: false,
+          parameters: { depthTest: false },
+        })
+      : null;
+
   const sortedObsIndices = useMemo(() => {
     return obsIndices
       ? new Set(Array.from(obsIndices, (i) => sortedIndexMap.get(i)))
@@ -296,6 +321,11 @@ export function Scatterplot({
     (_d, { index }) => {
       const grayOut =
         isPending || (sortedObsIndices && !sortedObsIndices.has(index));
+
+      if (getOriginalIndex(index) === selectedObsIndex) {
+        return [255, 215, 0, 255];
+      }
+
       return (
         getColor({
           value: (sortedData.values[index] - min) / (max - min),
@@ -320,31 +350,22 @@ export function Scatterplot({
       useUnsColors,
       settings.colorEncoding,
       selectedObs?.colors,
+      selectedObsIndex,
+      getOriginalIndex,
     ],
   );
 
   // @TODO: add support for pseudospatial hover to reflect in radius
-  const getRadius = useCallback(
-    (_d, { index }) => {
-      const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
+  const getRadius = (_d, { index }) => {
+    const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
 
-      if (
-        pointInteractionEnabled &&
-        (index === hoveredIndex || getOriginalIndex(index) === selectedObsIndex)
-      ) {
-        return grayOut ? 200 : 200;
-      }
+    // Only enlarge if this point is selected
+    if (getOriginalIndex(index) === selectedObsIndex) {
+      return grayOut ? 200 : 200; // or whatever selected radius you want
+    }
 
-      return grayOut ? 1 : 60;
-    },
-    [
-      sortedObsIndices,
-      hoveredIndex,
-      selectedObsIndex,
-      getOriginalIndex,
-      pointInteractionEnabled,
-    ],
-  );
+    return grayOut ? 1 : 60; // normal radius for unselected points
+  };
 
   const memoizedLayers = useMemo(() => {
     return [
@@ -411,9 +432,12 @@ export function Scatterplot({
     selectedFeatureIndexes,
   ]);
 
+  // const layers = useDeferredValue(
+  //   mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers,
+  // ); // draw scatterplot on top of polygons when in ViewMode
   const layers = useDeferredValue(
-    mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers,
-  ); // draw scatterplot on top of polygons when in ViewMode
+    [...memoizedLayers, hoverLayer].filter(Boolean),
+  );
 
   useEffect(() => {
     if (!features?.features?.length) {
@@ -446,6 +470,7 @@ export function Scatterplot({
       pointInteractionEnabled
     ) {
       // clicked a scatterplot point
+      clickedInsideRef.current = true;
       const originalIndex = getOriginalIndex(info.index);
       dispatch({ type: 'set.selectedObsIndex', index: originalIndex });
     }
