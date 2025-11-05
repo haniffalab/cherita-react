@@ -1,11 +1,11 @@
 import { useState } from 'react';
 
 import {
+  faCheck,
   faChevronDown,
   faChevronUp,
   faCircleInfo,
   faDroplet,
-  faMinus,
   faPlus,
   faTrash,
 } from '@fortawesome/free-solid-svg-icons';
@@ -19,13 +19,13 @@ import {
   Tooltip,
 } from 'react-bootstrap';
 
-import { SelectionItem } from './VarItem';
 import { COLOR_ENCODINGS, SELECTION_MODES } from '../../constants/constants';
 import {
   useSettings,
   useSettingsDispatch,
 } from '../../context/SettingsContext';
 import { SearchModal } from '../search-bar/SearchBar';
+import { SelectionItem } from './VarItem';
 
 // @TODO: add button to score genes and plot
 
@@ -122,16 +122,18 @@ function SelectionSet({
                 selectSet();
               }}
               disabled={!set.vars.length}
-              title="Set as color encoding"
+              title={
+                !set.vars.length
+                  ? 'No variables in set'
+                  : isMultiple
+                    ? isActive
+                      ? 'Remove from plot'
+                      : 'Add to plot'
+                    : 'Set as color encoding'
+              }
             >
-              <FontAwesomeIcon icon={faDroplet} />
-              {isMultiple && (
-                <FontAwesomeIcon
-                  icon={isActive ? faMinus : faPlus}
-                  size="xs"
-                  className="ps-xs-1"
-                />
-              )}
+              {!isMultiple && <FontAwesomeIcon icon={faDroplet} />}
+              {isMultiple && <FontAwesomeIcon icon={faCheck} />}
             </Button>
             <Button
               type="button"

@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import {
-  faDroplet,
-  faMinus,
-  faPlus,
-  faTrash,
-} from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faDroplet, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MoreVert } from '@mui/icons-material';
 import _ from 'lodash';
@@ -160,17 +155,17 @@ export function SelectionItem({
                 }}
                 disabled={isNotInData}
                 title={
-                  isNotInData ? 'Not present in data' : 'Set as color encoding'
+                  isNotInData
+                    ? 'Not present in data'
+                    : isMultiple
+                      ? isActive
+                        ? 'Remove from plot'
+                        : 'Add to plot'
+                      : 'Set as color encoding'
                 }
               >
-                <FontAwesomeIcon icon={faDroplet} />
-                {isMultiple && (
-                  <FontAwesomeIcon
-                    icon={isActive ? faMinus : faPlus}
-                    size="xs"
-                    className="ps-xs-1"
-                  />
-                )}
+                {!isMultiple && <FontAwesomeIcon icon={faDroplet} />}
+                {isMultiple && <FontAwesomeIcon icon={faCheck} />}
               </Button>
             )}
             {showRemove && (
