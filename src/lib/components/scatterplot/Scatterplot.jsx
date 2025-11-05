@@ -322,7 +322,10 @@ export function Scatterplot({
       const grayOut =
         isPending || (sortedObsIndices && !sortedObsIndices.has(index));
 
-      if (getOriginalIndex(index) === selectedObsIndex) {
+      if (
+        pointInteractionEnabled &&
+        getOriginalIndex(index) === selectedObsIndex
+      ) {
         return [255, 215, 0, 255];
       }
 
@@ -359,12 +362,14 @@ export function Scatterplot({
   const getRadius = (_d, { index }) => {
     const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
 
-    // Only enlarge if this point is selected
-    if (getOriginalIndex(index) === selectedObsIndex) {
-      return grayOut ? 200 : 200; // or whatever selected radius you want
+    if (
+      pointInteractionEnabled &&
+      getOriginalIndex(index) === selectedObsIndex
+    ) {
+      return grayOut ? 200 : 200;
     }
 
-    return grayOut ? 1 : 60; // normal radius for unselected points
+    return grayOut ? 1 : 60;
   };
 
   const memoizedLayers = useMemo(() => {
