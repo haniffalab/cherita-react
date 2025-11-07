@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 import _ from 'lodash';
 import {
@@ -26,33 +26,45 @@ export function ObsmKeysList({ setHasObsm }) {
   const dispatch = useSettingsDispatch();
   const [obsmKeysList, setObsmKeysList] = useState([]);
   const [active, setActive] = useState(null);
-  const [params, setParams] = useState({
-    url: dataset.url,
-  });
 
-  useEffect(() => {
-    setParams((p) => {
-      return {
-        ...p,
-        url: dataset.url,
-      };
-    });
-  }, [dataset.url]);
+  const params = useMemo(
+    () => ({
+      url: dataset.url,
+    }),
+    [dataset.url],
+  );
 
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
     refetchOnMount: false,
   });
 
   useEffect(() => {
-    if (!isPending && !serverError) {
-      if (!fetchedData || !fetchedData.length) {
+    if (!isPending) {
+      if (serverError || !fetchedData || !fetchedData.length) {
         setHasObsm(false);
+        setObsmKeysList([]);
+        if (settings.selectedObsm) {
+          dispatch({
+            type: 'select.obsm',
+            obsm: null,
+          });
+        }
       } else {
         setHasObsm(true);
         setObsmKeysList(fetchedData);
 
-        // Set default obsm if in keys list and not selected
-        if (!settings.selectedObsm) {
+        if (settings.selectedObsm) {
+          // If selected obsm is not in keys list, reset to null
+          if (!_.includes(fetchedData, settings.selectedObsm)) {
+            dispatch({
+              type: 'select.obsm',
+              obsm: null,
+            });
+          } else {
+            setActive(settings.selectedObsm);
+          }
+        } else {
+          // Set default obsm if in keys list and not selected
           // Follow DEFAULT_OBSM_KEYS order
           _.each(DEFAULT_OBSM_KEYS, (k) => {
             const defaultObsm = _.find(
@@ -67,18 +79,6 @@ export function ObsmKeysList({ setHasObsm }) {
               return false; // break
             }
           });
-        }
-      }
-
-      if (settings.selectedObsm) {
-        // If selected obsm is not in keys list, reset to null
-        if (!_.includes(fetchedData || [], settings.selectedObsm)) {
-          dispatch({
-            type: 'select.obsm',
-            obsm: null,
-          });
-        } else {
-          setActive(settings.selectedObsm);
         }
       }
     }
