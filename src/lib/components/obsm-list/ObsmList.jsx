@@ -24,7 +24,7 @@ export function ObsmKeysList({ setHasObsm }) {
   const dataset = useDataset();
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
-  const [obsmKeysList, setObsmKeysList] = useState([]);
+  const [keysList, setKeysList] = useState([]);
   const [active, setActive] = useState(null);
 
   const params = useMemo(
@@ -39,10 +39,10 @@ export function ObsmKeysList({ setHasObsm }) {
   });
 
   useEffect(() => {
-    if (!isPending) {
-      if (serverError || !fetchedData || !fetchedData.length) {
+    if (!isPending && !serverError) {
+      if (!!fetchedData && !fetchedData.length) {
         setHasObsm(false);
-        setObsmKeysList([]);
+        setKeysList([]);
         if (settings.selectedObsm) {
           dispatch({
             type: 'select.obsm',
@@ -51,7 +51,7 @@ export function ObsmKeysList({ setHasObsm }) {
         }
       } else {
         setHasObsm(true);
-        setObsmKeysList(fetchedData);
+        setKeysList(fetchedData);
 
         if (settings.selectedObsm) {
           // If selected obsm is not in keys list, reset to null
@@ -81,6 +81,13 @@ export function ObsmKeysList({ setHasObsm }) {
           });
         }
       }
+    } else if (!isPending && serverError) {
+      if (settings.selectedObsm) {
+        dispatch({
+          type: 'select.obsm',
+          obsm: null,
+        });
+      }
     }
   }, [
     dispatch,
@@ -91,7 +98,7 @@ export function ObsmKeysList({ setHasObsm }) {
     settings.selectedObsm,
   ]);
 
-  const obsmList = obsmKeysList.map((item) => {
+  const obsmList = keysList.map((item) => {
     return (
       <Dropdown.Item
         key={item}
