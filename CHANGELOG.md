@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.6](https://github.com/haniffalab/cherita-react/compare/v1.4.5...v1.4.6) (2025-11-20)
+
+
+### Bug Fixes
+
+* show error on ObsmKeysList instead of setting hasObsm to false ([baa5bc3](https://github.com/haniffalab/cherita-react/commit/baa5bc31fca6dfbdd3a0315031c6b8e74fde07ee))
+
 ## [1.4.5](https://github.com/haniffalab/cherita-react/compare/v1.4.4...v1.4.5) (2025-11-07)
 
 
