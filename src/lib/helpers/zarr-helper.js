@@ -1,51 +1,43 @@
 import { useCallback } from 'react';
 
 import { useQueries, useQuery } from '@tanstack/react-query';
-import { ArrayNotFoundError, GroupNotFoundError, openArray } from 'zarr';
-
-export const GET_OPTIONS = {
-  concurrencyLimit: 10, // max number of concurrent requests (default 10)
-  progressCallback: ({ progress, queueSize }) => {
-    console.debug(`${(progress / queueSize) * 100}% complete.`);
-  }, // callback executed after each request
-};
+import * as zarr from 'zarrita';
+import { get } from '@zarrita/ndarray';
+import unpack from 'ndarray-unpack';
 
 export class ZarrHelper {
   async open(url, path) {
-    const z = await openArray({ store: url, path: path, mode: 'r' });
+    const root = zarr.root(new zarr.FetchStore(url));
+    const z = await zarr.open(root.resolve(path));
     return z;
   }
 }
 
-const fetchDataFromZarr = async (url, path, s, opts) => {
+const fetchDataFromZarr = async (url, path, s) => {
   try {
     const zarrHelper = new ZarrHelper();
     const z = await zarrHelper.open(url, path);
-    const result = await z.get(s, opts);
-    return result.data;
+    const result = await get(z, s);
+    if (result.dtype === 'bigint64')
+      throw new Error('bigint64 dtype not supported');
+    const arr = unpack(result);
+    return arr;
   } catch (error) {
-    if (
-      error instanceof ArrayNotFoundError ||
-      error instanceof GroupNotFoundError
-    ) {
+    if (error instanceof zarr.NodeNotFoundError) {
       error.status = 404;
     }
     throw error;
   }
 };
 
-export const useZarr = (
-  { url, path, s = null },
-  options = GET_OPTIONS,
-  opts = {},
-) => {
+export const useZarr = ({ url, path, s = null }, opts = {}) => {
   const {
     data = null,
     isLoading: isPending = false,
     error: serverError = null,
   } = useQuery({
     queryKey: ['zarr', url, path, s],
-    queryFn: () => fetchDataFromZarr(url, path, s, options),
+    queryFn: () => fetchDataFromZarr(url, path, s),
     retry: (failureCount, { error }) => {
       if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
       return failureCount < 3;
@@ -65,12 +57,7 @@ const aggregateData = (inputs, data) => {
   return dataObject;
 };
 
-export const useMultipleZarr = (
-  inputs,
-  options = GET_OPTIONS,
-  opts = {},
-  agg = aggregateData,
-) => {
+export const useMultipleZarr = (inputs, opts = {}, agg = aggregateData) => {
   const combine = useCallback(
     (results) => {
       return {
@@ -92,7 +79,7 @@ export const useMultipleZarr = (
   } = useQueries({
     queries: inputs.map((input) => ({
       queryKey: ['zarr', input.url, input.path, input.s],
-      queryFn: () => fetchDataFromZarr(input.url, input.path, input.s, options),
+      queryFn: () => fetchDataFromZarr(input.url, input.path, input.s),
       retry: (failureCount, { error }) => {
         if ([400, 401, 403, 404, 422].includes(error?.status)) return false;
         return failureCount < 3;

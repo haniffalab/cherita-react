@@ -24,6 +24,23 @@ jest.mock('../lib/utils/requests', () => ({
   useDebouncedFetch: jest.fn(),
 }));
 
+jest.mock(
+  'zarrita',
+  () => ({
+    slice: jest.fn((start, end) => ({ start, end })),
+    open: jest.fn(),
+  }),
+  { virtual: true },
+);
+
+jest.mock(
+  '@zarrita/ndarray',
+  () => ({
+    get: jest.fn(),
+  }),
+  { virtual: true },
+);
+
 jest.mock('../lib/utils/Resolver', () => {
   const actual = jest.requireActual('../lib/utils/Resolver');
   return {

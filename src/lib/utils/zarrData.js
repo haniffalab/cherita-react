@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 
 import _ from 'lodash';
-import { slice } from 'zarr';
+import { slice } from 'zarrita';
 
 import { useSelectedObs, useSelectedVar } from './Resolver';
 import { OBS_TYPES } from '../constants/constants';
 import { useDataset } from '../context/DatasetContext';
 import { useSettings } from '../context/SettingsContext';
-import { GET_OPTIONS, useZarr, useMultipleZarr } from '../helpers/zarr-helper';
+import { useZarr, useMultipleZarr } from '../helpers/zarr-helper';
 
 // @TODO: support specifying slice to load from context
 export const useObsmData = (obsm = null) => {
@@ -25,7 +25,7 @@ export const useObsmData = (obsm = null) => {
     [dataset.url, obsm],
   );
 
-  return useZarr(obsmParams, GET_OPTIONS, { enabled: !!obsm });
+  return useZarr(obsmParams, { enabled: !!obsm });
 };
 
 const meanData = (_i, data) => {
@@ -55,12 +55,7 @@ export const useXData = (agg = meanData) => {
     [dataset.url, selectedVar],
   );
 
-  return useMultipleZarr(
-    xParams,
-    GET_OPTIONS,
-    { enabled: !!xParams.length },
-    agg,
-  );
+  return useMultipleZarr(xParams, { enabled: !!xParams.length }, agg);
 };
 
 export const useObsData = (obs = null) => {
@@ -80,7 +75,7 @@ export const useObsData = (obs = null) => {
     [dataset.url, obs?.name, obs?.type],
   );
 
-  return useZarr(obsParams, GET_OPTIONS, { enabled: !!obs });
+  return useZarr(obsParams, { enabled: !!obs });
 };
 
 export const useLabelObsData = () => {
@@ -103,7 +98,7 @@ export const useLabelObsData = () => {
     [dataset.url, settings.data.obs, settings.labelObs],
   );
 
-  return useMultipleZarr(labelObsParams, GET_OPTIONS, {
+  return useMultipleZarr(labelObsParams, {
     enabled: !!labelObsParams.length,
   });
 };
