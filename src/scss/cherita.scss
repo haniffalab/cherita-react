@@ -437,6 +437,13 @@ input[type='checkbox'] {
   cursor: pointer;
 }
 
+.cherita-search-modal {
+  .form-control:focus {
+    box-shadow: none;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+  }
+}
+
 .ps-xs-1 {
   padding-left: 0.15rem !important;
 }

@@ -14,6 +14,7 @@ import Accordion from 'react-bootstrap/Accordion';
 import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 import AccordionContext from 'react-bootstrap/AccordionContext';
 
+import { CategoricalObs, ContinuousObs } from './ObsItem';
 import {
   COLOR_ENCODINGS,
   DEFAULT_OBS_GROUP,
@@ -26,7 +27,6 @@ import {
 } from '../../context/SettingsContext';
 import { LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useFetch } from '../../utils/requests';
-import { CategoricalObs, ContinuousObs } from './ObsItem';
 
 const ObsAccordionToggle = ({ children, eventKey, handleAccordionToggle }) => {
   const { activeEventKey } = useContext(AccordionContext);
@@ -342,7 +342,9 @@ export function ObsColsList({
         {isPending ? (
           <LoadingSpinner />
         ) : !!obsCols && !_.size(obsCols) ? (
-          <Alert variant="danger">No observations found.</Alert>
+          <div className="p-3">
+            <Alert variant="danger">No observations found</Alert>
+          </div>
         ) : (
           <Accordion
             flush
@@ -357,7 +359,7 @@ export function ObsColsList({
     );
   } else {
     return (
-      <div>
+      <div className="p-3">
         <Alert variant="danger">{serverError.message}</Alert>
       </div>
     );
