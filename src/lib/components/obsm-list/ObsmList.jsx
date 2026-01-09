@@ -39,8 +39,15 @@ export function ObsmKeysList({ setHasObsm }) {
   });
 
   useEffect(() => {
-    if (!isPending && !serverError) {
-      if (!!fetchedData && !fetchedData.length) {
+    if (!isPending) {
+      if (serverError) {
+        if (settings.selectedObsm) {
+          dispatch({
+            type: 'select.obsm',
+            obsm: null,
+          });
+        }
+      } else if (!fetchedData || (!!fetchedData && !fetchedData.length)) {
         setHasObsm(false);
         setKeysList([]);
         if (settings.selectedObsm) {
@@ -80,13 +87,6 @@ export function ObsmKeysList({ setHasObsm }) {
             }
           });
         }
-      }
-    } else if (!isPending && serverError) {
-      if (settings.selectedObsm) {
-        dispatch({
-          type: 'select.obsm',
-          obsm: null,
-        });
       }
     }
   }, [

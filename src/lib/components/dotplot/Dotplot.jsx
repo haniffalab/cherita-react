@@ -48,7 +48,7 @@ export function Dotplot({
     () => ({
       url: dataset.url,
       obsCol: selectedObs,
-      obsValues: !selectedObs?.omit.length
+      obsValues: !selectedObs?.omit?.length
         ? null
         : _.difference(selectedObs?.values, selectedObs?.omit),
       varKeys: selectedMultiVar.map((i) =>
