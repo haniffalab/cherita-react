@@ -40,7 +40,8 @@ export function ObsmKeysList({ setHasObsm }) {
 
   useEffect(() => {
     if (!isPending && !serverError) {
-      if (!!fetchedData && !fetchedData.length) {
+      const obsmKeysArray = Array.isArray(fetchedData) ? fetchedData : [];
+      if (obsmKeysArray.length === 0) {
         setHasObsm(false);
         setKeysList([]);
         if (settings.selectedObsm) {
@@ -51,11 +52,11 @@ export function ObsmKeysList({ setHasObsm }) {
         }
       } else {
         setHasObsm(true);
-        setKeysList(fetchedData);
+        setKeysList(obsmKeysArray);
 
         if (settings.selectedObsm) {
           // If selected obsm is not in keys list, reset to null
-          if (!_.includes(fetchedData, settings.selectedObsm)) {
+          if (!_.includes(obsmKeysArray, settings.selectedObsm)) {
             dispatch({
               type: 'select.obsm',
               obsm: null,
@@ -68,7 +69,7 @@ export function ObsmKeysList({ setHasObsm }) {
           // Follow DEFAULT_OBSM_KEYS order
           _.each(DEFAULT_OBSM_KEYS, (k) => {
             const defaultObsm = _.find(
-              fetchedData,
+              obsmKeysArray,
               (item) => item.toLowerCase() === k,
             );
             if (defaultObsm) {
