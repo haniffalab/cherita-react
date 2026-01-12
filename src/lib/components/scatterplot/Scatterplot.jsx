@@ -17,6 +17,8 @@ import { EditableGeoJsonLayer } from '@nebula.gl/layers';
 import _ from 'lodash';
 import { Alert } from 'react-bootstrap';
 
+import { SpatialControls } from './SpatialControls';
+import { Toolbox } from './Toolbox';
 import {
   COLOR_ENCODINGS,
   OBS_TYPES,
@@ -38,8 +40,6 @@ import { useSelectedObs } from '../../utils/Resolver';
 import { formatNumerical } from '../../utils/string';
 import { useLabelObsData } from '../../utils/zarrData';
 import { PlotAlert } from '../full-page/PlotAlert';
-import { SpatialControls } from './SpatialControls';
-import { Toolbox } from './Toolbox';
 
 window.deck.log.level = 1;
 
@@ -432,9 +432,11 @@ export function Scatterplot({
     features,
     getFillColor,
     getRadius,
+    hoveredIndex,
     mode,
     radiusScale,
     selectedFeatureIndexes,
+    selectedObsIndex
   ]);
 
   // const layers = useDeferredValue(
