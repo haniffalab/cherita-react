@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.4.6](https://github.com/haniffalab/cherita-react/compare/v1.4.5...v1.4.6) (2025-11-20)
+
+
+### Bug Fixes
+
+* show error on ObsmKeysList instead of setting hasObsm to false ([baa5bc3](https://github.com/haniffalab/cherita-react/commit/baa5bc31fca6dfbdd3a0315031c6b8e74fde07ee))
+
+## [1.4.5](https://github.com/haniffalab/cherita-react/compare/v1.4.4...v1.4.5) (2025-11-07)
+
+
+### Bug Fixes
+
+* scatterplot bug showing no obsm ([5a8b59b](https://github.com/haniffalab/cherita-react/commit/5a8b59b5708533a1c013a5cc8d1097c8b08962fc)), closes [#192](https://github.com/haniffalab/cherita-react/issues/192)
+* set var encoding button icon to minus when selected ([e2d5cb6](https://github.com/haniffalab/cherita-react/commit/e2d5cb68e724550d9b6070303c93f031f355d451)), closes [#194](https://github.com/haniffalab/cherita-react/issues/194)
+
 ## [1.4.4](https://github.com/haniffalab/cherita-react/compare/v1.4.3...v1.4.4) (2025-10-29)
 
 
