@@ -1,6 +1,6 @@
-import { useSettings } from "../../context/SettingsContext";
-import { useZarrData } from "../../context/ZarrDataContext";
-import { useLabelObsData } from "../../utils/zarrData";
+import { useSettings } from '../../context/SettingsContext';
+import { useZarrData } from '../../context/ZarrDataContext';
+import { useLabelObsData } from '../../utils/zarrData';
 
 export function ObsExplorer() {
   const settings = useSettings();

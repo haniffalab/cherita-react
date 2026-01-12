@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
-import { useDataset } from '../context/DatasetContext';
 import { useFetch } from './requests';
+import { useDataset } from '../context/DatasetContext';
 
 export const useDiseaseSearch = () => {
   const ENDPOINT = 'diseases';

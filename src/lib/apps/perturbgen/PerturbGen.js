@@ -1,22 +1,22 @@
-import { useState } from "react";
+import { useState } from 'react';
 
-import { useMediaQuery } from "@mui/material";
-import { Card, Container, Modal } from "react-bootstrap";
+import { useMediaQuery } from '@mui/material';
+import { Card, Container, Modal } from 'react-bootstrap';
 
-import { ObsColsList } from "../../components/obs-list/ObsList";
+import { ObsExplorer } from './ObsExplorer';
+import { ObsColsList } from '../../components/obs-list/ObsList';
 import {
   OffcanvasControls,
   OffcanvasObs,
   OffcanvasObsm,
   OffcanvasVars,
-} from "../../components/offcanvas";
-import { PseudospatialToolbar } from "../../components/pseudospatial/PseudospatialToolbar";
-import { Scatterplot } from "../../components/scatterplot/Scatterplot";
-import { ScatterplotControls } from "../../components/scatterplot/ScatterplotControls";
-import { SearchBar } from "../../components/search-bar/SearchBar";
-import { BREAKPOINTS, SELECTION_MODES } from "../../constants/constants";
-import { DatasetProvider } from "../../context/DatasetContext";
-import { ObsExplorer } from "./ObsExplorer";
+} from '../../components/offcanvas';
+import { PseudospatialToolbar } from '../../components/pseudospatial/PseudospatialToolbar';
+import { Scatterplot } from '../../components/scatterplot/Scatterplot';
+import { ScatterplotControls } from '../../components/scatterplot/ScatterplotControls';
+import { SearchBar } from '../../components/search-bar/SearchBar';
+import { BREAKPOINTS, SELECTION_MODES } from '../../constants/constants';
+import { DatasetProvider } from '../../context/DatasetContext';
 
 export function PerturbGen({ ...props }) {
   const [showObs, setShowObs] = useState(false);

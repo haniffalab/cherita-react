@@ -10,13 +10,13 @@ import Nav from 'react-bootstrap/Nav';
 import Row from 'react-bootstrap/Row';
 import Tab from 'react-bootstrap/Tab';
 
-import { COLOR_ENCODINGS } from '../../constants/constants';
 import { DiseaseInfo, VarInfo } from './SearchInfo';
 import {
   DiseasesSearchResults,
   ObsSearchResults,
   VarSearchResults,
 } from './SearchResults';
+import { COLOR_ENCODINGS } from '../../constants/constants';
 
 const select = (dispatch, item) => {
   dispatch({
