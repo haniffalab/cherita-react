@@ -1,3 +1,4 @@
+export { PerturbGen } from './apps/perturbgen/PerturbGen';
 export { Dotplot } from './components/dotplot/Dotplot';
 export { DotplotControls } from './components/dotplot/DotplotControls';
 export { Heatmap } from './components/heatmap/Heatmap';

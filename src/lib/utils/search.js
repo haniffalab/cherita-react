@@ -44,3 +44,24 @@ export const useVarSearch = () => {
     data,
   };
 };
+
+export const useObsSearch = () => {
+  const ENDPOINT = 'obs/values';
+  const dataset = useDataset();
+  const [params, setParams] = useState({
+    url: dataset.url,
+    col: dataset.obsSearchCol,
+    text: '',
+  });
+
+  const data = useFetch(ENDPOINT, params, {
+    enabled: !!params.text.length,
+    refetchOnMount: true,
+  });
+
+  return {
+    params,
+    setParams,
+    data,
+  };
+};

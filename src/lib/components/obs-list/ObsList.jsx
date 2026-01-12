@@ -342,7 +342,9 @@ export function ObsColsList({
         {isPending ? (
           <LoadingSpinner />
         ) : !!obsCols && !_.size(obsCols) ? (
-          <Alert variant="danger">No observations found.</Alert>
+          <div className="p-3">
+            <Alert variant="danger">No observations found</Alert>
+          </div>
         ) : (
           <Accordion
             flush
@@ -357,7 +359,7 @@ export function ObsColsList({
     );
   } else {
     return (
-      <div>
+      <div className="p-3">
         <Alert variant="danger">{serverError.message}</Alert>
       </div>
     );
