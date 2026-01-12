@@ -74,7 +74,7 @@ export function Violin({
               }
             : selectedVar?.index,
           obsCol: selectedObs,
-          obsValues: !selectedObs?.omit.length
+          obsValues: !selectedObs?.omit?.length
             ? null
             : _.difference(selectedObs?.values, selectedObs?.omit),
           obsIndices: isSliced ? [...(obsIndices || [])] : null,

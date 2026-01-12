@@ -63,7 +63,7 @@ function usePseudospatialData(plotType) {
         ...(settings.sliceBy.obs
           ? {
               obsCol: selectedObs,
-              obsValues: !selectedObs?.omit.length
+              obsValues: !selectedObs?.omit?.length
                 ? null
                 : _.difference(selectedObs?.values, selectedObs?.omit),
             }
@@ -72,7 +72,7 @@ function usePseudospatialData(plotType) {
     } else if (plotType === PLOT_TYPES.CATEGORICAL) {
       return {
         obsCol: selectedObs,
-        obsValues: !selectedObs?.omit.length
+        obsValues: !selectedObs?.omit?.length
           ? null
           : _.difference(selectedObs?.values, selectedObs?.omit),
         mode: settings.pseudospatial.categoricalMode,
@@ -80,7 +80,7 @@ function usePseudospatialData(plotType) {
     } else if (plotType === 'continuous') {
       return {
         obsCol: selectedObs,
-        obsValues: !selectedObs?.omit.length
+        obsValues: !selectedObs?.omit?.length
           ? null
           : _.difference(selectedObs?.values, selectedObs?.omit),
       };

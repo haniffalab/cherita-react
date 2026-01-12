@@ -39,9 +39,15 @@ export function ObsmKeysList({ setHasObsm }) {
   });
 
   useEffect(() => {
-    if (!isPending && !serverError) {
-      const obsmKeysArray = Array.isArray(fetchedData) ? fetchedData : [];
-      if (obsmKeysArray.length === 0) {
+    if (!isPending) {
+      if (serverError) {
+        if (settings.selectedObsm) {
+          dispatch({
+            type: 'select.obsm',
+            obsm: null,
+          });
+        }
+      } else if (!fetchedData || (!!fetchedData && !fetchedData.length)) {
         setHasObsm(false);
         setKeysList([]);
         if (settings.selectedObsm) {
@@ -52,11 +58,11 @@ export function ObsmKeysList({ setHasObsm }) {
         }
       } else {
         setHasObsm(true);
-        setKeysList(obsmKeysArray);
+        setKeysList(fetchedData);
 
         if (settings.selectedObsm) {
           // If selected obsm is not in keys list, reset to null
-          if (!_.includes(obsmKeysArray, settings.selectedObsm)) {
+          if (!_.includes(fetchedData, settings.selectedObsm)) {
             dispatch({
               type: 'select.obsm',
               obsm: null,
@@ -69,7 +75,7 @@ export function ObsmKeysList({ setHasObsm }) {
           // Follow DEFAULT_OBSM_KEYS order
           _.each(DEFAULT_OBSM_KEYS, (k) => {
             const defaultObsm = _.find(
-              obsmKeysArray,
+              fetchedData,
               (item) => item.toLowerCase() === k,
             );
             if (defaultObsm) {
@@ -81,13 +87,6 @@ export function ObsmKeysList({ setHasObsm }) {
             }
           });
         }
-      }
-    } else if (!isPending && serverError) {
-      if (settings.selectedObsm) {
-        dispatch({
-          type: 'select.obsm',
-          obsm: null,
-        });
       }
     }
   }, [
