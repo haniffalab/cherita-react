@@ -152,7 +152,7 @@ export function ObsSearchResults(props) {
         isStale,
       }) => {
         const onObsSelect = (dispatch, item, closeModal) => {
-          dispatch({ type: 'set.selectedObsIndex', index: item.index });
+          dispatch({ type: 'set.selectedObsIndex', index: item.matrix_index });
           if (closeModal) closeModal();
         };
 
