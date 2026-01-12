@@ -158,9 +158,9 @@ export function ObsSearchResults(props) {
 
         return (
           <ListGroup.Item
-            key={item.index}
+            key={item.matrix_index}
             onClick={() => setSelectedResult(item)}
-            active={selectedResult?.index === item.index}
+            active={selectedResult?.matrix_index === item.matrix_index}
           >
             <div className="d-flex justify-content-between align-items-center w-100">
               <div>{item.name}</div>
