@@ -436,7 +436,7 @@ export function Scatterplot({
     mode,
     radiusScale,
     selectedFeatureIndexes,
-    selectedObsIndex
+    selectedObsIndex,
   ]);
 
   // const layers = useDeferredValue(
