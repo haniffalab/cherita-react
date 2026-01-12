@@ -44,9 +44,6 @@ export default function Header() {
               <NavDropdown.Item as={Link} to="full-page/violin">
                 Violin
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="full-page/perturbgen">
-                PerturbGen
-              </NavDropdown.Item>
             </NavDropdown>
             <NavDropdown title="Apps" id="apps-dropdown">
               <NavDropdown.Item as={Link} to="apps/perturbgen">
