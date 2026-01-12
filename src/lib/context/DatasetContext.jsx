@@ -63,7 +63,7 @@ const initialDataset = {
 };
 
 export function DatasetProvider({ dataset_url, children, ...dataset_params }) {
-  const dataset = _.assign(initialDataset, {
+  const dataset = _.assign({}, initialDataset, {
     url: dataset_url,
     ...dataset_params,
   });
