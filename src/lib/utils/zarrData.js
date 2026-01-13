@@ -8,6 +8,7 @@ import { OBS_TYPES } from '../constants/constants';
 import { useDataset } from '../context/DatasetContext';
 import { useSettings } from '../context/SettingsContext';
 import { useZarr, useMultipleZarr } from '../helpers/zarr-helper';
+import { useFetch } from './requests';
 
 // @TODO: support specifying slice to load from context
 export const useObsmData = (obsm = null) => {
@@ -43,15 +44,15 @@ export const useXData = (agg = meanData) => {
         ? []
         : !selectedVar?.isSet
           ? [
-              {
-                url: dataset.url,
-                path: 'X',
-                s: [null, selectedVar?.matrix_index],
-              },
-            ]
+            {
+              url: dataset.url,
+              path: 'X',
+              s: [null, selectedVar?.matrix_index],
+            },
+          ]
           : _.map(selectedVar?.vars, (v) => {
-              return { url: dataset.url, path: 'X', s: [null, v.matrix_index] };
-            }),
+            return { url: dataset.url, path: 'X', s: [null, v.matrix_index] };
+          }),
     [dataset.url, selectedVar],
   );
 
@@ -100,5 +101,50 @@ export const useLabelObsData = () => {
 
   return useMultipleZarr(labelObsParams, {
     enabled: !!labelObsParams.length,
+  });
+};
+
+export const useObsColsData = (obsColsNames = []) => {
+  const dataset = useDataset();
+  const settings = useSettings();
+
+  // @TODO: fetch more lightweight metadata
+  // name, type, codesMap
+  const ENDPOINT = 'obs/cols';
+  const obsParams = useMemo(() => 
+    ({
+      url: dataset.url,
+    }), [dataset.url]
+  )
+
+  const { fetchedData: obsData, isPending, serverError } = useFetch(ENDPOINT, obsParams, {
+    refetchOnMount: false,
+  });
+
+  const obsColsParams = useMemo(() =>
+  {
+    if (!isPending && obsData && !serverError) {
+      const obsCols =  _.fromPairs(_.map(obsData, (o) => [o.name, o]));
+      const names = obsColsNames.length ? obsColsNames : _.keys(obsCols);
+      return _.map(names, (obsName) => {
+        const obs = obsCols[obsName] || null;
+        return {
+          url: dataset.url,
+          path:
+            'obs/' +
+            obs.name +
+            (obs.type === OBS_TYPES.CATEGORICAL ? '/codes' : ''),
+          s: [settings.selectedObsIndex], //[slice(settings.selectedObsIndex, settings.selectedObsIndex + 1)],
+          key: obs.name,
+        };
+      })
+    }
+    else {
+      return [];
+    }
+}, [dataset.url, settings.data.obs, settings.selectedObsIndex, obsColsNames]);
+
+  return useMultipleZarr(obsColsParams, {
+    enabled: !!settings.selectedObsIndex && !!obsColsParams.length,
   });
 };
