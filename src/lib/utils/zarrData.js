@@ -153,7 +153,7 @@ export const useObsColsData = (obsColsNames = []) => {
   return {
     obsCols,
     ...useMultipleZarr(obsColsParams, {
-      enabled: !!settings.selectedObsIndex && !!obsColsParams.length,
+      enabled: settings.selectedObsIndex != null && !!obsColsParams.length,
     }),
   };
 };
