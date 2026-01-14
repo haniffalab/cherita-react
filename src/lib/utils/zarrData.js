@@ -108,24 +108,23 @@ export const useObsColsData = (obsColsNames = []) => {
   const dataset = useDataset();
   const settings = useSettings();
 
-  // @TODO: fetch more lightweight metadata
-  // name, type, codesMap
   const ENDPOINT = 'obs/cols';
-  const obsParams = useMemo(() => 
-    ({
-      url: dataset.url,
-    }), [dataset.url]
+  const obsParams = useMemo(() =>
+  ({
+    url: dataset.url,
+    returnValues: false,
+    ...(obsColsNames.length ? { cols: obsColsNames } : {}),
+  }), [dataset.url, obsColsNames]
   )
 
-  const { fetchedData: obsData, isPending, serverError } = useFetch(ENDPOINT, obsParams, {
+  const { fetchedData: obsColsData, isPending, serverError } = useFetch(ENDPOINT, obsParams, {
     refetchOnMount: false,
   });
 
-  const obsColsParams = useMemo(() =>
-  {
-    if (!isPending && obsData && !serverError) {
-      const obsCols =  _.fromPairs(_.map(obsData, (o) => [o.name, o]));
-      const names = obsColsNames.length ? obsColsNames : _.keys(obsCols);
+  const obsCols = useMemo(() => _.fromPairs(_.map(obsColsData, (o) => [o.name, o])), [obsColsData]);
+  const obsColsParams = useMemo(() => {
+    if (!isPending && obsCols && !serverError) {
+      const names = _.keys(obsCols);
       return _.map(names, (obsName) => {
         const obs = obsCols[obsName] || null;
         return {
@@ -142,9 +141,11 @@ export const useObsColsData = (obsColsNames = []) => {
     else {
       return [];
     }
-}, [dataset.url, settings.data.obs, settings.selectedObsIndex, obsColsNames]);
+  }, [dataset.url, settings.data.obs, settings.selectedObsIndex, obsColsNames]);
 
-  return useMultipleZarr(obsColsParams, {
-    enabled: !!settings.selectedObsIndex && !!obsColsParams.length,
-  });
+  return {
+    obsCols, ...useMultipleZarr(obsColsParams, {
+      enabled: !!settings.selectedObsIndex && !!obsColsParams.length,
+    })
+  };
 };
