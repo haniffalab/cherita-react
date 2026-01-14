@@ -3,12 +3,12 @@ import { useMemo } from 'react';
 import _ from 'lodash';
 import { slice } from 'zarrita';
 
+import { useFetch } from './requests';
 import { useSelectedObs, useSelectedVar } from './Resolver';
 import { OBS_TYPES } from '../constants/constants';
 import { useDataset } from '../context/DatasetContext';
 import { useSettings } from '../context/SettingsContext';
 import { useZarr, useMultipleZarr } from '../helpers/zarr-helper';
-import { useFetch } from './requests';
 
 // @TODO: support specifying slice to load from context
 export const useObsmData = (obsm = null) => {
@@ -44,15 +44,15 @@ export const useXData = (agg = meanData) => {
         ? []
         : !selectedVar?.isSet
           ? [
-            {
-              url: dataset.url,
-              path: 'X',
-              s: [null, selectedVar?.matrix_index],
-            },
-          ]
+              {
+                url: dataset.url,
+                path: 'X',
+                s: [null, selectedVar?.matrix_index],
+              },
+            ]
           : _.map(selectedVar?.vars, (v) => {
-            return { url: dataset.url, path: 'X', s: [null, v.matrix_index] };
-          }),
+              return { url: dataset.url, path: 'X', s: [null, v.matrix_index] };
+            }),
     [dataset.url, selectedVar],
   );
 
@@ -109,19 +109,27 @@ export const useObsColsData = (obsColsNames = []) => {
   const settings = useSettings();
 
   const ENDPOINT = 'obs/cols';
-  const obsParams = useMemo(() =>
-  ({
-    url: dataset.url,
-    returnValues: false,
-    ...(obsColsNames.length ? { cols: obsColsNames } : {}),
-  }), [dataset.url, obsColsNames]
-  )
+  const obsParams = useMemo(
+    () => ({
+      url: dataset.url,
+      returnValues: false,
+      ...(obsColsNames.length ? { cols: obsColsNames } : {}),
+    }),
+    [dataset.url, obsColsNames],
+  );
 
-  const { fetchedData: obsColsData, isPending, serverError } = useFetch(ENDPOINT, obsParams, {
+  const {
+    fetchedData: obsColsData,
+    isPending,
+    serverError,
+  } = useFetch(ENDPOINT, obsParams, {
     refetchOnMount: false,
   });
 
-  const obsCols = useMemo(() => _.fromPairs(_.map(obsColsData, (o) => [o.name, o])), [obsColsData]);
+  const obsCols = useMemo(
+    () => _.fromPairs(_.map(obsColsData, (o) => [o.name, o])),
+    [obsColsData],
+  );
   const obsColsParams = useMemo(() => {
     if (!isPending && obsCols && !serverError) {
       const names = _.keys(obsCols);
@@ -136,16 +144,16 @@ export const useObsColsData = (obsColsNames = []) => {
           s: [settings.selectedObsIndex], //[slice(settings.selectedObsIndex, settings.selectedObsIndex + 1)],
           key: obs.name,
         };
-      })
-    }
-    else {
+      });
+    } else {
       return [];
     }
-  }, [dataset.url, settings.data.obs, settings.selectedObsIndex, obsColsNames]);
+  }, [isPending, obsCols, serverError, dataset.url, settings.selectedObsIndex]);
 
   return {
-    obsCols, ...useMultipleZarr(obsColsParams, {
+    obsCols,
+    ...useMultipleZarr(obsColsParams, {
       enabled: !!settings.selectedObsIndex && !!obsColsParams.length,
-    })
+    }),
   };
 };
