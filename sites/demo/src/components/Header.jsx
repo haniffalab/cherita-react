@@ -45,6 +45,11 @@ export default function Header() {
                 Violin
               </NavDropdown.Item>
             </NavDropdown>
+            <NavDropdown title="Apps" id="apps-dropdown">
+              <NavDropdown.Item as={Link} to="apps/perturbgen">
+                PerturbGen
+              </NavDropdown.Item>
+            </NavDropdown>
           </Nav>
         </Container>
       </Navbar>

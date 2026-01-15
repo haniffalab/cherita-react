@@ -11,7 +11,11 @@ import Row from 'react-bootstrap/Row';
 import Tab from 'react-bootstrap/Tab';
 
 import { DiseaseInfo, VarInfo } from './SearchInfo';
-import { DiseasesSearchResults, VarSearchResults } from './SearchResults';
+import {
+  DiseasesSearchResults,
+  ObsSearchResults,
+  VarSearchResults,
+} from './SearchResults';
 import { COLOR_ENCODINGS } from '../../constants/constants';
 
 const select = (dispatch, item) => {
@@ -53,6 +57,7 @@ function addVarSet(dispatch, { name, vars }) {
 const FEATURE_TYPE = {
   VAR: 'var',
   DISEASE: 'disease',
+  OBS: 'obs',
 };
 
 export function SearchModal({
@@ -64,11 +69,19 @@ export function SearchModal({
   handleSelect = onVarSelect,
   searchVar,
   searchDiseases,
+  searchObs,
 }) {
-  const [tab, setTab] = useState('var');
+  const getDefaultTab = () => {
+    if (searchVar) return FEATURE_TYPE.VAR;
+    if (searchDiseases) return FEATURE_TYPE.DISEASE;
+    if (searchObs) return FEATURE_TYPE.OBS;
+    return null; // fallback
+  };
+  const [tab, setTab] = useState(getDefaultTab);
   const [selectedResult, setSelectedResult] = useState({
     var: null,
     disease: null,
+    obs: null,
   });
   const [varResultsLength, setVarResultsLength] = useState(null);
   const [diseaseResultsLength, setDiseaseResultsLength] = useState(null);
@@ -84,9 +97,9 @@ export function SearchModal({
                   e.preventDefault();
                 }}
               >
-                <FormGroup>
+                <FormGroup className="cherita-search-modal">
                   <div className="d-flex align-items-center">
-                    <InputGroup>
+                    <InputGroup className="focus-ring focus-ring-warning">
                       <InputGroup.Text>
                         <SearchIcon />
                       </InputGroup.Text>
@@ -100,6 +113,7 @@ export function SearchModal({
                           setSelectedResult({
                             var: null,
                             disease: null,
+                            obs: null,
                           });
                           setVarResultsLength(null);
                           setDiseaseResultsLength(null);
@@ -141,6 +155,15 @@ export function SearchModal({
                           </Nav.Link>
                         </Nav.Item>
                       )}
+                      {searchObs && (
+                        <Nav.Item>
+                          <Nav.Link eventKey={FEATURE_TYPE.OBS}>
+                            Genes{' '}
+                            {!!diseaseResultsLength &&
+                              `(${diseaseResultsLength})`}
+                          </Nav.Link>
+                        </Nav.Item>
+                      )}
                     </Nav>
                   </Col>
                   <Col sm={9} className="py-3">
@@ -174,6 +197,22 @@ export function SearchModal({
                           />
                         </Tab.Pane>
                       )}
+                      {searchObs && (
+                        <Tab.Pane eventKey={FEATURE_TYPE.OBS}>
+                          <ObsSearchResults
+                            text={text}
+                            handleSelect={handleSelect}
+                            selectedResult={selectedResult.obs}
+                            setSelectedResult={(item) =>
+                              setSelectedResult((prev) => {
+                                return { ...prev, obs: item };
+                              })
+                            }
+                            setResultsLength={setVarResultsLength}
+                            handleClose={handleClose}
+                          />
+                        </Tab.Pane>
+                      )}
                     </Tab.Content>
                   </Col>
                 </Row>
@@ -181,15 +220,21 @@ export function SearchModal({
             </Col>
             <Col xs={12} md={4} className="bg-light p-3 search-modal-info">
               {selectedResult[tab] ? (
-                tab === FEATURE_TYPE.DISEASE ? (
-                  <DiseaseInfo
-                    disease={selectedResult.disease}
-                    handleSelect={handleSelect}
-                    addVarSet={addVarSet}
-                  />
-                ) : (
-                  <VarInfo varItem={selectedResult.var} />
-                )
+                (() => {
+                  if (tab === FEATURE_TYPE.DISEASE) {
+                    return (
+                      <DiseaseInfo
+                        disease={selectedResult.disease}
+                        handleSelect={handleSelect}
+                        addVarSet={addVarSet}
+                      />
+                    );
+                  } else if (tab === FEATURE_TYPE.OBS) {
+                    return <VarInfo varItem={selectedResult.obs} />;
+                  } else {
+                    return <VarInfo varItem={selectedResult.var} />;
+                  }
+                })()
               ) : (
                 <div className="text-muted">No result selected</div>
               )}
@@ -201,7 +246,11 @@ export function SearchModal({
   );
 }
 
-export function SearchBar({ searchVar = true, searchDiseases = false }) {
+export function SearchBar({
+  searchVar = true,
+  searchDiseases = false,
+  searchObs = false,
+}) {
   const [text, setText] = useState('');
   const displayText = [
     ...(searchVar ? ['features'] : []),
@@ -238,6 +287,7 @@ export function SearchBar({ searchVar = true, searchDiseases = false }) {
         displayText={displayText}
         searchVar={searchVar}
         searchDiseases={searchDiseases}
+        searchObs={searchObs}
         handleClose={() => setShowModal(false)}
       />
     </div>
