@@ -1,5 +1,24 @@
 # Changelog
 
+# [1.5.0](https://github.com/haniffalab/cherita-react/compare/v1.4.6...v1.5.0) (2026-01-15)
+
+
+### Bug Fixes
+
+* add padding around alerts in obs box ([c49d5ef](https://github.com/haniffalab/cherita-react/commit/c49d5ef330a831397e26d11fed6a3cfe749b5d13))
+* guard against null obsm keys to fix [#206](https://github.com/haniffalab/cherita-react/issues/206) ([5251435](https://github.com/haniffalab/cherita-react/commit/525143586f04d4af61c4b7b771dae96de307a4cb))
+* in obs search results use 'matrix_index' ([f440912](https://github.com/haniffalab/cherita-react/commit/f4409121130f696e11f088d20d3f8a58552e8b30))
+* linting ([fb5378f](https://github.com/haniffalab/cherita-react/commit/fb5378f632dd6d3d5fcb995e830e88a17cfdb86e))
+* on select in obs search results use 'matrix_index' ([cacd1be](https://github.com/haniffalab/cherita-react/commit/cacd1be27278b6c941618777e1b98bf5850a17a6))
+* remove perturbgen from fullpage dropdown ([2496031](https://github.com/haniffalab/cherita-react/commit/24960310cec68c65ac09dbc05b667638378a6b4f))
+* use lodash map to ensure falsey values return empty array ([d3c6dd3](https://github.com/haniffalab/cherita-react/commit/d3c6dd3bdf800f231b5dd3cf6b5e59fa925210d9)), closes [#210](https://github.com/haniffalab/cherita-react/issues/210)
+
+
+### Features
+
+* add plot component to wrap plots+offcanvas, similar to using fullpage component ([a2f8844](https://github.com/haniffalab/cherita-react/commit/a2f8844c2700c22b02146451fe4704b9b6a5746b))
+* replace zarrjs with zarrita ([ec79116](https://github.com/haniffalab/cherita-react/commit/ec79116e04848f34e8da06d3ab9bc5bc79cc426d)), closes [#202](https://github.com/haniffalab/cherita-react/issues/202)
+
 ## [1.4.6](https://github.com/haniffalab/cherita-react/compare/v1.4.5...v1.4.6) (2025-11-20)
 
 
