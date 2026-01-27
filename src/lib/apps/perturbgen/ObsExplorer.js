@@ -10,24 +10,61 @@ import { formatNumerical } from '../../utils/string';
 import { useObsColsData } from '../../utils/zarrData';
 
 import { VirtualizedTable } from '../../utils/VirtualizedTable';
+import { useState } from 'react';
+import { useEffect } from 'react';
+import { useCallback } from 'react';
 
-const DataTable = ({ query }) => {
-  const { data, isLoading, error } = useParquetQuery(query);
-  const { fields } = data?.schema || [];
+const DataTable = ({ query: baseQuery, pageSize = 100 }) => {
+  const [offset, setOffset] = useState(0);
+  const [data, setData] = useState([]);
+  const [fields, setFields] = useState([]);
 
-  const result = data?.toArray().map((row) => row.toJSON());
+  useEffect(() => {
+    setData([]);
+    setOffset(0);
+  }, [baseQuery]);
 
-  if (isLoading) {
+  const query = useMemo(() => {
+    if (!baseQuery) return null;
+    return `
+      ${baseQuery}
+      LIMIT ${pageSize} OFFSET ${offset}
+    `;
+  }, [baseQuery, offset, pageSize]);
+
+  const { data: queryData, isLoading, error } = useParquetQuery(query);
+
+  useEffect(() => {
+    if (queryData) {
+      const newData = queryData.toArray().map((row) => row.toJSON());
+      setData((prevData) => [...prevData, ...newData]);
+      setFields(queryData.schema?.fields || []);
+    }
+  }, [queryData]);
+
+  const loadMore = useCallback(() => {
+    if (isLoading) return;
+    setOffset((prev) => prev + pageSize);
+  }, [isLoading, pageSize]);
+
+  if (isLoading && offset === 0) {
     return <div className="my-3">Loading...</div>;
   }
   if (error) {
     return <div className="my-3">Error loading data</div>;
   }
-  if (!result || result.length === 0) {
+  if (!data || data.length === 0) {
     return null;
   }
 
-  return <VirtualizedTable fields={fields} data={result} />;
+  return (
+    <VirtualizedTable
+      fields={fields}
+      data={data}
+      loadMore={loadMore}
+      isLoading={isLoading}
+    />
+  );
 };
 
 export function ObsExplorer() {

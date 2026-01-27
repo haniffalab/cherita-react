@@ -1,4 +1,4 @@
-import { forwardRef, Fragment } from 'react';
+import { forwardRef, Fragment, useCallback } from 'react';
 
 import {
   Table as MuiTable,
@@ -12,24 +12,27 @@ import {
 import _ from 'lodash';
 import { TableVirtuoso } from 'react-virtuoso';
 
-export const VirtualizedTable = ({ fields, data, height = 400 }) => {
-  const TableComponents = {
-    Scroller: forwardRef((props, ref) => (
-      <TableContainer component={Paper} {...props} ref={ref} />
-    )),
-    Table: (props) => (
-      <MuiTable
-        {...props}
-        style={{ borderCollapse: 'separate' }}
-        size="small"
-      />
-    ),
-    TableHead: TableHead,
-    TableRow: TableRow,
-    TableBody: forwardRef((props, ref) => <TableBody {...props} ref={ref} />),
-  };
+const TableComponents = {
+  Scroller: forwardRef((props, ref) => (
+    <TableContainer component={Paper} {...props} ref={ref} />
+  )),
+  Table: (props) => (
+    <MuiTable {...props} style={{ borderCollapse: 'separate' }} size="small" />
+  ),
+  TableHead: TableHead,
+  TableRow: TableRow,
+  TableBody: forwardRef((props, ref) => <TableBody {...props} ref={ref} />),
+};
 
-  function fixedHeaderContent() {
+export const VirtualizedTable = ({
+  fields,
+  data,
+  height = 400,
+  loadMore = null,
+  increaseViewportBy = 100,
+  isLoading = false,
+}) => {
+  const fixedHeaderContent = useCallback(() => {
     return (
       <TableRow>
         {fields?.map((field) => (
@@ -45,17 +48,33 @@ export const VirtualizedTable = ({ fields, data, height = 400 }) => {
         ))}
       </TableRow>
     );
-  }
+  }, [fields]);
 
-  function rowContent(_index, row) {
-    return (
-      <Fragment>
-        {_.map(fields, (field) => (
-          <TableCell key={field.name}>{row[field.name]}</TableCell>
-        ))}
-      </Fragment>
-    );
-  }
+  const fixedFooterContent = useCallback(() => {
+    if (isLoading) {
+      return (
+        <TableRow>
+          <TableCell colSpan={fields.length} align="center">
+            Loading...
+          </TableCell>
+        </TableRow>
+      );
+    }
+    return null;
+  }, [isLoading, fields.length]);
+
+  const rowContent = useCallback(
+    (_index, row) => {
+      return (
+        <Fragment>
+          {_.map(fields, (field) => (
+            <TableCell key={`${field.name}`}>{row[field.name]}</TableCell>
+          ))}
+        </Fragment>
+      );
+    },
+    [fields],
+  );
 
   return (
     <TableVirtuoso
@@ -63,7 +82,10 @@ export const VirtualizedTable = ({ fields, data, height = 400 }) => {
       data={data}
       components={TableComponents}
       fixedHeaderContent={fixedHeaderContent}
+      fixedFooterContent={fixedFooterContent}
       itemContent={rowContent}
+      endReached={loadMore}
+      increaseViewportBy={increaseViewportBy}
     />
   );
 };
