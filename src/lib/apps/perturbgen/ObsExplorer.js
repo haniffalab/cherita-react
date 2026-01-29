@@ -1,18 +1,15 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import _ from 'lodash';
 import { Table } from 'react-bootstrap';
 
 import { OBS_TYPES } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
 import { useSettings } from '../../context/SettingsContext';
 import { useParquetQuery } from '../../utils/parquetData';
 import { formatNumerical } from '../../utils/string';
-import { useObsColsData } from '../../utils/zarrData';
-
 import { VirtualizedTable } from '../../utils/VirtualizedTable';
-import { useState } from 'react';
-import { useEffect } from 'react';
-import { useCallback } from 'react';
+import { useObsColsData } from '../../utils/zarrData';
 
 const DataTable = ({ query: baseQuery, pageSize = 100 }) => {
   const [offset, setOffset] = useState(0);
@@ -68,31 +65,33 @@ const DataTable = ({ query: baseQuery, pageSize = 100 }) => {
 };
 
 export function ObsExplorer() {
-  const { selectedObsIndex, obsExplorer = {} } = useSettings();
+  const { selectedObsIndex } = useSettings();
+  const { obsExplorer = {} } = useDataset();
 
   const {
     obsCols,
     data: colsData,
     isPending,
     serverError,
-  } = useObsColsData(obsExplorer.obsCols);
+  } = useObsColsData(obsExplorer?.obsCols);
 
   const query = useMemo(() => {
-    if (!selectedObsIndex || !obsExplorer.dataUrl || !colsData) return null;
+    if (!selectedObsIndex || !obsExplorer?.dataUrl || !colsData) return null;
 
-    const where = _.map(_.keys(obsExplorer.dataFilterCols), (colName) => {
-      return `${obsExplorer.dataFilterCols[colName]}='${colsData?.[colName]}'`;
+    const where = _.map(_.keys(obsExplorer?.dataFilterCols), (colName) => {
+      return `${obsExplorer?.dataFilterCols[colName]}='${colsData?.[colName]}'`;
     }).join(' AND ');
 
-    return `
+    return (
+      `
       SELECT *
-      FROM read_parquet('${obsExplorer.dataUrl}')
-      WHERE ${where}
-    `;
+      FROM read_parquet('${obsExplorer?.dataUrl}')
+    ` + (where ? `WHERE ${where}` : '')
+    );
   }, [
     selectedObsIndex,
-    obsExplorer.dataUrl,
-    obsExplorer.dataFilterCols,
+    obsExplorer?.dataUrl,
+    obsExplorer?.dataFilterCols,
     colsData,
   ]);
 
