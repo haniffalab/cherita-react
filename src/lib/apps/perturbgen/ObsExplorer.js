@@ -43,7 +43,7 @@ const DataTable = ({ query: baseQuery, pageSize = 100 }) => {
     if (isLoading) return;
     if (queryData && !queryData.numRows) return;
     setOffset((prev) => prev + pageSize);
-  }, [isLoading, pageSize, queryData?.numRows]);
+  }, [isLoading, pageSize, queryData]);
 
   if (isLoading && offset === 0) {
     return <div className="my-3">Loading...</div>;
