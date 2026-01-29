@@ -64,6 +64,30 @@ const DataTable = ({ query: baseQuery, pageSize = 100 }) => {
   );
 };
 
+const ObsExplorerTable = ({ colsData }) => {
+  const { selectedObsIndex } = useSettings();
+  const { obsExplorer = {} } = useDataset();
+  const { dataUrl, dataFilterCols } = obsExplorer;
+
+  const query = useMemo(() => {
+    if (!selectedObsIndex || !dataUrl || (dataFilterCols && !colsData))
+      return null;
+
+    const where = _.map(_.keys(dataFilterCols), (colName) => {
+      return `${dataFilterCols[colName]}='${colsData?.[colName]}'`;
+    }).join(' AND ');
+
+    return (
+      `
+      SELECT *
+      FROM read_parquet('${dataUrl}')
+    ` + (where ? `WHERE ${where}` : '')
+    );
+  }, [selectedObsIndex, dataUrl, dataFilterCols, colsData]);
+
+  return <DataTable query={query} />;
+};
+
 export function ObsExplorer() {
   const { selectedObsIndex } = useSettings();
   const { obsExplorer = {} } = useDataset();
@@ -74,26 +98,6 @@ export function ObsExplorer() {
     isPending,
     serverError,
   } = useObsColsData(obsExplorer?.obsCols);
-
-  const query = useMemo(() => {
-    if (!selectedObsIndex || !obsExplorer?.dataUrl || !colsData) return null;
-
-    const where = _.map(_.keys(obsExplorer?.dataFilterCols), (colName) => {
-      return `${obsExplorer?.dataFilterCols[colName]}='${colsData?.[colName]}'`;
-    }).join(' AND ');
-
-    return (
-      `
-      SELECT *
-      FROM read_parquet('${obsExplorer?.dataUrl}')
-    ` + (where ? `WHERE ${where}` : '')
-    );
-  }, [
-    selectedObsIndex,
-    obsExplorer?.dataUrl,
-    obsExplorer?.dataFilterCols,
-    colsData,
-  ]);
 
   if (selectedObsIndex == null) {
     return <div className="my-3">No selection</div>;
@@ -129,7 +133,7 @@ export function ObsExplorer() {
           })}
         </tbody>
       </Table>
-      <DataTable query={query} />
+      <ObsExplorerTable colsData={colsData} />
     </div>
   );
 }
