@@ -1,25 +1,5 @@
-// eslint-disable-line
 import * as duckdb from '@duckdb/duckdb-wasm';
-// eslint-disable-next-line import/no-unresolved
-import eh_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js?url';
-// eslint-disable-next-line import/no-unresolved
-import mvp_worker from '@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js?url';
-// eslint-disable-next-line import/no-unresolved
-import duckdb_wasm_eh from '@duckdb/duckdb-wasm/dist/duckdb-eh.wasm?url';
-// eslint-disable-next-line import/no-unresolved
-import duckdb_wasm from '@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm?url';
 import { useQuery } from '@tanstack/react-query';
-
-const duckDBBundles = {
-  mvp: {
-    mainModule: duckdb_wasm,
-    mainWorker: mvp_worker,
-  },
-  eh: {
-    mainModule: duckdb_wasm_eh,
-    mainWorker: eh_worker,
-  },
-};
 
 let dbInstance = null;
 
@@ -27,8 +7,15 @@ const initDB = async () => {
   if (dbInstance) {
     return dbInstance;
   }
-  const bundle = await duckdb.selectBundle(duckDBBundles);
-  const worker = new Worker(bundle.mainWorker);
+  const bundle = await duckdb.selectBundle(duckdb.getJsDelivrBundles());
+
+  const worker_url = URL.createObjectURL(
+    new Blob([`importScripts("${bundle.mainWorker}");`], {
+      type: 'text/javascript',
+    }),
+  );
+  const worker = new Worker(worker_url);
+
   const logger = new duckdb.ConsoleLogger();
   const db = new duckdb.AsyncDuckDB(logger, worker);
   await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
