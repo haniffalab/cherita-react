@@ -20,6 +20,10 @@ const initDB = async () => {
   const db = new duckdb.AsyncDuckDB(logger, worker);
   await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
 
+  const c = await db.connect();
+  await c.query('LOAD httpfs;');
+  await c.close();
+
   dbInstance = db;
   return db;
 };
@@ -40,7 +44,6 @@ export const useParquetQuery = (queryString, options) => {
     queryKey: ['duckdb-query', queryString],
     queryFn: async () => {
       const c = await db.connect();
-      await c.query('LOAD httpfs;');
       const result = await c.query(queryString);
       await c.close();
       return result;
