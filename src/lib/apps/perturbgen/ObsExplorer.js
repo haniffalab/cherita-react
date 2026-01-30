@@ -1,17 +1,18 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import _ from 'lodash';
-import { Table } from 'react-bootstrap';
+import { Alert, Table } from 'react-bootstrap';
 
 import { OBS_TYPES } from '../../constants/constants';
 import { useDataset } from '../../context/DatasetContext';
 import { useSettings } from '../../context/SettingsContext';
-import { useParquetQuery } from '../../utils/parquetData';
+import { useParquet, useParquetQuery } from '../../utils/parquetData';
+import { DataTableSkeleton } from '../../utils/Skeleton';
 import { formatNumerical } from '../../utils/string';
 import { VirtualizedTable } from '../../utils/VirtualizedTable';
 import { useObsColsData } from '../../utils/zarrData';
 
-const DataTable = ({ query: baseQuery, pageSize = 100 }) => {
+const DataTable = ({ query: baseQuery, pageSize = 50 }) => {
   const [offset, setOffset] = useState(0);
   const [data, setData] = useState([]);
   const [fields, setFields] = useState([]);
@@ -46,10 +47,10 @@ const DataTable = ({ query: baseQuery, pageSize = 100 }) => {
   }, [isLoading, pageSize, queryData]);
 
   if (isLoading && offset === 0) {
-    return <div className="my-3">Loading...</div>;
+    return <DataTableSkeleton />;
   }
   if (error) {
-    return <div className="my-3">Error loading data</div>;
+    return <Alert variant="danger">Error loading data</Alert>;
   }
   if (!data || data.length === 0) {
     return null;
@@ -92,6 +93,7 @@ const ObsExplorerTable = ({ colsData }) => {
 export function ObsExplorer() {
   const { selectedObsIndex } = useSettings();
   const { obsExplorer = {} } = useDataset();
+  useParquet(); // initialize duckdb instance
 
   const {
     obsCols,

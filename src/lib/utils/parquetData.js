@@ -44,7 +44,6 @@ export const useParquetQuery = (queryString, options) => {
       const result = await c.query(queryString);
       await c.close();
       return result;
-      // return result.toArray().map((row) => row.toJSON());
     },
     enabled:
       !isDbLoading && !!db && !!queryString && (options?.enabled ?? true),
