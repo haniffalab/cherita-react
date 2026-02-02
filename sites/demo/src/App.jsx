@@ -1,4 +1,8 @@
-import { FullPage, PerturbGen, PLOT_TYPES } from '@haniffalab/cherita-react';
+import {
+  ObservationFeature,
+  PerturbationMapStandardView,
+  PLOT_TYPES,
+} from '@haniffalab/cherita-react';
 import { Route, Routes } from 'react-router-dom';
 
 import Footer from './components/Footer';
@@ -21,54 +25,86 @@ export default function App(props) {
             <p className="m-3">Demo website for @haniffalab/cherita-react</p>
           }
         />
-        <Route exact path="/dotplot" element={<DotplotDemo {...props} />} />
-        <Route exact path="/heatmap" element={<HeatmapDemo {...props} />} />
+        <Route
+          exac
+          t
+          path="/observation-feature/embedded-plot/dotplot"
+          element={<DotplotDemo {...props} />}
+        />
         <Route
           exact
-          path="/matrixplot"
+          path="/observation-feature/embedded-plot/heatmap"
+          element={<HeatmapDemo {...props} />}
+        />
+        <Route
+          exact
+          path="/observation-feature/embedded-plot/matrixplot"
           element={<MatrixplotDemo {...props} />}
         />
         <Route
           exact
-          path="/scatterplot"
+          path="/observation-feature/embedded-plot/scatterplot"
           element={<ScatterplotDemo {...props} />}
         />
-        <Route exact path="/violin" element={<ViolinDemo {...props} />} />
         <Route
           exact
-          path="/full-page/scatterplot"
+          path="/observation-feature/embedded-plot/violin"
+          element={<ViolinDemo {...props} />}
+        />
+        <Route
+          exact
+          path="/observation-feature/standard-view/dotplot"
           element={
-            <FullPage {...props} defaultPlotType={PLOT_TYPES.SCATTERPLOT} />
+            <ObservationFeature.StandardView
+              {...props}
+              defaultPlotType={PLOT_TYPES.DOTPLOT}
+            />
           }
         ></Route>
         <Route
           exact
-          path="/full-page/dotplot"
-          element={<FullPage {...props} defaultPlotType={PLOT_TYPES.DOTPLOT} />}
-        ></Route>
-        <Route
-          exact
-          path="/full-page/heatmap"
-          element={<FullPage {...props} defaultPlotType={PLOT_TYPES.HEATMAP} />}
-        ></Route>
-        <Route
-          exact
-          path="/full-page/matrixplot"
+          path="/observation-feature/standard-view/heatmap"
           element={
-            <FullPage {...props} defaultPlotType={PLOT_TYPES.MATRIXPLOT} />
+            <ObservationFeature.StandardView
+              {...props}
+              defaultPlotType={PLOT_TYPES.HEATMAP}
+            />
           }
         ></Route>
         <Route
           exact
-          path="/full-page/violin"
+          path="/observation-feature/standard-view/matrixplot"
           element={
-            <FullPage {...props} defaultPlotType={PLOT_TYPES.VIOLINPLOT} />
+            <ObservationFeature.StandardView
+              {...props}
+              defaultPlotType={PLOT_TYPES.MATRIXPLOT}
+            />
           }
         ></Route>
         <Route
           exact
-          path="/apps/perturbgen"
-          element={<PerturbGen {...props} />}
+          path="/observation-feature/standard-view/scatterplot"
+          element={
+            <ObservationFeature.StandardView
+              {...props}
+              defaultPlotType={PLOT_TYPES.SCATTERPLOT}
+            />
+          }
+        ></Route>
+        <Route
+          exact
+          path="/observation-feature/standard-view/violin"
+          element={
+            <ObservationFeature.StandardView
+              {...props}
+              defaultPlotType={PLOT_TYPES.VIOLINPLOT}
+            />
+          }
+        ></Route>
+        <Route
+          exact
+          path="/perturbation-map/standard-view"
+          element={<PerturbationMapStandardView {...props} />}
         ></Route>
       </Routes>
       <Footer />
