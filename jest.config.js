@@ -8,7 +8,7 @@ module.exports = {
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js', // Mock static assets
   },
   transformIgnorePatterns: [
-    '/node_modules/(?!(polyclip-ts|@uidotdev/usehooks)/)', // Transform ESM dependencies
+    '/node_modules/(?!(polyclip-ts|@uidotdev/usehooks|kdbush|geokdbush)/)', // Transform ESM dependencies
   ],
   // Coverage options
   collectCoverage: true, // Enable coverage collection
