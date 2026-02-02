@@ -12,7 +12,7 @@ import { formatNumerical } from '../../utils/string';
 import { VirtualizedTable } from '../../utils/VirtualizedTable';
 import { useObsColsData } from '../../utils/zarrData';
 
-const DataTable = ({ query: baseQuery, pageSize = 50 }) => {
+const DataTable = ({ query: baseQuery, pageSize = 100 }) => {
   const [offset, setOffset] = useState(0);
   const [data, setData] = useState([]);
   const [fields, setFields] = useState([]);

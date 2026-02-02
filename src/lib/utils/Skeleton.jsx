@@ -21,27 +21,27 @@ export const ObsmKeysListBtn = () => {
   );
 };
 
+export const TableRowSekeleton = ({ cols = 3 }) => {
+  return (
+    <TableRow>
+      {Array.from({ length: cols }).map((_, index) => (
+        <TableCell key={index}>
+          <Skeleton variant="text" />
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+};
+
 export const DataTableSkeleton = ({ rows = 2, cols = 3 }) => {
   return (
     <Table>
       <TableHead>
-        <TableRow>
-          {Array.from({ length: cols }).map((_, index) => (
-            <TableCell key={index}>
-              <Skeleton variant="text" />
-            </TableCell>
-          ))}
-        </TableRow>
+        <TableRowSekeleton cols={cols} />
       </TableHead>
       <TableBody>
         {Array.from({ length: rows }).map((_, rowIndex) => (
-          <TableRow key={rowIndex}>
-            {Array.from({ length: cols }).map((_, colIndex) => (
-              <TableCell key={colIndex}>
-                <Skeleton variant="text" />
-              </TableCell>
-            ))}
-          </TableRow>
+          <TableRowSekeleton key={rowIndex} cols={cols} />
         ))}
       </TableBody>
     </Table>

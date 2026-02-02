@@ -12,6 +12,8 @@ import {
 import _ from 'lodash';
 import { TableVirtuoso } from 'react-virtuoso';
 
+import { TableRowSekeleton } from './Skeleton';
+
 const TableComponents = {
   Scroller: forwardRef((props, ref) => (
     <TableContainer component={Paper} {...props} ref={ref} />
@@ -51,16 +53,8 @@ export const VirtualizedTable = ({
   }, [fields]);
 
   const fixedFooterContent = useCallback(() => {
-    if (isLoading) {
-      return (
-        <TableRow>
-          <TableCell colSpan={fields.length} align="center">
-            Loading...
-          </TableCell>
-        </TableRow>
-      );
-    }
-    return null;
+    if (!isLoading) return null;
+    return <TableRowSekeleton cols={fields.length} />;
   }, [isLoading, fields.length]);
 
   const rowContent = useCallback(
