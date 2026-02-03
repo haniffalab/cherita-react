@@ -27,6 +27,9 @@ import { DatasetProvider } from '../../context/DatasetContext';
 export function EmbeddedPlot({
   plotType = PLOT_TYPES.SCATTERPLOT,
   canOverrideSettings = false,
+  showObsBtn = true,
+  showVarsBtn = true,
+  showCtrlsBtn = true,
   ...props
 }) {
   const [showCategories, setShowCategories] = useState(false);
@@ -87,7 +90,7 @@ export function EmbeddedPlot({
   };
 
   return (
-    <DatasetProvider {...props}>
+    <DatasetProvider canOverrideSettings={false} {...props}>
       {plot()}
       <OffcanvasObs
         {...props}
