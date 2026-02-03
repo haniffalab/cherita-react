@@ -35,8 +35,7 @@ export function Matrixplot({
   const selectedObs = useSelectedObs();
   const selectedMultiVar = useSelectedMultiVar();
 
-  const { showCategoriesBtn, showSearchBtn, isCompact } =
-    usePlotVisibility(isFullscreen);
+  const { showCategoriesBtn, showSearchBtn } = usePlotVisibility(isFullscreen);
 
   const params = useMemo(
     () => ({
