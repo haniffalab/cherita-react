@@ -371,7 +371,7 @@ export function Scatterplot({
         return 200;
       }
 
-      return grayOut ? 1 : 3;
+      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 40 : 1);
     },
     [
       getOriginalIndex,
