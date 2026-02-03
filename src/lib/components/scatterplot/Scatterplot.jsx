@@ -345,6 +345,9 @@ export function Scatterplot({
     [
       isPending,
       sortedObsIndices,
+      pointInteractionEnabled,
+      getOriginalIndex,
+      selectedObsIndex,
       getColor,
       sortedData.values,
       min,
@@ -353,24 +356,30 @@ export function Scatterplot({
       useUnsColors,
       settings.colorEncoding,
       selectedObs?.colors,
-      selectedObsIndex,
-      getOriginalIndex,
     ],
   );
 
   // @TODO: add support for pseudospatial hover to reflect in radius
-  const getRadius = (_d, { index }) => {
-    const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
+  const getRadius = useCallback(
+    (_d, { index }) => {
+      const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
 
-    if (
-      pointInteractionEnabled &&
-      getOriginalIndex(index) === selectedObsIndex
-    ) {
-      return grayOut ? 200 : 200;
-    }
+      if (
+        pointInteractionEnabled &&
+        getOriginalIndex(index) === selectedObsIndex
+      ) {
+        return 200;
+      }
 
-    return grayOut ? 1 : 60;
-  };
+      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 40 : 1);
+    },
+    [
+      getOriginalIndex,
+      pointInteractionEnabled,
+      selectedObsIndex,
+      sortedObsIndices,
+    ],
+  );
 
   const memoizedLayers = useMemo(() => {
     return [
@@ -486,6 +495,10 @@ export function Scatterplot({
   const getLabel = (o, v, isVar = false) => {
     if (isVar || o.type === OBS_TYPES.CONTINUOUS) {
       return `${o.name}: ${formatNumerical(parseFloat(v))}`;
+    } else if (o.type === OBS_TYPES.DISCRETE) {
+      return `${o.name}: ${v}`;
+    } else if (o.type === OBS_TYPES.BOOLEAN) {
+      return `${o.name}: ${o.codesMap[+v]}`;
     } else {
       return `${o.name}: ${o.codesMap[v]}`;
     }
