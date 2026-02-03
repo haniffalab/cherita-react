@@ -13,7 +13,6 @@ import {
 import { useDataset } from '../../context/DatasetContext';
 import { useFilteredData } from '../../context/FilterContext';
 import { useSettings } from '../../context/SettingsContext';
-import usePlotVisibility from '../../hooks/usePlotVisibility';
 import { LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useDebouncedFetch } from '../../utils/requests';
 import {
@@ -22,6 +21,7 @@ import {
   useSelectedVar,
 } from '../../utils/Resolver';
 import { StyledTooltip } from '../../utils/StyledTooltip';
+import usePlotVisibility from '../../utils/usePlotVisibility';
 import { PlotAlert } from '../plot/PlotAlert';
 import { PlotlyToolbar, PlotlyModebarControls } from '../toolbar/Toolbar';
 

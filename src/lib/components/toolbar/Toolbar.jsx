@@ -2,7 +2,7 @@ import { faList, faSearch, faSliders } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Container, Nav, Navbar, Button, ButtonGroup } from 'react-bootstrap';
 
-import usePlotVisibility from '../../hooks/usePlotVisibility';
+import usePlotVisibility from '../../utils/usePlotVisibility';
 
 export const Toolbar = ({
   setShowCategories,

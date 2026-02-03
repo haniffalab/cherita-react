@@ -32,7 +32,7 @@ import {
   useSettings,
   useSettingsDispatch,
 } from '../../context/SettingsContext';
-import usePlotVisibility from '../../hooks/usePlotVisibility';
+import usePlotVisibility from '../../utils/usePlotVisibility';
 import { OffcanvasControls } from '../offcanvas/OffCanvas';
 
 export function SpatialControls({

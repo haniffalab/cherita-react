@@ -11,10 +11,10 @@ import {
   useSettings,
   useSettingsDispatch,
 } from '../../context/SettingsContext';
-import usePlotVisibility from '../../hooks/usePlotVisibility';
 import { LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useDebouncedFetch } from '../../utils/requests';
 import { useSelectedMultiVar, useSelectedObs } from '../../utils/Resolver';
+import usePlotVisibility from '../../utils/usePlotVisibility';
 import { PlotAlert } from '../plot/PlotAlert';
 import { PlotlyToolbar, PlotlyModebarControls } from '../toolbar/Toolbar';
 

@@ -8,10 +8,10 @@ import { PLOTLY_MODEBAR_BUTTONS } from '../../constants/constants';
 import { useDataset } from '../../context/DatasetContext';
 import { useFilteredData } from '../../context/FilterContext';
 import { useSettings } from '../../context/SettingsContext';
-import usePlotVisibility from '../../hooks/usePlotVisibility';
 import { LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useDebouncedFetch } from '../../utils/requests';
 import { useSelectedMultiVar, useSelectedObs } from '../../utils/Resolver';
+import usePlotVisibility from '../../utils/usePlotVisibility';
 import { PlotAlert } from '../plot/PlotAlert';
 import { PlotlyToolbar, PlotlyModebarControls } from '../toolbar/Toolbar';
 
