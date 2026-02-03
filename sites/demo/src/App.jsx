@@ -1,6 +1,6 @@
 import {
   ObservationFeature,
-  PerturbationMapStandardView,
+  PerturbationMap,
   PLOT_TYPES,
 } from '@haniffalab/cherita-react';
 import { Route, Routes } from 'react-router-dom';
@@ -104,7 +104,7 @@ export default function App(props) {
         <Route
           exact
           path="/perturbation-map/standard-view"
-          element={<PerturbationMapStandardView {...props} />}
+          element={<PerturbationMap.StandardView {...props} />}
         ></Route>
       </Routes>
       <Footer />
