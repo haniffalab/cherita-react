@@ -44,15 +44,15 @@ export const useXData = (agg = meanData) => {
         ? []
         : !selectedVar?.isSet
           ? [
-            {
-              url: dataset.url,
-              path: 'X',
-              s: [null, selectedVar?.matrix_index],
-            },
-          ]
+              {
+                url: dataset.url,
+                path: 'X',
+                s: [null, selectedVar?.matrix_index],
+              },
+            ]
           : _.map(selectedVar?.vars, (v) => {
-            return { url: dataset.url, path: 'X', s: [null, v.matrix_index] };
-          }),
+              return { url: dataset.url, path: 'X', s: [null, v.matrix_index] };
+            }),
     [dataset.url, selectedVar],
   );
 
