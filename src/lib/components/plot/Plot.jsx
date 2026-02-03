@@ -28,7 +28,6 @@ export function Plot({
   showObsBtn = true,
   showVarsBtn = true,
   showCtrlsBtn = true,
-  canOverrideSettings = false,
   ...props
 }) {
   const [showObs, setShowObs] = useState(false);
@@ -91,7 +90,7 @@ export function Plot({
   };
 
   return (
-    <DatasetProvider {...props}>
+    <DatasetProvider canOverrideSettings={false} {...props}>
       {plot()}
       <OffcanvasObs
         {...props}
