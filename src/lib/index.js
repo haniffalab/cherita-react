@@ -1,4 +1,5 @@
-export { PerturbGen } from './apps/perturbgen/PerturbGen';
+export { default as ObservationFeature } from './views/ObservationFeature';
+export { default as PerturbationMap } from './views/PerturbationMap';
 export { Dotplot } from './components/dotplot/Dotplot';
 export { DotplotControls } from './components/dotplot/DotplotControls';
 export { Heatmap } from './components/heatmap/Heatmap';
@@ -12,7 +13,7 @@ export {
   OffcanvasObs,
   OffcanvasObsm,
   OffcanvasVars,
-} from './components/offcanvas';
+} from './components/offcanvas/OffCanvas';
 export { Pseudospatial } from './components/pseudospatial/Pseudospatial';
 export { Scatterplot } from './components/scatterplot/Scatterplot';
 export { ScatterplotControls } from './components/scatterplot/ScatterplotControls';
@@ -30,5 +31,3 @@ export {
 } from './constants/constants';
 export { DatasetProvider } from './context/DatasetContext';
 export { FilterProvider } from './context/FilterContext';
-export { FullPage } from './components/full-page/FullPage';
-export { Plot } from './components/plot/Plot';
