@@ -17,7 +17,7 @@ import { SearchBar } from '../../components/search-bar/SearchBar';
 import { SELECTION_MODES } from '../../constants/constants';
 import { DatasetProvider } from '../../context/DatasetContext';
 
-export function PerturbationMapStandardView({ ...props }) {
+export function StandardView({ ...props }) {
   const [showCategories, setShowCategories] = useState(false);
   const [showEmbeddings, setShowEmbeddings] = useState(false);
   const [showObsExplorer, setShowObsExplorer] = useState(false);
