@@ -532,6 +532,7 @@ export function Scatterplot({
     if (settings.labelObs.length) {
       text.push(
         ..._.map(labelObsData.data, (v, k) => {
+          if (!v) return;
           const labelObs = settings.data.obs[k];
           return getLabel(labelObs, v[getOriginalIndex(index)]);
         }),
