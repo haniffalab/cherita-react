@@ -26,7 +26,6 @@ export const SettingsDispatchContext = createContext(null);
 
 const initialSettings = {
   selectedObs: null, // { name: "obs_name", omit: ["obs_item"], bins: {} }
-  selectedObsIndex: null,
   selectedVar: null, // { name: "var_name", isSet: false } or { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }
   selectedObsm: null, // "obsm_name" (e.g. "X_umap")
   selectedMultiVar: [], // [{ name: "var_name", isSet: false }, { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }]
@@ -60,6 +59,9 @@ const initialSettings = {
       opacity: 1,
     },
   },
+  // for obsExplorer
+  selectedObsIndex: null,
+  explorerObs: [],
   // dataset resolved values
   data: {
     // store resolved obs and vars from selectedObs, selectedVar, selectedMultiVar, vars, labelObs

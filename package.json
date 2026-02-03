@@ -42,10 +42,12 @@
     "@tanstack/react-virtual": "^3.7.0",
     "@turf/turf": "^7.0.0",
     "@uidotdev/usehooks": "^2.4.1",
-    "@zarrita/ndarray": "^0.1.5",
+    "@zarrita/ndarray": "0.1.6",
     "bootstrap": "^5.3.3",
     "deck.gl": "8.8.27",
+    "isndarray": "^1.0.0",
     "jquery": "^3.7.1",
+    "ndarray": "^1.0.19",
     "ndarray-unpack": "^1.0.0",
     "nebula.gl": "^1.0.4",
     "numbro": "^2.5.0",
@@ -54,7 +56,7 @@
     "react-bootstrap": "^2.7.4",
     "react-plotly.js": "^2.6.0",
     "react-scripts": "^5.0.1",
-    "zarrita": "^0.5.4"
+    "zarrita": "0.6.0"
   },
   "peerDependencies": {
     "react": "^18.2.0",
