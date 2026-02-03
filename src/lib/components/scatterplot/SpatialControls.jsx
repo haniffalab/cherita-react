@@ -4,7 +4,7 @@ import {
   faCrosshairs,
   faDrawPolygon,
   faHand,
-  faList,
+  faBars,
   faMinus,
   faPen,
   faPlus,
@@ -14,7 +14,6 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { JoinInner } from '@mui/icons-material';
-import useMediaQuery from '@mui/material/useMediaQuery';
 import {
   DrawLineStringMode,
   DrawPolygonByDraggingMode,
@@ -28,13 +27,13 @@ import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 
-import { OffcanvasControls } from '../offcanvas';
 import { ScatterplotControls } from './ScatterplotControls';
-import { BREAKPOINTS } from '../../constants/constants';
 import {
   useSettings,
   useSettingsDispatch,
 } from '../../context/SettingsContext';
+import usePlotVisibility from '../../hooks/usePlotVisibility';
+import { OffcanvasControls } from '../offcanvas/OffCanvas';
 
 export function SpatialControls({
   mode,
@@ -45,8 +44,8 @@ export function SpatialControls({
   resetBounds,
   increaseZoom,
   decreaseZoom,
-  setShowObs,
-  setShowVars,
+  setShowCategories,
+  setShowSearch,
   isFullscreen,
 }) {
   const settings = useSettings();
@@ -56,10 +55,8 @@ export function SpatialControls({
   const handleCloseControls = () => setShowControls(false);
   const handleShowControls = () => setShowControls(true);
 
-  const LgBreakpoint = useMediaQuery(BREAKPOINTS.LG);
-  const XlBreakpoint = useMediaQuery(BREAKPOINTS.XL);
-  const showObsBtn = isFullscreen ? LgBreakpoint : true;
-  const showVarsBtn = isFullscreen ? XlBreakpoint : true;
+  const { showCategoriesBtn, showSearchBtn, isCompact } =
+    usePlotVisibility(isFullscreen);
 
   const onSelect = (eventKey, event) => {
     switch (eventKey) {
@@ -94,6 +91,7 @@ export function SpatialControls({
     <>
       <Button
         active={settings.sliceBy.polygons}
+        size={isCompact ? 'sm' : undefined}
         title="Filter data with polygons"
         onClick={() => {
           setMode(() => ViewMode);
@@ -102,10 +100,14 @@ export function SpatialControls({
           });
         }}
       >
-        <JoinInner />
+        <JoinInner
+          fontSize={isCompact ? 'small' : 'medium'}
+          sx={{ display: 'block' }}
+        />
       </Button>
       <Button
-        title="Delete selected polygons"
+        title="Delete selcted polygons"
+        size={isCompact ? 'sm' : undefined}
         onClick={() => {
           const newFeatures = features.features.filter(
             (_f, i) => !selectedFeatureIndexes.includes(i),
@@ -123,25 +125,33 @@ export function SpatialControls({
   );
 
   return (
-    <div className="cherita-spatial-controls">
-      {(showObsBtn || showVarsBtn) && (
-        <ButtonGroup vertical className="w-100 mb-1">
-          {showObsBtn && (
+    <div
+      className={`cherita-spatial-controls ${isCompact ? 'is-compact' : ''}`}
+    >
+      {(showCategoriesBtn || showSearchBtn) && (
+        <ButtonGroup vertical className="mb-1 w-100">
+          {showCategoriesBtn && (
             <OverlayTrigger
               placement="right"
               overlay={<Tooltip id="tooltip-obs">Browse categories</Tooltip>}
             >
-              <Button onClick={() => setShowObs(true)}>
-                <FontAwesomeIcon icon={faList} />
+              <Button
+                size={isCompact ? 'sm' : undefined}
+                onClick={() => setShowCategories(true)}
+              >
+                <FontAwesomeIcon icon={faBars} />
               </Button>
             </OverlayTrigger>
           )}
-          {showVarsBtn && (
+          {showSearchBtn && (
             <OverlayTrigger
               placement="right"
               overlay={<Tooltip id="tooltip-vars">Search features</Tooltip>}
             >
-              <Button onClick={() => setShowVars(true)}>
+              <Button
+                size={isCompact ? 'sm' : undefined}
+                onClick={() => setShowSearch(true)}
+              >
                 <FontAwesomeIcon icon={faSearch} />
               </Button>
             </OverlayTrigger>
@@ -153,17 +163,29 @@ export function SpatialControls({
           onClick={() => setMode(() => ViewMode)}
           title="Set dragging mode"
           active={mode === ViewMode}
+          size={isCompact ? 'sm' : undefined}
         >
           <FontAwesomeIcon icon={faHand} />
         </Button>
-        <Button onClick={increaseZoom} title="Increase zoom">
+        <Button
+          size={isCompact ? 'sm' : undefined}
+          onClick={increaseZoom}
+          title="Increase zoom"
+        >
           <FontAwesomeIcon icon={faPlus} />
         </Button>
-        <Button onClick={decreaseZoom} title="Decrease zoom">
+        <Button
+          size={isCompact ? 'sm' : undefined}
+          onClick={decreaseZoom}
+          title="Decrease zoom"
+        >
           <FontAwesomeIcon icon={faMinus} />
         </Button>
-        <div className="border-bottom"></div> {/* Divider */}
-        <Button onClick={resetBounds} title="Reset zoom and center">
+        <Button
+          size={isCompact ? 'sm' : undefined}
+          onClick={resetBounds}
+          title="Reset zoom and center"
+        >
           <FontAwesomeIcon icon={faCrosshairs} />
         </Button>
         <Dropdown
@@ -171,6 +193,7 @@ export function SpatialControls({
           className="caret-off"
           drop="end"
           onSelect={onSelect}
+          size={isCompact ? 'sm' : undefined}
         >
           <Dropdown.Toggle
             id="dropdown-autoclose-outside"
@@ -195,7 +218,10 @@ export function SpatialControls({
           </Dropdown.Menu>
         </Dropdown>
         {!!features?.features?.length && polygonControls}
-        <Button onClick={handleShowControls}>
+        <Button
+          size={isCompact ? 'sm' : undefined}
+          onClick={handleShowControls}
+        >
           <FontAwesomeIcon icon={faSliders} />
         </Button>
       </ButtonGroup>

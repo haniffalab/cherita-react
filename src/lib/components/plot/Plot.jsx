@@ -17,7 +17,8 @@ import {
   OffcanvasObs,
   OffcanvasObsm,
   OffcanvasVars,
-} from '../offcanvas';
+  OffcanvasObsExplorer,
+} from '../offcanvas/OffCanvas';
 import { Scatterplot } from '../scatterplot/Scatterplot';
 import { ScatterplotControls } from '../scatterplot/ScatterplotControls';
 import { Violin } from '../violin/Violin';
@@ -31,10 +32,11 @@ export function Plot({
   canOverrideSettings = false,
   ...props
 }) {
-  const [showObs, setShowObs] = useState(false);
-  const [showObsm, setShowObsm] = useState(false);
-  const [showVars, setShowVars] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
+  const [showEmbeddings, setShowEmbeddings] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [showObsExplorer, setShowObsExplorer] = useState(false);
 
   const { plotControls, varMode, showSelectedAsActive } = {
     [PLOT_TYPES.SCATTERPLOT]: {
@@ -69,8 +71,8 @@ export function Plot({
     showVarsBtn,
     showCtrlsBtn,
     plotType,
-    setShowObs,
-    setShowVars,
+    setShowCategories,
+    setShowSearch,
     setShowControls,
   };
 
@@ -96,14 +98,19 @@ export function Plot({
       <OffcanvasObs
         {...props}
         showSelectedAsActive={showSelectedAsActive}
-        show={showObs}
-        handleClose={() => setShowObs(false)}
+        show={showCategories}
+        handleClose={() => setShowCategories(false)}
       />
       <OffcanvasVars
         {...props}
-        show={showVars}
-        handleClose={() => setShowVars(false)}
+        show={showSearch}
+        handleClose={() => setShowSearch(false)}
         mode={varMode}
+      />
+      <OffcanvasObsExplorer
+        show={showObsExplorer}
+        handleClose={() => setShowObsExplorer(false)}
+        mode={SELECTION_MODES.SINGLE}
       />
       {plotControls && (
         <OffcanvasControls
@@ -115,8 +122,8 @@ export function Plot({
       )}
       <OffcanvasObsm
         {...props}
-        show={showObsm}
-        handleClose={() => setShowObsm(false)}
+        show={showEmbeddings}
+        handleClose={() => setShowEmbeddings(false)}
       />
     </DatasetProvider>
   );
