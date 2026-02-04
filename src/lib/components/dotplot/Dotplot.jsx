@@ -14,6 +14,7 @@ import {
 import { LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useDebouncedFetch } from '../../utils/requests';
 import { useSelectedMultiVar, useSelectedObs } from '../../utils/Resolver';
+import usePlotlySetup from '../../utils/usePlotlySetup';
 import usePlotVisibility from '../../utils/usePlotVisibility';
 import { PlotAlert } from '../plot/PlotAlert';
 import { PlotlyToolbar, PlotlyModebarControls } from '../toolbar/Toolbar';
@@ -25,6 +26,7 @@ export function Dotplot({
   plotType,
   setPlotType,
   isFullscreen = false,
+  showPlotControls = true,
 }) {
   const ENDPOINT = 'dotplot';
   const dataset = useDataset();
@@ -160,27 +162,33 @@ export function Dotplot({
     ]),
   ];
 
+  const { layout: plotLayout, config: plotConfig } = usePlotlySetup({
+    layout,
+    showPlotControls,
+    colorscale: colorscale.current,
+    modeBarButtons,
+  });
+
   if (!serverError) {
     if (hasSelections) {
       return (
         <div className="cherita-plot cherita-dotplot position-relative">
-          <div className="plotly-toolbar">
-            <PlotlyToolbar
-              setShowCategories={setShowCategories}
-              setShowSearch={setShowSearch}
-              isFullscreen={isFullscreen}
-            />
-          </div>
+          {showPlotControls && (
+            <div className="plotly-toolbar">
+              <PlotlyToolbar
+                setShowCategories={setShowCategories}
+                setShowSearch={setShowSearch}
+                isFullscreen={isFullscreen}
+              />
+            </div>
+          )}
           {isPending && <LoadingSpinner />}
           <Plot
             data={data}
-            layout={layout}
+            layout={plotLayout}
+            config={plotConfig}
             useResizeHandler={true}
             style={{ width: '100%', height: '100%' }}
-            config={{
-              displaylogo: false,
-              modeBarButtons: modeBarButtons,
-            }}
           />
         </div>
       );

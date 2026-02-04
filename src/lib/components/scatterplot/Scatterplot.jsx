@@ -60,7 +60,7 @@ export function Scatterplot({
   setPlotType,
   isFullscreen = false,
   pointInteractionEnabled = false,
-  showSpatialControls = true,
+  showPlotControls = true,
 }) {
   const { useUnsColors } = useDataset();
   const settings = useSettings();
@@ -604,7 +604,7 @@ export function Scatterplot({
           }}
           ref={deckRef}
         ></DeckGL>
-        {showSpatialControls && (
+        {showPlotControls && (
           <SpatialControls
             mode={mode}
             setMode={setMode}
@@ -645,6 +645,7 @@ export function Scatterplot({
               obsLength={parseInt(data.positions?.length)}
               slicedLength={parseInt(slicedLength)}
               setHasObsm={setHasObsm}
+              showPlotControls={showPlotControls}
             />
           </div>
           {!error && (
