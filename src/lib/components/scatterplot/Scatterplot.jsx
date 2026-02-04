@@ -168,25 +168,24 @@ export function Scatterplot({
   ]);
 
   useEffect(() => {
-    if (data.positions && !!data.positions.length) {
+    if (data.positions && data.positions.length) {
       const mapHelper = new MapHelper();
-      setViewport(
-        mapHelper.fitBounds(data.positions, {
+      const { latitude, longitude, zoom, bounds } = mapHelper.fitBounds(
+        data.positions,
+        {
           width: deckRef?.current?.deck?.width,
           height: deckRef?.current?.deck?.height,
-        }),
+        },
       );
+      setViewState((v) => ({
+        ...v,
+        latitude,
+        longitude,
+        zoom,
+      }));
+      setViewport({ latitude, longitude, zoom, bounds });
     }
   }, [data.positions]);
-
-  useEffect(() => {
-    if (viewport) {
-      const { latitude, longitude, zoom } = viewport;
-      setViewState((v) => {
-        return { ...v, longitude: longitude, latitude: latitude, zoom: zoom };
-      });
-    }
-  }, [viewport]);
 
   useEffect(() => {
     if (

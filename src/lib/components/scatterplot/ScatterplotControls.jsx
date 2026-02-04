@@ -41,6 +41,7 @@ const ColorscaleRange = () => {
       </Typography>
       <div className="px-4">
         <NormalizedRangeSlider
+          aria-labelledby="colorscale-range"
           value={settings.controls.range}
           valueMin={valueMin}
           valueMax={valueMax}

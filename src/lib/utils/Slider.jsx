@@ -8,6 +8,7 @@ export const NormalizedRangeSlider = ({
   valueMax,
   disabled,
   onChangeCommitted = () => {},
+  ...props
 }) => {
   const [sliderValue, setSliderValue] = useState(value);
 
@@ -34,7 +35,6 @@ export const NormalizedRangeSlider = ({
 
   return (
     <Slider
-      aria-labelledby="colorscale-range"
       min={0}
       max={1}
       step={0.001}
@@ -46,6 +46,7 @@ export const NormalizedRangeSlider = ({
       valueLabelFormat={valueLabelFormat}
       marks={!disabled && marks}
       disabled={disabled}
+      {...props}
     />
   );
 };
