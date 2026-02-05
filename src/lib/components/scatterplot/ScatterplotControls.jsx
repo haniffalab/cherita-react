@@ -108,6 +108,7 @@ const RadiusScaleRange = ({ min = 1, max = 5000 }) => {
           valueLabelFormat={valueLabelFormat}
           marks={!disabled && marks}
           disabled={disabled}
+          track={false}
         />
       </div>
     </Box>
