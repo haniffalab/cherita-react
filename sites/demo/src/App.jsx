@@ -26,8 +26,7 @@ export default function App(props) {
           }
         />
         <Route
-          exac
-          t
+          exact
           path="/observation-feature/embedded-plot/dotplot"
           element={<DotplotDemo {...props} />}
         />
@@ -60,7 +59,7 @@ export default function App(props) {
               defaultPlotType={PLOT_TYPES.DOTPLOT}
             />
           }
-        ></Route>
+        />
         <Route
           exact
           path="/observation-feature/standard-view/heatmap"
@@ -70,7 +69,7 @@ export default function App(props) {
               defaultPlotType={PLOT_TYPES.HEATMAP}
             />
           }
-        ></Route>
+        />
         <Route
           exact
           path="/observation-feature/standard-view/matrixplot"
@@ -80,7 +79,7 @@ export default function App(props) {
               defaultPlotType={PLOT_TYPES.MATRIXPLOT}
             />
           }
-        ></Route>
+        />
         <Route
           exact
           path="/observation-feature/standard-view/scatterplot"
@@ -90,7 +89,7 @@ export default function App(props) {
               defaultPlotType={PLOT_TYPES.SCATTERPLOT}
             />
           }
-        ></Route>
+        />
         <Route
           exact
           path="/observation-feature/standard-view/violin"
@@ -100,12 +99,12 @@ export default function App(props) {
               defaultPlotType={PLOT_TYPES.VIOLINPLOT}
             />
           }
-        ></Route>
+        />
         <Route
           exact
           path="/perturbation-map/standard-view"
           element={<PerturbationMap.StandardView {...props} />}
-        ></Route>
+        />
       </Routes>
       <Footer />
     </div>
