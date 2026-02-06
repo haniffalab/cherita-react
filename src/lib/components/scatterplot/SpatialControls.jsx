@@ -91,7 +91,7 @@ export function SpatialControls({
     <>
       <Button
         active={settings.sliceBy.polygons}
-        size={isCompact ? 'sm' : undefined}
+        size={isCompact && 'sm'}
         title="Filter data with polygons"
         onClick={() => {
           setMode(() => ViewMode);
@@ -107,7 +107,7 @@ export function SpatialControls({
       </Button>
       <Button
         title="Delete selcted polygons"
-        size={isCompact ? 'sm' : undefined}
+        size={isCompact && 'sm'}
         onClick={() => {
           const newFeatures = features.features.filter(
             (_f, i) => !selectedFeatureIndexes.includes(i),
@@ -136,7 +136,7 @@ export function SpatialControls({
               overlay={<Tooltip id="tooltip-obs">Browse categories</Tooltip>}
             >
               <Button
-                size={isCompact ? 'sm' : undefined}
+                size={isCompact && 'sm'}
                 onClick={() => setShowCategories(true)}
               >
                 <FontAwesomeIcon icon={faBars} />
@@ -149,7 +149,7 @@ export function SpatialControls({
               overlay={<Tooltip id="tooltip-vars">Search features</Tooltip>}
             >
               <Button
-                size={isCompact ? 'sm' : undefined}
+                size={isCompact && 'sm'}
                 onClick={() => setShowSearch(true)}
               >
                 <FontAwesomeIcon icon={faSearch} />
@@ -163,26 +163,26 @@ export function SpatialControls({
           onClick={() => setMode(() => ViewMode)}
           title="Set dragging mode"
           active={mode === ViewMode}
-          size={isCompact ? 'sm' : undefined}
+          size={isCompact && 'sm'}
         >
           <FontAwesomeIcon icon={faHand} />
         </Button>
         <Button
-          size={isCompact ? 'sm' : undefined}
+          size={isCompact && 'sm'}
           onClick={increaseZoom}
           title="Increase zoom"
         >
           <FontAwesomeIcon icon={faPlus} />
         </Button>
         <Button
-          size={isCompact ? 'sm' : undefined}
+          size={isCompact && 'sm'}
           onClick={decreaseZoom}
           title="Decrease zoom"
         >
           <FontAwesomeIcon icon={faMinus} />
         </Button>
         <Button
-          size={isCompact ? 'sm' : undefined}
+          size={isCompact && 'sm'}
           onClick={resetBounds}
           title="Reset zoom and center"
         >
@@ -193,11 +193,11 @@ export function SpatialControls({
           className="caret-off"
           drop="end"
           onSelect={onSelect}
-          size={isCompact ? 'sm' : undefined}
+          size={isCompact && 'sm'}
         >
           <Dropdown.Toggle
             id="dropdown-autoclose-outside"
-            className={`caret-off ${mode === DrawPolygonByDraggingMode || mode === ModifyMode ? 'active' : ''}`}
+            className={`w-100 caret-off ${mode === DrawPolygonByDraggingMode || mode === ModifyMode ? 'active' : ''}`}
           >
             <FontAwesomeIcon icon={faDrawPolygon} />
           </Dropdown.Toggle>
@@ -218,10 +218,7 @@ export function SpatialControls({
           </Dropdown.Menu>
         </Dropdown>
         {!!features?.features?.length && polygonControls}
-        <Button
-          size={isCompact ? 'sm' : undefined}
-          onClick={handleShowControls}
-        >
+        <Button size={isCompact && 'sm'} onClick={handleShowControls}>
           <FontAwesomeIcon icon={faSliders} />
         </Button>
       </ButtonGroup>
