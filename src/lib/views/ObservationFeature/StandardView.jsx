@@ -8,20 +8,15 @@ import { Heatmap } from '../../components/heatmap/Heatmap';
 import { HeatmapControls } from '../../components/heatmap/HeatmapControls';
 import { Matrixplot } from '../../components/matrixplot/Matrixplot';
 import { MatrixplotControls } from '../../components/matrixplot/MatrixplotControls';
-import { ObsColsList } from '../../components/obs-list/ObsList';
 import {
   OffcanvasControls,
-  OffcanvasObs,
   OffcanvasObsm,
-  OffcanvasVars,
 } from '../../components/offcanvas/OffCanvas';
 import { PlotTypeSelector } from '../../components/plot/PlotTypeSelector';
 import { Pseudospatial } from '../../components/pseudospatial/Pseudospatial';
 import { PseudospatialToolbar } from '../../components/pseudospatial/PseudospatialToolbar';
 import { Scatterplot } from '../../components/scatterplot/Scatterplot';
 import { ScatterplotControls } from '../../components/scatterplot/ScatterplotControls';
-import { SearchBar } from '../../components/search-bar/SearchBar';
-import { VarNamesList } from '../../components/var-list/VarList';
 import { Violin } from '../../components/violin/Violin';
 import { ViolinControls } from '../../components/violin/ViolinControls';
 import {
@@ -30,15 +25,15 @@ import {
   VIOLIN_MODES,
 } from '../../constants/constants';
 import { DatasetProvider } from '../../context/DatasetContext';
+import { useObsSideBar, useVarSideBar } from '../../utils/hooks';
 
 export function StandardView({
   searchDiseases = true,
   defaultPlotType = PLOT_TYPES.SCATTERPLOT,
+  isPseudospatial = false,
   ...props
 }) {
-  const [showCategories, setShowCategories] = useState(false);
   const [showEmbeddings, setShowEmbeddings] = useState(false);
-  const [showSearch, setShowSearch] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [plotType, setPlotType] = useState(
@@ -47,8 +42,6 @@ export function StandardView({
   const [showPseudospatialControls, setShowPseudospatialControls] =
     useState(false);
   const [pseudospatialPlotType, setpseudospatialPlotType] = useState(null);
-
-  const { isPseudospatial = false } = props;
 
   useEffect(() => {
     setPlotType(defaultPlotType || PLOT_TYPES.SCATTERPLOT);
@@ -82,6 +75,30 @@ export function StandardView({
     },
   }[plotType];
 
+  const {
+    ObsSideBar,
+    showCategoriesBtn,
+    setShowOffcanvas: setShowCategories,
+  } = useObsSideBar({
+    isFullscreen: true,
+    showSelectedAsActive,
+    showHistograms: varMode === SELECTION_MODES.SINGLE,
+    showColor: varMode === SELECTION_MODES.SINGLE,
+    ...props,
+  });
+
+  const {
+    VarSideBar,
+    showSearchBtn,
+    setShowOffcanvas: setShowSearch,
+  } = useVarSideBar({
+    isFullscreen: true,
+    searchVar: true,
+    searchDiseases,
+    mode: varMode,
+    ...props,
+  });
+
   const plot = useMemo(() => {
     const commonProps = {
       plotType,
@@ -90,6 +107,8 @@ export function StandardView({
       setShowSearch,
       setShowControls,
       setPlotType,
+      showCategoriesBtn,
+      showSearchBtn,
     };
 
     switch (plotType) {
@@ -105,19 +124,20 @@ export function StandardView({
       default:
         return <Scatterplot {...commonProps} />;
     }
-  }, [plotType]);
+  }, [
+    plotType,
+    setShowCategories,
+    setShowSearch,
+    showCategoriesBtn,
+    showSearchBtn,
+  ]);
 
   return (
     <div className="cherita-app">
       <DatasetProvider {...props}>
         <Container fluid className="cherita-app-container">
           <div className="cherita-app-obs modern-scrollbars border-end h-100">
-            <ObsColsList
-              {...props}
-              showSelectedAsActive={showSelectedAsActive}
-              showHistograms={varMode === SELECTION_MODES.SINGLE}
-              showColor={varMode === SELECTION_MODES.SINGLE}
-            />
+            <ObsSideBar />
           </div>
           <div className="cherita-app-canvas">{plot}</div>
           <div className="cherita-app-sidebar p-3">
@@ -140,12 +160,7 @@ export function StandardView({
                 ) : (
                   <></>
                 )}
-                <div className="sidebar-features">
-                  <SearchBar searchDiseases={searchDiseases} searchVar={true} />
-                  <div className="sidebar-features-list">
-                    <VarNamesList mode={varMode} />
-                  </div>
-                </div>
+                <VarSideBar />
               </Card.Body>
             </Card>
           </div>
@@ -155,17 +170,6 @@ export function StandardView({
             <Modal.Header closeButton></Modal.Header>
             <Modal.Body></Modal.Body>
           </Modal>
-          <OffcanvasObs
-            {...props}
-            showSelectedAsActive={showSelectedAsActive}
-            show={showCategories}
-            handleClose={() => setShowCategories(false)}
-          />
-          <OffcanvasVars
-            show={showSearch}
-            handleClose={() => setShowSearch(false)}
-            mode={varMode}
-          />
           {plotControls && (
             <OffcanvasControls
               show={showControls}

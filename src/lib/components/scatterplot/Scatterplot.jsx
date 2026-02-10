@@ -56,6 +56,8 @@ export function Scatterplot({
   radius = null,
   setShowCategories,
   setShowSearch,
+  showCategoriesBtn,
+  showSearchBtn,
   plotType,
   setPlotType,
   isFullscreen = false,
@@ -621,6 +623,8 @@ export function Scatterplot({
             setShowCategories={setShowCategories}
             setShowSearch={setShowSearch}
             isFullscreen={isFullscreen}
+            showCategoriesBtn={showCategoriesBtn}
+            showSearchBtn={showSearchBtn}
           />
         )}
         <div className="cherita-spatial-footer">

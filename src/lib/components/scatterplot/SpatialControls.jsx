@@ -47,6 +47,8 @@ export function SpatialControls({
   setShowCategories,
   setShowSearch,
   isFullscreen,
+  showCategoriesBtn: showCategoriesBtnProp,
+  showSearchBtn: showSearchBtnProp,
 }) {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
@@ -55,10 +57,16 @@ export function SpatialControls({
   const handleCloseControls = () => setShowControls(false);
   const handleShowControls = () => setShowControls(true);
 
-  const { showCategoriesBtn, showSearchBtn, isCompact } =
-    usePlotVisibility(isFullscreen);
+  const {
+    showCategoriesBtn: showCategoriesBtnState,
+    showSearchBtn: showSearchBtnState,
+    isCompact,
+  } = usePlotVisibility(isFullscreen);
 
-  const onSelect = (eventKey, event) => {
+  const showCategoriesBtn = showCategoriesBtnProp ?? showCategoriesBtnState;
+  const showSearchBtn = showSearchBtnProp ?? showSearchBtnState;
+
+  const onSelect = (eventKey, _event) => {
     switch (eventKey) {
       case 'DrawPolygonMode':
         setMode(() => DrawPolygonMode);

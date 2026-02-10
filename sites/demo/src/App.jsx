@@ -102,6 +102,11 @@ export default function App(props) {
         />
         <Route
           exact
+          path="/observation-feature/split-view"
+          element={<ObservationFeature.SplitView {...props} />}
+        />
+        <Route
+          exact
           path="/perturbation-map/standard-view"
           element={<PerturbationMap.StandardView {...props} />}
         />

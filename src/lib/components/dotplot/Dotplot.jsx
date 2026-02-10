@@ -24,6 +24,8 @@ export function Dotplot({
   setShowControls,
   plotType,
   setPlotType,
+  showCategoriesBtn: showCategoriesBtnProp,
+  showSearchBtn: showSearchBtnProp,
   isFullscreen = false,
 }) {
   const ENDPOINT = 'dotplot';
@@ -39,7 +41,13 @@ export function Dotplot({
   const selectedObs = useSelectedObs();
   const selectedMultiVar = useSelectedMultiVar();
 
-  const { showCategoriesBtn, showSearchBtn } = usePlotVisibility(isFullscreen);
+  const {
+    showCategoriesBtn: showCategoriesBtnState,
+    showSearchBtn: showSearchBtnState,
+  } = usePlotVisibility(isFullscreen);
+
+  const showCategoriesBtn = showCategoriesBtnProp ?? showCategoriesBtnState;
+  const showSearchBtn = showSearchBtnProp ?? showSearchBtnState;
 
   const params = useMemo(
     () => ({
