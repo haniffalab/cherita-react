@@ -92,7 +92,7 @@ const RadiusScaleRange = ({ min = 1, max = 5000 }) => {
   return (
     <Box className="w-100">
       <Typography id="radius-scale-range" gutterBottom>
-        Dot radius scale
+        Point size
       </Typography>
       <div className="px-4">
         <Slider
@@ -122,6 +122,8 @@ export const ScatterplotControls = () => {
         <ColorscaleSelect />
         <Form.Group className="mb-2">
           <ColorscaleRange />
+        </Form.Group>
+        <Form.Group className="mb-2">
           <RadiusScaleRange />
         </Form.Group>
       </Form>
