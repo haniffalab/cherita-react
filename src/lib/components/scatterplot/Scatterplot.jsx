@@ -39,7 +39,6 @@ import { Legend } from '../../utils/Legend';
 import { LoadingLinear, LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useSelectedObs } from '../../utils/Resolver';
 import { formatNumerical } from '../../utils/string';
-import usePlotVisibility from '../../utils/usePlotVisibility';
 import { useLabelObsData } from '../../utils/zarrData';
 import { PlotAlert } from '../plot/PlotAlert';
 
@@ -64,12 +63,14 @@ const getRadiusScale = (bounds) => {
 };
 
 export function Scatterplot({
-  pointInteractionEnabled = false,
-  showSpatialControls = true,
   setShowCategories,
   setShowSearch,
+  showCategoriesBtn,
+  showSearchBtn,
   setPlotType,
   isFullscreen = false,
+  pointInteractionEnabled = false,
+  showSpatialControls = true,
 }) {
   const { useUnsColors } = useDataset();
   const settings = useSettings();
@@ -96,7 +97,6 @@ export function Scatterplot({
 
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [isHoveringPoint, setIsHoveringPoint] = useState(false);
-  const { showSearchBtn } = usePlotVisibility(isFullscreen);
 
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
@@ -639,6 +639,8 @@ export function Scatterplot({
             setShowCategories={setShowCategories}
             setShowSearch={setShowSearch}
             isFullscreen={isFullscreen}
+            showCategoriesBtn={showCategoriesBtn}
+            showSearchBtn={showSearchBtn}
           />
         )}
         <div className="cherita-spatial-footer">
