@@ -8,7 +8,7 @@ export default function usePlotVisibility(isFullscreen) {
 
   const showCategoriesBtn = isFullscreen ? Lg : true;
   const showSearchBtn = isFullscreen ? Xl : true;
-  const isCompact = isFullscreen || Lg;
+  const isCompact = !isFullscreen || Lg;
 
   return { showCategoriesBtn, showSearchBtn, isCompact };
 }
