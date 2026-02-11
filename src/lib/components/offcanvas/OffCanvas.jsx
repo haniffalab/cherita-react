@@ -1,6 +1,7 @@
 import Offcanvas from 'react-bootstrap/Offcanvas';
 
 import { SELECTION_MODES } from '../../constants/constants';
+import { ObsExplorer } from '../../views/PerturbationMap/ObsExplorer';
 import { ObsColsList } from '../obs-list/ObsList';
 import { ObsmKeysList } from '../obsm-list/ObsmList';
 import { SearchBar } from '../search-bar/SearchBar';
@@ -62,6 +63,28 @@ export function OffcanvasControls({ show, handleClose, Controls, ...props }) {
       </Offcanvas.Header>
       <Offcanvas.Body>
         <Controls {...props} />
+      </Offcanvas.Body>
+    </Offcanvas>
+  );
+}
+
+export function OffcanvasObsExplorer({ show, handleClose, ...props }) {
+  return (
+    <Offcanvas show={show} onHide={handleClose}>
+      <Offcanvas.Header closeButton>
+        <Offcanvas.Title>Controls</Offcanvas.Title>
+      </Offcanvas.Header>
+      <Offcanvas.Body>
+        <div className="sidebar-features">
+          <SearchBar
+            searchDiseases={false}
+            searchVar={false}
+            searchObs={true}
+          />
+          <div className="sidebar-features-list">
+            <ObsExplorer {...props} />
+          </div>
+        </div>
       </Offcanvas.Body>
     </Offcanvas>
   );

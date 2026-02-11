@@ -19,13 +19,13 @@ import {
   Tooltip,
 } from 'react-bootstrap';
 
+import { SelectionItem } from './VarItem';
 import { COLOR_ENCODINGS, SELECTION_MODES } from '../../constants/constants';
 import {
   useSettings,
   useSettingsDispatch,
 } from '../../context/SettingsContext';
 import { SearchModal } from '../search-bar/SearchBar';
-import { SelectionItem } from './VarItem';
 
 // @TODO: add button to score genes and plot
 

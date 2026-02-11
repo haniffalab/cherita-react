@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-import { useMediaQuery } from '@mui/material';
 import { Card, Container, Modal } from 'react-bootstrap';
 
 import { ObsExplorer } from './ObsExplorer';
@@ -9,27 +8,23 @@ import {
   OffcanvasControls,
   OffcanvasObs,
   OffcanvasObsm,
-  OffcanvasVars,
-} from '../../components/offcanvas';
+  OffcanvasObsExplorer,
+} from '../../components/offcanvas/OffCanvas';
 import { PseudospatialToolbar } from '../../components/pseudospatial/PseudospatialToolbar';
 import { Scatterplot } from '../../components/scatterplot/Scatterplot';
 import { ScatterplotControls } from '../../components/scatterplot/ScatterplotControls';
 import { SearchBar } from '../../components/search-bar/SearchBar';
-import { BREAKPOINTS, SELECTION_MODES } from '../../constants/constants';
+import { SELECTION_MODES } from '../../constants/constants';
 import { DatasetProvider } from '../../context/DatasetContext';
 
-export function PerturbGen({ ...props }) {
-  const [showObs, setShowObs] = useState(false);
-  const [showObsm, setShowObsm] = useState(false);
-  const [showVars, setShowVars] = useState(false);
+export function StandardView({ ...props }) {
+  const [showCategories, setShowCategories] = useState(false);
+  const [showEmbeddings, setShowEmbeddings] = useState(false);
+  const [showObsExplorer, setShowObsExplorer] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [showPseudospatialControls, setShowPseudospatialControls] =
     useState(false);
-  const LgBreakpoint = useMediaQuery(BREAKPOINTS.LG);
-  const XlBreakpoint = useMediaQuery(BREAKPOINTS.XL);
-  const showObsBtn = LgBreakpoint;
-  const showVarsBtn = XlBreakpoint;
 
   return (
     <div className="cherita-app">
@@ -45,11 +40,8 @@ export function PerturbGen({ ...props }) {
           </div>
           <div className="cherita-app-canvas">
             <Scatterplot
-              showObsBtn={showObsBtn}
-              showVarsBtn={showVarsBtn}
-              showCtrlsBtn={true}
-              setShowObs={setShowObs}
-              setShowVars={setShowVars}
+              setShowCategories={setShowCategories}
+              setShowSearch={setShowObsExplorer}
               setShowControls={setShowControls}
               isFullscreen={true}
               pointInteractionEnabled={true}
@@ -77,14 +69,14 @@ export function PerturbGen({ ...props }) {
           <Modal.Body></Modal.Body>
         </Modal>
         <OffcanvasObs
-          show={showObs}
-          handleClose={() => setShowObs(false)}
+          show={showCategories}
+          handleClose={() => setShowCategories(false)}
           {...props}
           showSelectedAsActive={false}
         />
-        <OffcanvasVars
-          show={showVars}
-          handleClose={() => setShowVars(false)}
+        <OffcanvasObsExplorer
+          show={showObsExplorer}
+          handleClose={() => setShowObsExplorer(false)}
           mode={SELECTION_MODES.SINGLE}
         />
         <OffcanvasControls
@@ -92,7 +84,10 @@ export function PerturbGen({ ...props }) {
           handleClose={() => setShowControls(false)}
           Controls={ScatterplotControls}
         />
-        <OffcanvasObsm show={showObsm} handleClose={() => setShowObsm(false)} />
+        <OffcanvasObsm
+          show={showEmbeddings}
+          handleClose={() => setShowEmbeddings(false)}
+        />
         <OffcanvasControls
           show={showPseudospatialControls}
           handleClose={() => setShowPseudospatialControls(false)}

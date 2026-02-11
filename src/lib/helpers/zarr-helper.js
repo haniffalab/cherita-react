@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
 
 import { useQueries, useQuery } from '@tanstack/react-query';
-import * as zarr from 'zarrita';
+import isnd from 'isndarray';
 import ndarray from 'ndarray';
 import unpack from 'ndarray-unpack';
-import isnd from 'isndarray';
+import * as zarr from 'zarrita';
 
 export class ZarrHelper {
   async open(url, path) {

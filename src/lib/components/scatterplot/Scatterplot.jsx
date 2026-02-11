@@ -39,7 +39,7 @@ import { LoadingLinear, LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useSelectedObs } from '../../utils/Resolver';
 import { formatNumerical } from '../../utils/string';
 import { useLabelObsData } from '../../utils/zarrData';
-import { PlotAlert } from '../full-page/PlotAlert';
+import { PlotAlert } from '../plot/PlotAlert';
 
 window.deck.log.level = 1;
 
@@ -62,12 +62,13 @@ const getRadiusScale = (bounds) => {
 };
 
 export function Scatterplot({
-  setShowObs,
-  setShowVars,
+  setShowCategories,
+  setShowSearch,
   plotType,
   setPlotType,
   isFullscreen = false,
   pointInteractionEnabled = false,
+  showSpatialControls = true,
 }) {
   const { useUnsColors } = useDataset();
   const settings = useSettings();
@@ -380,10 +381,10 @@ export function Scatterplot({
         pointInteractionEnabled &&
         getOriginalIndex(index) === selectedObsIndex
       ) {
-        return 90;
+        return 50;
       }
 
-      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 40 : 1);
+      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 5 : 1);
     },
     [
       getOriginalIndex,
@@ -615,19 +616,25 @@ export function Scatterplot({
           }}
           ref={deckRef}
         ></DeckGL>
-        <SpatialControls
-          mode={mode}
-          setMode={setMode}
-          features={features}
-          setFeatures={setFeatures}
-          selectedFeatureIndexes={selectedFeatureIndexes}
-          resetBounds={() => setViewState(getBounds())}
-          increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
-          decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
-          setShowObs={setShowObs}
-          setShowVars={setShowVars}
-          isFullscreen={isFullscreen}
-        />
+        {showSpatialControls && (
+          <SpatialControls
+            mode={mode}
+            setMode={setMode}
+            features={features}
+            setFeatures={setFeatures}
+            selectedFeatureIndexes={selectedFeatureIndexes}
+            resetBounds={() => setViewState(getBounds())}
+            increaseZoom={() =>
+              setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))
+            }
+            decreaseZoom={() =>
+              setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))
+            }
+            setShowCategories={setShowCategories}
+            setShowSearch={setShowSearch}
+            isFullscreen={isFullscreen}
+          />
+        )}
         <div className="cherita-spatial-footer">
           <div className="cherita-toolbox-footer">
             {!!error && !isRendering && (
