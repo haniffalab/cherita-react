@@ -383,10 +383,10 @@ export function Scatterplot({
         pointInteractionEnabled &&
         getOriginalIndex(index) === selectedObsIndex
       ) {
-        return 200;
+        return 50;
       }
 
-      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 40 : 1);
+      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 5 : 1);
     },
     [
       getOriginalIndex,

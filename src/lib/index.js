@@ -1,5 +1,5 @@
-export { default as ObservationFeature } from './views/ObservationFeature';
-export { default as PerturbationMap } from './views/PerturbationMap';
+export { ObservationFeature } from './views/ObservationFeature';
+export { PerturbationMap } from './views/PerturbationMap';
 export { Dotplot } from './components/dotplot/Dotplot';
 export { DotplotControls } from './components/dotplot/DotplotControls';
 export { Heatmap } from './components/heatmap/Heatmap';

@@ -1,7 +1,5 @@
 import { StandardView } from './StandardView';
 
-const PerturbationMap = {
+export const PerturbationMap = {
   StandardView,
 };
-
-export default PerturbationMap;
