@@ -1,46 +1,44 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { useMediaQuery } from '@mui/material';
 import { Card, Container, Modal } from 'react-bootstrap';
 
-import {
-  BREAKPOINTS,
-  PLOT_TYPES,
-  SELECTION_MODES,
-  VIOLIN_MODES,
-} from '../../constants/constants';
-import { DatasetProvider } from '../../context/DatasetContext';
-import { Dotplot } from '../dotplot/Dotplot';
-import { DotplotControls } from '../dotplot/DotplotControls';
-import { Heatmap } from '../heatmap/Heatmap';
-import { HeatmapControls } from '../heatmap/HeatmapControls';
-import { Matrixplot } from '../matrixplot/Matrixplot';
-import { MatrixplotControls } from '../matrixplot/MatrixplotControls';
-import { ObsColsList } from '../obs-list/ObsList';
+import { Dotplot } from '../../components/dotplot/Dotplot';
+import { DotplotControls } from '../../components/dotplot/DotplotControls';
+import { Heatmap } from '../../components/heatmap/Heatmap';
+import { HeatmapControls } from '../../components/heatmap/HeatmapControls';
+import { Matrixplot } from '../../components/matrixplot/Matrixplot';
+import { MatrixplotControls } from '../../components/matrixplot/MatrixplotControls';
+import { ObsColsList } from '../../components/obs-list/ObsList';
 import {
   OffcanvasControls,
   OffcanvasObs,
   OffcanvasObsm,
   OffcanvasVars,
-} from '../offcanvas';
-import { PlotTypeSelector } from './PlotTypeSelector';
-import { Pseudospatial } from '../pseudospatial/Pseudospatial';
-import { PseudospatialToolbar } from '../pseudospatial/PseudospatialToolbar';
-import { Scatterplot } from '../scatterplot/Scatterplot';
-import { ScatterplotControls } from '../scatterplot/ScatterplotControls';
-import { SearchBar } from '../search-bar/SearchBar';
-import { VarNamesList } from '../var-list/VarList';
-import { Violin } from '../violin/Violin';
-import { ViolinControls } from '../violin/ViolinControls';
+} from '../../components/offcanvas/OffCanvas';
+import { PlotTypeSelector } from '../../components/plot/PlotTypeSelector';
+import { Pseudospatial } from '../../components/pseudospatial/Pseudospatial';
+import { PseudospatialToolbar } from '../../components/pseudospatial/PseudospatialToolbar';
+import { Scatterplot } from '../../components/scatterplot/Scatterplot';
+import { ScatterplotControls } from '../../components/scatterplot/ScatterplotControls';
+import { SearchBar } from '../../components/search-bar/SearchBar';
+import { VarNamesList } from '../../components/var-list/VarList';
+import { Violin } from '../../components/violin/Violin';
+import { ViolinControls } from '../../components/violin/ViolinControls';
+import {
+  PLOT_TYPES,
+  SELECTION_MODES,
+  VIOLIN_MODES,
+} from '../../constants/constants';
+import { DatasetProvider } from '../../context/DatasetContext';
 
-export function FullPage({
+export function StandardView({
   searchDiseases = true,
   defaultPlotType = PLOT_TYPES.SCATTERPLOT,
   ...props
 }) {
-  const [showObs, setShowObs] = useState(false);
-  const [showObsm, setShowObsm] = useState(false);
-  const [showVars, setShowVars] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
+  const [showEmbeddings, setShowEmbeddings] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [plotType, setPlotType] = useState(
@@ -55,11 +53,6 @@ export function FullPage({
   useEffect(() => {
     setPlotType(defaultPlotType || PLOT_TYPES.SCATTERPLOT);
   }, [defaultPlotType]);
-
-  const LgBreakpoint = useMediaQuery(BREAKPOINTS.LG);
-  const XlBreakpoint = useMediaQuery(BREAKPOINTS.XL);
-  const showObsBtn = LgBreakpoint;
-  const showVarsBtn = XlBreakpoint;
 
   const { plotControls, varMode, showSelectedAsActive } = {
     [PLOT_TYPES.SCATTERPLOT]: {
@@ -91,12 +84,10 @@ export function FullPage({
 
   const plot = useMemo(() => {
     const commonProps = {
-      showObsBtn,
-      showVarsBtn,
-      showCtrlsBtn: true,
       plotType,
-      setShowObs,
-      setShowVars,
+      isFullscreen: true,
+      setShowCategories,
+      setShowSearch,
       setShowControls,
       setPlotType,
     };
@@ -112,9 +103,9 @@ export function FullPage({
         return <Violin mode={VIOLIN_MODES.MULTIKEY} {...commonProps} />;
       case PLOT_TYPES.SCATTERPLOT:
       default:
-        return <Scatterplot {...commonProps} isFullscreen={true} />;
+        return <Scatterplot {...commonProps} />;
     }
-  }, [plotType, showObsBtn, showVarsBtn]);
+  }, [plotType]);
 
   return (
     <div className="cherita-app">
@@ -167,12 +158,12 @@ export function FullPage({
           <OffcanvasObs
             {...props}
             showSelectedAsActive={showSelectedAsActive}
-            show={showObs}
-            handleClose={() => setShowObs(false)}
+            show={showCategories}
+            handleClose={() => setShowCategories(false)}
           />
           <OffcanvasVars
-            show={showVars}
-            handleClose={() => setShowVars(false)}
+            show={showSearch}
+            handleClose={() => setShowSearch(false)}
             mode={varMode}
           />
           {plotControls && (
@@ -183,8 +174,8 @@ export function FullPage({
             />
           )}
           <OffcanvasObsm
-            show={showObsm}
-            handleClose={() => setShowObsm(false)}
+            show={showEmbeddings}
+            handleClose={() => setShowEmbeddings(false)}
           />
           <OffcanvasControls
             show={showPseudospatialControls}

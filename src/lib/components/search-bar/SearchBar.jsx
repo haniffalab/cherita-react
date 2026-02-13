@@ -87,7 +87,7 @@ export function SearchModal({
   const [diseaseResultsLength, setDiseaseResultsLength] = useState(null);
 
   return (
-    <Modal show={show} onHide={handleClose} size="xl">
+    <Modal show={show} onHide={handleClose} size="xl" fullscreen="xl-down">
       <Modal.Header className="bg-primary">
         <Container className="gx-0">
           <Row>

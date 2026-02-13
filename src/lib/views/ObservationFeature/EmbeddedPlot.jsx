@@ -1,39 +1,42 @@
 import { useState } from 'react';
 
+import { Dotplot } from '../../components/dotplot/Dotplot';
+import { DotplotControls } from '../../components/dotplot/DotplotControls';
+import { Heatmap } from '../../components/heatmap/Heatmap';
+import { HeatmapControls } from '../../components/heatmap/HeatmapControls';
+import { Matrixplot } from '../../components/matrixplot/Matrixplot';
+import { MatrixplotControls } from '../../components/matrixplot/MatrixplotControls';
+import {
+  OffcanvasControls,
+  OffcanvasObs,
+  OffcanvasObsm,
+  OffcanvasVars,
+  OffcanvasObsExplorer,
+} from '../../components/offcanvas/OffCanvas';
+import { Scatterplot } from '../../components/scatterplot/Scatterplot';
+import { ScatterplotControls } from '../../components/scatterplot/ScatterplotControls';
+import { Violin } from '../../components/violin/Violin';
+import { ViolinControls } from '../../components/violin/ViolinControls';
 import {
   PLOT_TYPES,
   SELECTION_MODES,
   VIOLIN_MODES,
 } from '../../constants/constants';
 import { DatasetProvider } from '../../context/DatasetContext';
-import { Dotplot } from '../dotplot/Dotplot';
-import { DotplotControls } from '../dotplot/DotplotControls';
-import { Heatmap } from '../heatmap/Heatmap';
-import { HeatmapControls } from '../heatmap/HeatmapControls';
-import { Matrixplot } from '../matrixplot/Matrixplot';
-import { MatrixplotControls } from '../matrixplot/MatrixplotControls';
-import {
-  OffcanvasControls,
-  OffcanvasObs,
-  OffcanvasObsm,
-  OffcanvasVars,
-} from '../offcanvas';
-import { Scatterplot } from '../scatterplot/Scatterplot';
-import { ScatterplotControls } from '../scatterplot/ScatterplotControls';
-import { Violin } from '../violin/Violin';
-import { ViolinControls } from '../violin/ViolinControls';
 
-export function Plot({
+export function EmbeddedPlot({
   plotType = PLOT_TYPES.SCATTERPLOT,
+  canOverrideSettings = false,
   showObsBtn = true,
   showVarsBtn = true,
   showCtrlsBtn = true,
   ...props
 }) {
-  const [showObs, setShowObs] = useState(false);
-  const [showObsm, setShowObsm] = useState(false);
-  const [showVars, setShowVars] = useState(false);
+  const [showCategories, setShowCategories] = useState(false);
+  const [showEmbeddings, setShowEmbeddings] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [showObsExplorer, setShowObsExplorer] = useState(false);
 
   const { plotControls, varMode, showSelectedAsActive } = {
     [PLOT_TYPES.SCATTERPLOT]: {
@@ -64,12 +67,9 @@ export function Plot({
   }[plotType];
 
   const commonProps = {
-    showObsBtn,
-    showVarsBtn,
-    showCtrlsBtn,
     plotType,
-    setShowObs,
-    setShowVars,
+    setShowCategories,
+    setShowSearch,
     setShowControls,
   };
 
@@ -95,14 +95,19 @@ export function Plot({
       <OffcanvasObs
         {...props}
         showSelectedAsActive={showSelectedAsActive}
-        show={showObs}
-        handleClose={() => setShowObs(false)}
+        show={showCategories}
+        handleClose={() => setShowCategories(false)}
       />
       <OffcanvasVars
         {...props}
-        show={showVars}
-        handleClose={() => setShowVars(false)}
+        show={showSearch}
+        handleClose={() => setShowSearch(false)}
         mode={varMode}
+      />
+      <OffcanvasObsExplorer
+        show={showObsExplorer}
+        handleClose={() => setShowObsExplorer(false)}
+        mode={SELECTION_MODES.SINGLE}
       />
       {plotControls && (
         <OffcanvasControls
@@ -114,8 +119,8 @@ export function Plot({
       )}
       <OffcanvasObsm
         {...props}
-        show={showObsm}
-        handleClose={() => setShowObsm(false)}
+        show={showEmbeddings}
+        handleClose={() => setShowEmbeddings(false)}
       />
     </DatasetProvider>
   );

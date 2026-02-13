@@ -1,50 +1,13 @@
-import { useState } from 'react';
-
-import {
-  DatasetProvider,
-  Heatmap,
-  HeatmapControls,
-  OffcanvasControls,
-  OffcanvasObs,
-  OffcanvasVars,
-  Toolbar,
-} from '@haniffalab/cherita-react';
+import { ObservationFeature, PLOT_TYPES } from '@haniffalab/cherita-react';
 import Container from 'react-bootstrap/Container';
 
 export default function HeatmapDemo(props) {
-  const [showObs, setShowObs] = useState(false);
-  const [showVars, setShowVars] = useState(false);
-  const [showControls, setShowControls] = useState(false);
-
+  const plotType = PLOT_TYPES.HEATMAP;
   return (
     <div className="h-100">
       <Container>
         <div className="cherita-container">
-          <DatasetProvider {...props}>
-            <Toolbar
-              setShowObs={setShowObs}
-              setShowVars={setShowVars}
-              setShowControls={setShowControls}
-            />
-            <div className="cherita-container-plot">
-              <Heatmap />
-            </div>
-            <OffcanvasObs
-              show={showObs}
-              handleClose={() => setShowObs(false)}
-              showColor={false}
-              showSelectedAsActive={true}
-            />
-            <OffcanvasVars
-              show={showVars}
-              handleClose={() => setShowVars(false)}
-            />
-            <OffcanvasControls
-              show={showControls}
-              handleClose={() => setShowControls(false)}
-              Controls={HeatmapControls}
-            />
-          </DatasetProvider>
+          <ObservationFeature.EmbeddedPlot plotType={plotType} {...props} />
         </div>
       </Container>
     </div>
