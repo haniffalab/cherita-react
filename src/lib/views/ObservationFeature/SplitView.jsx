@@ -1,13 +1,24 @@
 import { useState, useMemo, useCallback } from 'react';
 
-import { Button, ButtonGroup, Card, Container } from 'react-bootstrap';
+import { Card, Container, ToggleButton } from 'react-bootstrap';
 
 import { Scatterplot } from '../../components/scatterplot/Scatterplot';
 import { COLOR_ENCODINGS, INITIAL_VIEW_STATE } from '../../constants/constants';
 import { DatasetProvider } from '../../context/DatasetContext';
 import { useObsSideBar, useVarSideBar } from '../../utils/hooks';
 
-const ObsView = ({ viewState, onViewStateChange, ...props }) => {
+const SyncButton = ({ isSynced, toggleSync }) => (
+  <ToggleButton
+    type="checkbox"
+    checked={isSynced}
+    onClick={toggleSync}
+    variant="outline-primary"
+  >
+    {isSynced ? 'Unfollow view' : 'Follow view'}
+  </ToggleButton>
+);
+
+const ObsView = ({ viewState, onViewStateChange, children, ...props }) => {
   const {
     ObsSideBar,
     showCategoriesBtn,
@@ -26,6 +37,7 @@ const ObsView = ({ viewState, onViewStateChange, ...props }) => {
         {memoizedObsSideBar}
       </div>
       <div className="cherita-app-canvas">
+        {children}
         <Scatterplot
           {...props}
           viewState={viewState}
@@ -38,7 +50,7 @@ const ObsView = ({ viewState, onViewStateChange, ...props }) => {
   );
 };
 
-const VarView = ({ viewState, onViewStateChange, ...props }) => {
+const VarView = ({ viewState, onViewStateChange, children, ...props }) => {
   const {
     VarSideBar,
     showSearchBtn,
@@ -54,6 +66,7 @@ const VarView = ({ viewState, onViewStateChange, ...props }) => {
       defaultSettings={{ colorEncoding: COLOR_ENCODINGS.VAR }}
     >
       <div className="cherita-app-canvas">
+        {children}
         <Scatterplot
           {...props}
           viewState={viewState}
@@ -78,27 +91,35 @@ export function SplitView(props) {
   const [obsViewState, setObsViewState] = useState(INITIAL_VIEW_STATE);
   const [varViewState, setVarViewState] = useState(INITIAL_VIEW_STATE);
 
-  const handleSyncToggle = () => {
-    setIsSynced((prev) => !prev);
-  };
+  const toggleSyncViewState = useCallback(
+    (viewState) => {
+      if (isSynced) {
+        setIsSynced(false);
+      } else {
+        setSyncedViewState(viewState);
+        setIsSynced(true);
+      }
+    },
+    [isSynced],
+  );
 
   const onObsViewStateChange = useCallback(
-    (newViewState) => {
-      setObsViewState(newViewState);
-      setSyncedViewState(newViewState);
+    (viewState) => {
+      setObsViewState(viewState);
+      setSyncedViewState(viewState);
       if (isSynced) {
-        setVarViewState(newViewState);
+        setVarViewState(viewState);
       }
     },
     [isSynced],
   );
 
   const onVarViewStateChange = useCallback(
-    (newViewState) => {
-      setVarViewState(newViewState);
-      setSyncedViewState(newViewState);
+    (viewState) => {
+      setVarViewState(viewState);
+      setSyncedViewState(viewState);
       if (isSynced) {
-        setObsViewState(newViewState);
+        setObsViewState(viewState);
       }
     },
     [isSynced],
@@ -107,29 +128,33 @@ export function SplitView(props) {
   return (
     <>
       <div className="cherita-app">
-        <div className="w-100 d-flex justify-content-center mb-2">
-          <ButtonGroup>
-            <Button onClick={handleSyncToggle}>
-              {isSynced ? 'Unsync View States' : 'Sync View States'}
-            </Button>
-            {/* <Button onClick={handleSyncToggle}>
-              {isSynced ? 'Unsync View States' : 'Sync View States'}
-            </Button> */}
-          </ButtonGroup>
-        </div>
         <Container fluid className="cherita-app-container">
           <ObsView
             {...props}
             showSearchBtn={false}
             viewState={isSynced ? syncedViewState : obsViewState}
             onViewStateChange={onObsViewStateChange}
-          />
+          >
+            <div>
+              <SyncButton
+                isSynced={isSynced}
+                toggleSync={() => toggleSyncViewState(obsViewState)}
+              />
+            </div>
+          </ObsView>
           <VarView
             {...props}
             showCategoriesBtn={false}
             viewState={isSynced ? syncedViewState : varViewState}
             onViewStateChange={onVarViewStateChange}
-          />
+          >
+            <div>
+              <SyncButton
+                isSynced={isSynced}
+                toggleSync={() => toggleSyncViewState(varViewState)}
+              />
+            </div>
+          </VarView>
         </Container>
       </div>
     </>
