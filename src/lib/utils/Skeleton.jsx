@@ -21,7 +21,7 @@ export const ObsmKeysListBtn = () => {
   );
 };
 
-export const TableRowSekeleton = ({ cols = 3 }) => {
+export const TableRowSkeleton = ({ cols = 3 }) => {
   return (
     <TableRow>
       {Array.from({ length: cols }).map((_, index) => (
@@ -37,11 +37,11 @@ export const DataTableSkeleton = ({ rows = 2, cols = 3 }) => {
   return (
     <Table>
       <TableHead>
-        <TableRowSekeleton cols={cols} />
+        <TableRowSkeleton cols={cols} />
       </TableHead>
       <TableBody>
         {Array.from({ length: rows }).map((_, rowIndex) => (
-          <TableRowSekeleton key={rowIndex} cols={cols} />
+          <TableRowSkeleton key={rowIndex} cols={cols} />
         ))}
       </TableBody>
     </Table>

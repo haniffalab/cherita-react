@@ -12,7 +12,7 @@ import {
 import _ from 'lodash';
 import { TableVirtuoso } from 'react-virtuoso';
 
-import { TableRowSekeleton } from './Skeleton';
+import { TableRowSkeleton } from './Skeleton';
 
 const TableComponents = {
   Scroller: forwardRef((props, ref) => (
@@ -54,7 +54,7 @@ export const VirtualizedTable = ({
 
   const fixedFooterContent = useCallback(() => {
     if (!isLoading) return null;
-    return <TableRowSekeleton cols={fields.length} />;
+    return <TableRowSkeleton cols={fields.length} />;
   }, [isLoading, fields.length]);
 
   const rowContent = useCallback(
