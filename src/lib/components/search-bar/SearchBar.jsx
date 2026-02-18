@@ -130,12 +130,12 @@ export function SearchModal({
           </Row>
         </Container>
       </Modal.Header>
-      <Modal.Body className="p-0">
-        <Container>
-          <Row>
+      <Modal.Body className="p-0 h-100">
+        <Container className="h-100">
+          <Row className="h-100">
             <Col xs={12} md={8}>
               <Tab.Container activeKey={tab} onSelect={(k) => setTab(k)}>
-                <Row className="w-100">
+                <Row className="w-100 h-100">
                   <Col sm={3} className="py-3 border-end">
                     <Nav variant="pills" className="flex-column">
                       {searchVar && (
