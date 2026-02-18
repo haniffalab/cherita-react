@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
+import { useQuery } from '@tanstack/react-query';
 import _ from 'lodash';
 import { Alert, Table } from 'react-bootstrap';
 
@@ -11,6 +12,54 @@ import { DataTableSkeleton } from '../../utils/Skeleton';
 import { formatNumerical } from '../../utils/string';
 import { VirtualizedTable } from '../../utils/VirtualizedTable';
 import { useObsColsData } from '../../utils/zarrData';
+
+const useNCBIData = ({ symbol }) => {
+  const {
+    data: fetchedData = null,
+    isLoading: isPending = false,
+    error: serverError = null,
+  } = useQuery({
+    queryKey: ['ncbiData', symbol],
+    queryFn: async () => {
+      const reponse = await fetch(
+        `https://api.ncbi.nlm.nih.gov/datasets/v2/gene/symbol/${symbol}/taxon/human?page_size=1`,
+        {
+          method: 'GET',
+        },
+      );
+      if (!reponse.ok) {
+        throw new Error('Error fetching NCBI data');
+      }
+      return await reponse.json();
+    },
+    enabled: !!symbol,
+  });
+  return { fetchedData, isPending, serverError };
+};
+
+const NCBIData = ({ symbol }) => {
+  const { fetchedData, isPending, serverError } = useNCBIData({ symbol });
+  const { description } = fetchedData?.reports?.[0]?.gene?.summary?.[0] || {};
+  if (!isPending && !serverError && description) {
+    return (
+      <>
+        <h3>{symbol}</h3>
+        <p>{description}</p>
+        <p>
+          Data fetched from{' '}
+          <a
+            href="https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/rest-api/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            NCBI API
+          </a>
+        </p>
+      </>
+    );
+  }
+  return null;
+};
 
 const DataTable = ({ query: baseQuery, pageSize = 100 }) => {
   const [offset, setOffset] = useState(0);
@@ -113,6 +162,7 @@ export function ObsExplorer() {
   }
   return (
     <div>
+      <NCBIData symbol={colsData?.[obsExplorer.symbolCol]} />
       <Table striped size="sm" responsive>
         <tbody>
           {_.map(colsData, (value, colName) => {

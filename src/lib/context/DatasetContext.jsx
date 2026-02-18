@@ -62,6 +62,7 @@ const initialDataset = {
   isPseudospatial: false,
   obsExplorer: {
     obsCols: [],
+    symbolCol: null, // obs col with gene symbols to query NCBI for additional info in ObsExplorer
     dataUrl: null, // for additional data in a remote .parquet file
     dataFilterCols: null, // map of obs cols to filter data in .parquet file
   },
