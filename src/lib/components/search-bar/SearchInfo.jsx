@@ -120,28 +120,30 @@ export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
 
   const diseaseVarList = _.map(sortedDiseaseVars, (v) => {
     return (
-      <ListGroup.Item key={v.gene_id}>
-        <div className="d-flex justify-content-between align-items-center w-100">
-          {v.name}
-          <div className="d-flex align-items-center gap-1">
-            <Button
-              type="button"
-              className="m-0 p-0 px-1"
-              variant="outline-secondary"
-              title="Add to list"
-              onClick={() => {
-                handleSelect(dispatch, {
-                  name: v.name,
-                  index: v.index,
-                  matrix_index: v.matrix_index,
-                });
-              }}
-            >
-              <FontAwesomeIcon icon={faPlus} />
-            </Button>
+      <div className="virtualized-list-wrapper">
+        <ListGroup.Item key={v.gene_id}>
+          <div className="d-flex justify-content-between align-items-center w-100">
+            {v.name}
+            <div className="d-flex align-items-center gap-1">
+              <Button
+                type="button"
+                className="m-0 p-0 px-1"
+                variant="outline-secondary"
+                title="Add to list"
+                onClick={() => {
+                  handleSelect(dispatch, {
+                    name: v.name,
+                    index: v.index,
+                    matrix_index: v.matrix_index,
+                  });
+                }}
+              >
+                <FontAwesomeIcon icon={faPlus} />
+              </Button>
+            </div>
           </div>
-        </div>
-      </ListGroup.Item>
+        </ListGroup.Item>
+      </div>
     );
   });
 
