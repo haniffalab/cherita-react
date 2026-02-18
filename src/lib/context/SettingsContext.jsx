@@ -62,7 +62,6 @@ const initialSettings = {
   },
   // for obsExplorer
   selectedObsIndex: null,
-  explorerObs: [],
   // dataset resolved values
   data: {
     // store resolved obs and vars from selectedObs, selectedVar, selectedMultiVar, vars, labelObs
