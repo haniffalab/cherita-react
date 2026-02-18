@@ -1,7 +1,17 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableRow from '@mui/material/TableRow';
+import Tooltip from '@mui/material/Tooltip';
 import _ from 'lodash';
-import { Alert, Table } from 'react-bootstrap';
+import { Alert, Modal } from 'react-bootstrap';
 
 import { OBS_TYPES } from '../../constants/constants';
 import { useDataset } from '../../context/DatasetContext';
@@ -91,6 +101,8 @@ const ObsExplorerTable = ({ colsData }) => {
 };
 
 export function ObsExplorer() {
+  const [showModal, setShowModal] = useState(false);
+
   const { selectedObsIndex } = useSettings();
   const { obsExplorer = {} } = useDataset();
   useParquet(); // initialize duckdb instance
@@ -103,7 +115,12 @@ export function ObsExplorer() {
   } = useObsColsData(obsExplorer?.obsCols);
 
   if (selectedObsIndex == null) {
-    return <div className="my-3">No selection</div>;
+    return (
+      <div className="my-4 text-muted">
+        Select a point in the scatterplot to view details about the gene
+        perturbation.
+      </div>
+    );
   }
   if (isPending) {
     return <div className="my-3">Loading...</div>;
@@ -112,31 +129,127 @@ export function ObsExplorer() {
     return <div className="my-3">Error loading data</div>;
   }
   return (
-    <div>
-      <Table striped size="sm" responsive>
-        <tbody>
-          {_.map(colsData, (value, colName) => {
-            const col = obsCols?.[colName] || {};
-            let v;
-            if (col.type === OBS_TYPES.CONTINUOUS) {
-              v = formatNumerical(parseFloat(value));
-            } else if (col.type === OBS_TYPES.DISCRETE) {
-              v = value;
-            } else if (col.type === OBS_TYPES.BOOLEAN) {
-              v = col.codesMap?.[+value] || value;
-            } else {
-              v = col.codesMap?.[value] || value;
+    <div className="mt-3 d-flex flex-column h-100">
+      <div className="overflow-auto flex-grow-1 modern-scrollbars">
+        <h2 className="fw-bold mb-2">
+          <Tooltip
+            title={
+              <>
+                This panel shows metadata and predicted downstream effects for
+                the selected gene perturbation across the atlas.
+              </>
             }
-            return (
-              <tr key={colName}>
-                <td>{colName}</td>
-                <td>{v}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </Table>
-      <ObsExplorerTable colsData={colsData} />
+            placement="right"
+            arrow
+          >
+            GENE
+          </Tooltip>
+        </h2>
+        <p className="mb-3">Gene description</p>
+        <div className="mb-0">
+          <h5 className="fw-bold mb-2">
+            <Tooltip
+              title={
+                <>
+                  These values describe how the selected gene perturbation is
+                  annotated in the atlas, including lineage, biological context,
+                  and summary scores used in the perturbation landscape.
+                </>
+              }
+              placement="right"
+              arrow
+            >
+              Perturbation metadata <InfoOutlinedIcon fontSize="small" />
+            </Tooltip>
+          </h5>
+
+          <TableContainer
+            component={Paper}
+            sx={{
+              borderRadius: 2,
+              marginBottom: 2,
+              border: 1,
+              borderColor: 'divider',
+            }}
+          >
+            <Table size="small" aria-label="perturbation metadata">
+              <TableBody>
+                {_.map(colsData, (value, colName) => {
+                  const col = obsCols?.[colName] || {};
+                  let v;
+
+                  if (col.type === OBS_TYPES.CONTINUOUS) {
+                    v = formatNumerical(parseFloat(value));
+                  } else if (col.type === OBS_TYPES.DISCRETE) {
+                    v = value;
+                  } else if (col.type === OBS_TYPES.BOOLEAN) {
+                    v = col.codesMap?.[+value] || value;
+                  } else {
+                    v = col.codesMap?.[value] || value;
+                  }
+
+                  return (
+                    <TableRow hover key={colName}>
+                      <TableCell scope="row">
+                        {col.displayName || colName}
+                      </TableCell>
+                      <TableCell>{v}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+        <div className="mb-3">
+          <h5 className="fw-bold mb-2 d-flex align-items-center justify-content-between">
+            <Tooltip
+              title={
+                <>
+                  This table shows genes predicted to change exp ression i
+                  response to the selected perturbation. Re sults can be sor and
+                  explored to identify affect ed pathways and regulatory
+                  programs.
+                </>
+              }
+              placement="right"
+              arrow
+            >
+              <span
+                className="d-i{' '}
+               nline-flex align-items-center"
+              >
+                Predicted downstream effects{' '}
+                <InfoOutlinedIcon fontSize="small" className="ms-1" />
+              </span>
+            </Tooltip>
+
+            {/* MUI expand icon */}
+            <IconButton
+              size="small"
+              onClick={() => setShowModal(true)}
+              aria-label="Expand full table"
+            >
+              <OpenInFullIcon fontSize="small" />
+            </IconButton>
+          </h5>
+
+          <ObsExplorerTable colsData={colsData} />
+        </div>
+        <Modal
+          show={showModal}
+          onHide={() => setShowModal(false)}
+          size="xl"
+          scrollable
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Full downstream effects table</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <ObsExplorerTable colsData={colsData} />
+          </Modal.Body>
+        </Modal>
+      </div>
     </div>
   );
 }
