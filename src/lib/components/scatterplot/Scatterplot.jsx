@@ -22,6 +22,7 @@ import { Toolbox } from './Toolbox';
 import {
   COLOR_ENCODINGS,
   OBS_TYPES,
+  PLOT_TYPES,
   SELECTED_POLYGON_FILLCOLOR,
   UNSELECTED_POLYGON_FILLCOLOR,
 } from '../../constants/constants';
@@ -62,13 +63,12 @@ const getRadiusScale = (bounds) => {
 };
 
 export function Scatterplot({
-  setShowCategories,
-  setShowSearch,
-  plotType,
-  setPlotType,
-  isFullscreen = false,
   pointInteractionEnabled = false,
   showSpatialControls = true,
+  setShowCategories,
+  setShowSearch,
+  setPlotType,
+  isFullscreen = false,
 }) {
   const { useUnsColors } = useDataset();
   const settings = useSettings();
@@ -578,7 +578,7 @@ export function Scatterplot({
       <PlotAlert
         variant="info"
         heading="Scatterplot unavailable for this dataset"
-        plotType={plotType}
+        plotType={PLOT_TYPES.SCATTERPLOT}
         setPlotType={setPlotType}
       >
         This dataset does not include any embeddings, so a scatterplot cannot be
