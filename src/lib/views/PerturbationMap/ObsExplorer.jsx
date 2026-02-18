@@ -10,6 +10,7 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Tooltip from '@mui/material/Tooltip';
+import { useQuery } from '@tanstack/react-query';
 import _ from 'lodash';
 import { Alert, Modal } from 'react-bootstrap';
 
@@ -21,6 +22,61 @@ import { DataTableSkeleton } from '../../utils/Skeleton';
 import { formatNumerical } from '../../utils/string';
 import { VirtualizedTable } from '../../utils/VirtualizedTable';
 import { useObsColsData } from '../../utils/zarrData';
+
+const useNCBIData = ({ symbol }) => {
+  const {
+    data: fetchedData = null,
+    isLoading: isPending = false,
+    error: serverError = null,
+  } = useQuery({
+    queryKey: ['ncbiData', symbol],
+    queryFn: async () => {
+      const reponse = await fetch(
+        `https://api.ncbi.nlm.nih.gov/datasets/v2/gene/symbol/${symbol}/taxon/human?page_size=1`,
+        {
+          method: 'GET',
+        },
+      );
+      if (!reponse.ok) {
+        throw new Error('Error fetching NCBI data');
+      }
+      return await reponse.json();
+    },
+    enabled: !!symbol,
+  });
+  return { fetchedData, isPending, serverError };
+};
+
+const NCBIData = ({ symbol }) => {
+  const { fetchedData, isPending, serverError } = useNCBIData({ symbol });
+  const { description } = fetchedData?.reports?.[0]?.gene?.summary?.[0] || {};
+  if (!isPending && !serverError && description) {
+    return (
+      <>
+        <p>{description}</p>
+        <p className="text-muted small">
+          Data fetched from{' '}
+          <a
+            href="https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/rest-api/"
+            target="_blank"
+            rel="noreferrer"
+          >
+            NCBI API
+          </a>
+          {' · '}
+          <a
+            href={`https://www.ncbi.nlm.nih.gov/gene/?term=${encodeURIComponent(symbol)}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Gene page
+          </a>
+        </p>
+      </>
+    );
+  }
+  return null;
+};
 
 const DataTable = ({ query: baseQuery, pageSize = 100 }) => {
   const [offset, setOffset] = useState(0);
@@ -128,6 +184,7 @@ export function ObsExplorer() {
   if (serverError) {
     return <div className="my-3">Error loading data</div>;
   }
+
   return (
     <div className="mt-3 d-flex flex-column h-100">
       <div className="overflow-auto flex-grow-1 modern-scrollbars">
@@ -142,10 +199,10 @@ export function ObsExplorer() {
             placement="right"
             arrow
           >
-            GENE
+            {colsData?.[obsExplorer.symbolCol]}
           </Tooltip>
         </h2>
-        <p className="mb-3">Gene description</p>
+        <NCBIData symbol={colsData?.[obsExplorer.symbolCol]} />
         <div className="mb-0">
           <h5 className="fw-bold mb-2">
             <Tooltip
