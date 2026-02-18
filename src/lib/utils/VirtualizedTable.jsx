@@ -15,9 +15,25 @@ import { TableVirtuoso } from 'react-virtuoso';
 import { TableRowSkeleton } from './Skeleton';
 
 const TableComponents = {
-  Scroller: forwardRef((props, ref) => (
-    <TableContainer component={Paper} {...props} ref={ref} />
-  )),
+  Scroller: forwardRef((props, ref) => {
+    const { sx, ...rest } = props;
+
+    return (
+      <TableContainer
+        component={Paper}
+        ref={ref}
+        {...rest}
+        sx={[
+          {
+            marginBottom: 2,
+            border: 1,
+            borderColor: 'divider',
+          },
+          sx,
+        ]}
+      />
+    );
+  }),
   Table: (props) => (
     <MuiTable {...props} style={{ borderCollapse: 'separate' }} size="small" />
   ),
