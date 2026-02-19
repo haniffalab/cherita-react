@@ -13,41 +13,81 @@ export default function Header() {
             <Nav.Link as={Link} to="/">
               Home
             </Nav.Link>
-            <Nav.Link as={Link} to="dotplot">
-              Dotplot
-            </Nav.Link>
-            <Nav.Link as={Link} to="heatmap">
-              Heatmap
-            </Nav.Link>
-            <Nav.Link as={Link} to="matrixplot">
-              Matrixplot
-            </Nav.Link>
-            <Nav.Link as={Link} to="scatterplot">
-              Scatterplot
-            </Nav.Link>
-            <Nav.Link as={Link} to="violin">
-              Violin
-            </Nav.Link>
-            <NavDropdown title="Full Page" id="full-page-dropdown">
-              <NavDropdown.Item as={Link} to="full-page/dotplot">
+            <NavDropdown
+              title="ObservationFeature"
+              id="observation-feature-dropdown"
+            >
+              <NavDropdown.Header>Standard View</NavDropdown.Header>
+              <NavDropdown.Item
+                as={Link}
+                to="observation-feature/standard-view/dotplot"
+              >
                 Dotplot
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="full-page/heatmap">
+              <NavDropdown.Item
+                as={Link}
+                to="observation-feature/standard-view/heatmap"
+              >
                 Heatmap
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="full-page/matrixplot">
+              <NavDropdown.Item
+                as={Link}
+                to="observation-feature/standard-view/matrixplot"
+              >
                 Matrixplot
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="full-page/scatterplot">
+              <NavDropdown.Item
+                as={Link}
+                to="observation-feature/standard-view/scatterplot"
+              >
                 Scatterplot
               </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="full-page/violin">
+              <NavDropdown.Item
+                as={Link}
+                to="observation-feature/standard-view/violin"
+              >
+                Violin
+              </NavDropdown.Item>
+              <NavDropdown.Header>Embedded Plots</NavDropdown.Header>
+              <NavDropdown.Item
+                as={Link}
+                to="observation-feature/embedded-plot/dotplot"
+              >
+                Dotplot
+              </NavDropdown.Item>
+              <NavDropdown.Item
+                as={Link}
+                to="observation-feature/embedded-plot/heatmap"
+              >
+                Heatmap
+              </NavDropdown.Item>
+              <NavDropdown.Item
+                as={Link}
+                to="observation-feature/embedded-plot/matrixplot"
+              >
+                Matrixplot
+              </NavDropdown.Item>
+              <NavDropdown.Item
+                as={Link}
+                to="observation-feature/embedded-plot/scatterplot"
+              >
+                Scatterplot
+              </NavDropdown.Item>
+              <NavDropdown.Item
+                as={Link}
+                to="observation-feature/embedded-plot/violin"
+              >
                 Violin
               </NavDropdown.Item>
             </NavDropdown>
-            <NavDropdown title="Apps" id="apps-dropdown">
-              <NavDropdown.Item as={Link} to="apps/perturbgen">
-                PerturbGen
+            <NavDropdown title="PerturbationMap" id="perturbation-map-dropdown">
+              <NavDropdown.Header>Standard Views</NavDropdown.Header>
+              <NavDropdown.Item as={Link} to="perturbation-map/standard-view">
+                StandardView
+              </NavDropdown.Item>
+              <NavDropdown.Header>Embedded Plots</NavDropdown.Header>
+              <NavDropdown.Item as={Link} to="perturbation-map/embedded-plot">
+                EmbeddedPlot
               </NavDropdown.Item>
             </NavDropdown>
           </Nav>

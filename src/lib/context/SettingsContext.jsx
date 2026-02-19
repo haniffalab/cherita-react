@@ -26,7 +26,6 @@ export const SettingsDispatchContext = createContext(null);
 
 const initialSettings = {
   selectedObs: null, // { name: "obs_name", omit: ["obs_item"], bins: {} }
-  selectedObsIndex: null,
   selectedVar: null, // { name: "var_name", isSet: false } or { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }
   selectedObsm: null, // "obsm_name" (e.g. "X_umap")
   selectedMultiVar: [], // [{ name: "var_name", isSet: false }, { name: "var_set_name", isSet: true, vars: [{ name: "var1" }, { name: "var2" }] }]
@@ -46,6 +45,7 @@ const initialSettings = {
     },
     meanOnlyExpressed: false,
     expressionCutoff: 0.0,
+    radiusScale: {},
   },
   varSort: {
     var: { sort: VAR_SORT.NONE, sortOrder: VAR_SORT_ORDER.ASC },
@@ -60,6 +60,8 @@ const initialSettings = {
       opacity: 1,
     },
   },
+  // for obsExplorer
+  selectedObsIndex: null,
   // dataset resolved values
   data: {
     // store resolved obs and vars from selectedObs, selectedVar, selectedMultiVar, vars, labelObs
@@ -255,6 +257,8 @@ const OBS_DATA_KEYS = [
   'mean',
   'median',
   'n_unique',
+  // optional custom colors
+  'colors',
 ];
 
 const splitObs = (obs) => {
@@ -632,6 +636,18 @@ function settingsReducer(settings, action) {
         controls: {
           ...settings.controls,
           expressionCutoff: action.expressionCutoff,
+        },
+      };
+    }
+    case 'set.controls.radiusScale': {
+      return {
+        ...settings,
+        controls: {
+          ...settings.controls,
+          radiusScale: {
+            ...settings.controls.radiusScale,
+            [action.obsm]: action.radiusScale,
+          },
         },
       };
     }

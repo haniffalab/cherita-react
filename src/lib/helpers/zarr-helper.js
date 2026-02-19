@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 
 import { useQueries, useQuery } from '@tanstack/react-query';
-import * as zarr from 'zarrita';
-import { get } from '@zarrita/ndarray';
+import isnd from 'isndarray';
+import ndarray from 'ndarray';
 import unpack from 'ndarray-unpack';
+import * as zarr from 'zarrita';
 
 export class ZarrHelper {
   async open(url, path) {
@@ -17,11 +18,21 @@ const fetchDataFromZarr = async (url, path, s) => {
   try {
     const zarrHelper = new ZarrHelper();
     const z = await zarrHelper.open(url, path);
-    const result = await get(z, s);
+    let result;
+    const res = await zarr.get(z, s);
+    const { data, shape } = res;
+    if (data && shape) {
+      result = ndarray(data, shape);
+    } else {
+      result = res;
+    }
     if (result.dtype === 'bigint64')
       throw new Error('bigint64 dtype not supported');
-    const arr = unpack(result);
-    return arr;
+    if (isnd(result)) {
+      const arr = unpack(result);
+      return arr;
+    }
+    return result;
   } catch (error) {
     if (error instanceof zarr.NodeNotFoundError) {
       error.status = 404;

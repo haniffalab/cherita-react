@@ -113,25 +113,27 @@ export function VarSearchResults(props) {
         setSelectedResult,
         isStale,
       }) => (
-        <ListGroup.Item
-          key={item.index ?? item.name}
-          onClick={() => setSelectedResult(item)}
-          active={selectedResult?.index === item.index}
-        >
-          <div className="d-flex justify-content-between align-items-center w-100">
-            <div>{item.name}</div>
-            <Button
-              type="button"
-              className="m-0 p-0 px-1"
-              variant="outline-secondary"
-              title="Add to list"
-              disabled={isStale}
-              onClick={() => handleSelect(dispatch, item)}
-            >
-              <FontAwesomeIcon icon={faPlus} />
-            </Button>
-          </div>
-        </ListGroup.Item>
+        <div className="virtualized-list-wrapper" key={item.index ?? item.name}>
+          <ListGroup.Item
+            key={item.index ?? item.name}
+            onClick={() => setSelectedResult(item)}
+            active={selectedResult?.index === item.index}
+          >
+            <div className="d-flex justify-content-between align-items-center w-100">
+              <div>{item.name}</div>
+              <Button
+                type="button"
+                className="m-0 p-0 px-1"
+                variant="outline-secondary"
+                title="Add to list"
+                disabled={isStale}
+                onClick={() => handleSelect(dispatch, item)}
+              >
+                <FontAwesomeIcon icon={faPlus} />
+              </Button>
+            </div>
+          </ListGroup.Item>
+        </div>
       )}
     />
   );
@@ -157,25 +159,27 @@ export function ObsSearchResults(props) {
         };
 
         return (
-          <ListGroup.Item
-            key={item.matrix_index}
-            onClick={() => setSelectedResult(item)}
-            active={selectedResult?.matrix_index === item.matrix_index}
-          >
-            <div className="d-flex justify-content-between align-items-center w-100">
-              <div>{item.name}</div>
-              <Button
-                type="button"
-                className="m-0 p-0 px-1"
-                variant="outline-secondary"
-                title="Add to list"
-                disabled={isStale}
-                onClick={() => onObsSelect(dispatch, item, props.handleClose)}
-              >
-                <FontAwesomeIcon icon={faPlus} />
-              </Button>
-            </div>
-          </ListGroup.Item>
+          <div className="virtualized-list-wrapper" key={item.matrix_index}>
+            <ListGroup.Item
+              key={item.matrix_index}
+              onClick={() => setSelectedResult(item)}
+              active={selectedResult?.matrix_index === item.matrix_index}
+            >
+              <div className="d-flex justify-content-between align-items-center w-100">
+                <div>{item.name}</div>
+                <Button
+                  type="button"
+                  className="m-0 p-0 px-1"
+                  variant="outline-secondary"
+                  title="Add to list"
+                  disabled={isStale}
+                  onClick={() => onObsSelect(dispatch, item, props.handleClose)}
+                >
+                  <FontAwesomeIcon icon={faPlus} />
+                </Button>
+              </div>
+            </ListGroup.Item>
+          </div>
         );
       }}
     />
@@ -191,15 +195,17 @@ export function DiseasesSearchResults(props) {
       overscan={250}
       estimateSize={() => 32}
       itemRenderer={({ item, setSelectedResult, selectedResult }) => (
-        <ListGroup.Item
-          key={item.id ?? item.name}
-          onClick={() => setSelectedResult(item)}
-          active={selectedResult?.id === item.id}
-        >
-          <div className="d-flex justify-content-between align-items-center w-100">
-            <div>{item.disease_name}</div>
-          </div>
-        </ListGroup.Item>
+        <div className="virtualized-list-wrapper" key={item.id ?? item.name}>
+          <ListGroup.Item
+            key={item.id ?? item.name}
+            onClick={() => setSelectedResult(item)}
+            active={selectedResult?.id === item.id}
+          >
+            <div className="d-flex justify-content-between align-items-center w-100">
+              <div>{item.disease_name}</div>
+            </div>
+          </ListGroup.Item>
+        </div>
       )}
     />
   );

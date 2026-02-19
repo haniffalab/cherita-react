@@ -3,12 +3,15 @@
   top: 1rem;
   left: 1rem;
   z-index: 10;
-  width: 3rem;
+  width: 2.65rem;
 
-  // Target buttons inside the controls
   .btn {
-    padding-left: 0;
-    padding-right: 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  &.is-compact {
+    width: 2rem;
   }
 }
 

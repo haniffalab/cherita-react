@@ -38,8 +38,9 @@ import { Legend } from '../../utils/Legend';
 import { LoadingLinear, LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useSelectedObs } from '../../utils/Resolver';
 import { formatNumerical } from '../../utils/string';
+import usePlotVisibility from '../../utils/usePlotVisibility';
 import { useLabelObsData } from '../../utils/zarrData';
-import { PlotAlert } from '../full-page/PlotAlert';
+import { PlotAlert } from '../plot/PlotAlert';
 
 window.deck.log.level = 1;
 
@@ -52,14 +53,23 @@ const INITIAL_VIEW_STATE = {
   bearing: 0,
 };
 
+const getRadiusScale = (bounds) => {
+  // From 28 degrees ~= 30km -> 30m radius
+  const lonDim = bounds[1][0] - bounds[0][0];
+  const latDim = bounds[1][1] - bounds[0][1];
+  const minDim = Math.min(lonDim, latDim);
+  const rs = (0.01 / minDim) * 111111;
+  return rs;
+};
+
 export function Scatterplot({
-  radius = null,
-  setShowObs,
-  setShowVars,
+  setShowCategories,
+  setShowSearch,
   plotType,
   setPlotType,
   isFullscreen = false,
   pointInteractionEnabled = false,
+  showSpatialControls = true,
 }) {
   const { useUnsColors } = useDataset();
   const settings = useSettings();
@@ -67,9 +77,9 @@ export function Scatterplot({
   const dispatch = useSettingsDispatch();
   const { getColor } = useColor();
   const deckRef = useRef(null);
+  const [viewport, setViewport] = useState(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [isRendering, setIsRendering] = useState(true);
-  const [radiusScale, setRadiusScale] = useState(radius || 1);
   const [isPending, setIsPending] = useState(false);
   const [data, setData] = useState({
     positions: [],
@@ -79,11 +89,14 @@ export function Scatterplot({
   const [hasObsm, setHasObsm] = useState(true);
   const [dataError, setDataError] = useState(null);
 
+  const radiusScale = settings.controls.radiusScale[settings.selectedObsm] || 1;
+
   const selectedObs = useSelectedObs();
   const selectedObsIndex = settings.selectedObsIndex;
 
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [isHoveringPoint, setIsHoveringPoint] = useState(false);
+  const { showSearchBtn } = usePlotVisibility(isFullscreen);
 
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
@@ -98,19 +111,6 @@ export function Scatterplot({
   const clickedInsideRef = useRef(false);
 
   // @TODO: assert length of obsmData, xData, obsData is equal
-
-  const getRadiusScale = useCallback(
-    (bounds) => {
-      if (!!radius) return radius;
-      // From 28 degrees ~= 30km -> 30m radius
-      const lonDim = bounds[1][0] - bounds[0][0];
-      const latDim = bounds[1][1] - bounds[0][1];
-      const minDim = Math.min(lonDim, latDim);
-      const rs = (0.01 / minDim) * 111111;
-      return rs;
-    },
-    [radius],
-  );
 
   useEffect(() => {
     if (
@@ -171,7 +171,7 @@ export function Scatterplot({
   ]);
 
   useEffect(() => {
-    if (data.positions && !!data.positions.length) {
+    if (data.positions && data.positions.length) {
       const mapHelper = new MapHelper();
       const { latitude, longitude, zoom, bounds } = mapHelper.fitBounds(
         data.positions,
@@ -180,17 +180,32 @@ export function Scatterplot({
           height: deckRef?.current?.deck?.height,
         },
       );
-      setRadiusScale(getRadiusScale(bounds));
-      setViewState((v) => {
-        return { ...v, longitude: longitude, latitude: latitude, zoom: zoom };
+      setViewState((v) => ({
+        ...v,
+        latitude,
+        longitude,
+        zoom,
+      }));
+      setViewport({ latitude, longitude, zoom, bounds });
+    }
+  }, [data.positions]);
+
+  useEffect(() => {
+    if (
+      viewport?.bounds &&
+      !settings.controls.radiusScale[settings.selectedObsm]
+    ) {
+      dispatch({
+        type: 'set.controls.radiusScale',
+        obsm: settings.selectedObsm,
+        radiusScale: getRadiusScale(viewport.bounds),
       });
     }
   }, [
-    getRadiusScale,
-    obsmData.data,
-    obsmData.isPending,
-    obsmData.serverError,
-    data.positions,
+    dispatch,
+    settings.controls.radiusScale,
+    settings.selectedObsm,
+    viewport?.bounds,
   ]);
 
   useEffect(() => {
@@ -345,6 +360,9 @@ export function Scatterplot({
     [
       isPending,
       sortedObsIndices,
+      pointInteractionEnabled,
+      getOriginalIndex,
+      selectedObsIndex,
       getColor,
       sortedData.values,
       min,
@@ -353,24 +371,30 @@ export function Scatterplot({
       useUnsColors,
       settings.colorEncoding,
       selectedObs?.colors,
-      selectedObsIndex,
-      getOriginalIndex,
     ],
   );
 
   // @TODO: add support for pseudospatial hover to reflect in radius
-  const getRadius = (_d, { index }) => {
-    const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
+  const getRadius = useCallback(
+    (_d, { index }) => {
+      const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
 
-    if (
-      pointInteractionEnabled &&
-      getOriginalIndex(index) === selectedObsIndex
-    ) {
-      return grayOut ? 200 : 200;
-    }
+      if (
+        pointInteractionEnabled &&
+        getOriginalIndex(index) === selectedObsIndex
+      ) {
+        return 50;
+      }
 
-    return grayOut ? 1 : 60;
-  };
+      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 26 : 1);
+    },
+    [
+      getOriginalIndex,
+      pointInteractionEnabled,
+      selectedObsIndex,
+      sortedObsIndices,
+    ],
+  );
 
   const memoizedLayers = useMemo(() => {
     return [
@@ -480,12 +504,20 @@ export function Scatterplot({
       clickedInsideRef.current = true;
       const originalIndex = getOriginalIndex(info.index);
       dispatch({ type: 'set.selectedObsIndex', index: originalIndex });
+      // in collapsed view, open offcanvas
+      if (pointInteractionEnabled && showSearchBtn) {
+        setShowSearch(true);
+      }
     }
   }
 
   const getLabel = (o, v, isVar = false) => {
     if (isVar || o.type === OBS_TYPES.CONTINUOUS) {
       return `${o.name}: ${formatNumerical(parseFloat(v))}`;
+    } else if (o.type === OBS_TYPES.DISCRETE) {
+      return `${o.name}: ${v}`;
+    } else if (o.type === OBS_TYPES.BOOLEAN) {
+      return `${o.name}: ${o.codesMap[+v]}`;
     } else {
       return `${o.name}: ${o.codesMap[v]}`;
     }
@@ -519,6 +551,7 @@ export function Scatterplot({
     if (settings.labelObs.length) {
       text.push(
         ..._.map(labelObsData.data, (v, k) => {
+          if (!v) return;
           const labelObs = settings.data.obs[k];
           return getLabel(labelObs, v[getOriginalIndex(index)]);
         }),
@@ -589,19 +622,25 @@ export function Scatterplot({
           }}
           ref={deckRef}
         ></DeckGL>
-        <SpatialControls
-          mode={mode}
-          setMode={setMode}
-          features={features}
-          setFeatures={setFeatures}
-          selectedFeatureIndexes={selectedFeatureIndexes}
-          resetBounds={() => setViewState(getBounds())}
-          increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
-          decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
-          setShowObs={setShowObs}
-          setShowVars={setShowVars}
-          isFullscreen={isFullscreen}
-        />
+        {showSpatialControls && (
+          <SpatialControls
+            mode={mode}
+            setMode={setMode}
+            features={features}
+            setFeatures={setFeatures}
+            selectedFeatureIndexes={selectedFeatureIndexes}
+            resetBounds={() => setViewState(getBounds())}
+            increaseZoom={() =>
+              setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))
+            }
+            decreaseZoom={() =>
+              setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))
+            }
+            setShowCategories={setShowCategories}
+            setShowSearch={setShowSearch}
+            isFullscreen={isFullscreen}
+          />
+        )}
         <div className="cherita-spatial-footer">
           <div className="cherita-toolbox-footer">
             {!!error && !isRendering && (

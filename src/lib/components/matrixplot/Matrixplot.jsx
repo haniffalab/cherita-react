@@ -11,22 +11,17 @@ import { useSettings } from '../../context/SettingsContext';
 import { LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useDebouncedFetch } from '../../utils/requests';
 import { useSelectedMultiVar, useSelectedObs } from '../../utils/Resolver';
-import { PlotAlert } from '../full-page/PlotAlert';
-import {
-  ControlsPlotlyToolbar,
-  ObsPlotlyToolbar,
-  VarPlotlyToolbar,
-} from '../toolbar/Toolbar';
+import usePlotVisibility from '../../utils/usePlotVisibility';
+import { PlotAlert } from '../plot/PlotAlert';
+import { PlotlyToolbar, PlotlyModebarControls } from '../toolbar/Toolbar';
 
 export function Matrixplot({
-  showObsBtn = false,
-  showVarsBtn = false,
-  showCtrlsBtn = false,
-  setShowObs,
-  setShowVars,
+  setShowCategories,
+  setShowSearch,
   setShowControls,
   plotType,
   setPlotType,
+  isFullscreen = false,
 }) {
   const ENDPOINT = 'matrixplot';
   const dataset = useDataset();
@@ -39,6 +34,8 @@ export function Matrixplot({
 
   const selectedObs = useSelectedObs();
   const selectedMultiVar = useSelectedMultiVar();
+
+  const { showCategoriesBtn, showSearchBtn } = usePlotVisibility(isFullscreen);
 
   const params = useMemo(
     () => ({
@@ -107,20 +104,24 @@ export function Matrixplot({
     updateColorscale(colorscale.current);
   }, [settings.controls.colorScale, updateColorscale]);
 
-  const customModeBarButtons = _.compact([
-    showObsBtn && ObsPlotlyToolbar({ onClick: setShowObs }),
-    showVarsBtn && VarPlotlyToolbar({ onClick: setShowVars }),
-    showCtrlsBtn && ControlsPlotlyToolbar({ onClick: setShowControls }),
-  ]);
-
-  const modeBarButtons = customModeBarButtons.length
-    ? [customModeBarButtons, PLOTLY_MODEBAR_BUTTONS]
-    : [PLOTLY_MODEBAR_BUTTONS];
+  const modeBarButtons = [
+    _.compact([
+      PlotlyModebarControls({ onClick: setShowControls }),
+      ...PLOTLY_MODEBAR_BUTTONS,
+    ]),
+  ];
 
   if (!serverError) {
     if (hasSelections) {
       return (
         <div className="cherita-plot cherita-matrixplot position-relative">
+          <div className="plotly-toolbar">
+            <PlotlyToolbar
+              setShowCategories={setShowCategories}
+              setShowSearch={setShowSearch}
+              isFullscreen={isFullscreen}
+            />
+          </div>
           {isPending && <LoadingSpinner />}
           <Plot
             data={data}
@@ -144,11 +145,11 @@ export function Matrixplot({
       >
         <p className="p-0 m-0">
           Select a{' '}
-          {showObsBtn ? (
+          {showCategoriesBtn ? (
             <Button
               variant="link"
               className="border-0 p-0 align-baseline"
-              onClick={setShowObs}
+              onClick={setShowCategories}
             >
               category
             </Button>
@@ -156,11 +157,11 @@ export function Matrixplot({
             'category'
           )}{' '}
           to group observations, then choose one or more{' '}
-          {showVarsBtn ? (
+          {showSearchBtn ? (
             <Button
               variant="link"
               className="border-0 p-0 align-baseline"
-              onClick={setShowVars}
+              onClick={setShowSearch}
             >
               features
             </Button>

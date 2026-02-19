@@ -3,7 +3,7 @@
   .plotly {
     .modebar {
       top: 16px;
-      right: 0;
+      right: 12px;
 
       // Each button group in the modebar
       .modebar-group {
@@ -43,5 +43,14 @@
         transition: opacity 0.3s;
       }
     }
+  }
+}
+
+.cherita-plot {
+  .plotly-toolbar {
+    position: absolute;
+    z-index: 10;
+    top: 16px;
+    left: 16px;
   }
 }
