@@ -85,6 +85,7 @@ export function SearchModal({
   });
   const [varResultsLength, setVarResultsLength] = useState(null);
   const [diseaseResultsLength, setDiseaseResultsLength] = useState(null);
+  const [obsResultsLength, setObsResultsLength] = useState(null);
 
   return (
     <Modal show={show} onHide={handleClose} size="xl" fullscreen="xl-down">
@@ -117,6 +118,7 @@ export function SearchModal({
                           });
                           setVarResultsLength(null);
                           setDiseaseResultsLength(null);
+                          setObsResultsLength(null);
                         }}
                       />
                       <Button variant="light" onClick={handleClose}>
@@ -159,8 +161,7 @@ export function SearchModal({
                         <Nav.Item>
                           <Nav.Link eventKey={FEATURE_TYPE.OBS}>
                             Genes{' '}
-                            {!!diseaseResultsLength &&
-                              `(${diseaseResultsLength})`}
+                            {!!obsResultsLength && `(${obsResultsLength})`}
                           </Nav.Link>
                         </Nav.Item>
                       )}
@@ -208,7 +209,7 @@ export function SearchModal({
                                 return { ...prev, obs: item };
                               })
                             }
-                            setResultsLength={setVarResultsLength}
+                            setResultsLength={setObsResultsLength}
                             handleClose={handleClose}
                           />
                         </Tab.Pane>
