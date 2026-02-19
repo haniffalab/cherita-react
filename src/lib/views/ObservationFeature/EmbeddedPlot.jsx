@@ -71,6 +71,7 @@ export function EmbeddedPlot({
     setShowCategories,
     setShowSearch,
     setShowControls,
+    ...props,
   };
 
   const plot = () => {
