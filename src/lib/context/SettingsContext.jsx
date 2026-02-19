@@ -257,6 +257,8 @@ const OBS_DATA_KEYS = [
   'mean',
   'median',
   'n_unique',
+  // optional custom colors
+  'colors',
 ];
 
 const splitObs = (obs) => {
