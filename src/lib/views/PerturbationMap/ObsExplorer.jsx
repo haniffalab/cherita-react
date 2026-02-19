@@ -1,8 +1,17 @@
 import { useMemo, useState, useEffect, useCallback } from 'react';
 
-import { useQuery } from '@tanstack/react-query';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import IconButton from '@mui/material/IconButton';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableRow from '@mui/material/TableRow';
+import Tooltip from '@mui/material/Tooltip';
 import _ from 'lodash';
-import { Alert, Table } from 'react-bootstrap';
+import { Alert, Modal } from 'react-bootstrap';
 
 import { OBS_TYPES } from '../../constants/constants';
 import { useDataset } from '../../context/DatasetContext';
@@ -10,32 +19,9 @@ import { useSettings } from '../../context/SettingsContext';
 import { useParquet, useParquetQuery } from '../../utils/parquetData';
 import { DataTableSkeleton } from '../../utils/Skeleton';
 import { formatNumerical } from '../../utils/string';
+import { useNCBIData } from '../../utils/useNCBIData';
 import { VirtualizedTable } from '../../utils/VirtualizedTable';
 import { useObsColsData } from '../../utils/zarrData';
-
-const useNCBIData = ({ symbol }) => {
-  const {
-    data: fetchedData = null,
-    isLoading: isPending = false,
-    error: serverError = null,
-  } = useQuery({
-    queryKey: ['ncbiData', symbol],
-    queryFn: async () => {
-      const reponse = await fetch(
-        `https://api.ncbi.nlm.nih.gov/datasets/v2/gene/symbol/${symbol}/taxon/human?page_size=1`,
-        {
-          method: 'GET',
-        },
-      );
-      if (!reponse.ok) {
-        throw new Error('Error fetching NCBI data');
-      }
-      return await reponse.json();
-    },
-    enabled: !!symbol,
-  });
-  return { fetchedData, isPending, serverError };
-};
 
 const NCBIData = ({ symbol }) => {
   const { fetchedData, isPending, serverError } = useNCBIData({ symbol });
@@ -43,9 +29,8 @@ const NCBIData = ({ symbol }) => {
   if (!isPending && !serverError && description) {
     return (
       <>
-        <h3>{symbol}</h3>
         <p>{description}</p>
-        <p>
+        <p className="text-muted small">
           Data fetched from{' '}
           <a
             href="https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/rest-api/"
@@ -53,6 +38,14 @@ const NCBIData = ({ symbol }) => {
             rel="noreferrer"
           >
             NCBI API
+          </a>
+          {' · '}
+          <a
+            href={`https://www.ncbi.nlm.nih.gov/gene/?term=${encodeURIComponent(symbol)}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Gene page
           </a>
         </p>
       </>
@@ -140,6 +133,8 @@ const ObsExplorerTable = ({ colsData }) => {
 };
 
 export function ObsExplorer() {
+  const [showModal, setShowModal] = useState(false);
+
   const { selectedObsIndex } = useSettings();
   const { obsExplorer = {} } = useDataset();
   useParquet(); // initialize duckdb instance
@@ -152,7 +147,12 @@ export function ObsExplorer() {
   } = useObsColsData(obsExplorer?.obsCols);
 
   if (selectedObsIndex == null) {
-    return <div className="my-3">No selection</div>;
+    return (
+      <div className="my-4 text-muted">
+        Select a point in the scatterplot to view details about the gene
+        perturbation.
+      </div>
+    );
   }
   if (isPending) {
     return <div className="my-3">Loading...</div>;
@@ -160,33 +160,133 @@ export function ObsExplorer() {
   if (serverError) {
     return <div className="my-3">Error loading data</div>;
   }
+
   return (
-    <div>
-      <NCBIData symbol={colsData?.[obsExplorer.symbolCol]} />
-      <Table striped size="sm" responsive>
-        <tbody>
-          {_.map(colsData, (value, colName) => {
-            const col = obsCols?.[colName] || {};
-            let v;
-            if (col.type === OBS_TYPES.CONTINUOUS) {
-              v = formatNumerical(parseFloat(value));
-            } else if (col.type === OBS_TYPES.DISCRETE) {
-              v = value;
-            } else if (col.type === OBS_TYPES.BOOLEAN) {
-              v = col.codesMap?.[+value] || value;
-            } else {
-              v = col.codesMap?.[value] || value;
+    <div className="mt-3 d-flex flex-column h-100">
+      <div className="overflow-auto flex-grow-1 modern-scrollbars">
+        <h2 className="fw-bold mb-2">
+          <Tooltip
+            title={
+              <>
+                This panel shows metadata and predicted downstream effects for
+                the selected gene perturbation across the atlas.
+              </>
             }
-            return (
-              <tr key={colName}>
-                <td>{colName}</td>
-                <td>{v}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </Table>
-      <ObsExplorerTable colsData={colsData} />
+            placement="right"
+            arrow
+          >
+            <span>{colsData?.[obsExplorer.symbolCol]}</span>
+          </Tooltip>
+        </h2>
+        <NCBIData symbol={colsData?.[obsExplorer.symbolCol]} />
+        <div className="mb-0">
+          <h5 className="fw-bold mb-2">
+            <Tooltip
+              title={
+                <>
+                  These values describe how the selected gene perturbation is
+                  annotated in the atlas, including lineage, biological context,
+                  and summary scores used in the perturbation landscape.
+                </>
+              }
+              placement="right"
+              arrow
+            >
+              <span>
+                Perturbation metadata <InfoOutlinedIcon fontSize="small" />
+              </span>
+            </Tooltip>
+          </h5>
+
+          <TableContainer
+            component={Paper}
+            sx={{
+              borderRadius: 2,
+              marginBottom: 2,
+              border: 1,
+              borderColor: 'divider',
+            }}
+          >
+            <Table size="small" aria-label="perturbation metadata">
+              <TableBody>
+                {_.map(colsData, (value, colName) => {
+                  const col = obsCols?.[colName] || {};
+                  let v;
+
+                  if (col.type === OBS_TYPES.CONTINUOUS) {
+                    v = formatNumerical(parseFloat(value));
+                  } else if (col.type === OBS_TYPES.DISCRETE) {
+                    v = value;
+                  } else if (col.type === OBS_TYPES.BOOLEAN) {
+                    v = col.codesMap?.[+value] || value;
+                  } else {
+                    v = col.codesMap?.[value] || value;
+                  }
+
+                  return (
+                    <TableRow hover key={colName}>
+                      <TableCell scope="row">
+                        {col.displayName || colName}
+                      </TableCell>
+                      <TableCell>{v}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+        {obsExplorer?.dataUrl && (
+          <div className="mb-3">
+            <h5 className="fw-bold mb-2 d-flex align-items-center justify-content-between">
+              <Tooltip
+                title={
+                  <>
+                    This table shows genes predicted to change expression in
+                    response to the selected perturbation. Results can be sorted
+                    and explored to identify affected pathways and regulatory
+                    programs.
+                  </>
+                }
+                placement="right"
+                arrow
+              >
+                <span
+                  className="d-i{' '}
+               nline-flex align-items-center"
+                >
+                  Predicted downstream effects{' '}
+                  <InfoOutlinedIcon fontSize="small" className="ms-1" />
+                </span>
+              </Tooltip>
+
+              {/* MUI expand icon */}
+              <IconButton
+                size="small"
+                onClick={() => setShowModal(true)}
+                aria-label="Expand full table"
+              >
+                <OpenInFullIcon fontSize="small" />
+              </IconButton>
+            </h5>
+
+            <ObsExplorerTable colsData={colsData} />
+          </div>
+        )}
+        <Modal
+          show={showModal}
+          onHide={() => setShowModal(false)}
+          size="xl"
+          scrollable
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Full downstream effects table</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <ObsExplorerTable colsData={colsData} />
+          </Modal.Body>
+        </Modal>
+      </div>
     </div>
   );
 }

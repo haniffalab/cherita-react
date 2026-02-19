@@ -72,7 +72,7 @@ export function OffcanvasObsExplorer({ show, handleClose, ...props }) {
   return (
     <Offcanvas show={show} onHide={handleClose}>
       <Offcanvas.Header closeButton>
-        <Offcanvas.Title>Controls</Offcanvas.Title>
+        <Offcanvas.Title>Features</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
         <div className="sidebar-features">
