@@ -10,7 +10,6 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableRow from '@mui/material/TableRow';
 import Tooltip from '@mui/material/Tooltip';
-import { useQuery } from '@tanstack/react-query';
 import _ from 'lodash';
 import { Alert, Modal } from 'react-bootstrap';
 
@@ -20,32 +19,9 @@ import { useSettings } from '../../context/SettingsContext';
 import { useParquet, useParquetQuery } from '../../utils/parquetData';
 import { DataTableSkeleton } from '../../utils/Skeleton';
 import { formatNumerical } from '../../utils/string';
+import { useNCBIData } from '../../utils/useNCBIData';
 import { VirtualizedTable } from '../../utils/VirtualizedTable';
 import { useObsColsData } from '../../utils/zarrData';
-
-const useNCBIData = ({ symbol }) => {
-  const {
-    data: fetchedData = null,
-    isLoading: isPending = false,
-    error: serverError = null,
-  } = useQuery({
-    queryKey: ['ncbiData', symbol],
-    queryFn: async () => {
-      const reponse = await fetch(
-        `https://api.ncbi.nlm.nih.gov/datasets/v2/gene/symbol/${symbol}/taxon/human?page_size=1`,
-        {
-          method: 'GET',
-        },
-      );
-      if (!reponse.ok) {
-        throw new Error('Error fetching NCBI data');
-      }
-      return await reponse.json();
-    },
-    enabled: !!symbol,
-  });
-  return { fetchedData, isPending, serverError };
-};
 
 const NCBIData = ({ symbol }) => {
   const { fetchedData, isPending, serverError } = useNCBIData({ symbol });
