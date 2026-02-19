@@ -175,7 +175,7 @@ export function ObsExplorer() {
             placement="right"
             arrow
           >
-            {colsData?.[obsExplorer.symbolCol]}
+            <span>{colsData?.[obsExplorer.symbolCol]}</span>
           </Tooltip>
         </h2>
         <NCBIData symbol={colsData?.[obsExplorer.symbolCol]} />
@@ -192,7 +192,9 @@ export function ObsExplorer() {
               placement="right"
               arrow
             >
-              Perturbation metadata <InfoOutlinedIcon fontSize="small" />
+              <span>
+                Perturbation metadata <InfoOutlinedIcon fontSize="small" />
+              </span>
             </Tooltip>
           </h5>
 
@@ -234,41 +236,43 @@ export function ObsExplorer() {
             </Table>
           </TableContainer>
         </div>
-        <div className="mb-3">
-          <h5 className="fw-bold mb-2 d-flex align-items-center justify-content-between">
-            <Tooltip
-              title={
-                <>
-                  This table shows genes predicted to change exp ression i
-                  response to the selected perturbation. Re sults can be sor and
-                  explored to identify affect ed pathways and regulatory
-                  programs.
-                </>
-              }
-              placement="right"
-              arrow
-            >
-              <span
-                className="d-i{' '}
-               nline-flex align-items-center"
+        {obsExplorer?.dataUrl && (
+          <div className="mb-3">
+            <h5 className="fw-bold mb-2 d-flex align-items-center justify-content-between">
+              <Tooltip
+                title={
+                  <>
+                    This table shows genes predicted to change expression in
+                    response to the selected perturbation. Results can be sorted
+                    and explored to identify affected pathways and regulatory
+                    programs.
+                  </>
+                }
+                placement="right"
+                arrow
               >
-                Predicted downstream effects{' '}
-                <InfoOutlinedIcon fontSize="small" className="ms-1" />
-              </span>
-            </Tooltip>
+                <span
+                  className="d-i{' '}
+               nline-flex align-items-center"
+                >
+                  Predicted downstream effects{' '}
+                  <InfoOutlinedIcon fontSize="small" className="ms-1" />
+                </span>
+              </Tooltip>
 
-            {/* MUI expand icon */}
-            <IconButton
-              size="small"
-              onClick={() => setShowModal(true)}
-              aria-label="Expand full table"
-            >
-              <OpenInFullIcon fontSize="small" />
-            </IconButton>
-          </h5>
+              {/* MUI expand icon */}
+              <IconButton
+                size="small"
+                onClick={() => setShowModal(true)}
+                aria-label="Expand full table"
+              >
+                <OpenInFullIcon fontSize="small" />
+              </IconButton>
+            </h5>
 
-          <ObsExplorerTable colsData={colsData} />
-        </div>
+            <ObsExplorerTable colsData={colsData} />
+          </div>
+        )}
         <Modal
           show={showModal}
           onHide={() => setShowModal(false)}
