@@ -170,7 +170,7 @@ export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
 
   const diseaseVarList = _.map(sortedDiseaseVars, (v) => {
     return (
-      <div className="virtualized-list-wrapper">
+      <div className="virtualized-list-wrapper" key={v.gene_id}>
         <ListGroup.Item key={v.gene_id}>
           <div className="d-flex justify-content-between align-items-center w-100">
             {v.name}

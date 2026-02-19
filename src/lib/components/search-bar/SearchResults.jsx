@@ -113,7 +113,7 @@ export function VarSearchResults(props) {
         setSelectedResult,
         isStale,
       }) => (
-        <div className="virtualized-list-wrapper">
+        <div className="virtualized-list-wrapper" key={item.index ?? item.name}>
           <ListGroup.Item
             key={item.index ?? item.name}
             onClick={() => setSelectedResult(item)}
@@ -159,7 +159,7 @@ export function ObsSearchResults(props) {
         };
 
         return (
-          <div className="virtualized-list-wrapper">
+          <div className="virtualized-list-wrapper" key={item.matrix_index}>
             <ListGroup.Item
               key={item.matrix_index}
               onClick={() => setSelectedResult(item)}
@@ -195,7 +195,7 @@ export function DiseasesSearchResults(props) {
       overscan={250}
       estimateSize={() => 32}
       itemRenderer={({ item, setSelectedResult, selectedResult }) => (
-        <div className="virtualized-list-wrapper">
+        <div className="virtualized-list-wrapper" key={item.id ?? item.name}>
           <ListGroup.Item
             key={item.id ?? item.name}
             onClick={() => setSelectedResult(item)}

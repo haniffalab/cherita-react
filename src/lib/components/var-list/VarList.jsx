@@ -135,7 +135,7 @@ export function VarNamesList({
 
   const makeListItem = (item) => {
     return (
-      <div className="virtualized-list-wrapper">
+      <div className="virtualized-list-wrapper" key={item.matrix_index}>
         <ListGroup.Item key={item.matrix_index}>
           <VarItem item={item} active={active} mode={mode} />
         </ListGroup.Item>
@@ -145,7 +145,7 @@ export function VarNamesList({
 
   const makeSetListItem = (set) => {
     return (
-      <div className="virtualized-list-wrapper">
+      <div className="virtualized-list-wrapper" key={set.name}>
         <ListGroup.Item key={set.name}>
           <VarSet set={set} active={active} mode={mode} />
         </ListGroup.Item>
