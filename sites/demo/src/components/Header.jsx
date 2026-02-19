@@ -83,7 +83,11 @@ export default function Header() {
             <NavDropdown title="PerturbationMap" id="perturbation-map-dropdown">
               <NavDropdown.Header>Standard Views</NavDropdown.Header>
               <NavDropdown.Item as={Link} to="perturbation-map/standard-view">
-                PerturbGen
+                StandardView
+              </NavDropdown.Item>
+              <NavDropdown.Header>Embedded Plots</NavDropdown.Header>
+              <NavDropdown.Item as={Link} to="perturbation-map/embedded-plot">
+                EmbeddedPlot
               </NavDropdown.Item>
             </NavDropdown>
           </Nav>
