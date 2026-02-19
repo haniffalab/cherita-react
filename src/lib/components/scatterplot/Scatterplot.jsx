@@ -39,7 +39,7 @@ import { LoadingLinear, LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useSelectedObs } from '../../utils/Resolver';
 import { formatNumerical } from '../../utils/string';
 import { useLabelObsData } from '../../utils/zarrData';
-import { PlotAlert } from '../full-page/PlotAlert';
+import { PlotAlert } from '../plot/PlotAlert';
 
 window.deck.log.level = 1;
 
@@ -52,14 +52,23 @@ const INITIAL_VIEW_STATE = {
   bearing: 0,
 };
 
+const getRadiusScale = (bounds) => {
+  // From 28 degrees ~= 30km -> 30m radius
+  const lonDim = bounds[1][0] - bounds[0][0];
+  const latDim = bounds[1][1] - bounds[0][1];
+  const minDim = Math.min(lonDim, latDim);
+  const rs = (0.01 / minDim) * 111111;
+  return rs;
+};
+
 export function Scatterplot({
-  radius = null,
-  setShowObs,
-  setShowVars,
+  setShowCategories,
+  setShowSearch,
   plotType,
   setPlotType,
   isFullscreen = false,
   pointInteractionEnabled = false,
+  showSpatialControls = true,
 }) {
   const { useUnsColors } = useDataset();
   const settings = useSettings();
@@ -67,9 +76,9 @@ export function Scatterplot({
   const dispatch = useSettingsDispatch();
   const { getColor } = useColor();
   const deckRef = useRef(null);
+  const [viewport, setViewport] = useState(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [isRendering, setIsRendering] = useState(true);
-  const [radiusScale, setRadiusScale] = useState(radius || 1);
   const [isPending, setIsPending] = useState(false);
   const [data, setData] = useState({
     positions: [],
@@ -78,6 +87,8 @@ export function Scatterplot({
   const [coordsError, setCoordsError] = useState(null);
   const [hasObsm, setHasObsm] = useState(true);
   const [dataError, setDataError] = useState(null);
+
+  const radiusScale = settings.controls.radiusScale[settings.selectedObsm] || 1;
 
   const selectedObs = useSelectedObs();
   const selectedObsIndex = settings.selectedObsIndex;
@@ -98,19 +109,6 @@ export function Scatterplot({
   const clickedInsideRef = useRef(false);
 
   // @TODO: assert length of obsmData, xData, obsData is equal
-
-  const getRadiusScale = useCallback(
-    (bounds) => {
-      if (!!radius) return radius;
-      // From 28 degrees ~= 30km -> 30m radius
-      const lonDim = bounds[1][0] - bounds[0][0];
-      const latDim = bounds[1][1] - bounds[0][1];
-      const minDim = Math.min(lonDim, latDim);
-      const rs = (0.01 / minDim) * 111111;
-      return rs;
-    },
-    [radius],
-  );
 
   useEffect(() => {
     if (
@@ -171,7 +169,7 @@ export function Scatterplot({
   ]);
 
   useEffect(() => {
-    if (data.positions && !!data.positions.length) {
+    if (data.positions && data.positions.length) {
       const mapHelper = new MapHelper();
       const { latitude, longitude, zoom, bounds } = mapHelper.fitBounds(
         data.positions,
@@ -180,17 +178,32 @@ export function Scatterplot({
           height: deckRef?.current?.deck?.height,
         },
       );
-      setRadiusScale(getRadiusScale(bounds));
-      setViewState((v) => {
-        return { ...v, longitude: longitude, latitude: latitude, zoom: zoom };
+      setViewState((v) => ({
+        ...v,
+        latitude,
+        longitude,
+        zoom,
+      }));
+      setViewport({ latitude, longitude, zoom, bounds });
+    }
+  }, [data.positions]);
+
+  useEffect(() => {
+    if (
+      viewport?.bounds &&
+      !settings.controls.radiusScale[settings.selectedObsm]
+    ) {
+      dispatch({
+        type: 'set.controls.radiusScale',
+        obsm: settings.selectedObsm,
+        radiusScale: getRadiusScale(viewport.bounds),
       });
     }
   }, [
-    getRadiusScale,
-    obsmData.data,
-    obsmData.isPending,
-    obsmData.serverError,
-    data.positions,
+    dispatch,
+    settings.controls.radiusScale,
+    settings.selectedObsm,
+    viewport?.bounds,
   ]);
 
   useEffect(() => {
@@ -368,10 +381,10 @@ export function Scatterplot({
         pointInteractionEnabled &&
         getOriginalIndex(index) === selectedObsIndex
       ) {
-        return 200;
+        return 50;
       }
 
-      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 40 : 1);
+      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 20 : 1);
     },
     [
       getOriginalIndex,
@@ -603,19 +616,25 @@ export function Scatterplot({
           }}
           ref={deckRef}
         ></DeckGL>
-        <SpatialControls
-          mode={mode}
-          setMode={setMode}
-          features={features}
-          setFeatures={setFeatures}
-          selectedFeatureIndexes={selectedFeatureIndexes}
-          resetBounds={() => setViewState(getBounds())}
-          increaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))}
-          decreaseZoom={() => setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))}
-          setShowObs={setShowObs}
-          setShowVars={setShowVars}
-          isFullscreen={isFullscreen}
-        />
+        {showSpatialControls && (
+          <SpatialControls
+            mode={mode}
+            setMode={setMode}
+            features={features}
+            setFeatures={setFeatures}
+            selectedFeatureIndexes={selectedFeatureIndexes}
+            resetBounds={() => setViewState(getBounds())}
+            increaseZoom={() =>
+              setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))
+            }
+            decreaseZoom={() =>
+              setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))
+            }
+            setShowCategories={setShowCategories}
+            setShowSearch={setShowSearch}
+            isFullscreen={isFullscreen}
+          />
+        )}
         <div className="cherita-spatial-footer">
           <div className="cherita-toolbox-footer">
             {!!error && !isRendering && (

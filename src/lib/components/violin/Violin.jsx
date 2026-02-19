@@ -21,23 +21,18 @@ import {
   useSelectedVar,
 } from '../../utils/Resolver';
 import { StyledTooltip } from '../../utils/StyledTooltip';
-import { PlotAlert } from '../full-page/PlotAlert';
-import {
-  ControlsPlotlyToolbar,
-  ObsPlotlyToolbar,
-  VarPlotlyToolbar,
-} from '../toolbar/Toolbar';
+import usePlotVisibility from '../../utils/usePlotVisibility';
+import { PlotAlert } from '../plot/PlotAlert';
+import { PlotlyToolbar, PlotlyModebarControls } from '../toolbar/Toolbar';
 
 export function Violin({
   mode = VIOLIN_MODES.MULTIKEY,
-  showObsBtn = false,
-  showVarsBtn = false,
-  showCtrlsBtn = false,
-  setShowObs,
-  setShowVars,
+  setShowCategories,
+  setShowSearch,
   setShowControls,
   plotType,
   setPlotType,
+  isFullscreen = false,
 }) {
   const ENDPOINT = 'violin';
   const dataset = useDataset();
@@ -50,6 +45,8 @@ export function Violin({
   const selectedMultiVar = useSelectedMultiVar();
   const selectedVar = useSelectedVar();
   const selectedObs = useSelectedObs();
+
+  const { showCategoriesBtn, showSearchBtn } = usePlotVisibility(isFullscreen);
 
   const params = useMemo(
     () => ({
@@ -147,20 +144,24 @@ export function Violin({
     }
   }, [fetchedData, hasSelections, isPending, serverError]);
 
-  const customModeBarButtons = _.compact([
-    showObsBtn && ObsPlotlyToolbar({ onClick: setShowObs }),
-    showVarsBtn && VarPlotlyToolbar({ onClick: setShowVars }),
-    showCtrlsBtn && ControlsPlotlyToolbar({ onClick: setShowControls }),
-  ]);
-
-  const modeBarButtons = customModeBarButtons.length
-    ? [customModeBarButtons, PLOTLY_MODEBAR_BUTTONS]
-    : [PLOTLY_MODEBAR_BUTTONS];
+  const modeBarButtons = [
+    _.compact([
+      PlotlyModebarControls({ onClick: setShowControls }),
+      ...PLOTLY_MODEBAR_BUTTONS,
+    ]),
+  ];
 
   if (!serverError) {
     if (hasSelections) {
       return (
         <div className="cherita-plot cherita-violin">
+          <div className="plotly-toolbar">
+            <PlotlyToolbar
+              setShowCategories={setShowCategories}
+              setShowSearch={setShowSearch}
+              isFullscreen={isFullscreen}
+            />
+          </div>
           {isPending && <LoadingSpinner />}
           <div className="d-flex flex-column h-100">
             <div
@@ -216,11 +217,11 @@ export function Violin({
         {mode === VIOLIN_MODES.MULTIKEY && (
           <p className="p-0 m-0">
             Select one or more{' '}
-            {showVarsBtn ? (
+            {showSearchBtn ? (
               <Button
                 variant="link"
                 className="border-0 p-0 align-baseline"
-                onClick={setShowVars}
+                onClick={setShowSearch}
               >
                 features
               </Button>
@@ -233,11 +234,11 @@ export function Violin({
         {mode === VIOLIN_MODES.GROUPBY && (
           <p className="p-0 m-0">
             Select a{' '}
-            {showObsBtn ? (
+            {showCategoriesBtn ? (
               <Button
                 variant="link"
                 className="border-0 p-0 align-baseline"
-                onClick={setShowObs}
+                onClick={setShowCategories}
               >
                 category
               </Button>
@@ -245,11 +246,11 @@ export function Violin({
               'category'
             )}{' '}
             to group observations, and choose a{' '}
-            {showVarsBtn ? (
+            {showSearchBtn ? (
               <Button
                 variant="link"
                 className="border-0 p-0 align-baseline"
-                onClick={setShowVars}
+                onClick={setShowSearch}
               >
                 feature
               </Button>

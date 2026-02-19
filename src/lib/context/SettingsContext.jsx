@@ -45,6 +45,7 @@ const initialSettings = {
     },
     meanOnlyExpressed: false,
     expressionCutoff: 0.0,
+    radiusScale: {},
   },
   varSort: {
     var: { sort: VAR_SORT.NONE, sortOrder: VAR_SORT_ORDER.ASC },
@@ -61,7 +62,6 @@ const initialSettings = {
   },
   // for obsExplorer
   selectedObsIndex: null,
-  explorerObs: [],
   // dataset resolved values
   data: {
     // store resolved obs and vars from selectedObs, selectedVar, selectedMultiVar, vars, labelObs
@@ -636,6 +636,18 @@ function settingsReducer(settings, action) {
         controls: {
           ...settings.controls,
           expressionCutoff: action.expressionCutoff,
+        },
+      };
+    }
+    case 'set.controls.radiusScale': {
+      return {
+        ...settings,
+        controls: {
+          ...settings.controls,
+          radiusScale: {
+            ...settings.controls.radiusScale,
+            [action.obsm]: action.radiusScale,
+          },
         },
       };
     }

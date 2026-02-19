@@ -10,14 +10,12 @@ import {
   useSettingsDispatch,
 } from '../../context/SettingsContext';
 import { useSelectedObs } from '../../utils/Resolver';
+import { NormalizedRangeSlider } from '../../utils/Slider';
 import { ColorscaleSelect } from '../controls/Controls';
 
-export const ScatterplotControls = () => {
+const ColorscaleRange = () => {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
-  const [sliderValue, setSliderValue] = useState(
-    settings.controls.range || [0, 1],
-  );
   const { valueMin, valueMax } = useFilteredData();
 
   const selectedObs = useSelectedObs();
@@ -27,60 +25,107 @@ export const ScatterplotControls = () => {
       ? selectedObs?.type === OBS_TYPES.CATEGORICAL
       : false;
 
-  const valueLabelFormat = (value) => {
-    return (value * (valueMax - valueMin) + valueMin).toFixed(2);
-  };
-
-  const marks = [
-    { value: 0, label: valueLabelFormat(0) },
-    { value: 1, label: valueLabelFormat(1) },
-  ];
-
-  const updateSlider = (_e, value) => {
-    setSliderValue(value);
-  };
-
-  const updateRange = (_e, value) => {
-    setSliderValue(value);
+  const onChangeCommitted = (value) => {
     dispatch({
       type: 'set.controls.range',
-      range: sliderValue,
+      range: value,
     });
   };
 
-  useEffect(() => {
-    setSliderValue(settings.controls.range);
-  }, [settings.controls.range]);
+  const disabled = !settings.colorEncoding || isCategorical;
 
-  const rangeSlider = (
+  return (
     <Box className="w-100">
       <Typography id="colorscale-range" gutterBottom>
         Colorscale range
       </Typography>
       <div className="px-4">
-        <Slider
+        <NormalizedRangeSlider
           aria-labelledby="colorscale-range"
-          min={0}
-          max={1}
-          step={0.001}
-          value={sliderValue}
-          onChange={updateSlider}
-          onChangeCommitted={updateRange}
-          valueLabelDisplay="auto"
-          getAriaValueText={valueLabelFormat}
-          valueLabelFormat={valueLabelFormat}
-          marks={marks}
-          disabled={isCategorical}
+          value={settings.controls.range}
+          valueMin={valueMin}
+          valueMax={valueMax}
+          disabled={disabled}
+          onChangeCommitted={onChangeCommitted}
         />
       </div>
     </Box>
   );
+};
 
+const RadiusScaleRange = ({ min = 1, max = 5000 }) => {
+  const settings = useSettings();
+  const dispatch = useSettingsDispatch();
+
+  const { selectedObsm } = settings;
+  const [sliderValue, setSliderValue] = useState(
+    settings.controls.radiusScale?.[selectedObsm] || 1,
+  );
+
+  useEffect(() => {
+    setSliderValue(settings.controls.radiusScale?.[selectedObsm] || 1);
+  }, [settings.controls.radiusScale, selectedObsm]);
+
+  const valueLabelFormat = (value) => {
+    return value.toFixed(0);
+  };
+
+  const marks = [
+    { value: min, label: 'smaller' },
+    { value: max, label: 'larger' },
+  ];
+
+  const onChange = (_e, value) => {
+    setSliderValue(value);
+  };
+
+  const onChangeCommitted = (_e, value) => {
+    dispatch({
+      type: 'set.controls.radiusScale',
+      obsm: selectedObsm,
+      radiusScale: value,
+    });
+  };
+
+  const disabled = !selectedObsm;
+
+  return (
+    <Box className="w-100">
+      <Typography id="radius-scale-range" gutterBottom>
+        Point size
+      </Typography>
+      <div className="px-4">
+        <Slider
+          aria-labelledby="radius-scale-range"
+          min={min}
+          max={max}
+          step={1}
+          value={sliderValue}
+          onChange={onChange}
+          onChangeCommitted={onChangeCommitted}
+          valueLabelDisplay="off"
+          getAriaValueText={valueLabelFormat}
+          valueLabelFormat={valueLabelFormat}
+          marks={!disabled && marks}
+          disabled={disabled}
+          track={false}
+        />
+      </div>
+    </Box>
+  );
+};
+
+export const ScatterplotControls = () => {
   return (
     <>
       <Form>
         <ColorscaleSelect />
-        <Form.Group className="mb-2">{rangeSlider}</Form.Group>
+        <Form.Group className="mb-2">
+          <ColorscaleRange />
+        </Form.Group>
+        <Form.Group className="mb-2">
+          <RadiusScaleRange />
+        </Form.Group>
       </Form>
     </>
   );

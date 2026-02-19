@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Tooltip from '@mui/material/Tooltip';
 import _ from 'lodash';
 import { Button, ListGroup } from 'react-bootstrap';
 
@@ -12,6 +13,7 @@ import {
   useSettingsDispatch,
 } from '../../context/SettingsContext';
 import { useFetch } from '../../utils/requests';
+import { useNCBIData } from '../../utils/useNCBIData';
 import { VarDiseaseInfo } from '../var-list/VarItem';
 import { sortMeans, useVarMean } from '../var-list/VarList';
 
@@ -32,6 +34,15 @@ export function VarInfo({ varItem }) {
     });
   }, [varItem.name]);
 
+  const {
+    fetchedData: ncbiData,
+    isPending: isNCBIPending,
+    serverError: ncbiError,
+  } = useNCBIData({ symbol: varItem.name });
+
+  const geneDescription =
+    ncbiData?.reports?.[0]?.gene?.summary?.[0]?.description;
+
   const { fetchedData, isPending, serverError } = useFetch(ENDPOINT, params, {
     refetchOnMount: false,
     enabled: !!dataset.diseaseDatasets.length,
@@ -41,11 +52,50 @@ export function VarInfo({ varItem }) {
 
   return (
     <div>
-      <h5>{varItem.name}</h5>
+      <h2>{varItem.name}</h2>
+      {isNCBIPending && (
+        <p className="text-muted small">Loading gene description…</p>
+      )}
+      {!isNCBIPending && !ncbiError && geneDescription && (
+        <>
+          <p className="small">{geneDescription}</p>
+          <p className="text-muted small">
+            Data fetched from{' '}
+            <a
+              href="https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/rest-api/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              NCBI API
+            </a>
+            {' · '}
+            <a
+              href={`https://www.ncbi.nlm.nih.gov/gene/?term=${encodeURIComponent(varItem.name)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Gene page
+            </a>
+          </p>
+        </>
+      )}
       {!!dataset.diseaseDatasets.length && isPending && <p>Loading...</p>}
       {hasDiseaseInfo && (
         <>
-          <h6>Associated diseases</h6>
+          <h5 className="fw-bold mb-2">
+            <Tooltip
+              title={
+                <>
+                  Reported and inferred diseases associated with this gene,
+                  including supporting metadata.
+                </>
+              }
+              placement="left"
+              arrow
+            >
+              Associated Diseases
+            </Tooltip>
+          </h5>
           <VarDiseaseInfo data={fetchedData} />
         </>
       )}
@@ -120,28 +170,30 @@ export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
 
   const diseaseVarList = _.map(sortedDiseaseVars, (v) => {
     return (
-      <ListGroup.Item key={v.gene_id}>
-        <div className="d-flex justify-content-between align-items-center w-100">
-          {v.name}
-          <div className="d-flex align-items-center gap-1">
-            <Button
-              type="button"
-              className="m-0 p-0 px-1"
-              variant="outline-secondary"
-              title="Add to list"
-              onClick={() => {
-                handleSelect(dispatch, {
-                  name: v.name,
-                  index: v.index,
-                  matrix_index: v.matrix_index,
-                });
-              }}
-            >
-              <FontAwesomeIcon icon={faPlus} />
-            </Button>
+      <div className="virtualized-list-wrapper" key={v.gene_id}>
+        <ListGroup.Item key={v.gene_id}>
+          <div className="d-flex justify-content-between align-items-center w-100">
+            {v.name}
+            <div className="d-flex align-items-center gap-1">
+              <Button
+                type="button"
+                className="m-0 p-0 px-1"
+                variant="outline-secondary"
+                title="Add to list"
+                onClick={() => {
+                  handleSelect(dispatch, {
+                    name: v.name,
+                    index: v.index,
+                    matrix_index: v.matrix_index,
+                  });
+                }}
+              >
+                <FontAwesomeIcon icon={faPlus} />
+              </Button>
+            </div>
           </div>
-        </div>
-      </ListGroup.Item>
+        </ListGroup.Item>
+      </div>
     );
   });
 

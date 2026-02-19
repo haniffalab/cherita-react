@@ -1,6 +1,6 @@
 {
   "name": "@haniffalab/cherita-react",
-  "version": "1.4.6",
+  "version": "1.5.0",
   "author": "Haniffa Lab",
   "license": "MIT",
   "keywords": [
@@ -26,6 +26,7 @@
     "./dist/*.css": "./dist/css/*.css"
   },
   "dependencies": {
+    "@duckdb/duckdb-wasm": "^1.33.1-dev18.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@fortawesome/fontawesome-svg-core": "^6.4.0",
@@ -56,6 +57,7 @@
     "react-bootstrap": "^2.7.4",
     "react-plotly.js": "^2.6.0",
     "react-scripts": "^5.0.1",
+    "react-virtuoso": "^4.18.1",
     "zarrita": "0.6.0"
   },
   "peerDependencies": {
@@ -112,7 +114,7 @@
     "test": "jest",
     "test:ci": "jest --coverage --ci --no-watch",
     "lint:scss": "stylelint 'src/**/*.scss' --fix",
-    "lint:js": "eslint 'src/**/*.js' --fix",
+    "lint:js": "eslint 'src/**/*.{js,jsx}' --fix",
     "lint": "npm run lint:scss && npm run lint:js",
     "start-demo": "npm run dev --prefix sites/demo",
     "reinstall": "rm -rf node_modules package-lock.json && npm install"

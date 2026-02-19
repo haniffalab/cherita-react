@@ -28,7 +28,10 @@ export function PlotAlert({
       )}
       <div className="cherita-plot-alert h-100">
         <div className="w-100 h-100 d-flex justify-content-center align-items-center">
-          <Alert variant={variant} className="m-0 w-75 w-lg-50 text-center">
+          <Alert
+            variant={variant}
+            className="m-0 my-3 w-75 w-lg-50 text-center"
+          >
             {heading && <Alert.Heading>{heading}</Alert.Heading>} {children}
           </Alert>
         </div>
