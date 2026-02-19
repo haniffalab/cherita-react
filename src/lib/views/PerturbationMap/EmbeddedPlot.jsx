@@ -25,7 +25,7 @@ export function EmbeddedPlot({ showCtrlsBtn = true, ...props }) {
 
   return (
     <DatasetProvider canOverrideSettings={false} {...props}>
-      <Scatterplot {...commonProps} />
+      <Scatterplot {...commonProps} pointInteractionEnabled={true} />
       <OffcanvasObs
         {...props}
         showSelectedAsActive={false}
