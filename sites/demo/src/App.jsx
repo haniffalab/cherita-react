@@ -10,6 +10,7 @@ import Header from './components/Header';
 import DotplotDemo from './containers/DotplotDemo';
 import HeatmapDemo from './containers/HeatmapDemo';
 import MatrixplotDemo from './containers/MatrixplotDemo';
+import PerturbationMapEmbeddedPlotDemo from './containers/PerturbationMap/EmbeddedPlotDemo';
 import ScatterplotDemo from './containers/ScatterplotDemo';
 import ViolinDemo from './containers/ViolinDemo';
 
@@ -109,6 +110,11 @@ export default function App(props) {
           exact
           path="/perturbation-map/standard-view"
           element={<PerturbationMap.StandardView {...props} />}
+        />
+        <Route
+          exact
+          path="/perturbation-map/embedded-plot"
+          element={<PerturbationMapEmbeddedPlotDemo {...props} />}
         />
       </Routes>
       <Footer />

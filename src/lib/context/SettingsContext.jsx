@@ -62,7 +62,6 @@ const initialSettings = {
   },
   // for obsExplorer
   selectedObsIndex: null,
-  explorerObs: [],
   // dataset resolved values
   data: {
     // store resolved obs and vars from selectedObs, selectedVar, selectedMultiVar, vars, labelObs
@@ -258,6 +257,8 @@ const OBS_DATA_KEYS = [
   'mean',
   'median',
   'n_unique',
+  // optional custom colors
+  'colors',
 ];
 
 const splitObs = (obs) => {
