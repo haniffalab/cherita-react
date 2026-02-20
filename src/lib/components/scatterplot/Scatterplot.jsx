@@ -108,6 +108,9 @@ export function Scatterplot({
   const { obsmData, xData, obsData } = useZarrData();
   const labelObsData = useLabelObsData();
 
+  const lastSelectedObsIndexRef = useRef(selectedObsIndex);
+  const isInternalSelectionRef = useRef(false);
+
   // @TODO: assert length of obsmData, xData, obsData is equal
 
   const handleViewStateChange = useCallback(
@@ -197,6 +200,23 @@ export function Scatterplot({
     return {};
   }, [data.positions]);
 
+  const centerOnPoint = useCallback(
+    (coords) => {
+      handleViewStateChange({
+        longitude: coords[0],
+        latitude: coords[1],
+        zoom: 6,
+        transitionDuration: 500,
+        transitionInterpolator: new LinearInterpolator([
+          'longitude',
+          'latitude',
+          'zoom',
+        ]),
+      });
+    },
+    [handleViewStateChange],
+  );
+
   useEffect(() => {
     if (!initializedViewStateRef.current && latitude && longitude && zoom) {
       let initialViewState = { latitude, longitude, zoom };
@@ -225,6 +245,27 @@ export function Scatterplot({
     pointInteractionEnabled,
     selectedObsIndex,
     zoom,
+  ]);
+
+  useEffect(() => {
+    if (
+      initializedViewStateRef.current &&
+      pointInteractionEnabled &&
+      data.positions?.[selectedObsIndex] &&
+      selectedObsIndex !== lastSelectedObsIndexRef.current &&
+      !isInternalSelectionRef.current
+    ) {
+      const coords = data.positions[selectedObsIndex];
+      centerOnPoint(coords);
+    }
+
+    lastSelectedObsIndexRef.current = selectedObsIndex;
+    isInternalSelectionRef.current = false;
+  }, [
+    selectedObsIndex,
+    data.positions,
+    pointInteractionEnabled,
+    centerOnPoint,
   ]);
 
   useEffect(() => {
@@ -501,6 +542,7 @@ export function Scatterplot({
       pointInteractionEnabled
     ) {
       // clicked a scatterplot point
+      isInternalSelectionRef.current = true;
       const originalIndex = getOriginalIndex(info.index);
       dispatch({ type: 'set.selectedObsIndex', index: originalIndex });
       // in collapsed view, open offcanvas
