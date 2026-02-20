@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { Button } from 'react-bootstrap';
 import Plot from 'react-plotly.js';
 
-import { PLOTLY_MODEBAR_BUTTONS } from '../../constants/constants';
+import { PLOT_TYPES, PLOTLY_MODEBAR_BUTTONS } from '../../constants/constants';
 import { useDataset } from '../../context/DatasetContext';
 import { useFilteredData } from '../../context/FilterContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -19,7 +19,6 @@ export function Heatmap({
   setShowCategories,
   setShowSearch,
   setShowControls,
-  plotType,
   setPlotType,
   isFullscreen = false,
 }) {
@@ -145,7 +144,7 @@ export function Heatmap({
       <PlotAlert
         variant="info"
         heading="Set up your heatmap"
-        plotType={plotType}
+        plotType={PLOT_TYPES.HEATMAP}
         setPlotType={setPlotType}
       >
         <p className="p-0 m-0">
@@ -182,7 +181,7 @@ export function Heatmap({
       <PlotAlert
         variant="danger"
         heading="Error displaying the heatmap"
-        plotType={plotType}
+        plotType={PLOT_TYPES.HEATMAP}
         setPlotType={setPlotType}
       >
         {serverError.message ||
