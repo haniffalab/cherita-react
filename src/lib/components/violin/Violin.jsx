@@ -32,6 +32,8 @@ export function Violin({
   setShowControls,
   plotType,
   setPlotType,
+  showCategoriesBtn: showCategoriesBtnProp,
+  showSearchBtn: showSearchBtnProp,
   isFullscreen = false,
 }) {
   const ENDPOINT = 'violin';
@@ -46,7 +48,13 @@ export function Violin({
   const selectedVar = useSelectedVar();
   const selectedObs = useSelectedObs();
 
-  const { showCategoriesBtn, showSearchBtn } = usePlotVisibility(isFullscreen);
+  const {
+    showCategoriesBtn: showCategoriesBtnState,
+    showSearchBtn: showSearchBtnState,
+  } = usePlotVisibility(isFullscreen);
+
+  const showCategoriesBtn = showCategoriesBtnProp ?? showCategoriesBtnState;
+  const showSearchBtn = showSearchBtnProp ?? showSearchBtnState;
 
   const params = useMemo(
     () => ({

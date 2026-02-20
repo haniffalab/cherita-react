@@ -106,3 +106,12 @@ export const BREAKPOINTS = {
 
 // In order of priority
 export const DEFAULT_OBSM_KEYS = ['x_umap', 'x_tsne', 'x_scvi', 'x_pca'];
+
+export const INITIAL_VIEW_STATE = {
+  longitude: 0,
+  latitude: 0,
+  zoom: 0,
+  maxZoom: 16,
+  pitch: 0,
+  bearing: 0,
+};

@@ -8,6 +8,7 @@ export { Matrixplot } from './components/matrixplot/Matrixplot';
 export { MatrixplotControls } from './components/matrixplot/MatrixplotControls';
 export { ObsColsList } from './components/obs-list/ObsList';
 export { ObsmKeysList } from './components/obsm-list/ObsmList';
+export { ObsExplorer } from './components/obsexplorer/ObsExplorer';
 export {
   OffcanvasControls,
   OffcanvasObs,

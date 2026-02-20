@@ -7,13 +7,14 @@ import {
   useState,
 } from 'react';
 
-import { LinearInterpolator } from '@deck.gl/core';
 import { ScatterplotLayer } from '@deck.gl/layers';
 import { DeckGL } from '@deck.gl/react';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useControlled } from '@mui/material';
 import { ViewMode } from '@nebula.gl/edit-modes';
 import { EditableGeoJsonLayer } from '@nebula.gl/layers';
+import { LinearInterpolator } from 'deck.gl';
 import _ from 'lodash';
 import { Alert } from 'react-bootstrap';
 
@@ -21,6 +22,7 @@ import { SpatialControls } from './SpatialControls';
 import { Toolbox } from './Toolbox';
 import {
   COLOR_ENCODINGS,
+  INITIAL_VIEW_STATE,
   OBS_TYPES,
   SELECTED_POLYGON_FILLCOLOR,
   UNSELECTED_POLYGON_FILLCOLOR,
@@ -38,20 +40,10 @@ import { Legend } from '../../utils/Legend';
 import { LoadingLinear, LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useSelectedObs } from '../../utils/Resolver';
 import { formatNumerical } from '../../utils/string';
-import usePlotVisibility from '../../utils/usePlotVisibility';
 import { useLabelObsData } from '../../utils/zarrData';
 import { PlotAlert } from '../plot/PlotAlert';
 
 window.deck.log.level = 1;
-
-const INITIAL_VIEW_STATE = {
-  longitude: 0,
-  latitude: 0,
-  zoom: 0,
-  maxZoom: 16,
-  pitch: 0,
-  bearing: 0,
-};
 
 const getRadiusScale = (bounds) => {
   // From 28 degrees ~= 30km -> 30m radius
@@ -65,8 +57,12 @@ const getRadiusScale = (bounds) => {
 export function Scatterplot({
   setShowCategories,
   setShowSearch,
+  showCategoriesBtn,
+  showSearchBtn,
   plotType,
   setPlotType,
+  viewState: viewStateProp,
+  onViewStateChange,
   isFullscreen = false,
   pointInteractionEnabled = false,
   showSpatialControls = true,
@@ -77,8 +73,12 @@ export function Scatterplot({
   const dispatch = useSettingsDispatch();
   const { getColor } = useColor();
   const deckRef = useRef(null);
-  const [viewport, setViewport] = useState(null);
-  const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
+  const initializedViewStateRef = useRef(false);
+  const [viewState, setViewState] = useControlled({
+    controlled: viewStateProp,
+    default: INITIAL_VIEW_STATE,
+    state: 'viewState',
+  });
   const [isRendering, setIsRendering] = useState(true);
   const [isPending, setIsPending] = useState(false);
   const [data, setData] = useState({
@@ -96,7 +96,6 @@ export function Scatterplot({
 
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [isHoveringPoint, setIsHoveringPoint] = useState(false);
-  const { showSearchBtn } = usePlotVisibility(isFullscreen);
 
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
@@ -108,9 +107,22 @@ export function Scatterplot({
 
   const { obsmData, xData, obsData } = useZarrData();
   const labelObsData = useLabelObsData();
-  const clickedInsideRef = useRef(false);
+
+  const lastSelectedObsIndexRef = useRef(selectedObsIndex);
+  const isInternalSelectionRef = useRef(false);
 
   // @TODO: assert length of obsmData, xData, obsData is equal
+
+  const handleViewStateChange = useCallback(
+    (newViewState) => {
+      const v = { ...viewState, ...newViewState };
+      setViewState(v);
+      if (onViewStateChange) {
+        onViewStateChange(v);
+      }
+    },
+    [onViewStateChange, setViewState, viewState],
+  );
 
   useEffect(() => {
     if (
@@ -171,71 +183,100 @@ export function Scatterplot({
   ]);
 
   useEffect(() => {
+    initializedViewStateRef.current = false;
+  }, [settings.selectedObsm]);
+
+  const { latitude, longitude, zoom, bounds } = useMemo(() => {
     if (data.positions && data.positions.length) {
-      const mapHelper = new MapHelper();
-      const { latitude, longitude, zoom, bounds } = mapHelper.fitBounds(
+      const { latitude, longitude, zoom, bounds } = new MapHelper().fitBounds(
         data.positions,
         {
           width: deckRef?.current?.deck?.width,
           height: deckRef?.current?.deck?.height,
         },
       );
-      setViewState((v) => ({
-        ...v,
-        latitude,
-        longitude,
-        zoom,
-      }));
-      setViewport({ latitude, longitude, zoom, bounds });
+      return { latitude, longitude, zoom, bounds };
     }
+    return {};
   }, [data.positions]);
 
-  useEffect(() => {
-    if (
-      viewport?.bounds &&
-      !settings.controls.radiusScale[settings.selectedObsm]
-    ) {
-      dispatch({
-        type: 'set.controls.radiusScale',
-        obsm: settings.selectedObsm,
-        radiusScale: getRadiusScale(viewport.bounds),
+  const centerOnPoint = useCallback(
+    (coords) => {
+      handleViewStateChange({
+        longitude: coords[0],
+        latitude: coords[1],
+        zoom: 6,
+        transitionDuration: 500,
+        transitionInterpolator: new LinearInterpolator([
+          'longitude',
+          'latitude',
+          'zoom',
+        ]),
       });
+    },
+    [handleViewStateChange],
+  );
+
+  useEffect(() => {
+    if (!initializedViewStateRef.current && latitude && longitude && zoom) {
+      let initialViewState = { latitude, longitude, zoom };
+      if (pointInteractionEnabled && data.positions?.[selectedObsIndex]) {
+        const coords = data.positions[selectedObsIndex];
+        initialViewState = {
+          longitude: coords[0],
+          latitude: coords[1],
+          zoom: 6,
+          transitionDuration: 500,
+          transitionInterpolator: new LinearInterpolator([
+            'longitude',
+            'latitude',
+            'zoom',
+          ]),
+        };
+      }
+      handleViewStateChange(initialViewState);
+      initializedViewStateRef.current = true;
     }
   }, [
-    dispatch,
-    settings.controls.radiusScale,
-    settings.selectedObsm,
-    viewport?.bounds,
+    data.positions,
+    handleViewStateChange,
+    latitude,
+    longitude,
+    pointInteractionEnabled,
+    selectedObsIndex,
+    zoom,
   ]);
 
   useEffect(() => {
-    if (!pointInteractionEnabled) return;
-    if (selectedObsIndex == null) return;
-    if (!data.positions?.length) return;
-
-    // If the selection came from a click inside this plot, skip recentering
-    if (clickedInsideRef.current) {
-      clickedInsideRef.current = false;
-      return;
+    if (
+      initializedViewStateRef.current &&
+      pointInteractionEnabled &&
+      data.positions?.[selectedObsIndex] &&
+      selectedObsIndex !== lastSelectedObsIndexRef.current &&
+      !isInternalSelectionRef.current
+    ) {
+      const coords = data.positions[selectedObsIndex];
+      centerOnPoint(coords);
     }
 
-    const coords = data.positions[selectedObsIndex];
-    if (!coords) return;
+    lastSelectedObsIndexRef.current = selectedObsIndex;
+    isInternalSelectionRef.current = false;
+  }, [
+    selectedObsIndex,
+    data.positions,
+    pointInteractionEnabled,
+    centerOnPoint,
+  ]);
 
-    // Update viewState to centre on this point
-    setViewState((v) => ({
-      ...v,
-      longitude: coords[0],
-      latitude: coords[1],
-      zoom: Math.max(v.zoom, 6),
-      transitionDuration: 500,
-      transitionInterpolator: new LinearInterpolator([
-        'longitude',
-        'latitude',
-        'zoom',
-      ]), //@TODO: switch to easing interpolator
-    }));
-  }, [pointInteractionEnabled, selectedObsIndex, data.positions]);
+  useEffect(() => {
+    if (bounds && !settings.controls.radiusScale[settings.selectedObsm]) {
+      dispatch({
+        type: 'set.controls.radiusScale',
+        obsm: settings.selectedObsm,
+        radiusScale: getRadiusScale(bounds),
+      });
+    }
+  }, [dispatch, settings.controls.radiusScale, settings.selectedObsm, bounds]);
 
   const getBounds = useCallback(() => {
     const { latitude, longitude, zoom } = new MapHelper().fitBounds(
@@ -463,11 +504,11 @@ export function Scatterplot({
     selectedObsIndex,
   ]);
 
-  // const layers = useDeferredValue(
-  //   mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers,
-  // ); // draw scatterplot on top of polygons when in ViewMode
   const layers = useDeferredValue(
-    [...memoizedLayers, hoverLayer].filter(Boolean),
+    [
+      ...(mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers),
+      hoverLayer,
+    ].filter(Boolean),
   );
 
   useEffect(() => {
@@ -484,7 +525,7 @@ export function Scatterplot({
     });
   }, [settings.selectedObsm, dispatch, features.features]);
 
-  function onLayerClick(info) {
+  const onLayerClick = (info) => {
     if (mode !== ViewMode) return;
 
     if (!info.object) {
@@ -501,7 +542,7 @@ export function Scatterplot({
       pointInteractionEnabled
     ) {
       // clicked a scatterplot point
-      clickedInsideRef.current = true;
+      isInternalSelectionRef.current = true;
       const originalIndex = getOriginalIndex(info.index);
       dispatch({ type: 'set.selectedObsIndex', index: originalIndex });
       // in collapsed view, open offcanvas
@@ -509,7 +550,7 @@ export function Scatterplot({
         setShowSearch(true);
       }
     }
-  }
+  };
 
   const getLabel = (o, v, isVar = false) => {
     if (isVar || o.type === OBS_TYPES.CONTINUOUS) {
@@ -599,8 +640,8 @@ export function Scatterplot({
         {obsmData.isPending && <LoadingSpinner disableShrink={true} />}
         {isPending && <LoadingLinear />}
         <DeckGL
-          viewState={viewState}
-          onViewStateChange={(e) => setViewState(e.viewState)}
+          initialViewState={viewState}
+          onViewStateChange={(e) => handleViewStateChange(e.viewState)}
           controller={{ doubleClickZoom: mode === ViewMode }}
           layers={layers}
           onClick={onLayerClick}
@@ -629,16 +670,18 @@ export function Scatterplot({
             features={features}
             setFeatures={setFeatures}
             selectedFeatureIndexes={selectedFeatureIndexes}
-            resetBounds={() => setViewState(getBounds())}
+            resetBounds={() => handleViewStateChange(getBounds())}
             increaseZoom={() =>
-              setViewState((v) => ({ ...v, zoom: v.zoom + 1 }))
+              handleViewStateChange({ zoom: viewState.zoom + 1 })
             }
             decreaseZoom={() =>
-              setViewState((v) => ({ ...v, zoom: v.zoom - 1 }))
+              handleViewStateChange({ zoom: viewState.zoom - 1 })
             }
             setShowCategories={setShowCategories}
             setShowSearch={setShowSearch}
             isFullscreen={isFullscreen}
+            showCategoriesBtn={showCategoriesBtn}
+            showSearchBtn={showSearchBtn}
           />
         )}
         <div className="cherita-spatial-footer">

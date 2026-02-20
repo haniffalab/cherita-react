@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 import { Dotplot } from '../../components/dotplot/Dotplot';
 import { DotplotControls } from '../../components/dotplot/DotplotControls';
@@ -27,8 +27,8 @@ import { DatasetProvider } from '../../context/DatasetContext';
 export function EmbeddedPlot({
   plotType = PLOT_TYPES.SCATTERPLOT,
   canOverrideSettings = false,
-  showObsBtn = true,
-  showVarsBtn = true,
+  showCategoriesBtn = true,
+  showSearchBtn = true,
   showCtrlsBtn = true,
   ...props
 }) {
@@ -66,15 +66,16 @@ export function EmbeddedPlot({
     },
   }[plotType];
 
-  const commonProps = {
-    plotType,
-    setShowCategories,
-    setShowSearch,
-    setShowControls,
-    ...props,
-  };
+  const plot = useMemo(() => {
+    const commonProps = {
+      plotType,
+      setShowCategories,
+      setShowSearch,
+      setShowControls,
+      showCategoriesBtn,
+      showSearchBtn,
+    };
 
-  const plot = () => {
     switch (plotType) {
       case PLOT_TYPES.DOTPLOT:
         return <Dotplot {...commonProps} />;
@@ -88,11 +89,11 @@ export function EmbeddedPlot({
       default:
         return <Scatterplot {...commonProps} />;
     }
-  };
+  }, [plotType, showCategoriesBtn, showSearchBtn]);
 
   return (
     <DatasetProvider canOverrideSettings={false} {...props}>
-      {plot()}
+      {plot}
       <OffcanvasObs
         {...props}
         showSelectedAsActive={showSelectedAsActive}

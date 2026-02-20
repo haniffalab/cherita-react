@@ -48,6 +48,10 @@ export default function Header() {
               >
                 Violin
               </NavDropdown.Item>
+              <NavDropdown.Header>Split View</NavDropdown.Header>
+              <NavDropdown.Item as={Link} to="observation-feature/split-view">
+                Split View
+              </NavDropdown.Item>
               <NavDropdown.Header>Embedded Plots</NavDropdown.Header>
               <NavDropdown.Item
                 as={Link}
