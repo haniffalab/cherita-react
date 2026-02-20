@@ -90,6 +90,7 @@ export function StandardView({
       setShowSearch,
       setShowControls,
       setPlotType,
+      ...props,
     };
 
     switch (plotType) {

@@ -167,7 +167,7 @@ function CategoricalItem({
   const { getColor } = useColor();
 
   return (
-    <div className="virtualized-list-wrapper">
+    <div className="virtualized-list-wrapper ps-1" key={value}>
       <ListGroup.Item key={value} className="obs-item">
         <div className="d-flex align-items-center flex-wrap">
           <div className="flex-grow-1 me-auto mw-100">

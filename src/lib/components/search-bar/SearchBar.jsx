@@ -85,6 +85,7 @@ export function SearchModal({
   });
   const [varResultsLength, setVarResultsLength] = useState(null);
   const [diseaseResultsLength, setDiseaseResultsLength] = useState(null);
+  const [obsResultsLength, setObsResultsLength] = useState(null);
 
   return (
     <Modal show={show} onHide={handleClose} size="xl" fullscreen="xl-down">
@@ -117,6 +118,7 @@ export function SearchModal({
                           });
                           setVarResultsLength(null);
                           setDiseaseResultsLength(null);
+                          setObsResultsLength(null);
                         }}
                       />
                       <Button variant="light" onClick={handleClose}>
@@ -130,12 +132,12 @@ export function SearchModal({
           </Row>
         </Container>
       </Modal.Header>
-      <Modal.Body className="p-0">
-        <Container>
-          <Row>
+      <Modal.Body className="p-0 h-100">
+        <Container className="h-100">
+          <Row className="h-100">
             <Col xs={12} md={8}>
               <Tab.Container activeKey={tab} onSelect={(k) => setTab(k)}>
-                <Row className="w-100">
+                <Row className="w-100 h-100">
                   <Col sm={3} className="py-3 border-end">
                     <Nav variant="pills" className="flex-column">
                       {searchVar && (
@@ -159,8 +161,7 @@ export function SearchModal({
                         <Nav.Item>
                           <Nav.Link eventKey={FEATURE_TYPE.OBS}>
                             Genes{' '}
-                            {!!diseaseResultsLength &&
-                              `(${diseaseResultsLength})`}
+                            {!!obsResultsLength && `(${obsResultsLength})`}
                           </Nav.Link>
                         </Nav.Item>
                       )}
@@ -208,7 +209,7 @@ export function SearchModal({
                                 return { ...prev, obs: item };
                               })
                             }
-                            setResultsLength={setVarResultsLength}
+                            setResultsLength={setObsResultsLength}
                             handleClose={handleClose}
                           />
                         </Tab.Pane>

@@ -39,6 +39,7 @@ import { Legend } from '../../utils/Legend';
 import { LoadingLinear, LoadingSpinner } from '../../utils/LoadingIndicators';
 import { useSelectedObs } from '../../utils/Resolver';
 import { formatNumerical } from '../../utils/string';
+import usePlotVisibility from '../../utils/usePlotVisibility';
 import { useLabelObsData } from '../../utils/zarrData';
 import { PlotAlert } from '../plot/PlotAlert';
 
@@ -95,6 +96,7 @@ export function Scatterplot({
 
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [isHoveringPoint, setIsHoveringPoint] = useState(false);
+  const { showSearchBtn } = usePlotVisibility(isFullscreen);
 
   // EditableGeoJsonLayer
   const [mode, setMode] = useState(() => ViewMode);
@@ -384,7 +386,7 @@ export function Scatterplot({
         return 50;
       }
 
-      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 5 : 1);
+      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 26 : 1);
     },
     [
       getOriginalIndex,
@@ -502,6 +504,10 @@ export function Scatterplot({
       clickedInsideRef.current = true;
       const originalIndex = getOriginalIndex(info.index);
       dispatch({ type: 'set.selectedObsIndex', index: originalIndex });
+      // in collapsed view, open offcanvas
+      if (pointInteractionEnabled && showSearchBtn) {
+        setShowSearch(true);
+      }
     }
   }
 
