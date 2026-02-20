@@ -117,7 +117,10 @@
     "lint:js": "eslint 'src/**/*.{js,jsx}' --fix",
     "lint": "npm run lint:scss && npm run lint:js",
     "start-demo": "npm run dev --prefix sites/demo",
-    "reinstall": "rm -rf node_modules package-lock.json && npm install"
+    "reinstall": "rm -rf node_modules package-lock.json && npm install",
+    "docs:start": "npm run start --prefix website",
+    "docs:build": "npm run build --prefix website",
+    "docs:serve": "npm run serve --prefix website"
   },
   "eslintConfig": {
     "extends": [

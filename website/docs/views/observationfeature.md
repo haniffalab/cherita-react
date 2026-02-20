@@ -10,7 +10,7 @@ The `ObservationFeature` view provides visualization components for exploring ob
 
 ### StandardView
 
-A full-page view with integrated [observation list](../components/list.md#obscolslist), [variable list](../components/list.md#varnameslist), and [plot visualization](../components/plots.md).
+A full-page view with integrated [observation list](../components/metadata.md#obscolslist), [variable list](../components/metadata.md#varnameslist), and [plot visualization](../components/plots.md).
 
 ```jsx
 import { ObservationFeature, PLOT_TYPES } from "@haniffalab/cherita-react";
