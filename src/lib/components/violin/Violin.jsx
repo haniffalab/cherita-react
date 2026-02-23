@@ -7,6 +7,7 @@ import { Badge, Button } from 'react-bootstrap';
 import Plot from 'react-plotly.js';
 
 import {
+  PLOT_TYPES,
   PLOTLY_MODEBAR_BUTTONS,
   VIOLIN_MODES,
 } from '../../constants/constants';
@@ -30,7 +31,6 @@ export function Violin({
   setShowCategories,
   setShowSearch,
   setShowControls,
-  plotType,
   setPlotType,
   isFullscreen = false,
 }) {
@@ -211,7 +211,7 @@ export function Violin({
       <PlotAlert
         variant="info"
         heading="Set up your violin plot"
-        plotType={plotType}
+        plotType={PLOT_TYPES.VIOLINPLOT}
         setPlotType={setPlotType}
       >
         {mode === VIOLIN_MODES.MULTIKEY && (
@@ -267,7 +267,7 @@ export function Violin({
       <PlotAlert
         variant="danger"
         heading="Error displaying the violin plot"
-        plotType={plotType}
+        plotType={PLOT_TYPES.VIOLINPLOT}
         setPlotType={setPlotType}
       >
         {serverError.message ||
