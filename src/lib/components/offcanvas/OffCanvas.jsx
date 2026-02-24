@@ -1,6 +1,7 @@
 import Offcanvas from 'react-bootstrap/Offcanvas';
 
 import { SELECTION_MODES } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
 import { ObsExplorer } from '../../views/PerturbationMap/ObsExplorer';
 import { ObsColsList } from '../obs-list/ObsList';
 import { ObsmKeysList } from '../obsm-list/ObsmList';
@@ -38,10 +39,11 @@ export function OffcanvasVars({
   handleClose,
   mode = SELECTION_MODES.MULTIPLE,
 }) {
+  const dataset = useDataset();
   return (
     <Offcanvas show={show} onHide={handleClose} className="offcanvas-vars">
       <Offcanvas.Header closeButton>
-        <Offcanvas.Title>Features</Offcanvas.Title>
+        <Offcanvas.Title>Search for {dataset.varLabel.plural}</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
         <div className="sidebar-features">
@@ -69,10 +71,11 @@ export function OffcanvasControls({ show, handleClose, Controls, ...props }) {
 }
 
 export function OffcanvasObsExplorer({ show, handleClose, ...props }) {
+  const dataset = useDataset();
   return (
     <Offcanvas show={show} onHide={handleClose}>
       <Offcanvas.Header closeButton>
-        <Offcanvas.Title>Gene Perturbations</Offcanvas.Title>
+        <Offcanvas.Title>Search for {dataset.varLabel.plural}</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body className="p-1">
         <div className="sidebar-features">
