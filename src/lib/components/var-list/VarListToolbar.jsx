@@ -56,7 +56,7 @@ export function VarListToolbar({ varType = 'var' }) {
     <div className="d-flex justify-content-end align-items-center mb-2">
       <ToggleButtonGroup
         name="sortfeatures"
-        aria-label="Sort features by"
+        aria-label="Sort by"
         size="sm"
         type="radio"
       >

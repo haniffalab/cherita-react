@@ -1,9 +1,11 @@
 import { Button, ButtonGroup, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
+import { useDataset } from '../../context/DatasetContext';
 import { formatNumerical } from '../../utils/string';
 import { ObsmKeysList } from '../obsm-list/ObsmList';
 
 export function Toolbox({ mode, obsLength, slicedLength, setHasObsm }) {
+  const { obsLabel } = useDataset();
   return (
     <div className="cherita-toolbox">
       <ButtonGroup>
@@ -17,7 +19,7 @@ export function Toolbox({ mode, obsLength, slicedLength, setHasObsm }) {
               overlay={
                 <Tooltip id="tooltip-dropped-mode">
                   You have selected {formatNumerical(slicedLength)} out of{' '}
-                  {formatNumerical(obsLength)} cells
+                  {formatNumerical(obsLength)} {obsLabel.plural}
                 </Tooltip>
               }
             >
@@ -28,7 +30,7 @@ export function Toolbox({ mode, obsLength, slicedLength, setHasObsm }) {
                 aria-disabled="true"
               >
                 {formatNumerical(slicedLength)} of {formatNumerical(obsLength)}{' '}
-                cells
+                {obsLabel.plural}
               </Button>
             </OverlayTrigger>
           ) : (
@@ -36,7 +38,7 @@ export function Toolbox({ mode, obsLength, slicedLength, setHasObsm }) {
               placement="top"
               overlay={
                 <Tooltip id="tooltip-dropped-mode">
-                  You are viewing {formatNumerical(obsLength)} cells
+                  You are viewing {formatNumerical(obsLength)} {obsLabel.plural}
                 </Tooltip>
               }
             >
@@ -46,7 +48,7 @@ export function Toolbox({ mode, obsLength, slicedLength, setHasObsm }) {
                 style={{ cursor: 'default' }}
                 aria-disabled="true"
               >
-                {formatNumerical(obsLength)} cells
+                {formatNumerical(obsLength)} {obsLabel.plural}
               </Button>
             </OverlayTrigger>
           ))}

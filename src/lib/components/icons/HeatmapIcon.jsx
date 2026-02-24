@@ -4,8 +4,8 @@ export default function HeatmapIcon({
   gap = 1,
   ...props
 }) {
-  const rows = 6; // genes
-  const cols = 8; // cells
+  const rows = 6; // features
+  const cols = 8; // observations
 
   // Example expression pattern for visual clusters
   const expressionLevels = [

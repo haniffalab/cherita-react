@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import { PLOT_TYPES } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
 import { StyledTooltip } from '../../utils/StyledTooltip';
 import DotPlotIcon from '../icons/DotPlotIcon';
 import HeatmapIcon from '../icons/HeatmapIcon';
@@ -13,36 +14,41 @@ const plotTypes = [
     type: PLOT_TYPES.SCATTERPLOT,
     icon: ScatterplotIcon,
     name: 'Scatterplot',
-    description: 'Displays cells in 2D based on dimensionality reduction.',
+    description: ({ obsLabel }) =>
+      `Displays ${obsLabel.plural} in 2D based on dimensionality reduction.`,
   },
   {
     type: PLOT_TYPES.MATRIXPLOT,
     icon: MatrixPlotIcon,
     name: 'Matrix Plot',
-    description: 'Shows expression values of genes across categories.',
+    description: ({ varLabel, valueLabel }) =>
+      `Shows ${valueLabel.singular} values of ${varLabel.plural} across categories.`,
   },
   {
     type: PLOT_TYPES.DOTPLOT,
     icon: DotPlotIcon,
     name: 'Dot Plot',
-    description: 'Shows proportion and expression of genes across groups.',
+    description: ({ varLabel, valueLabel }) =>
+      `Shows proportion and ${valueLabel.singular} of ${varLabel.plural} across groups.`,
   },
   {
     type: PLOT_TYPES.HEATMAP,
     icon: HeatmapIcon,
     name: 'Heatmap',
-    description:
-      'Visualises gene expression or feature activity as a colour-coded matrix.',
+    description: ({ varLabel, valueLabel }) =>
+      `Visualises ${valueLabel.singular} of ${varLabel.plural} as a colour-coded matrix.`,
   },
   {
     type: PLOT_TYPES.VIOLINPLOT,
     icon: ViolinPlotIcon,
     name: 'Violin Plot',
-    description: 'Displays distribution of gene expression across categories.',
+    description: ({ varLabel, valueLabel }) =>
+      `Displays distribution of ${valueLabel.singular} across ${varLabel.plural}.`,
   },
 ];
 
 export function PlotTypeSelector({ currentType, onChange }) {
+  const { obsLabel, varLabel, valueLabel } = useDataset();
   const [hoveredMap, setHoveredMap] = useState({});
 
   const handleMouseEnter = (type) =>
@@ -65,7 +71,7 @@ export function PlotTypeSelector({ currentType, onChange }) {
               <>
                 <strong>{name}</strong>
                 <br />
-                {description}
+                {description({ obsLabel, varLabel, valueLabel })}
               </>
             }
             placement="bottom"
