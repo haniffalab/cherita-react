@@ -106,7 +106,7 @@ export function StandardView({
       default:
         return <Scatterplot {...commonProps} />;
     }
-  }, [plotType]);
+  }, [plotType, props]);
 
   return (
     <div className="cherita-app">
