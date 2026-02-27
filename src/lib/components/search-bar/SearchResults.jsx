@@ -148,7 +148,6 @@ export function ObsSearchResults(props) {
       itemRenderer={({
         item,
         dispatch,
-        handleClose,
         selectedResult,
         setSelectedResult,
         isStale,
