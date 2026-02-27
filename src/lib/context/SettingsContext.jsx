@@ -371,6 +371,36 @@ function settingsReducer(settings, action) {
         });
       }
     }
+    case 'select.multivar.batch': {
+      const newVars = [];
+      let newVarData = {};
+
+      _.forEach(action.vars, (v) => {
+        const inMultiVar = settings.selectedMultiVar.some(
+          (mv) => mv.name === v.name,
+        );
+        if (!inMultiVar) {
+          const { settings: varSettings, data: varData } = splitVar(v);
+          newVars.push(varSettings);
+          newVarData = { ...newVarData, ...varData };
+        }
+      });
+
+      if (!newVars.length) {
+        return validateSettings({ ...settings });
+      }
+      return validateSettings({
+        ...settings,
+        selectedMultiVar: [...settings.selectedMultiVar, ...newVars],
+        data: {
+          ...settings.data,
+          vars: {
+            ...settings.data.vars,
+            ...newVarData,
+          },
+        },
+      });
+    }
     case 'deselect.multivar': {
       return validateSettings({
         ...settings,

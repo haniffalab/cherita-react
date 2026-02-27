@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
@@ -18,29 +18,48 @@ import {
 } from './SearchResults';
 import { COLOR_ENCODINGS } from '../../constants/constants';
 
-const select = (dispatch, item) => {
-  dispatch({
-    type: 'select.var',
-    var: item,
-  });
-  dispatch({
-    type: 'select.multivar',
-    var: item,
-  });
-  dispatch({
-    type: 'set.colorEncoding',
-    value: COLOR_ENCODINGS.VAR,
-  });
-};
+function useVarSelect() {
+  const pendingVars = useRef([]);
 
-const debounceSelect = _.debounce(select, 500);
+  const debouncedSelect = useMemo(
+    () =>
+      _.debounce((dispatch) => {
+        const vars = [...pendingVars.current];
+        pendingVars.current = [];
 
-function onVarSelect(dispatch, item) {
-  dispatch({
-    type: 'add.var',
-    var: item,
-  });
-  debounceSelect(dispatch, item);
+        dispatch({
+          type: 'select.multivar.batch',
+          vars: vars,
+        });
+
+        const lastItem = vars[vars.length - 1];
+        if (lastItem) {
+          dispatch({
+            type: 'select.var',
+            var: lastItem,
+          });
+          dispatch({
+            type: 'set.colorEncoding',
+            value: COLOR_ENCODINGS.VAR,
+          });
+        }
+      }, 500),
+    [],
+  );
+
+  const onVarSelect = useCallback(
+    (dispatch, item) => {
+      dispatch({
+        type: 'add.var',
+        var: item,
+      });
+      pendingVars.current.push(item);
+      debouncedSelect(dispatch);
+    },
+    [debouncedSelect],
+  );
+
+  return { onVarSelect, debouncedSelect };
 }
 
 function addVarSet(dispatch, { name, vars }) {
@@ -66,7 +85,7 @@ export function SearchModal({
   text,
   setText,
   displayText,
-  handleSelect = onVarSelect,
+  handleSelect,
   searchVar,
   searchDiseases,
   searchObs,
@@ -202,7 +221,6 @@ export function SearchModal({
                         <Tab.Pane eventKey={FEATURE_TYPE.OBS}>
                           <ObsSearchResults
                             text={text}
-                            handleSelect={handleSelect}
                             selectedResult={selectedResult.obs}
                             setSelectedResult={(item) =>
                               setSelectedResult((prev) => {
@@ -259,6 +277,7 @@ export function SearchBar({
   ].join(' and ');
 
   const [showModal, setShowModal] = useState(false);
+  const { onVarSelect, debouncedSelect } = useVarSelect();
 
   return (
     <div>
@@ -289,7 +308,11 @@ export function SearchBar({
         searchVar={searchVar}
         searchDiseases={searchDiseases}
         searchObs={searchObs}
-        handleClose={() => setShowModal(false)}
+        handleSelect={onVarSelect}
+        handleClose={() => {
+          debouncedSelect.flush();
+          setShowModal(false);
+        }}
       />
     </div>
   );
