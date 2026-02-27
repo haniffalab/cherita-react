@@ -96,7 +96,6 @@ export const PLOTLY_MODEBAR_BUTTONS = [
   'zoomIn2d',
   'zoomOut2d',
   'autoScale2d',
-  'resetScale2d',
 ];
 
 export const BREAKPOINTS = {
