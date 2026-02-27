@@ -35,7 +35,10 @@
 					".json"
 				]
 			}
-		}
+		},
+		"import/ignore": [
+			"zarrita"
+		]
 	},
 	"rules": {
 		"import/order": [
