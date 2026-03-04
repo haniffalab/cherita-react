@@ -253,7 +253,7 @@ export function Scatterplot({
   const identityGetOriginalIndex = useCallback((i) => i, []);
   const identitySortedIndexMap = useMemo(() => ({ get: (key) => key }), []);
 
-  const { sortedData, getOriginalIndex, sortedIndexMap } = useMemo(() => {
+  const { sortedIndices, getOriginalIndex, sortedIndexMap } = useMemo(() => {
     const isNumericalColorEncoding =
       settings.colorEncoding === COLOR_ENCODINGS.VAR ||
       (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
@@ -262,44 +262,55 @@ export function Scatterplot({
       settings.colorEncoding === COLOR_ENCODINGS.OBS &&
       (selectedObs?.type === OBS_TYPES.CATEGORICAL ||
         selectedObs?.type === OBS_TYPES.BOOLEAN);
+
     if (
       (isNumericalColorEncoding || isCategoricalColorEncoding) &&
       data.positions &&
       data.values &&
       data.positions.length === data.values.length
     ) {
-      const sortedIndices = _.map(data.values, (_v, i) => i).sort((a, b) => {
-        const va = data.values[a];
-        const vb = data.values[b];
-        if (isCategoricalColorEncoding) {
+      const n = data.values.length;
+      // Use typed array for better performance with large datasets
+      const indices = new Uint32Array(n);
+      for (let i = 0; i < n; i++) indices[i] = i;
+
+      const values = data.values;
+
+      if (isCategoricalColorEncoding) {
+        indices.sort((a, b) => {
+          const va = values[a];
+          const vb = values[b];
           if (va === vb) return 0;
           if (va === -1) return -1;
           if (vb === -1) return 1;
           return 0;
-        }
-        if (isNaN(va) && isNaN(vb)) return 0;
-        if (isNaN(va)) return -1;
-        if (isNaN(vb)) return 1;
-        return va - vb;
-      });
-      const sortedIndexMap = new Map(
-        _.map(sortedIndices, (originalIndex, sortedIndex) => [
-          originalIndex,
-          sortedIndex,
-        ]),
-      );
+        });
+      } else {
+        indices.sort((a, b) => {
+          const va = values[a];
+          const vb = values[b];
+          if (Number.isNaN(va) && Number.isNaN(vb)) return 0;
+          if (Number.isNaN(va)) return -1;
+          if (Number.isNaN(vb)) return 1;
+          return va - vb;
+        });
+      }
+
+      const reverseMap = new Uint32Array(n);
+      for (let i = 0; i < n; i++) {
+        reverseMap[indices[i]] = i;
+      }
+
       return {
-        sortedData: _.mapValues(data, (v, _k) => {
-          return v ? _.at(v, sortedIndices) : v;
-        }),
-        getOriginalIndex: (i) => sortedIndices[i],
-        sortedIndexMap: sortedIndexMap,
+        sortedIndices: indices,
+        getOriginalIndex: (i) => indices[i],
+        sortedIndexMap: { get: (key) => reverseMap[key] },
       };
     }
     return {
-      sortedData: data,
-      getOriginalIndex: identityGetOriginalIndex, // return original index
-      sortedIndexMap: identitySortedIndexMap, // return original index
+      sortedIndices: null,
+      getOriginalIndex: identityGetOriginalIndex,
+      sortedIndexMap: identitySortedIndexMap,
     };
   }, [
     data,
@@ -309,28 +320,24 @@ export function Scatterplot({
     settings.colorEncoding,
   ]);
 
-  const hoverLayer =
-    typeof hoveredIndex === 'number' &&
-    Array.isArray(sortedData?.positions) &&
-    hoveredIndex < sortedData.positions.length
-      ? new ScatterplotLayer({
-          id: 'hover-highlight',
-          data: [sortedData.positions[hoveredIndex]],
-          getPosition: (d) => d,
-          getFillColor: [255, 215, 0, 180],
-          getRadius: 10,
-          radiusMinPixels: 15,
-          radiusScale: 1,
-          pointSizeUnits: 'pixels',
-          pickable: false,
-          parameters: { depthTest: false },
-        })
-      : null;
+  // create sortedPositions as scatterplot layer expects data to be an array
+  const sortedPositions = useMemo(() => {
+    if (!sortedIndices || !data.positions?.length) return data.positions;
+    const n = sortedIndices.length;
+    const result = new Array(n);
+    for (let i = 0; i < n; i++) {
+      result[i] = data.positions[sortedIndices[i]];
+    }
+    return result;
+  }, [data.positions, sortedIndices]);
 
   const sortedObsIndices = useMemo(() => {
-    return obsIndices
-      ? new Set(Array.from(obsIndices, (i) => sortedIndexMap.get(i)))
-      : obsIndices;
+    if (!obsIndices) return obsIndices;
+    const result = new Set();
+    for (const i of obsIndices) {
+      result.add(sortedIndexMap.get(i));
+    }
+    return result;
   }, [obsIndices, sortedIndexMap]);
 
   const isCategorical = useMemo(() => {
@@ -354,16 +361,15 @@ export function Scatterplot({
       const grayOut =
         isPending || (sortedObsIndices && !sortedObsIndices.has(index));
 
-      if (
-        pointInteractionEnabled &&
-        getOriginalIndex(index) === selectedObsIndex
-      ) {
+      const originalIndex = getOriginalIndex(index);
+
+      if (pointInteractionEnabled && originalIndex === selectedObsIndex) {
         return [255, 215, 0, 255];
       }
 
       return (
         getColor({
-          value: (sortedData.values[index] - min) / (max - min),
+          value: (data.values[originalIndex] - min) / (max - min),
           categorical: isCategorical,
           grayOut: grayOut,
           ...(useUnsColors &&
@@ -381,7 +387,7 @@ export function Scatterplot({
       getOriginalIndex,
       selectedObsIndex,
       getColor,
-      sortedData.values,
+      data.values,
       min,
       max,
       isCategorical,
@@ -395,18 +401,24 @@ export function Scatterplot({
   const getRadius = useCallback(
     (_d, { index }) => {
       const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
+      const isHovered = pointInteractionEnabled && index === hoveredIndex;
 
       if (
         pointInteractionEnabled &&
         getOriginalIndex(index) === selectedObsIndex
       ) {
-        return 50;
+        return 100;
       }
 
-      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 26 : 1);
+      return (
+        (grayOut ? 1 : 3) *
+        (pointInteractionEnabled ? 26 : 1) *
+        (isHovered ? 1.5 : 1)
+      );
     },
     [
       getOriginalIndex,
+      hoveredIndex,
       pointInteractionEnabled,
       selectedObsIndex,
       sortedObsIndices,
@@ -418,7 +430,9 @@ export function Scatterplot({
       new ScatterplotLayer({
         id: 'cherita-layer-scatterplot',
         pickable: true,
-        data: sortedData.positions,
+        autoHighlight: pointInteractionEnabled,
+        highlightColor: [255, 215, 0, 255],
+        data: sortedPositions,
         radiusScale: radiusScale,
         radiusMinPixels: 1,
         getPosition: (d) => d,
@@ -469,23 +483,21 @@ export function Scatterplot({
       }),
     ];
   }, [
-    sortedData.positions,
-    features,
+    pointInteractionEnabled,
+    sortedPositions,
+    radiusScale,
     getFillColor,
     getRadius,
     hoveredIndex,
-    mode,
-    radiusScale,
-    selectedFeatureIndexes,
     selectedObsIndex,
+    features,
+    mode,
+    selectedFeatureIndexes,
   ]);
 
-  // const layers = useDeferredValue(
-  //   mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers,
-  // ); // draw scatterplot on top of polygons when in ViewMode
   const layers = useDeferredValue(
-    [...memoizedLayers, hoverLayer].filter(Boolean),
-  );
+    mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers,
+  ); // draw scatterplot on top of polygons when in ViewMode
 
   useEffect(() => {
     if (!features?.features?.length) {
