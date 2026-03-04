@@ -254,17 +254,34 @@ export function Scatterplot({
   const identitySortedIndexMap = useMemo(() => ({ get: (key) => key }), []);
 
   const { sortedData, getOriginalIndex, sortedIndexMap } = useMemo(() => {
+    const isNumericalColorEncoding =
+      settings.colorEncoding === COLOR_ENCODINGS.VAR ||
+      (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
+        selectedObs?.type === OBS_TYPES.CONTINUOUS);
+    const isCategoricalColorEncoding =
+      settings.colorEncoding === COLOR_ENCODINGS.OBS &&
+      (selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+        selectedObs?.type === OBS_TYPES.BOOLEAN);
     if (
-      (settings.colorEncoding === COLOR_ENCODINGS.VAR ||
-        (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-          selectedObs?.type === OBS_TYPES.CONTINUOUS)) &&
+      (isNumericalColorEncoding || isCategoricalColorEncoding) &&
       data.positions &&
       data.values &&
       data.positions.length === data.values.length
     ) {
-      const sortedIndices = _.map(data.values, (_v, i) => i).sort(
-        (a, b) => data.values[a] - data.values[b],
-      );
+      const sortedIndices = _.map(data.values, (_v, i) => i).sort((a, b) => {
+        const va = data.values[a];
+        const vb = data.values[b];
+        if (isCategoricalColorEncoding) {
+          if (va === vb) return 0;
+          if (va === -1) return -1;
+          if (vb === -1) return 1;
+          return 0;
+        }
+        if (isNaN(va) && isNaN(vb)) return 0;
+        if (isNaN(va)) return -1;
+        if (isNaN(vb)) return 1;
+        return va - vb;
+      });
       const sortedIndexMap = new Map(
         _.map(sortedIndices, (originalIndex, sortedIndex) => [
           originalIndex,
