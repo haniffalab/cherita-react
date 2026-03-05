@@ -8,7 +8,6 @@ import {
 } from 'react';
 
 import { LinearInterpolator } from '@deck.gl/core';
-import { ScatterplotLayer } from '@deck.gl/layers';
 import { DeckGL } from '@deck.gl/react';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,6 +16,7 @@ import { EditableGeoJsonLayer } from '@nebula.gl/layers';
 import _ from 'lodash';
 import { Alert } from 'react-bootstrap';
 
+import { ScatterplotLayer } from './ScatterplotLayer';
 import { SpatialControls } from './SpatialControls';
 import { Toolbox } from './Toolbox';
 import {
@@ -249,97 +249,6 @@ export function Scatterplot({
     return { latitude, longitude, zoom };
   }, [data.positions]);
 
-  // Make stable references for getOriginalIndex and sortedIndexMap
-  const identityGetOriginalIndex = useCallback((i) => i, []);
-  const identitySortedIndexMap = useMemo(() => ({ get: (key) => key }), []);
-
-  const { sortedIndices, getOriginalIndex, sortedIndexMap } = useMemo(() => {
-    const isNumericalColorEncoding =
-      settings.colorEncoding === COLOR_ENCODINGS.VAR ||
-      (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-        selectedObs?.type === OBS_TYPES.CONTINUOUS);
-    const isCategoricalColorEncoding =
-      settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-      (selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-        selectedObs?.type === OBS_TYPES.BOOLEAN);
-
-    if (
-      (isNumericalColorEncoding || isCategoricalColorEncoding) &&
-      data.positions &&
-      data.values &&
-      data.positions.length === data.values.length
-    ) {
-      const n = data.values.length;
-      // Use typed array for better performance with large datasets
-      const indices = new Uint32Array(n);
-      for (let i = 0; i < n; i++) indices[i] = i;
-
-      const values = data.values;
-
-      if (isCategoricalColorEncoding) {
-        indices.sort((a, b) => {
-          const va = values[a];
-          const vb = values[b];
-          if (va === vb) return 0;
-          if (va === -1) return -1;
-          if (vb === -1) return 1;
-          return 0;
-        });
-      } else {
-        indices.sort((a, b) => {
-          const va = values[a];
-          const vb = values[b];
-          if (Number.isNaN(va) && Number.isNaN(vb)) return 0;
-          if (Number.isNaN(va)) return -1;
-          if (Number.isNaN(vb)) return 1;
-          return va - vb;
-        });
-      }
-
-      const reverseMap = new Uint32Array(n);
-      for (let i = 0; i < n; i++) {
-        reverseMap[indices[i]] = i;
-      }
-
-      return {
-        sortedIndices: indices,
-        getOriginalIndex: (i) => indices[i],
-        sortedIndexMap: { get: (key) => reverseMap[key] },
-      };
-    }
-    return {
-      sortedIndices: null,
-      getOriginalIndex: identityGetOriginalIndex,
-      sortedIndexMap: identitySortedIndexMap,
-    };
-  }, [
-    data,
-    identityGetOriginalIndex,
-    identitySortedIndexMap,
-    selectedObs?.type,
-    settings.colorEncoding,
-  ]);
-
-  // create sortedPositions as scatterplot layer expects data to be an array
-  const sortedPositions = useMemo(() => {
-    if (!sortedIndices || !data.positions?.length) return data.positions;
-    const n = sortedIndices.length;
-    const result = new Array(n);
-    for (let i = 0; i < n; i++) {
-      result[i] = data.positions[sortedIndices[i]];
-    }
-    return result;
-  }, [data.positions, sortedIndices]);
-
-  const sortedObsIndices = useMemo(() => {
-    if (!obsIndices) return obsIndices;
-    const result = new Set();
-    for (const i of obsIndices) {
-      result.add(sortedIndexMap.get(i));
-    }
-    return result;
-  }, [obsIndices, sortedIndexMap]);
-
   const isCategorical = useMemo(() => {
     if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
       return (
@@ -358,18 +267,15 @@ export function Scatterplot({
 
   const getFillColor = useCallback(
     (_d, { index }) => {
-      const grayOut =
-        isPending || (sortedObsIndices && !sortedObsIndices.has(index));
+      const grayOut = isPending || (obsIndices && !obsIndices.has(index));
 
-      const originalIndex = getOriginalIndex(index);
-
-      if (pointInteractionEnabled && originalIndex === selectedObsIndex) {
+      if (pointInteractionEnabled && index === selectedObsIndex) {
         return [255, 215, 0, 255];
       }
 
       return (
         getColor({
-          value: (data.values[originalIndex] - min) / (max - min),
+          value: (data.values[index] - min) / (max - min),
           categorical: isCategorical,
           grayOut: grayOut,
           ...(useUnsColors &&
@@ -382,9 +288,8 @@ export function Scatterplot({
     },
     [
       isPending,
-      sortedObsIndices,
+      obsIndices,
       pointInteractionEnabled,
-      getOriginalIndex,
       selectedObsIndex,
       getColor,
       data.values,
@@ -400,13 +305,10 @@ export function Scatterplot({
   // @TODO: add support for pseudospatial hover to reflect in radius
   const getRadius = useCallback(
     (_d, { index }) => {
-      const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
+      const grayOut = obsIndices && !obsIndices.has(index);
       const isHovered = pointInteractionEnabled && index === hoveredIndex;
 
-      if (
-        pointInteractionEnabled &&
-        getOriginalIndex(index) === selectedObsIndex
-      ) {
+      if (pointInteractionEnabled && index === selectedObsIndex) {
         return 100;
       }
 
@@ -416,32 +318,47 @@ export function Scatterplot({
         (isHovered ? 1.5 : 1)
       );
     },
-    [
-      getOriginalIndex,
-      hoveredIndex,
-      pointInteractionEnabled,
-      selectedObsIndex,
-      sortedObsIndices,
-    ],
+    [hoveredIndex, obsIndices, pointInteractionEnabled, selectedObsIndex],
   );
 
   const memoizedLayers = useMemo(() => {
+    const isCategorical =
+      settings.colorEncoding === COLOR_ENCODINGS.OBS &&
+      selectedObs?.type === OBS_TYPES.CATEGORICAL;
+    const numericValues = data.values?.filter(
+      (v) => !Number.isNaN(v) && v !== undefined,
+    );
+    const zMin = numericValues?.length ? _.min(numericValues) : 0;
+    const zMax = numericValues?.length ? _.max(numericValues) : 1;
     return [
       new ScatterplotLayer({
         id: 'cherita-layer-scatterplot',
         pickable: true,
         autoHighlight: pointInteractionEnabled,
         highlightColor: [255, 215, 0, 255],
-        data: sortedPositions,
+        data: data.positions,
         radiusScale: radiusScale,
         radiusMinPixels: 1,
         getPosition: (d) => d,
         getFillColor: getFillColor,
         getRadius: getRadius,
+        getSortValue: (_d, { index }) => {
+          const v = data.values?.[index];
+          // if categorical, only draw undefined at the back
+          // draw others normally
+          if (isCategorical) {
+            if (v !== -1) return 0;
+            else return v;
+          }
+          return Number.isNaN(v) || v === undefined ? zMin : v;
+        },
         updateTriggers: {
           getFillColor: getFillColor,
           getRadius: [getRadius, hoveredIndex, selectedObsIndex],
+          getSortValue: [data.values, zMin, zMax],
         },
+        zMin,
+        zMax,
         transitions: {
           getRadius: 200,
           getFillColor: 200,
@@ -483,8 +400,11 @@ export function Scatterplot({
       }),
     ];
   }, [
+    settings.colorEncoding,
+    selectedObs?.type,
+    data.values,
+    data.positions,
     pointInteractionEnabled,
-    sortedPositions,
     radiusScale,
     getFillColor,
     getRadius,
@@ -531,7 +451,7 @@ export function Scatterplot({
     ) {
       // clicked a scatterplot point
       clickedInsideRef.current = true;
-      const originalIndex = getOriginalIndex(info.index);
+      const originalIndex = info.index;
       dispatch({ type: 'set.selectedObsIndex', index: originalIndex });
       // in collapsed view, open offcanvas
       if (pointInteractionEnabled && showSearchBtn) {
@@ -561,20 +481,14 @@ export function Scatterplot({
       selectedObs &&
       !_.includes(settings.labelObs, selectedObs.name)
     ) {
-      text.push(getLabel(selectedObs, data.values?.[getOriginalIndex(index)]));
+      text.push(getLabel(selectedObs, data.values?.[index]));
     }
 
     if (
       settings.colorEncoding === COLOR_ENCODINGS.VAR &&
       settings.selectedVar
     ) {
-      text.push(
-        getLabel(
-          settings.selectedVar,
-          data.values?.[getOriginalIndex(index)],
-          true,
-        ),
-      );
+      text.push(getLabel(settings.selectedVar, data.values?.[index], true));
     }
 
     if (settings.labelObs.length) {
@@ -582,14 +496,14 @@ export function Scatterplot({
         ..._.map(labelObsData.data, (v, k) => {
           if (!v) return;
           const labelObs = settings.data.obs[k];
-          return getLabel(labelObs, v[getOriginalIndex(index)]);
+          return getLabel(labelObs, v[index]);
         }),
       );
     }
 
     if (!text.length) return;
 
-    const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
+    const grayOut = obsIndices && !obsIndices.has(index);
 
     return {
       text: text.length ? _.compact(text).join('\n') : null,
