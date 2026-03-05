@@ -94,7 +94,6 @@ export function Scatterplot({
   const selectedObs = useSelectedObs();
   const selectedObsIndex = settings.selectedObsIndex;
 
-  const [hoveredIndex, setHoveredIndex] = useState(null);
   const [isHoveringPoint, setIsHoveringPoint] = useState(false);
   const { showSearchBtn } = usePlotVisibility(isFullscreen);
 
@@ -306,19 +305,14 @@ export function Scatterplot({
   const getRadius = useCallback(
     (_d, { index }) => {
       const grayOut = obsIndices && !obsIndices.has(index);
-      const isHovered = pointInteractionEnabled && index === hoveredIndex;
 
       if (pointInteractionEnabled && index === selectedObsIndex) {
         return 100;
       }
 
-      return (
-        (grayOut ? 1 : 3) *
-        (pointInteractionEnabled ? 26 : 1) *
-        (isHovered ? 1.5 : 1)
-      );
+      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 26 : 1);
     },
-    [hoveredIndex, obsIndices, pointInteractionEnabled, selectedObsIndex],
+    [obsIndices, pointInteractionEnabled, selectedObsIndex],
   );
 
   const memoizedLayers = useMemo(() => {
@@ -334,8 +328,10 @@ export function Scatterplot({
       new ScatterplotLayer({
         id: 'cherita-layer-scatterplot',
         pickable: true,
-        autoHighlight: pointInteractionEnabled,
-        highlightColor: [255, 215, 0, 255],
+        autoHighlight: true,
+        highlightColor: pointInteractionEnabled
+          ? [255, 215, 0, 255]
+          : [0, 0, 0, 0],
         data: data.positions,
         radiusScale: radiusScale,
         radiusMinPixels: 1,
@@ -354,15 +350,16 @@ export function Scatterplot({
         },
         updateTriggers: {
           getFillColor: getFillColor,
-          getRadius: [getRadius, hoveredIndex, selectedObsIndex],
+          getRadius: [getRadius, selectedObsIndex],
           getSortValue: [data.values, zMin, zMax],
         },
-        zMin,
-        zMax,
         transitions: {
           getRadius: 200,
           getFillColor: 200,
         },
+        zMin,
+        zMax,
+        highlightMultiplier: pointInteractionEnabled ? 1.5 : 1.0,
       }),
       new EditableGeoJsonLayer({
         id: 'cherita-layer-draw',
@@ -408,7 +405,6 @@ export function Scatterplot({
     radiusScale,
     getFillColor,
     getRadius,
-    hoveredIndex,
     selectedObsIndex,
     features,
     mode,
@@ -552,9 +548,8 @@ export function Scatterplot({
             setIsRendering(false);
           }}
           useDevicePixels={false}
-          onHover={({ object, index }) => {
+          onHover={({ object }) => {
             const active = pointInteractionEnabled && !!object;
-            setHoveredIndex(active ? index : null);
             setIsHoveringPoint(active);
           }}
           getCursor={({ isDragging }) => {
