@@ -21,6 +21,7 @@ import {
 
 import { SelectionItem } from './VarItem';
 import { COLOR_ENCODINGS, SELECTION_MODES } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
 import {
   useSettings,
   useSettingsDispatch,
@@ -45,6 +46,7 @@ function SelectionSet({
   removeSetVar,
   isMultiple = false,
 }) {
+  const dataset = useDataset();
   const [openSet, setOpenSet] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [searchText, setSearchText] = useState('');
@@ -63,7 +65,7 @@ function SelectionSet({
     })
   ) : (
     <ListGroup.Item>
-      <div className="text-muted">No features in this set</div>
+      <div className="text-muted">No {dataset.varLabel.plural} in this set</div>
     </ListGroup.Item>
   );
 
@@ -85,7 +87,8 @@ function SelectionSet({
               placement="top"
               overlay={
                 <Tooltip>
-                  This set represents the mean value of its features
+                  This set represents the mean value of its{' '}
+                  {dataset.varLabel.plural}
                 </Tooltip>
               }
             >
@@ -162,7 +165,7 @@ function SelectionSet({
         handleClose={() => setShowModal(false)}
         text={searchText}
         setText={setSearchText}
-        displayText={'features'}
+        displayText={dataset.varLabel.plural}
         handleSelect={(d, i) => {
           addVarToSet(d, set, i);
         }}

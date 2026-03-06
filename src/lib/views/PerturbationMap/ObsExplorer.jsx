@@ -149,8 +149,8 @@ export function ObsExplorer() {
   if (selectedObsIndex == null) {
     return (
       <div className="my-4 text-muted">
-        Select a point in the scatterplot to view details about the gene
-        perturbation.
+        Select a point in the scatterplot or search for genes to view details
+        about the gene perturbation.
       </div>
     );
   }

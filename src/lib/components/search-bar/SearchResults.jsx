@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import _ from 'lodash';
 import { Button, ListGroup } from 'react-bootstrap';
 
+import { useDataset } from '../../context/DatasetContext';
 import { useSettingsDispatch } from '../../context/SettingsContext';
 import {
   useDiseaseSearch,
@@ -100,11 +101,12 @@ function SearchResultsBase({
 }
 
 export function VarSearchResults(props) {
+  const dataset = useDataset();
   return (
     <SearchResultsBase
       {...props}
       searchHook={useVarSearch}
-      emptyLabel="Search features"
+      emptyLabel={`Search for ${dataset.varLabel.plural}`}
       itemRenderer={({
         item,
         dispatch,
@@ -140,11 +142,12 @@ export function VarSearchResults(props) {
 }
 
 export function ObsSearchResults(props) {
+  const dataset = useDataset();
   return (
     <SearchResultsBase
       {...props}
       searchHook={useObsSearch}
-      emptyLabel="Search observations"
+      emptyLabel={`Search for ${dataset.obsSearchCol || 'observations'}`}
       itemRenderer={({
         item,
         dispatch,
@@ -191,7 +194,7 @@ export function DiseasesSearchResults(props) {
     <SearchResultsBase
       {...props}
       searchHook={useDiseaseSearch}
-      emptyLabel="Search diseases"
+      emptyLabel="Search for diseases"
       overscan={250}
       estimateSize={() => 32}
       itemRenderer={({ item, setSelectedResult, selectedResult }) => (

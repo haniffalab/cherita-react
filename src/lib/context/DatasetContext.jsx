@@ -66,6 +66,18 @@ const initialDataset = {
     dataUrl: null, // for additional data in a remote .parquet file
     dataFilterCols: null, // map of obs cols to filter data in .parquet file
   },
+  obsLabel: {
+    singular: 'cell',
+    plural: 'cells',
+  },
+  varLabel: {
+    singular: 'gene',
+    plural: 'genes',
+  },
+  valueLabel: {
+    singular: 'expression',
+    plural: 'expression',
+  },
 };
 
 export function DatasetProvider({ dataset_url, children, ...dataset_params }) {

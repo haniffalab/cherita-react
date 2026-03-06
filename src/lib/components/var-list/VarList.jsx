@@ -64,12 +64,10 @@ export const sortMeans = (i, means) => {
   return means[i.name] || _.min(_.values(means)) - 1;
 };
 
-export function VarNamesList({
-  mode = SELECTION_MODES.SINGLE,
-  displayName = 'genes',
-}) {
+export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
+  const dataset = useDataset();
 
   const selectedVar = useSelectedVar();
   const selectedMultiVar = useSelectedMultiVar();
@@ -180,8 +178,8 @@ export function VarNamesList({
   return (
     <div className="mt-3 d-flex flex-column h-100">
       <div className="d-flex justify-content-between mb-2">
-        <h5>{_.capitalize(displayName)}</h5>
-        <ButtonGroup aria-label="Feature options" size="sm">
+        <h5>{_.capitalize(dataset.varLabel.plural)}</h5>
+        <ButtonGroup aria-label="Options" size="sm">
           <Button
             variant="info"
             onClick={() => {
@@ -212,7 +210,9 @@ export function VarNamesList({
       </div>
       <>
         {!varList.length ? (
-          <Alert variant="light">Search for a feature.</Alert>
+          <Alert variant="light">
+            Search for a {dataset.varLabel.singular}
+          </Alert>
         ) : (
           <>
             <VarListToolbar />
