@@ -315,9 +315,6 @@ export function Scatterplot({
   );
 
   const memoizedLayers = useMemo(() => {
-    const isCategorical =
-      settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-      selectedObs?.type === OBS_TYPES.CATEGORICAL;
     const numericValues = data.values?.filter(
       (v) => !Number.isNaN(v) && v !== undefined,
     );
@@ -396,8 +393,6 @@ export function Scatterplot({
       }),
     ];
   }, [
-    settings.colorEncoding,
-    selectedObs?.type,
     data.values,
     data.positions,
     pointInteractionEnabled,
@@ -408,10 +403,11 @@ export function Scatterplot({
     features,
     mode,
     selectedFeatureIndexes,
+    isCategorical,
   ]);
 
   const layers = useDeferredValue(
-    mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers,
+    mode === ViewMode ? [...memoizedLayers].reverse() : memoizedLayers,
   ); // draw scatterplot on top of polygons when in ViewMode
 
   useEffect(() => {
