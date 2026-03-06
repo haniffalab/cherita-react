@@ -1,8 +1,8 @@
 import Offcanvas from 'react-bootstrap/Offcanvas';
 
 import { SELECTION_MODES } from '../../constants/constants';
-import { ObsExplorer } from '../../views/PerturbationMap/ObsExplorer';
 import { ObsColsList } from '../obs-list/ObsList';
+import { ObsExplorer } from '../obsexplorer/ObsExplorer';
 import { ObsmKeysList } from '../obsm-list/ObsmList';
 import { SearchBar } from '../search-bar/SearchBar';
 import { VarNamesList } from '../var-list/VarList';

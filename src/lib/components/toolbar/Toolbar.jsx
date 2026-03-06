@@ -9,8 +9,17 @@ export const Toolbar = ({
   setShowSearch,
   setShowControls,
   isFullscreen,
+  showCategoriesBtn: showCategoriesBtnProp,
+  showSearchBtn: showSearchBtnProp,
 }) => {
-  const { showCategoriesBtn, showSearchBtn } = usePlotVisibility(isFullscreen);
+  const {
+    showCategoriesBtn: showCategoriesBtnState,
+    showSearchBtn: showSearchBtnState,
+  } = usePlotVisibility(isFullscreen);
+
+  const showCategoriesBtn = showCategoriesBtnProp ?? showCategoriesBtnState;
+  const showSearchBtn = showSearchBtnProp ?? showSearchBtnState;
+
   return (
     <Navbar expand="md" bg="primary" variant="dark" className="cherita-navbar">
       <Container fluid>
@@ -50,8 +59,17 @@ export const PlotlyToolbar = ({
   setShowCategories,
   setShowSearch,
   isFullscreen,
+  showCategoriesBtn: showCategoriesBtnProp,
+  showSearchBtn: showSearchBtnProp,
 }) => {
-  const { showCategoriesBtn, showSearchBtn } = usePlotVisibility(isFullscreen);
+  const {
+    showCategoriesBtn: showCategoriesBtnState,
+    showSearchBtn: showSearchBtnState,
+  } = usePlotVisibility(isFullscreen);
+
+  const showCategoriesBtn = showCategoriesBtnProp ?? showCategoriesBtnState;
+  const showSearchBtn = showSearchBtnProp ?? showSearchBtnState;
+
   return (
     <ButtonGroup>
       {showCategoriesBtn && (
