@@ -8,7 +8,6 @@ import {
 } from 'react';
 
 import { LinearInterpolator } from '@deck.gl/core';
-import { ScatterplotLayer } from '@deck.gl/layers';
 import { DeckGL } from '@deck.gl/react';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,6 +16,7 @@ import { EditableGeoJsonLayer } from '@nebula.gl/layers';
 import _ from 'lodash';
 import { Alert } from 'react-bootstrap';
 
+import { ScatterplotLayer } from './ScatterplotLayer';
 import { SpatialControls } from './SpatialControls';
 import { Toolbox } from './Toolbox';
 import {
@@ -94,8 +94,6 @@ export function Scatterplot({
   const selectedObs = useSelectedObs();
   const selectedObsIndex = settings.selectedObsIndex;
 
-  const [hoveredIndex, setHoveredIndex] = useState(null);
-  const [isHoveringPoint, setIsHoveringPoint] = useState(false);
   const { showSearchBtn } = usePlotVisibility(isFullscreen);
 
   // EditableGeoJsonLayer
@@ -249,73 +247,6 @@ export function Scatterplot({
     return { latitude, longitude, zoom };
   }, [data.positions]);
 
-  // Make stable references for getOriginalIndex and sortedIndexMap
-  const identityGetOriginalIndex = useCallback((i) => i, []);
-  const identitySortedIndexMap = useMemo(() => ({ get: (key) => key }), []);
-
-  const { sortedData, getOriginalIndex, sortedIndexMap } = useMemo(() => {
-    if (
-      (settings.colorEncoding === COLOR_ENCODINGS.VAR ||
-        (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-          selectedObs?.type === OBS_TYPES.CONTINUOUS)) &&
-      data.positions &&
-      data.values &&
-      data.positions.length === data.values.length
-    ) {
-      const sortedIndices = _.map(data.values, (_v, i) => i).sort(
-        (a, b) => data.values[a] - data.values[b],
-      );
-      const sortedIndexMap = new Map(
-        _.map(sortedIndices, (originalIndex, sortedIndex) => [
-          originalIndex,
-          sortedIndex,
-        ]),
-      );
-      return {
-        sortedData: _.mapValues(data, (v, _k) => {
-          return v ? _.at(v, sortedIndices) : v;
-        }),
-        getOriginalIndex: (i) => sortedIndices[i],
-        sortedIndexMap: sortedIndexMap,
-      };
-    }
-    return {
-      sortedData: data,
-      getOriginalIndex: identityGetOriginalIndex, // return original index
-      sortedIndexMap: identitySortedIndexMap, // return original index
-    };
-  }, [
-    data,
-    identityGetOriginalIndex,
-    identitySortedIndexMap,
-    selectedObs?.type,
-    settings.colorEncoding,
-  ]);
-
-  const hoverLayer =
-    typeof hoveredIndex === 'number' &&
-    Array.isArray(sortedData?.positions) &&
-    hoveredIndex < sortedData.positions.length
-      ? new ScatterplotLayer({
-          id: 'hover-highlight',
-          data: [sortedData.positions[hoveredIndex]],
-          getPosition: (d) => d,
-          getFillColor: [255, 215, 0, 180],
-          getRadius: 10,
-          radiusMinPixels: 15,
-          radiusScale: 1,
-          pointSizeUnits: 'pixels',
-          pickable: false,
-          parameters: { depthTest: false },
-        })
-      : null;
-
-  const sortedObsIndices = useMemo(() => {
-    return obsIndices
-      ? new Set(Array.from(obsIndices, (i) => sortedIndexMap.get(i)))
-      : obsIndices;
-  }, [obsIndices, sortedIndexMap]);
-
   const isCategorical = useMemo(() => {
     if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
       return (
@@ -334,19 +265,15 @@ export function Scatterplot({
 
   const getFillColor = useCallback(
     (_d, { index }) => {
-      const grayOut =
-        isPending || (sortedObsIndices && !sortedObsIndices.has(index));
+      const grayOut = isPending || (obsIndices && !obsIndices.has(index));
 
-      if (
-        pointInteractionEnabled &&
-        getOriginalIndex(index) === selectedObsIndex
-      ) {
+      if (pointInteractionEnabled && index === selectedObsIndex) {
         return [255, 215, 0, 255];
       }
 
       return (
         getColor({
-          value: (sortedData.values[index] - min) / (max - min),
+          value: (data.values[index] - min) / (max - min),
           categorical: isCategorical,
           grayOut: grayOut,
           ...(useUnsColors &&
@@ -359,12 +286,11 @@ export function Scatterplot({
     },
     [
       isPending,
-      sortedObsIndices,
+      obsIndices,
       pointInteractionEnabled,
-      getOriginalIndex,
       selectedObsIndex,
       getColor,
-      sortedData.values,
+      data.values,
       min,
       max,
       isCategorical,
@@ -377,44 +303,59 @@ export function Scatterplot({
   // @TODO: add support for pseudospatial hover to reflect in radius
   const getRadius = useCallback(
     (_d, { index }) => {
-      const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
+      const grayOut = obsIndices && !obsIndices.has(index);
 
-      if (
-        pointInteractionEnabled &&
-        getOriginalIndex(index) === selectedObsIndex
-      ) {
-        return 50;
+      if (pointInteractionEnabled && index === selectedObsIndex) {
+        return 100;
       }
 
       return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 26 : 1);
     },
-    [
-      getOriginalIndex,
-      pointInteractionEnabled,
-      selectedObsIndex,
-      sortedObsIndices,
-    ],
+    [obsIndices, pointInteractionEnabled, selectedObsIndex],
   );
 
   const memoizedLayers = useMemo(() => {
+    const numericValues = data.values?.filter(
+      (v) => !Number.isNaN(v) && v !== undefined,
+    );
+    const zMin = numericValues?.length ? _.min(numericValues) : 0;
+    const zMax = numericValues?.length ? _.max(numericValues) : 1;
     return [
       new ScatterplotLayer({
         id: 'cherita-layer-scatterplot',
         pickable: true,
-        data: sortedData.positions,
+        autoHighlight: true,
+        highlightColor: pointInteractionEnabled
+          ? [255, 215, 0, 255]
+          : [0, 0, 0, 0],
+        data: data.positions,
         radiusScale: radiusScale,
         radiusMinPixels: 1,
         getPosition: (d) => d,
         getFillColor: getFillColor,
         getRadius: getRadius,
+        getSortValue: (_d, { index }) => {
+          const v = data.values?.[index];
+          // if categorical, only draw undefined at the back
+          // draw others normally
+          if (isCategorical) {
+            if (v !== -1) return 0;
+            else return v;
+          }
+          return Number.isNaN(v) || v === undefined ? zMin : v;
+        },
         updateTriggers: {
           getFillColor: getFillColor,
-          getRadius: [getRadius, hoveredIndex, selectedObsIndex],
+          getRadius: [getRadius, selectedObsIndex],
+          getSortValue: [data.values, zMin, zMax],
         },
         transitions: {
           getRadius: 200,
           getFillColor: 200,
         },
+        zMin,
+        zMax,
+        highlightMultiplier: pointInteractionEnabled ? 1.5 : 1.0,
       }),
       new EditableGeoJsonLayer({
         id: 'cherita-layer-draw',
@@ -452,23 +393,22 @@ export function Scatterplot({
       }),
     ];
   }, [
-    sortedData.positions,
-    features,
+    data.values,
+    data.positions,
+    pointInteractionEnabled,
+    radiusScale,
     getFillColor,
     getRadius,
-    hoveredIndex,
-    mode,
-    radiusScale,
-    selectedFeatureIndexes,
     selectedObsIndex,
+    features,
+    mode,
+    selectedFeatureIndexes,
+    isCategorical,
   ]);
 
-  // const layers = useDeferredValue(
-  //   mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers,
-  // ); // draw scatterplot on top of polygons when in ViewMode
   const layers = useDeferredValue(
-    [...memoizedLayers, hoverLayer].filter(Boolean),
-  );
+    mode === ViewMode ? [...memoizedLayers].reverse() : memoizedLayers,
+  ); // draw scatterplot on top of polygons when in ViewMode
 
   useEffect(() => {
     if (!features?.features?.length) {
@@ -502,8 +442,7 @@ export function Scatterplot({
     ) {
       // clicked a scatterplot point
       clickedInsideRef.current = true;
-      const originalIndex = getOriginalIndex(info.index);
-      dispatch({ type: 'set.selectedObsIndex', index: originalIndex });
+      dispatch({ type: 'set.selectedObsIndex', index: info.index });
       // in collapsed view, open offcanvas
       if (pointInteractionEnabled && showSearchBtn) {
         setShowSearch(true);
@@ -532,20 +471,14 @@ export function Scatterplot({
       selectedObs &&
       !_.includes(settings.labelObs, selectedObs.name)
     ) {
-      text.push(getLabel(selectedObs, data.values?.[getOriginalIndex(index)]));
+      text.push(getLabel(selectedObs, data.values?.[index]));
     }
 
     if (
       settings.colorEncoding === COLOR_ENCODINGS.VAR &&
       settings.selectedVar
     ) {
-      text.push(
-        getLabel(
-          settings.selectedVar,
-          data.values?.[getOriginalIndex(index)],
-          true,
-        ),
-      );
+      text.push(getLabel(settings.selectedVar, data.values?.[index], true));
     }
 
     if (settings.labelObs.length) {
@@ -553,14 +486,14 @@ export function Scatterplot({
         ..._.map(labelObsData.data, (v, k) => {
           if (!v) return;
           const labelObs = settings.data.obs[k];
-          return getLabel(labelObs, v[getOriginalIndex(index)]);
+          return getLabel(labelObs, v[index]);
         }),
       );
     }
 
     if (!text.length) return;
 
-    const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
+    const grayOut = obsIndices && !obsIndices.has(index);
 
     return {
       text: text.length ? _.compact(text).join('\n') : null,
@@ -609,15 +542,10 @@ export function Scatterplot({
             setIsRendering(false);
           }}
           useDevicePixels={false}
-          onHover={({ object, index }) => {
-            const active = pointInteractionEnabled && !!object;
-            setHoveredIndex(active ? index : null);
-            setIsHoveringPoint(active);
-          }}
-          getCursor={({ isDragging }) => {
+          getCursor={({ isDragging, isHovering }) => {
             if (mode !== ViewMode) return 'crosshair';
             if (isDragging) return 'grabbing';
-            if (isHoveringPoint) return 'pointer';
+            if (isHovering && pointInteractionEnabled) return 'pointer';
             return 'grab';
           }}
           ref={deckRef}
