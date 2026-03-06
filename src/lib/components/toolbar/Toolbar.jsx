@@ -8,7 +8,7 @@ export const Toolbar = ({
   setShowCategories,
   setShowSearch,
   setShowControls,
-  Fullscreen,
+  isFullscreen,
 }) => {
   const { showCategoriesBtn, showSearchBtn } = usePlotVisibility(isFullscreen);
   return (
