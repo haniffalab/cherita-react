@@ -94,7 +94,6 @@ export function Scatterplot({
   const selectedObs = useSelectedObs();
   const selectedObsIndex = settings.selectedObsIndex;
 
-  const [isHoveringPoint, setIsHoveringPoint] = useState(false);
   const { showSearchBtn } = usePlotVisibility(isFullscreen);
 
   // EditableGeoJsonLayer
@@ -547,14 +546,10 @@ export function Scatterplot({
             setIsRendering(false);
           }}
           useDevicePixels={false}
-          onHover={({ object }) => {
-            const active = pointInteractionEnabled && !!object;
-            setIsHoveringPoint(active);
-          }}
-          getCursor={({ isDragging }) => {
+          getCursor={({ isDragging, isHovering }) => {
             if (mode !== ViewMode) return 'crosshair';
             if (isDragging) return 'grabbing';
-            if (isHoveringPoint) return 'pointer';
+            if (isHovering && pointInteractionEnabled) return 'pointer';
             return 'grab';
           }}
           ref={deckRef}
