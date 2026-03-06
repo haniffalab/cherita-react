@@ -447,8 +447,7 @@ export function Scatterplot({
     ) {
       // clicked a scatterplot point
       clickedInsideRef.current = true;
-      const originalIndex = info.index;
-      dispatch({ type: 'set.selectedObsIndex', index: originalIndex });
+      dispatch({ type: 'set.selectedObsIndex', index: info.index });
       // in collapsed view, open offcanvas
       if (pointInteractionEnabled && showSearchBtn) {
         setShowSearch(true);
