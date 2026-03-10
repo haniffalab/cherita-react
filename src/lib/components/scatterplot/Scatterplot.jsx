@@ -304,9 +304,9 @@ export function Scatterplot({
 
   useEffect(() => {
     if (workerRef.current && data.values?.length) {
-      workerRef.current.postMessage({ values: data.values, isCategorical });
+      workerRef.current.postMessage({ values: data.values });
     }
-  }, [data.values, isCategorical]);
+  }, [data.values]);
 
   useEffect(() => {
     if (workerRef.current && obsIndices !== undefined) {
