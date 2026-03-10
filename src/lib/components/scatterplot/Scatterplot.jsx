@@ -41,6 +41,8 @@ import { useSelectedObs } from '../../utils/Resolver';
 import { formatNumerical } from '../../utils/string';
 import usePlotVisibility from '../../utils/usePlotVisibility';
 import { useLabelObsData } from '../../utils/zarrData';
+// eslint-disable-next-line import/no-unresolved
+import ScatterplotDataWorker from '../../workers/scatterplotData.js?worker';
 import { PlotAlert } from '../plot/PlotAlert';
 
 window.deck.log.level = 1;
@@ -75,7 +77,6 @@ export function Scatterplot({
   const settings = useSettings();
   const { obsIndices, valueMin, valueMax, slicedLength } = useFilteredData();
   const dispatch = useSettingsDispatch();
-  const { getColor } = useColor();
   const deckRef = useRef(null);
   const [viewport, setViewport] = useState(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
@@ -107,6 +108,30 @@ export function Scatterplot({
   const { obsmData, xData, obsData } = useZarrData();
   const labelObsData = useLabelObsData();
   const clickedInsideRef = useRef(false);
+
+  const workerRef = useRef(null);
+  const [scatterplotAttributes, setScatterplotAttributes] = useState(null);
+
+  const isCategorical = useMemo(() => {
+    if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
+      return (
+        selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+        selectedObs?.type === OBS_TYPES.BOOLEAN
+      );
+    } else {
+      return false;
+    }
+  }, [settings.colorEncoding, selectedObs?.type]);
+
+  const { colormap, getColor } = useColor({
+    isCategorical,
+    colorscale:
+      useUnsColors &&
+      settings.colorEncoding === COLOR_ENCODINGS.OBS &&
+      selectedObs?.colors
+        ? { colorscale: selectedObs?.colors }
+        : null,
+  });
 
   // @TODO: assert length of obsmData, xData, obsData is equal
 
@@ -169,7 +194,7 @@ export function Scatterplot({
   ]);
 
   useEffect(() => {
-    if (data.positions && data.positions.length) {
+    if (data.positions?.length) {
       const mapHelper = new MapHelper();
       const { latitude, longitude, zoom, bounds } = mapHelper.fitBounds(
         data.positions,
@@ -247,21 +272,47 @@ export function Scatterplot({
     return { latitude, longitude, zoom };
   }, [data.positions]);
 
-  const isCategorical = useMemo(() => {
-    if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
-      return (
-        selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-        selectedObs?.type === OBS_TYPES.BOOLEAN
-      );
-    } else {
-      return false;
-    }
-  }, [settings.colorEncoding, selectedObs?.type]);
+  const { min, max } = useMemo(
+    () => ({
+      min: settings.controls.range[0] * (valueMax - valueMin) + valueMin,
+      max: settings.controls.range[1] * (valueMax - valueMin) + valueMin,
+    }),
+    [settings.controls.range, valueMax, valueMin],
+  );
 
-  const { min, max } = {
-    min: settings.controls.range[0] * (valueMax - valueMin) + valueMin,
-    max: settings.controls.range[1] * (valueMax - valueMin) + valueMin,
-  };
+  useEffect(() => {
+    workerRef.current = new ScatterplotDataWorker();
+
+    workerRef.current.onmessage = ({ data }) => {
+      setScatterplotAttributes((p) => ({ ...p, ...data }));
+    };
+
+    workerRef.current.onerror = (e) => {
+      console.error('Worker error:', e);
+    };
+
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (workerRef.current && data.positions?.length) {
+      workerRef.current.postMessage({ positions: data.positions });
+    }
+  }, [data.positions]);
+
+  useEffect(() => {
+    if (workerRef.current && data.values?.length) {
+      workerRef.current.postMessage({ values: data.values, isCategorical });
+    }
+  }, [data.values, isCategorical]);
+
+  useEffect(() => {
+    if (workerRef.current && obsIndices !== undefined) {
+      workerRef.current.postMessage({ obsIndices });
+    }
+  }, [obsIndices]);
 
   const getFillColor = useCallback(
     (_d, { index }) => {
@@ -274,13 +325,7 @@ export function Scatterplot({
       return (
         getColor({
           value: (data.values[index] - min) / (max - min),
-          categorical: isCategorical,
           grayOut: grayOut,
-          ...(useUnsColors &&
-          settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-          selectedObs?.colors
-            ? { colorscale: selectedObs?.colors }
-            : {}),
         }) || [0, 0, 0, 100]
       );
     },
@@ -293,33 +338,10 @@ export function Scatterplot({
       data.values,
       min,
       max,
-      isCategorical,
-      useUnsColors,
-      settings.colorEncoding,
-      selectedObs?.colors,
     ],
   );
 
-  // @TODO: add support for pseudospatial hover to reflect in radius
-  const getRadius = useCallback(
-    (_d, { index }) => {
-      const grayOut = obsIndices && !obsIndices.has(index);
-
-      if (pointInteractionEnabled && index === selectedObsIndex) {
-        return 100;
-      }
-
-      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 26 : 1);
-    },
-    [obsIndices, pointInteractionEnabled, selectedObsIndex],
-  );
-
   const memoizedLayers = useMemo(() => {
-    const numericValues = data.values?.filter(
-      (v) => !Number.isNaN(v) && v !== undefined,
-    );
-    const zMin = numericValues?.length ? _.min(numericValues) : 0;
-    const zMax = numericValues?.length ? _.max(numericValues) : 1;
     return [
       new ScatterplotLayer({
         id: 'cherita-layer-scatterplot',
@@ -328,33 +350,35 @@ export function Scatterplot({
         highlightColor: pointInteractionEnabled
           ? [255, 215, 0, 255]
           : [0, 0, 0, 0],
-        data: data.positions,
+        data: {
+          length: scatterplotAttributes?.count || 0,
+          attributes: {
+            getPosition: {
+              value: scatterplotAttributes?.positions || new Float32Array(0),
+              size: 2,
+            },
+            getValues: {
+              value: scatterplotAttributes?.values || new Float32Array(0),
+              size: 1,
+            },
+            getEnabled: {
+              value:
+                scatterplotAttributes?.indexEnabledBitmask || new Uint8Array(0),
+              size: 1,
+            },
+          },
+        },
         radiusScale: radiusScale,
         radiusMinPixels: 1,
-        getPosition: (d) => d,
-        getFillColor: getFillColor,
-        getRadius: getRadius,
-        getSortValue: (_d, { index }) => {
-          const v = data.values?.[index];
-          // if categorical, only draw undefined at the back
-          // draw others normally
-          if (isCategorical) {
-            if (v !== -1) return 0;
-            else return v;
-          }
-          return Number.isNaN(v) || v === undefined ? zMin : v;
-        },
         updateTriggers: {
-          getFillColor: getFillColor,
-          getRadius: [getRadius, selectedObsIndex],
-          getSortValue: [data.values, zMin, zMax],
+          colormap: [colormap],
         },
-        transitions: {
-          getRadius: 200,
-          getFillColor: 200,
-        },
-        zMin,
-        zMax,
+        colormap,
+        isCategorical,
+        valueMin: min,
+        valueMax: max,
+        selectedIndex: pointInteractionEnabled ? selectedObsIndex : -1,
+        pointInteractionEnabled,
         highlightMultiplier: pointInteractionEnabled ? 1.5 : 1.0,
       }),
       new EditableGeoJsonLayer({
@@ -393,17 +417,20 @@ export function Scatterplot({
       }),
     ];
   }, [
-    data.values,
-    data.positions,
     pointInteractionEnabled,
+    scatterplotAttributes?.count,
+    scatterplotAttributes?.positions,
+    scatterplotAttributes?.values,
+    scatterplotAttributes?.indexEnabledBitmask,
     radiusScale,
-    getFillColor,
-    getRadius,
+    colormap,
+    isCategorical,
+    min,
+    max,
     selectedObsIndex,
     features,
     mode,
     selectedFeatureIndexes,
-    isCategorical,
   ]);
 
   const layers = useDeferredValue(
@@ -427,17 +454,17 @@ export function Scatterplot({
   function onLayerClick(info) {
     if (mode !== ViewMode) return;
 
-    if (!info.object) {
+    if (!info.index) {
       // clicked empty space
       setSelectedFeatureIndexes([]);
       return;
     }
 
-    if (info.layer.id === 'cherita-layer-draw') {
+    if (info.layer?.id === 'cherita-layer-draw') {
       // clicked a drawn polygon
       setSelectedFeatureIndexes([info.index]);
     } else if (
-      info.layer.id === 'cherita-layer-scatterplot' &&
+      info.layer?.id === 'cherita-layer-scatterplot' &&
       pointInteractionEnabled
     ) {
       // clicked a scatterplot point
@@ -463,7 +490,8 @@ export function Scatterplot({
   };
 
   const getTooltip = ({ object, index }) => {
-    if (!object || object?.type === 'Feature') return;
+    if (object?.type === 'Feature') return;
+    if (index < 0 || index === null) return;
     const text = [];
 
     if (

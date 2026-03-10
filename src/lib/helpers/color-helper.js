@@ -1,9 +1,8 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { COLORSCALES } from '../constants/colorscales';
+import { GRAY, GRAY_MIX, GRAY_ALPHA } from '../constants/constants';
 import { useSettings } from '../context/SettingsContext';
-
-const GRAY = [214, 212, 212];
 
 const parseHexColor = (color) => {
   const r = parseInt(color?.substring(1, 3), 16);
@@ -43,21 +42,23 @@ export const rgbToHex = (color) => {
   return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 };
 
-export const useColor = () => {
+export const useColor = ({ isCategorical = false, colorscale = null }) => {
   const settings = useSettings();
+
+  const colormap = useMemo(() => {
+    return (
+      colorscale ||
+      COLORSCALES[isCategorical ? 'Accent' : settings.controls.colorScale]
+    );
+  }, [colorscale, isCategorical, settings.controls.colorScale]);
 
   const getColor = useCallback(
     ({
       value,
-      categorical = false,
       grayOut = false,
-      grayParams: { alpha = 0.75, gray = 0.95 } = {},
+      grayParams: { alpha = GRAY_ALPHA, gray = GRAY_MIX } = {},
       colorEncoding = settings.colorEncoding,
-      colorscale = null,
     }) => {
-      const colormap =
-        colorscale ||
-        COLORSCALES[categorical ? 'Accent' : settings.controls.colorScale];
       if (colorEncoding) {
         if (grayOut) {
           // Mix color with gray manually instead of chroma.mix to get better performance with deck.gl
@@ -75,8 +76,8 @@ export const useColor = () => {
         return null;
       }
     },
-    [settings.colorEncoding, settings.controls.colorScale],
+    [settings.colorEncoding, colormap],
   );
 
-  return { getColor };
+  return { colormap, getColor };
 };

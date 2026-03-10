@@ -164,7 +164,10 @@ function CategoricalItem({
   showColor = true,
 }) {
   const { useUnsColors } = useDataset();
-  const { getColor } = useColor();
+  const { getColor } = useColor({
+    isCategorical: true,
+    colorscale: useUnsColors ? colors : null,
+  });
 
   return (
     <div className="virtualized-list-wrapper ps-1" key={value}>
@@ -272,11 +275,9 @@ function CategoricalItem({
                     height="10"
                     fill={`rgb(${getColor({
                       value: (code - min) / (max - min),
-                      categorical: true,
                       grayOut: isOmitted,
                       grayParams: { alpha: 1 },
                       colorEncoding: 'obs',
-                      ...(useUnsColors ? { colorscale: colors } : {}),
                     })})`}
                   />
                 </svg>

@@ -105,3 +105,7 @@ export const BREAKPOINTS = {
 
 // In order of priority
 export const DEFAULT_OBSM_KEYS = ['x_umap', 'x_tsne', 'x_scvi', 'x_pca'];
+
+export const GRAY = [214, 212, 212];
+export const GRAY_MIX = 0.95;
+export const GRAY_ALPHA = 0.75;
