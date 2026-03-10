@@ -126,10 +126,8 @@ export function Scatterplot({
   const { colormap, getColor } = useColor({
     isCategorical,
     colorscale:
-      useUnsColors &&
-      settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-      selectedObs?.colors
-        ? { colorscale: selectedObs?.colors }
+      useUnsColors && settings.colorEncoding === COLOR_ENCODINGS.OBS
+        ? selectedObs?.colors
         : null,
   });
 
