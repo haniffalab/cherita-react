@@ -309,10 +309,17 @@ export function Scatterplot({
   }, [data.values]);
 
   useEffect(() => {
-    if (workerRef.current && obsIndices !== undefined) {
-      workerRef.current.postMessage({ obsIndices });
+    if (
+      workerRef.current &&
+      data.positions?.length &&
+      obsIndices !== undefined
+    ) {
+      workerRef.current.postMessage({
+        obsIndices,
+        length: data.positions.length,
+      });
     }
-  }, [obsIndices]);
+  }, [obsIndices, data.positions?.length]);
 
   const getFillColor = useCallback(
     (_d, { index }) => {

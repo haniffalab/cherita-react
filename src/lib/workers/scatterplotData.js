@@ -1,14 +1,8 @@
 /* eslint-disable no-restricted-globals */
 
-let cachedPositions = new Float32Array(0);
-let cachedValues = new Float32Array(0);
-let cachedIndexEnabledBitmask = new Uint8Array(0);
-let cachedObsIndices = null;
-let cachedCount = 0;
-
-function computeBitmask(indices) {
-  if (indices === null) return new Uint8Array(cachedCount).fill(1);
-  const bitmask = new Uint8Array(cachedCount);
+function computeBitmask(indices, length) {
+  if (indices === null) return new Uint8Array(length).fill(1);
+  const bitmask = new Uint8Array(length);
   for (const idx of indices) {
     bitmask[idx] = 1;
   }
@@ -16,30 +10,28 @@ function computeBitmask(indices) {
 }
 
 self.onmessage = ({ data }) => {
+  // compute and transfer only updated data
+  const msg = {};
+  const transfer = [];
+
   if (data.positions) {
-    cachedPositions = new Float32Array(data.positions.flat());
-    cachedCount = data.positions.length;
+    const positions = new Float32Array(data.positions.flat());
+    msg.positions = positions;
+    msg.count = data.positions.length;
+    transfer.push(positions.buffer);
   }
 
   if (data.values) {
-    cachedValues = new Float32Array(data.values);
+    const values = new Float32Array(data.values);
+    msg.values = values;
+    transfer.push(values.buffer);
   }
 
-  if (data.obsIndices !== undefined) {
-    cachedObsIndices = data.obsIndices;
+  if (data.obsIndices !== undefined && !!data.length) {
+    const bitmask = computeBitmask(data.obsIndices, data.length);
+    msg.indexEnabledBitmask = bitmask;
+    transfer.push(bitmask.buffer);
   }
 
-  if (data.positions || data.obsIndices !== undefined) {
-    cachedIndexEnabledBitmask = computeBitmask(cachedObsIndices);
-  }
-
-  // Copy for transfer so cached buffers stay valid
-  const positions = new Float32Array(cachedPositions);
-  const values = new Float32Array(cachedValues);
-  const indexEnabledBitmask = new Uint8Array(cachedIndexEnabledBitmask);
-
-  self.postMessage(
-    { count: cachedCount, positions, values, indexEnabledBitmask },
-    [positions.buffer, values.buffer, indexEnabledBitmask.buffer],
-  );
+  self.postMessage(msg, transfer);
 };
