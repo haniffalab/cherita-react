@@ -25,6 +25,7 @@ import {
   PLOT_TYPES,
   SELECTED_POLYGON_FILLCOLOR,
   UNSELECTED_POLYGON_FILLCOLOR,
+  GRAY,
 } from '../../constants/constants';
 import { useDataset } from '../../context/DatasetContext';
 import { useFilteredData } from '../../context/FilterContext';
@@ -380,7 +381,11 @@ export function Scatterplot({
         updateTriggers: {
           colormap: [colormap],
         },
-        colormap: hasSelection ? colormap : ['#000000'],
+        colormap: isPending
+          ? [`${rgbToHex(GRAY)}aa`]
+          : hasSelection
+            ? colormap
+            : ['#000000aa'],
         isCategorical,
         valueMin: min,
         valueMax: max,
@@ -434,6 +439,7 @@ export function Scatterplot({
     scatterplotAttributes?.indexEnabledBitmask,
     radiusScale,
     colormap,
+    isPending,
     isCategorical,
     min,
     max,
