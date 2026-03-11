@@ -1,5 +1,4 @@
-/* eslint-disable no-restricted-globals */
-
+const WORKER_CODE = `
 function computeBitmask(indices, length) {
   if (indices === null) return new Uint8Array(length).fill(1);
   const bitmask = new Uint8Array(length);
@@ -35,3 +34,9 @@ self.onmessage = ({ data }) => {
 
   self.postMessage(msg, transfer);
 };
+`;
+
+export function createScatterplotWorker() {
+  const blob = new Blob([WORKER_CODE], { type: 'application/javascript' });
+  return new Worker(URL.createObjectURL(blob));
+}

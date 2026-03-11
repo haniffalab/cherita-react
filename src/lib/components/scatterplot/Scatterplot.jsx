@@ -41,8 +41,7 @@ import { useSelectedObs } from '../../utils/Resolver';
 import { formatNumerical } from '../../utils/string';
 import usePlotVisibility from '../../utils/usePlotVisibility';
 import { useLabelObsData } from '../../utils/zarrData';
-// eslint-disable-next-line import/no-unresolved
-import ScatterplotDataWorker from '../../workers/scatterplotData.js?worker';
+import { createScatterplotWorker } from '../../workers/scatterplotData.js';
 import { PlotAlert } from '../plot/PlotAlert';
 
 window.deck.log.level = 1;
@@ -279,7 +278,7 @@ export function Scatterplot({
   );
 
   useEffect(() => {
-    workerRef.current = new ScatterplotDataWorker();
+    workerRef.current = createScatterplotWorker();
 
     workerRef.current.onmessage = ({ data }) => {
       setScatterplotAttributes((p) => ({ ...p, ...data }));
