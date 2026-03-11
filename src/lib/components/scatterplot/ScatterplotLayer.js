@@ -110,7 +110,7 @@ export class ScatterplotLayer extends BaseLayer {
       },
       instanceIndex: {
         size: 1,
-        accessor: (object, { index }) => index,
+        accessor: (_, { index }) => index,
         defaultValue: 0,
       },
     });

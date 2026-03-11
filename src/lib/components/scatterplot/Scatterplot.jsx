@@ -347,6 +347,10 @@ export function Scatterplot({
   );
 
   const memoizedLayers = useMemo(() => {
+    const hasSelection =
+      (settings.colorEncoding === COLOR_ENCODINGS.VAR &&
+        settings.selectedVar) ||
+      (settings.colorEncoding === COLOR_ENCODINGS.OBS && selectedObs);
     return [
       new ScatterplotLayer({
         id: 'cherita-layer-scatterplot',
@@ -363,12 +367,11 @@ export function Scatterplot({
               size: 2,
             },
             getValues: {
-              value: scatterplotAttributes?.values || new Float32Array(0),
+              value: scatterplotAttributes?.values,
               size: 1,
             },
             getEnabled: {
-              value:
-                scatterplotAttributes?.indexEnabledBitmask || new Uint8Array(0),
+              value: scatterplotAttributes?.indexEnabledBitmask,
               size: 1,
             },
           },
@@ -378,7 +381,7 @@ export function Scatterplot({
         updateTriggers: {
           colormap: [colormap],
         },
-        colormap,
+        colormap: hasSelection ? colormap : ['#000000'],
         isCategorical,
         valueMin: min,
         valueMax: max,
@@ -422,6 +425,9 @@ export function Scatterplot({
       }),
     ];
   }, [
+    settings.colorEncoding,
+    settings.selectedVar,
+    selectedObs,
     pointInteractionEnabled,
     scatterplotAttributes?.count,
     scatterplotAttributes?.positions,
