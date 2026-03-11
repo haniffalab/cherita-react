@@ -38,5 +38,8 @@ self.onmessage = ({ data }) => {
 
 export function createScatterplotWorker() {
   const blob = new Blob([WORKER_CODE], { type: 'application/javascript' });
-  return new Worker(URL.createObjectURL(blob));
+  const url = URL.createObjectURL(blob);
+  const worker = new Worker(url);
+  URL.revokeObjectURL(url);
+  return worker;
 }
