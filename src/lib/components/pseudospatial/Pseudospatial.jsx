@@ -163,7 +163,9 @@ export function Pseudospatial({
           if (v === null) {
             return trace;
           }
-          const color = rgbToHex(getColor({ value: (v - min) / (max - min) }));
+          const color = rgbToHex(
+            getColor({ value: (v - min) / Math.max(max - min, 1e-6) }),
+          );
           return {
             ...trace,
             fillcolor: color,
@@ -204,7 +206,9 @@ export function Pseudospatial({
           if (v === null) {
             return trace;
           }
-          const color = rgbToHex(getColor({ value: (v - min) / (max - min) }));
+          const color = rgbToHex(
+            getColor({ value: (v - min) / Math.max(max - min, 1e-6) }),
+          );
           return {
             ...trace,
             fillcolor: color,
