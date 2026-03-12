@@ -274,7 +274,7 @@ function CategoricalItem({
                     width="10"
                     height="10"
                     fill={`rgb(${getColor({
-                      value: (code - min) / (max - min),
+                      value: (code - min) / Math.max(max - min, 1e-6),
                       grayOut: isOmitted,
                       grayParams: { alpha: 1 },
                       colorEncoding: 'obs',

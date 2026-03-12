@@ -329,7 +329,7 @@ export function Scatterplot({
 
       return (
         getColor({
-          value: (data.values[index] - min) / (max - min),
+          value: (data.values[index] - min) / Math.max(max - min, 1e-6),
           grayOut: grayOut,
         }) || [0, 0, 0, 100]
       );
