@@ -148,10 +148,10 @@ export function ObsSearchResults(props) {
       itemRenderer={({
         item,
         dispatch,
-        handleClose,
         selectedResult,
         setSelectedResult,
         isStale,
+        handleClose,
       }) => {
         const onObsSelect = (dispatch, item, closeModal) => {
           dispatch({ type: 'set.selectedObsIndex', index: item.matrix_index });
@@ -173,7 +173,7 @@ export function ObsSearchResults(props) {
                   variant="outline-secondary"
                   title="Add to list"
                   disabled={isStale}
-                  onClick={() => onObsSelect(dispatch, item, props.handleClose)}
+                  onClick={() => onObsSelect(dispatch, item, handleClose)}
                 >
                   <FontAwesomeIcon icon={faPlus} />
                 </Button>
