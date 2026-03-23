@@ -85,7 +85,7 @@ export function SearchModal({
   text,
   setText,
   displayText,
-  handleSelect,
+  handleVarSelect,
   searchVar,
   searchDiseases,
   searchObs,
@@ -192,7 +192,7 @@ export function SearchModal({
                         <Tab.Pane eventKey={FEATURE_TYPE.VAR}>
                           <VarSearchResults
                             text={text}
-                            handleSelect={handleSelect}
+                            handleSelect={handleVarSelect}
                             selectedResult={selectedResult.var}
                             setSelectedResult={(item) =>
                               setSelectedResult((prev) => {
@@ -244,7 +244,7 @@ export function SearchModal({
                     return (
                       <DiseaseInfo
                         disease={selectedResult.disease}
-                        handleSelect={handleSelect}
+                        handleSelect={handleVarSelect}
                         addVarSet={addVarSet}
                       />
                     );
@@ -308,7 +308,7 @@ export function SearchBar({
         searchVar={searchVar}
         searchDiseases={searchDiseases}
         searchObs={searchObs}
-        handleSelect={onVarSelect}
+        handleVarSelect={onVarSelect}
         handleClose={() => {
           debouncedSelect.flush();
           setShowModal(false);
