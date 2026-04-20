@@ -389,7 +389,7 @@ export function Scatterplot({
         isCategorical,
         valueMin: min,
         valueMax: max,
-        selectedIndex: pointInteractionEnabled ? selectedObsIndex : -1,
+        selectedIndex: pointInteractionEnabled ? (selectedObsIndex ?? -1) : -1,
         pointInteractionEnabled,
         highlightMultiplier: pointInteractionEnabled ? 1.5 : 1.0,
       }),
