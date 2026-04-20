@@ -118,7 +118,9 @@ export function Pseudospatial({
   const dispatch = useSettingsDispatch();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
-  const { getColor } = useColor();
+  const { getColor } = useColor({
+    isCategorical: false,
+  });
   const colorscale = useRef(settings.controls.colorScale);
   const { valueMin, valueMax } = useFilteredData();
 
