@@ -74,10 +74,7 @@ const initialDataset = {
     singular: 'gene',
     plural: 'genes',
   },
-  valueLabel: {
-    singular: 'expression',
-    plural: 'expression',
-  },
+  valueLabel: 'expression',
 };
 
 export function DatasetProvider({ dataset_url, children, ...dataset_params }) {
