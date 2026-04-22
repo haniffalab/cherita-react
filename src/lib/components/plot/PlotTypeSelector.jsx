@@ -22,28 +22,28 @@ const plotTypes = [
     icon: MatrixPlotIcon,
     name: 'Matrix Plot',
     description: ({ varLabel, valueLabel }) =>
-      `Shows ${valueLabel.singular} values of ${varLabel.plural} across categories.`,
+      `Shows ${valueLabel} values of ${varLabel.plural} across categories.`,
   },
   {
     type: PLOT_TYPES.DOTPLOT,
     icon: DotPlotIcon,
     name: 'Dot Plot',
     description: ({ varLabel, valueLabel }) =>
-      `Shows proportion and ${valueLabel.singular} of ${varLabel.plural} across groups.`,
+      `Shows proportion and ${valueLabel} of ${varLabel.plural} across groups.`,
   },
   {
     type: PLOT_TYPES.HEATMAP,
     icon: HeatmapIcon,
     name: 'Heatmap',
     description: ({ varLabel, valueLabel }) =>
-      `Visualises ${valueLabel.singular} of ${varLabel.plural} as a colour-coded matrix.`,
+      `Visualises ${valueLabel} of ${varLabel.plural} as a colour-coded matrix.`,
   },
   {
     type: PLOT_TYPES.VIOLINPLOT,
     icon: ViolinPlotIcon,
     name: 'Violin Plot',
     description: ({ varLabel, valueLabel }) =>
-      `Displays distribution of ${valueLabel.singular} across ${varLabel.plural}.`,
+      `Displays distribution of ${valueLabel} across ${varLabel.plural}.`,
   },
 ];
 

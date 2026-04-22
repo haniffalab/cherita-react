@@ -160,7 +160,7 @@ export function Heatmap({
           ) : (
             dataset.varLabel.plural
           )}{' '}
-          to display their expression, then choose a{' '}
+          to display their {dataset.valueLabel}, then choose a{' '}
           {showCategoriesBtn ? (
             <Button
               variant="link"

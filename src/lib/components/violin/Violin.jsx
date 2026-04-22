@@ -228,7 +228,8 @@ export function Violin({
             ) : (
               dataset.varLabel.plural
             )}{' '}
-            to display their expression distributions across all observations.
+            to display their {dataset.valueLabel} distributions across all
+            observations.
           </p>
         )}
         {mode === VIOLIN_MODES.GROUPBY && (

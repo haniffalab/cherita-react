@@ -204,7 +204,7 @@ export function Dotplot({
           ) : (
             dataset.varLabel.plural
           )}{' '}
-          to display their expression across groups, then choose a{' '}
+          to display their {dataset.valueLabel} across groups, then choose a{' '}
           {showCategoriesBtn ? (
             <Button
               variant="link"

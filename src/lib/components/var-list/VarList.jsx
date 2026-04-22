@@ -210,9 +210,7 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
       </div>
       <>
         {!varList.length ? (
-          <Alert variant="light">
-            Search for a {dataset.varLabel.singular}
-          </Alert>
+          <Alert variant="light">Search for {dataset.varLabel.plural}</Alert>
         ) : (
           <>
             <VarListToolbar />
