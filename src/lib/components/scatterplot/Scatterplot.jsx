@@ -397,6 +397,9 @@ export function Scatterplot({
         id: 'cherita-layer-draw',
         data: features,
         mode: mode,
+        parameters: {
+          depthTest: false,
+        },
         selectedFeatureIndexes,
         onEdit: ({ updatedData, editType, editContext }) => {
           setFeatures(updatedData);
