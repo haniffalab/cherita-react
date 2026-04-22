@@ -470,7 +470,7 @@ export function Scatterplot({
   function onLayerClick(info) {
     if (mode !== ViewMode) return;
 
-    if (!info.index) {
+    if (info.index === undefined || info.index === null) {
       // clicked empty space
       setSelectedFeatureIndexes([]);
       return;
