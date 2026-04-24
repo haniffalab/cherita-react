@@ -42,8 +42,8 @@ const plotTypes = [
     type: PLOT_TYPES.VIOLINPLOT,
     icon: ViolinPlotIcon,
     name: 'Violin Plot',
-    description: ({ varLabel, valueLabel }) =>
-      `Displays distribution of ${valueLabel} across ${varLabel.plural}.`,
+    description: ({ obsLabel, valueLabel }) =>
+      `Displays distribution of ${valueLabel} across ${obsLabel.plural}.`,
   },
 ];
 

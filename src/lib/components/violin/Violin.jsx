@@ -228,8 +228,8 @@ export function Violin({
             ) : (
               dataset.varLabel.plural
             )}{' '}
-            to display their {dataset.valueLabel} distributions across all
-            observations.
+            to display their {dataset.valueLabel} distributions across all{' '}
+            {dataset.obsLabel.plural}.
           </p>
         )}
         {mode === VIOLIN_MODES.GROUPBY && (

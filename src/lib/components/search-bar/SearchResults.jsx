@@ -147,7 +147,7 @@ export function ObsSearchResults(props) {
     <SearchResultsBase
       {...props}
       searchHook={useObsSearch}
-      emptyLabel={`Search for ${dataset.obsSearchCol || 'observations'}`}
+      emptyLabel={`Search for ${dataset.obsSearchCol?.trim() || 'observations'}`}
       itemRenderer={({
         item,
         dispatch,

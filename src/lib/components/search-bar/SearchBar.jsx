@@ -163,7 +163,7 @@ export function SearchModal({
                         <Nav.Item>
                           <Nav.Link eventKey={FEATURE_TYPE.OBS}>
                             {_.capitalize(
-                              dataset.obsSearchCol || 'observations',
+                              dataset.obsSearchCol?.trim() || 'observations',
                             )}{' '}
                             {!!obsResultsLength && `(${obsResultsLength})`}
                           </Nav.Link>

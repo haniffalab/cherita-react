@@ -136,7 +136,7 @@ export function ObsExplorer() {
   const [showModal, setShowModal] = useState(false);
 
   const { selectedObsIndex } = useSettings();
-  const { obsExplorer = {} } = useDataset();
+  const { obsExplorer = {}, varLabel, valueLabel } = useDataset();
   useParquet(); // initialize duckdb instance
 
   const {
@@ -149,8 +149,8 @@ export function ObsExplorer() {
   if (selectedObsIndex == null) {
     return (
       <div className="my-4 text-muted">
-        Select a point in the scatterplot or search for genes to view details
-        about the gene perturbation.
+        Select a point in the scatterplot or search for {varLabel.plural} to view details
+        about the {varLabel.singular} perturbation.
       </div>
     );
   }
@@ -169,7 +169,7 @@ export function ObsExplorer() {
             title={
               <>
                 This panel shows metadata and predicted downstream effects for
-                the selected gene perturbation across the atlas.
+                the selected {varLabel.singular} perturbation across the atlas.
               </>
             }
             placement="right"
@@ -184,7 +184,7 @@ export function ObsExplorer() {
             <Tooltip
               title={
                 <>
-                  These values describe how the selected gene perturbation is
+                  These values describe how the selected {varLabel.singular} perturbation is
                   annotated in the atlas, including lineage, biological context,
                   and summary scores used in the perturbation landscape.
                 </>
@@ -242,7 +242,7 @@ export function ObsExplorer() {
               <Tooltip
                 title={
                   <>
-                    This table shows genes predicted to change expression in
+                    This table shows {varLabel.plural} predicted to change {valueLabel} in
                     response to the selected perturbation. Results can be sorted
                     and explored to identify affected pathways and regulatory
                     programs.
