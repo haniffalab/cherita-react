@@ -18,7 +18,6 @@ export { Pseudospatial } from './components/pseudospatial/Pseudospatial';
 export { Scatterplot } from './components/scatterplot/Scatterplot';
 export { ScatterplotControls } from './components/scatterplot/ScatterplotControls';
 export { SearchBar } from './components/search-bar/SearchBar';
-export { Toolbar } from './components/toolbar/Toolbar';
 export { VarNamesList } from './components/var-list/VarList';
 export { Violin } from './components/violin/Violin';
 export { ViolinControls } from './components/violin/ViolinControls';

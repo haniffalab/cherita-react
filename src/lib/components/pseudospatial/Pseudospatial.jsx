@@ -113,7 +113,7 @@ export function Pseudospatial({
   plotType,
   setPlotType,
 }) {
-  const { imageUrl } = useDataset();
+  const { imageUrl, valueLabel } = useDataset();
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
   const [data, setData] = useState([]);
@@ -327,7 +327,7 @@ export function Pseudospatial({
               max={layout?.coloraxis?.cmax}
               addText={
                 plotType === PLOT_TYPES.GENE
-                  ? ' - Mean expression'
+                  ? ` - Mean ${valueLabel}`
                   : plotType === PLOT_TYPES.CATEGORICAL
                     ? ' - %'
                     : plotType === PLOT_TYPES.CONTINUOUS

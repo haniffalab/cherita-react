@@ -162,10 +162,10 @@ export function Matrixplot({
               className="border-0 p-0 align-baseline"
               onClick={setShowSearch}
             >
-              features
+              {dataset.varLabel.plural}
             </Button>
           ) : (
-            'features'
+            dataset.varLabel.plural
           )}{' '}
           to display the matrix plot.
         </p>

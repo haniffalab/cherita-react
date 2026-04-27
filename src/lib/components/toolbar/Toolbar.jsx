@@ -1,50 +1,10 @@
 import { faList, faSearch, faSliders } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import _ from 'lodash';
 import { Container, Nav, Navbar, Button, ButtonGroup } from 'react-bootstrap';
 
+import { useDataset } from '../../context/DatasetContext';
 import usePlotVisibility from '../../utils/usePlotVisibility';
-
-export const Toolbar = ({
-  setShowCategories,
-  setShowSearch,
-  setShowControls,
-  isFullscreen,
-}) => {
-  const { showCategoriesBtn, showSearchBtn } = usePlotVisibility(isFullscreen);
-  return (
-    <Navbar expand="md" bg="primary" variant="dark" className="cherita-navbar">
-      <Container fluid>
-        <Navbar.Toggle aria-controls="navbarScroll" />
-        <Navbar.Collapse id="navbarScroll">
-          <Nav navbarScroll>
-            {showCategoriesBtn && (
-              <Nav.Item className="me-2">
-                <Nav.Link onClick={() => setShowCategories(true)}>
-                  <FontAwesomeIcon icon={faList} className="me-2" />
-                  Explore Categories
-                </Nav.Link>
-              </Nav.Item>
-            )}
-            {showSearchBtn && (
-              <Nav.Item className="me-2">
-                <Nav.Link onClick={() => setShowSearch(true)}>
-                  <FontAwesomeIcon icon={faSearch} className="me-2" />
-                  Search Genes
-                </Nav.Link>
-              </Nav.Item>
-            )}
-            <Nav.Item className="me-2">
-              <Nav.Link onClick={() => setShowControls(true)}>
-                <FontAwesomeIcon icon={faSliders} className="me-2" />
-                Controls
-              </Nav.Link>
-            </Nav.Item>{' '}
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
-  );
-};
 
 export const PlotlyToolbar = ({
   setShowCategories,
@@ -52,6 +12,7 @@ export const PlotlyToolbar = ({
   isFullscreen,
 }) => {
   const { showCategoriesBtn, showSearchBtn } = usePlotVisibility(isFullscreen);
+  const dataset = useDataset();
   return (
     <ButtonGroup>
       {showCategoriesBtn && (
@@ -68,10 +29,10 @@ export const PlotlyToolbar = ({
         <Button
           variant="primary"
           onClick={() => setShowSearch(true)}
-          title="Search Genes"
+          title={`Search ${dataset.varLabel.plural}`}
         >
           <FontAwesomeIcon icon={faSearch} className="me-1" />
-          Genes
+          {_.capitalize(dataset.varLabel.plural)}
         </Button>
       )}
     </ButtonGroup>
