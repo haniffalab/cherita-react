@@ -118,7 +118,9 @@ export function Pseudospatial({
   const dispatch = useSettingsDispatch();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
-  const { getColor } = useColor();
+  const { getColor } = useColor({
+    isCategorical: false,
+  });
   const colorscale = useRef(settings.controls.colorScale);
   const { valueMin, valueMax } = useFilteredData();
 
@@ -163,7 +165,9 @@ export function Pseudospatial({
           if (v === null) {
             return trace;
           }
-          const color = rgbToHex(getColor({ value: (v - min) / (max - min) }));
+          const color = rgbToHex(
+            getColor({ value: (v - min) / Math.max(max - min, 1e-6) }),
+          );
           return {
             ...trace,
             fillcolor: color,
@@ -204,7 +208,9 @@ export function Pseudospatial({
           if (v === null) {
             return trace;
           }
-          const color = rgbToHex(getColor({ value: (v - min) / (max - min) }));
+          const color = rgbToHex(
+            getColor({ value: (v - min) / Math.max(max - min, 1e-6) }),
+          );
           return {
             ...trace,
             fillcolor: color,
