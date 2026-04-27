@@ -75,7 +75,7 @@ export function OffcanvasObsExplorer({ show, handleClose, ...props }) {
   return (
     <Offcanvas show={show} onHide={handleClose}>
       <Offcanvas.Header closeButton>
-        <Offcanvas.Title>Search for {dataset.varLabel.plural}</Offcanvas.Title>
+        <Offcanvas.Title>Search for {dataset.obsLabel.plural}</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body className="p-1">
         <div className="sidebar-features">

@@ -45,6 +45,7 @@ export function StandardView({ ...props }) {
               setShowControls={setShowControls}
               isFullscreen={true}
               pointInteractionEnabled={true}
+              isSearchObs={true}
             />
           </div>
           <div className="cherita-app-sidebar p-3">

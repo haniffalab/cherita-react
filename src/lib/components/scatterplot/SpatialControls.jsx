@@ -48,6 +48,7 @@ export function SpatialControls({
   setShowCategories,
   setShowSearch,
   isFullscreen,
+  isSearchObs = false,
 }) {
   const dataset = useDataset();
   const settings = useSettings();
@@ -150,7 +151,10 @@ export function SpatialControls({
               placement="right"
               overlay={
                 <Tooltip id="tooltip-vars">
-                  Search {dataset.varLabel.plural}
+                  Search{' '}
+                  {isSearchObs
+                    ? dataset.obsLabel.plural
+                    : dataset.varLabel.plural}
                 </Tooltip>
               }
             >
