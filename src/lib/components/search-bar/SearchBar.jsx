@@ -162,9 +162,7 @@ export function SearchModal({
                       {searchObs && (
                         <Nav.Item>
                           <Nav.Link eventKey={FEATURE_TYPE.OBS}>
-                            {_.capitalize(
-                              dataset.obsSearchCol?.trim() || 'observations',
-                            )}{' '}
+                            {_.capitalize(dataset.obsLabel.plural)}{' '}
                             {!!obsResultsLength && `(${obsResultsLength})`}
                           </Nav.Link>
                         </Nav.Item>
@@ -261,7 +259,7 @@ export function SearchBar({
   const displayText = [
     ...(searchVar ? [dataset.varLabel.plural] : []),
     ...(searchDiseases ? ['diseases'] : []),
-    ...(searchObs ? [dataset.obsSearchCol?.trim() || 'observations'] : []),
+    ...(searchObs ? [dataset.obsLabel.plural] : []),
   ].join(' and ');
 
   const [showModal, setShowModal] = useState(false);
