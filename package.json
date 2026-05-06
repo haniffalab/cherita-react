@@ -117,6 +117,7 @@
     "lint:js": "eslint 'src/**/*.{js,jsx}' --fix",
     "lint": "npm run lint:scss && npm run lint:js",
     "start-demo": "npm run dev --prefix sites/demo",
+    "postinstall": "npm install --prefix sites/demo",
     "reinstall": "rm -rf node_modules package-lock.json && npm install"
   },
   "eslintConfig": {
