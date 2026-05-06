@@ -75,20 +75,20 @@ export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
 
   const [active, setActive] = useState(
     mode === SELECTION_MODES.SINGLE
-      ? selectedVar?.matrix_index || selectedVar?.name
-      : selectedMultiVar.map((i) => i.matrix_index || i.name),
+      ? (selectedVar?.matrix_index ?? selectedVar?.name)
+      : selectedMultiVar.map((i) => i.matrix_index ?? i.name),
   );
   const [sortedVars, setSortedVars] = useState([]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.SINGLE) {
-      setActive(selectedVar?.matrix_index || selectedVar?.name);
+      setActive(selectedVar?.matrix_index ?? selectedVar?.name);
     }
   }, [mode, selectedVar]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.MULTIPLE) {
-      setActive(selectedMultiVar.map((i) => i.matrix_index || i.name));
+      setActive(selectedMultiVar.map((i) => i.matrix_index ?? i.name));
     }
   }, [mode, selectedMultiVar]);
 

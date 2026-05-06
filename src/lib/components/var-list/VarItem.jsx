@@ -164,8 +164,7 @@ export function SelectionItem({
                       : 'Set as color encoding'
                 }
               >
-                {!isMultiple && <FontAwesomeIcon icon={faDroplet} />}
-                {isMultiple && <FontAwesomeIcon icon={faCheck} />}
+                <FontAwesomeIcon icon={isMultiple ? faCheck : faDroplet} />
               </Button>
             )}
             {showRemove && (
