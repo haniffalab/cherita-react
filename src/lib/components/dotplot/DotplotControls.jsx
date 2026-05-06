@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 
+import _ from 'lodash';
 import { Button, Form, InputGroup } from 'react-bootstrap';
 
+import { useDataset } from '../../context/DatasetContext';
 import {
   useSettings,
   useSettingsDispatch,
@@ -11,6 +13,7 @@ import { ColorscaleSelect, ScaleSelect } from '../controls/Controls';
 export function DotplotControls() {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
+  const dataset = useDataset();
   const [controls, setControls] = useState({
     expressionCutoff: settings.controls.expressionCutoff,
     colorAxis: {
@@ -105,7 +108,7 @@ export function DotplotControls() {
         </Form.Group>
         <ScaleSelect plot="dotplot" />
         <Form.Group className="mb-2">
-          <Form.Label>Expression Cutoff</Form.Label>
+          <Form.Label>{_.capitalize(dataset.valueLabel)} Cutoff</Form.Label>
           <InputGroup>
             <Form.Control
               size="sm"
@@ -134,7 +137,7 @@ export function DotplotControls() {
           <Form.Check
             type="switch"
             id="meanOnlyExpressed"
-            label="Average only above cutoff"
+            label={`Average only above ${dataset.valueLabel} cutoff`}
             checked={settings.controls.meanOnlyExpressed}
             onChange={() => {
               dispatch({

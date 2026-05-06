@@ -64,12 +64,10 @@ export const sortMeans = (i, means) => {
   return means[i.name] || _.min(_.values(means)) - 1;
 };
 
-export function VarNamesList({
-  mode = SELECTION_MODES.SINGLE,
-  displayName = 'genes',
-}) {
+export function VarNamesList({ mode = SELECTION_MODES.SINGLE }) {
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
+  const dataset = useDataset();
 
   const selectedVar = useSelectedVar();
   const selectedMultiVar = useSelectedMultiVar();
@@ -77,20 +75,20 @@ export function VarNamesList({
 
   const [active, setActive] = useState(
     mode === SELECTION_MODES.SINGLE
-      ? selectedVar?.matrix_index || selectedVar?.name
-      : selectedMultiVar.map((i) => i.matrix_index || i.name),
+      ? (selectedVar?.matrix_index ?? selectedVar?.name)
+      : selectedMultiVar.map((i) => i.matrix_index ?? i.name),
   );
   const [sortedVars, setSortedVars] = useState([]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.SINGLE) {
-      setActive(selectedVar?.matrix_index || selectedVar?.name);
+      setActive(selectedVar?.matrix_index ?? selectedVar?.name);
     }
   }, [mode, selectedVar]);
 
   useEffect(() => {
     if (mode === SELECTION_MODES.MULTIPLE) {
-      setActive(selectedMultiVar.map((i) => i.matrix_index || i.name));
+      setActive(selectedMultiVar.map((i) => i.matrix_index ?? i.name));
     }
   }, [mode, selectedMultiVar]);
 
@@ -180,8 +178,8 @@ export function VarNamesList({
   return (
     <div className="mt-3 d-flex flex-column h-100">
       <div className="d-flex justify-content-between mb-2">
-        <h5>{_.capitalize(displayName)}</h5>
-        <ButtonGroup aria-label="Feature options" size="sm">
+        <h5>{_.capitalize(dataset.varLabel.plural)}</h5>
+        <ButtonGroup aria-label="Options" size="sm">
           <Button
             variant="info"
             onClick={() => {
@@ -212,7 +210,7 @@ export function VarNamesList({
       </div>
       <>
         {!varList.length ? (
-          <Alert variant="light">Search for a feature.</Alert>
+          <Alert variant="light">Search for {dataset.varLabel.plural}</Alert>
         ) : (
           <>
             <VarListToolbar />

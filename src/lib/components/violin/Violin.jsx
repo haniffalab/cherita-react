@@ -223,12 +223,13 @@ export function Violin({
                 className="border-0 p-0 align-baseline"
                 onClick={setShowSearch}
               >
-                features
+                {dataset.varLabel.plural}
               </Button>
             ) : (
-              'features'
+              dataset.varLabel.plural
             )}{' '}
-            to display their expression distributions across all observations.
+            to display their {dataset.valueLabel} distributions across all{' '}
+            {dataset.obsLabel.plural}.
           </p>
         )}
         {mode === VIOLIN_MODES.GROUPBY && (
@@ -252,10 +253,10 @@ export function Violin({
                 className="border-0 p-0 align-baseline"
                 onClick={setShowSearch}
               >
-                feature
+                {dataset.varLabel.singular}
               </Button>
             ) : (
-              'feature'
+              dataset.varLabel.singular
             )}{' '}
             to view its distribution within each group.
           </p>

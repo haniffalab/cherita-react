@@ -17,6 +17,7 @@ import {
   VarSearchResults,
 } from './SearchResults';
 import { COLOR_ENCODINGS } from '../../constants/constants';
+import { useDataset } from '../../context/DatasetContext';
 
 function useVarSelect() {
   const pendingVars = useRef([]);
@@ -105,6 +106,7 @@ export function SearchModal({
   const [varResultsLength, setVarResultsLength] = useState(null);
   const [diseaseResultsLength, setDiseaseResultsLength] = useState(null);
   const [obsResultsLength, setObsResultsLength] = useState(null);
+  const dataset = useDataset();
 
   return (
     <Modal show={show} onHide={handleClose} size="xl" fullscreen="xl-down">
@@ -162,7 +164,7 @@ export function SearchModal({
                       {searchVar && (
                         <Nav.Item>
                           <Nav.Link eventKey={FEATURE_TYPE.VAR}>
-                            Genes{' '}
+                            {_.capitalize(dataset.varLabel.plural)}{' '}
                             {!!varResultsLength && `(${varResultsLength})`}
                           </Nav.Link>
                         </Nav.Item>
@@ -179,7 +181,7 @@ export function SearchModal({
                       {searchObs && (
                         <Nav.Item>
                           <Nav.Link eventKey={FEATURE_TYPE.OBS}>
-                            Genes{' '}
+                            {_.capitalize(dataset.obsLabel.plural)}{' '}
                             {!!obsResultsLength && `(${obsResultsLength})`}
                           </Nav.Link>
                         </Nav.Item>
@@ -271,9 +273,11 @@ export function SearchBar({
   searchObs = false,
 }) {
   const [text, setText] = useState('');
+  const dataset = useDataset();
   const displayText = [
-    ...(searchVar ? ['features'] : []),
+    ...(searchVar ? [dataset.varLabel.plural] : []),
     ...(searchDiseases ? ['diseases'] : []),
+    ...(searchObs ? [dataset.obsLabel.plural] : []),
   ].join(' and ');
 
   const [showModal, setShowModal] = useState(false);

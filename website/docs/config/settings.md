@@ -23,7 +23,7 @@ Props passed to `DatasetProvider` define the values in `DatasetContext` and can 
 ### Usage
 
 ```jsx
-import { DatasetProvider, Scatterplot } from "@haniffalab/cherita-react";
+import { DatasetProvider, Scatterplot } from '@haniffalab/cherita-react';
 
 <DatasetProvider
   dataset_url="https://remote-anndata.zarr"
@@ -31,73 +31,100 @@ import { DatasetProvider, Scatterplot } from "@haniffalab/cherita-react";
   enableObsGroups={true}
 >
   <Scatterplot />
-</DatasetProvider>
+</DatasetProvider>;
 ```
 
 When using views, props should be provided to the view component which are then passed to the `DatasetProvider`
 
 ```jsx
-import { ObservationFeature } from "@haniffalab/cherita-react";
+import { ObservationFeature } from '@haniffalab/cherita-react';
 
 <ObservationFeature.StandardView
   dataset_url="https://remote-anndata.zarr"
   enableObsGroups={false}
-/>
+/>;
+```
+
+To customise the terminology used in the UI for your data modality, pass `obsLabel`, `varLabel` and `valueLabel` props:
+
+```jsx
+// Visium spatial transcriptomics (spots + genes + expression)
+<DatasetProvider
+  dataset_url="https://remote-anndata.zarr"
+  obsLabel={{ singular: "spot", plural: "spots" }}
+  varLabel={{ singular: "gene", plural: "genes" }}
+  valueLabel="expression"
+>
+  <Scatterplot />
+</DatasetProvider>
+
+// ATAC-seq (cells + peaks + accessibility)
+<DatasetProvider
+  dataset_url="https://remote-anndata.zarr"
+  obsLabel={{ singular: "cell", plural: "cells" }}
+  varLabel={{ singular: "peak", plural: "peaks" }}
+  valueLabel="accessibility"
+>
+  <Scatterplot />
+</DatasetProvider>
 ```
 
 ### Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `dataset_url` | `string` | required | URL to the AnnData-Zarr file |
-| `varNamesCol` | `string` | `null` | Column name for variable names to show in the [VarNamesCol](../components/metadata.md#varnameslist) and to use in the [SearchBar](../components/metadata.md#searchbar). For cases where the index of the `var` table holds id's or values not clear to the user |
-| `obsSearchCol` | `string` | `null` | Column for observation search. Used by [SearchBar](../components/metadata.md#searchbar) when it is set with `searchObs` as `true` |
-| `diseaseDatasets` | `array` | `[]` | Disease dataset configurations |
-| `obsGroups` | `object` | `null` | Custom observation groupings |
-| `imageUrl` | `string` | `null` | URL for spatial image |
-| `useUnsColors` | `boolean` | `false` | Use `uns` colors from AnnData |
-| `isPseudospatial` | `boolean` | `false` | Enable pseudospatial mode |
-| `obsExplorer` | `object` | `{ obsCols: [], dataUrl: null, dataFilterCols: null }` | Data to load in the [ObsExplorer](../components/metadata.md#obsexplorer) component. `obsCols` is a list of columns from the `obs` table in the dataset to be loaded and displayed in the component. If undefined or empty, all columns are displayed. `dataUrl` is the location of a remote Parquet file with additional data to load. `dataFilterCols` is a map between columns in the `obs` table of the dataset and columns in the Parquet file to filter the data to load from the Parquet file. e.g., `dataFilterCols: {obs_id: parquet_id}` will filter the Parquet data to only those rows where `parquet_id` matches the selected observation's `obs_id` value |
-| `canOverrideSettings` | `boolean` | `true` | Allow settings updated by user selections to be stored in the browser. When set to `false` only the `defaultSettings` will be considered on initial load of the dataset |
-| `defaultSettings` | `object` | `{}` | Default values for `SettingsContext`, useful to set pre-selected values when data loads |
+| Prop                  | Type      | Default                                                | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --------------------- | --------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dataset_url`         | `string`  | required                                               | URL to the AnnData-Zarr file                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `varNamesCol`         | `string`  | `null`                                                 | Column name for variable names to show in the [VarNamesCol](../components/metadata.md#varnameslist) and to use in the [SearchBar](../components/metadata.md#searchbar). For cases where the index of the `var` table holds id's or values not clear to the user                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `obsSearchCol`        | `string`  | `null`                                                 | Column for observation search. Used by [SearchBar](../components/metadata.md#searchbar) when it is set with `searchObs` as `true`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `diseaseDatasets`     | `array`   | `[]`                                                   | Disease dataset configurations                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `obsGroups`           | `object`  | `null`                                                 | Custom observation groupings                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `imageUrl`            | `string`  | `null`                                                 | URL for spatial image                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `useUnsColors`        | `boolean` | `false`                                                | Use `uns` colors from AnnData                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `isPseudospatial`     | `boolean` | `false`                                                | Enable pseudospatial mode                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `obsExplorer`         | `object`  | `{ obsCols: [], dataUrl: null, dataFilterCols: null }` | Data to load in the [ObsExplorer](../components/metadata.md#obsexplorer) component. `obsCols` is a list of columns from the `obs` table in the dataset to be loaded and displayed in the component. If undefined or empty, all columns are displayed. `dataUrl` is the location of a remote Parquet file with additional data to load. `dataFilterCols` is a map between columns in the `obs` table of the dataset and columns in the Parquet file to filter the data to load from the Parquet file. e.g., `dataFilterCols: {obs_id: parquet_id}` will filter the Parquet data to only those rows where `parquet_id` matches the selected observation's `obs_id` value |
+| `obsLabel`            | `object`  | `{ singular: 'cell', plural: 'cells' }`                | Labels used in the UI to refer to observations (rows). Override this to match your data modality, e.g. `{ singular: 'spot', plural: 'spots' }` for spatial transcriptomics or `{ singular: 'nucleus', plural: 'nuclei' }` for single-nucleus data                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `varLabel`            | `object`  | `{ singular: 'gene', plural: 'genes' }`                | Labels used in the UI to refer to variables (columns). Override this to match your data modality, e.g. `{ singular: 'peak', plural: 'peaks' }` for ATAC-seq or `{ singular: 'protein', plural: 'proteins' }` for proteomics                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `valueLabel`          | `string`  | `'expression'`                                         | Label used in the UI to describe matrix values. Override this to match your data modality, e.g. `'accessibility'` for chromatin data or `'activity'` for transcription factor activity                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `canOverrideSettings` | `boolean` | `true`                                                 | Allow settings updated by user selections to be stored in the browser. When set to `false` only the `defaultSettings` will be considered on initial load of the dataset                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `defaultSettings`     | `object`  | `{}`                                                   | Default values for `SettingsContext`, useful to set pre-selected values when data loads                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 #### `defaultSettings`
 
 Initial settings values can be provided as an object so a dataset is loaded with customized pre-selected values. All values handled by `SettingsContext` (except for `data` which are values resolved when the dataset is loaded) can be set through `defaultSettings`, however it is most useful for selections like `selectedObs`, `selectedVar`, `selectedObsm`, `selectedMultiVar`, `colorEncoding`.
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| `selectedObs` | `object` | `null` | Selected `obs` column like ` {name: "obs_name" }` |
-| `selectedVar` | `object` | `null` | Selected variable for visualization (can be single variable or variable set) |
-| `selectedObsm` | `object` | `null` | Selected observation matrix for dimensional reduction plots (e.g., "X_umap") |
-| `selectedMultiVar` | `array` | `[]` | Array of multiple selected variables for comparison |
-| `labelObs` | `array` | `[]` | Array of observation column names to display in the tooltips in the [Scatterplot](../components/plots.md#scatterplot) |
-| `vars` | `array` | `[]` | Array of variables available for selection |
-| `colorEncoding` | `COLOR_ENCODINGS` | `null` | Type of color encoding (variable-based or observation-based) |
-| `sliceBy` | `object` | `{ obs: false, polygons: false }` | Configuration for data slicing by observations or polygons |
-| `polygons` | `object` | `{}` | Polygon selection configurations for spatial plots |
-| `controls` | `object` | [See below](./settings.md#controls-default) | Plot controls |
-| `varSort` | `object` | `{}` | Variable sorting configuration |
-| `pseudospatial` | `object` | [See below](./settings.md#pseudospatial-default) | Pseudospatial plot controls |
-| `selectedObsIndex` | `int` | `null` | Index of currently selected observation |
+| Key                | Type              | Default                                          | Description                                                                                                           |
+| ------------------ | ----------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `selectedObs`      | `object`          | `null`                                           | Selected `obs` column like ` {name: "obs_name" }`                                                                     |
+| `selectedVar`      | `object`          | `null`                                           | Selected variable for visualization (can be single variable or variable set)                                          |
+| `selectedObsm`     | `object`          | `null`                                           | Selected observation matrix for dimensional reduction plots (e.g., "X_umap")                                          |
+| `selectedMultiVar` | `array`           | `[]`                                             | Array of multiple selected variables for comparison                                                                   |
+| `labelObs`         | `array`           | `[]`                                             | Array of observation column names to display in the tooltips in the [Scatterplot](../components/plots.md#scatterplot) |
+| `vars`             | `array`           | `[]`                                             | Array of variables available for selection                                                                            |
+| `colorEncoding`    | `COLOR_ENCODINGS` | `null`                                           | Type of color encoding (variable-based or observation-based)                                                          |
+| `sliceBy`          | `object`          | `{ obs: false, polygons: false }`                | Configuration for data slicing by observations or polygons                                                            |
+| `polygons`         | `object`          | `{}`                                             | Polygon selection configurations for spatial plots                                                                    |
+| `controls`         | `object`          | [See below](./settings.md#controls-default)      | Plot controls                                                                                                         |
+| `varSort`          | `object`          | `{}`                                             | Variable sorting configuration                                                                                        |
+| `pseudospatial`    | `object`          | [See below](./settings.md#pseudospatial-default) | Pseudospatial plot controls                                                                                           |
+| `selectedObsIndex` | `int`             | `null`                                           | Index of currently selected observation                                                                               |
 
 ##### `controls` {#controls-default}
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| `colorScale` | `string` | `'Viridis'` | Default color scale for visualization |
-| `range` | `array` | `[0, 1]` | Normalized range for color mapping [min, max] |
-| `colorAxis` | `object` | `{ dmin: 0, dmax: 1, cmin: 0, cmax: 1}` | Color axis configuration with data and color limits |
-| `scale` | `object` | `{ dotplot: DOTPLOT_SCALES.NONE.value, matrixplot: MATRIXPLOT_SCALES.NONE.value, violinplot: VIOLINPLOT_SCALES.WIDTH.value}` | Scaling options for different plot types |
-| `meanOnlyExpressed` | `bool` | `false` | Whether to calculate mean only from expressed cells |
-| `expressionCutoff` | `float` | 0.0 | Minimum expression threshold for calculations |
-| `radiusScale` | `string` | `{}` | Scale configuration for radius-based visualizations |
+| Key                 | Type     | Default                                                                                                                      | Description                                         |
+| ------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| `colorScale`        | `string` | `'Viridis'`                                                                                                                  | Default color scale for visualization               |
+| `range`             | `array`  | `[0, 1]`                                                                                                                     | Normalized range for color mapping [min, max]       |
+| `colorAxis`         | `object` | `{ dmin: 0, dmax: 1, cmin: 0, cmax: 1}`                                                                                      | Color axis configuration with data and color limits |
+| `scale`             | `object` | `{ dotplot: DOTPLOT_SCALES.NONE.value, matrixplot: MATRIXPLOT_SCALES.NONE.value, violinplot: VIOLINPLOT_SCALES.WIDTH.value}` | Scaling options for different plot types            |
+| `meanOnlyExpressed` | `bool`   | `false`                                                                                                                      | Whether to calculate mean only from expressed cells |
+| `expressionCutoff`  | `float`  | 0.0                                                                                                                          | Minimum expression threshold for calculations       |
+| `radiusScale`       | `string` | `{}`                                                                                                                         | Scale configuration for radius-based visualizations |
 
 ##### `pseudospatial` {#pseudospatial-default}
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| `maskSet` | `string` | `null` | Selected mask set for pseudospatial visualization |
-| `maskValues` | `string` | `null` | Selected mask values within the chosen mask set |
-| `categoricalMode` | `PSEUDOSPATIAL_CATEGORICAL_MODES` | `PSEUDOSPATIAL_CATEGORICAL_MODES.ACROSS.value` | Mode for categorical pseudospatial visualization |
-| `refImg` | `object` | `{ visible: false, opacity: 1 }` | Reference image configuration for spatial context |
+| Key               | Type                              | Default                                        | Description                                       |
+| ----------------- | --------------------------------- | ---------------------------------------------- | ------------------------------------------------- |
+| `maskSet`         | `string`                          | `null`                                         | Selected mask set for pseudospatial visualization |
+| `maskValues`      | `string`                          | `null`                                         | Selected mask values within the chosen mask set   |
+| `categoricalMode` | `PSEUDOSPATIAL_CATEGORICAL_MODES` | `PSEUDOSPATIAL_CATEGORICAL_MODES.ACROSS.value` | Mode for categorical pseudospatial visualization  |
+| `refImg`          | `object`                          | `{ visible: false, opacity: 1 }`               | Reference image configuration for spatial context |

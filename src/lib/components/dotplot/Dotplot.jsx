@@ -199,12 +199,12 @@ export function Dotplot({
               className="border-0 p-0 align-baseline"
               onClick={setShowSearch}
             >
-              features
+              {dataset.varLabel.plural}
             </Button>
           ) : (
-            'features'
+            dataset.varLabel.plural
           )}{' '}
-          to display their expression across groups, then choose a{' '}
+          to display their {dataset.valueLabel} across groups, then choose a{' '}
           {showCategoriesBtn ? (
             <Button
               variant="link"

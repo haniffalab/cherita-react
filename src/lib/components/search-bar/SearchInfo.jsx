@@ -204,7 +204,7 @@ export function DiseaseInfo({ disease, handleSelect, addVarSet }) {
   return (
     <div>
       <h5>{disease.disease_name}</h5>
-      <h6>Implicated genes</h6>
+      <h6>Implicated {dataset.varLabel.plural}</h6>
       {isPending ? (
         <p>Loading...</p>
       ) : (
