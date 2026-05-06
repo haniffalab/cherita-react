@@ -8,7 +8,6 @@ import {
 } from 'react';
 
 import { LinearInterpolator } from '@deck.gl/core';
-import { ScatterplotLayer } from '@deck.gl/layers';
 import { DeckGL } from '@deck.gl/react';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,6 +16,7 @@ import { EditableGeoJsonLayer } from '@nebula.gl/layers';
 import _ from 'lodash';
 import { Alert } from 'react-bootstrap';
 
+import { ScatterplotLayer } from './ScatterplotLayer';
 import { SpatialControls } from './SpatialControls';
 import { Toolbox } from './Toolbox';
 import {
@@ -25,6 +25,7 @@ import {
   PLOT_TYPES,
   SELECTED_POLYGON_FILLCOLOR,
   UNSELECTED_POLYGON_FILLCOLOR,
+  GRAY,
 } from '../../constants/constants';
 import { useDataset } from '../../context/DatasetContext';
 import { useFilteredData } from '../../context/FilterContext';
@@ -41,6 +42,7 @@ import { useSelectedObs } from '../../utils/Resolver';
 import { formatNumerical } from '../../utils/string';
 import usePlotVisibility from '../../utils/usePlotVisibility';
 import { useLabelObsData } from '../../utils/zarrData';
+import { createScatterplotWorker } from '../../workers/scatterplotData.js';
 import { PlotAlert } from '../plot/PlotAlert';
 
 window.deck.log.level = 1;
@@ -76,7 +78,6 @@ export function Scatterplot({
   const settings = useSettings();
   const { obsIndices, valueMin, valueMax, slicedLength } = useFilteredData();
   const dispatch = useSettingsDispatch();
-  const { getColor } = useColor();
   const deckRef = useRef(null);
   const [viewport, setViewport] = useState(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
@@ -95,8 +96,6 @@ export function Scatterplot({
   const selectedObs = useSelectedObs();
   const selectedObsIndex = settings.selectedObsIndex;
 
-  const [hoveredIndex, setHoveredIndex] = useState(null);
-  const [isHoveringPoint, setIsHoveringPoint] = useState(false);
   const { showSearchBtn } = usePlotVisibility(isFullscreen);
 
   // EditableGeoJsonLayer
@@ -110,6 +109,28 @@ export function Scatterplot({
   const { obsmData, xData, obsData } = useZarrData();
   const labelObsData = useLabelObsData();
   const clickedInsideRef = useRef(false);
+
+  const workerRef = useRef(null);
+  const [scatterplotAttributes, setScatterplotAttributes] = useState(null);
+
+  const isCategorical = useMemo(() => {
+    if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
+      return (
+        selectedObs?.type === OBS_TYPES.CATEGORICAL ||
+        selectedObs?.type === OBS_TYPES.BOOLEAN
+      );
+    } else {
+      return false;
+    }
+  }, [settings.colorEncoding, selectedObs?.type]);
+
+  const { colormap, getColor } = useColor({
+    isCategorical,
+    colorscale:
+      useUnsColors && settings.colorEncoding === COLOR_ENCODINGS.OBS
+        ? selectedObs?.colors
+        : null,
+  });
 
   // @TODO: assert length of obsmData, xData, obsData is equal
 
@@ -172,7 +193,7 @@ export function Scatterplot({
   ]);
 
   useEffect(() => {
-    if (data.positions && data.positions.length) {
+    if (data.positions?.length) {
       const mapHelper = new MapHelper();
       const { latitude, longitude, zoom, bounds } = mapHelper.fitBounds(
         data.positions,
@@ -250,177 +271,136 @@ export function Scatterplot({
     return { latitude, longitude, zoom };
   }, [data.positions]);
 
-  // Make stable references for getOriginalIndex and sortedIndexMap
-  const identityGetOriginalIndex = useCallback((i) => i, []);
-  const identitySortedIndexMap = useMemo(() => ({ get: (key) => key }), []);
+  const { min, max } = useMemo(
+    () => ({
+      min: settings.controls.range[0] * (valueMax - valueMin) + valueMin,
+      max: settings.controls.range[1] * (valueMax - valueMin) + valueMin,
+    }),
+    [settings.controls.range, valueMax, valueMin],
+  );
 
-  const { sortedData, getOriginalIndex, sortedIndexMap } = useMemo(() => {
-    if (
-      (settings.colorEncoding === COLOR_ENCODINGS.VAR ||
-        (settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-          selectedObs?.type === OBS_TYPES.CONTINUOUS)) &&
-      data.positions &&
-      data.values &&
-      data.positions.length === data.values.length
-    ) {
-      const sortedIndices = _.map(data.values, (_v, i) => i).sort(
-        (a, b) => data.values[a] - data.values[b],
-      );
-      const sortedIndexMap = new Map(
-        _.map(sortedIndices, (originalIndex, sortedIndex) => [
-          originalIndex,
-          sortedIndex,
-        ]),
-      );
-      return {
-        sortedData: _.mapValues(data, (v, _k) => {
-          return v ? _.at(v, sortedIndices) : v;
-        }),
-        getOriginalIndex: (i) => sortedIndices[i],
-        sortedIndexMap: sortedIndexMap,
-      };
-    }
-    return {
-      sortedData: data,
-      getOriginalIndex: identityGetOriginalIndex, // return original index
-      sortedIndexMap: identitySortedIndexMap, // return original index
+  useEffect(() => {
+    workerRef.current = createScatterplotWorker();
+
+    workerRef.current.onmessage = ({ data }) => {
+      setScatterplotAttributes((p) => ({ ...p, ...data }));
     };
-  }, [
-    data,
-    identityGetOriginalIndex,
-    identitySortedIndexMap,
-    selectedObs?.type,
-    settings.colorEncoding,
-  ]);
 
-  const hoverLayer =
-    typeof hoveredIndex === 'number' &&
-    Array.isArray(sortedData?.positions) &&
-    hoveredIndex < sortedData.positions.length
-      ? new ScatterplotLayer({
-          id: 'hover-highlight',
-          data: [sortedData.positions[hoveredIndex]],
-          getPosition: (d) => d,
-          getFillColor: [255, 215, 0, 180],
-          getRadius: 10,
-          radiusMinPixels: 15,
-          radiusScale: 1,
-          pointSizeUnits: 'pixels',
-          pickable: false,
-          parameters: { depthTest: false },
-        })
-      : null;
+    workerRef.current.onerror = (e) => {
+      console.error('Worker error:', e);
+    };
 
-  const sortedObsIndices = useMemo(() => {
-    return obsIndices
-      ? new Set(Array.from(obsIndices, (i) => sortedIndexMap.get(i)))
-      : obsIndices;
-  }, [obsIndices, sortedIndexMap]);
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, []);
 
-  const isCategorical = useMemo(() => {
-    if (settings.colorEncoding === COLOR_ENCODINGS.OBS) {
-      return (
-        selectedObs?.type === OBS_TYPES.CATEGORICAL ||
-        selectedObs?.type === OBS_TYPES.BOOLEAN
-      );
-    } else {
-      return false;
+  useEffect(() => {
+    if (workerRef.current && data.positions?.length) {
+      workerRef.current.postMessage({ positions: data.positions });
     }
-  }, [settings.colorEncoding, selectedObs?.type]);
+  }, [data.positions]);
 
-  const { min, max } = {
-    min: settings.controls.range[0] * (valueMax - valueMin) + valueMin,
-    max: settings.controls.range[1] * (valueMax - valueMin) + valueMin,
-  };
+  useEffect(() => {
+    if (workerRef.current && data.values?.length) {
+      workerRef.current.postMessage({ values: data.values });
+    }
+  }, [data.values]);
+
+  useEffect(() => {
+    if (
+      workerRef.current &&
+      data.positions?.length &&
+      obsIndices !== undefined
+    ) {
+      workerRef.current.postMessage({
+        obsIndices,
+        length: data.positions.length,
+      });
+    }
+  }, [obsIndices, data.positions?.length]);
 
   const getFillColor = useCallback(
     (_d, { index }) => {
-      const grayOut =
-        isPending || (sortedObsIndices && !sortedObsIndices.has(index));
+      const grayOut = isPending || (obsIndices && !obsIndices.has(index));
 
-      if (
-        pointInteractionEnabled &&
-        getOriginalIndex(index) === selectedObsIndex
-      ) {
+      if (pointInteractionEnabled && index === selectedObsIndex) {
         return [255, 215, 0, 255];
       }
 
       return (
         getColor({
-          value: (sortedData.values[index] - min) / (max - min),
-          categorical: isCategorical,
+          value: (data.values[index] - min) / Math.max(max - min, 1e-6),
           grayOut: grayOut,
-          ...(useUnsColors &&
-          settings.colorEncoding === COLOR_ENCODINGS.OBS &&
-          selectedObs?.colors
-            ? { colorscale: selectedObs?.colors }
-            : {}),
         }) || [0, 0, 0, 100]
       );
     },
     [
       isPending,
-      sortedObsIndices,
+      obsIndices,
       pointInteractionEnabled,
-      getOriginalIndex,
       selectedObsIndex,
       getColor,
-      sortedData.values,
+      data.values,
       min,
       max,
-      isCategorical,
-      useUnsColors,
-      settings.colorEncoding,
-      selectedObs?.colors,
-    ],
-  );
-
-  // @TODO: add support for pseudospatial hover to reflect in radius
-  const getRadius = useCallback(
-    (_d, { index }) => {
-      const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
-
-      if (
-        pointInteractionEnabled &&
-        getOriginalIndex(index) === selectedObsIndex
-      ) {
-        return 50;
-      }
-
-      return (grayOut ? 1 : 3) * (pointInteractionEnabled ? 26 : 1);
-    },
-    [
-      getOriginalIndex,
-      pointInteractionEnabled,
-      selectedObsIndex,
-      sortedObsIndices,
     ],
   );
 
   const memoizedLayers = useMemo(() => {
+    const hasSelection =
+      (settings.colorEncoding === COLOR_ENCODINGS.VAR &&
+        settings.selectedVar) ||
+      (settings.colorEncoding === COLOR_ENCODINGS.OBS && selectedObs);
     return [
       new ScatterplotLayer({
         id: 'cherita-layer-scatterplot',
         pickable: true,
-        data: sortedData.positions,
+        autoHighlight: true,
+        highlightColor: pointInteractionEnabled
+          ? [255, 215, 0, 255]
+          : [0, 0, 0, 0],
+        data: {
+          length: scatterplotAttributes?.count || 0,
+          attributes: {
+            getPosition: {
+              value: scatterplotAttributes?.positions || new Float32Array(0),
+              size: 2,
+            },
+            getValues: {
+              value: scatterplotAttributes?.values,
+              size: 1,
+            },
+            getEnabled: {
+              value: scatterplotAttributes?.indexEnabledBitmask,
+              size: 1,
+            },
+          },
+        },
         radiusScale: radiusScale,
         radiusMinPixels: 1,
-        getPosition: (d) => d,
-        getFillColor: getFillColor,
-        getRadius: getRadius,
         updateTriggers: {
-          getFillColor: getFillColor,
-          getRadius: [getRadius, hoveredIndex, selectedObsIndex],
+          colormap: [colormap],
         },
-        transitions: {
-          getRadius: 200,
-          getFillColor: 200,
-        },
+        colormap: isPending
+          ? [`${rgbToHex(GRAY)}aa`]
+          : hasSelection
+            ? colormap
+            : ['#000000aa'],
+        isCategorical,
+        valueMin: min,
+        valueMax: max,
+        selectedIndex: pointInteractionEnabled ? (selectedObsIndex ?? -1) : -1,
+        pointInteractionEnabled,
+        highlightMultiplier: pointInteractionEnabled ? 1.5 : 1.0,
       }),
       new EditableGeoJsonLayer({
         id: 'cherita-layer-draw',
         data: features,
         mode: mode,
+        parameters: {
+          depthTest: false,
+        },
         selectedFeatureIndexes,
         onEdit: ({ updatedData, editType, editContext }) => {
           setFeatures(updatedData);
@@ -453,23 +433,29 @@ export function Scatterplot({
       }),
     ];
   }, [
-    sortedData.positions,
-    features,
-    getFillColor,
-    getRadius,
-    hoveredIndex,
-    mode,
+    settings.colorEncoding,
+    settings.selectedVar,
+    selectedObs,
+    pointInteractionEnabled,
+    scatterplotAttributes?.count,
+    scatterplotAttributes?.positions,
+    scatterplotAttributes?.values,
+    scatterplotAttributes?.indexEnabledBitmask,
     radiusScale,
-    selectedFeatureIndexes,
+    colormap,
+    isPending,
+    isCategorical,
+    min,
+    max,
     selectedObsIndex,
+    features,
+    mode,
+    selectedFeatureIndexes,
   ]);
 
-  // const layers = useDeferredValue(
-  //   mode === ViewMode ? memoizedLayers.reverse() : memoizedLayers,
-  // ); // draw scatterplot on top of polygons when in ViewMode
   const layers = useDeferredValue(
-    [...memoizedLayers, hoverLayer].filter(Boolean),
-  );
+    mode === ViewMode ? [...memoizedLayers].reverse() : memoizedLayers,
+  ); // draw scatterplot on top of polygons when in ViewMode
 
   useEffect(() => {
     if (!features?.features?.length) {
@@ -488,23 +474,22 @@ export function Scatterplot({
   function onLayerClick(info) {
     if (mode !== ViewMode) return;
 
-    if (!info.object) {
+    if (info.index === undefined || info.index === null) {
       // clicked empty space
       setSelectedFeatureIndexes([]);
       return;
     }
 
-    if (info.layer.id === 'cherita-layer-draw') {
+    if (info.layer?.id === 'cherita-layer-draw') {
       // clicked a drawn polygon
       setSelectedFeatureIndexes([info.index]);
     } else if (
-      info.layer.id === 'cherita-layer-scatterplot' &&
+      info.layer?.id === 'cherita-layer-scatterplot' &&
       pointInteractionEnabled
     ) {
       // clicked a scatterplot point
       clickedInsideRef.current = true;
-      const originalIndex = getOriginalIndex(info.index);
-      dispatch({ type: 'set.selectedObsIndex', index: originalIndex });
+      dispatch({ type: 'set.selectedObsIndex', index: info.index });
       // in collapsed view, open offcanvas
       if (pointInteractionEnabled && showSearchBtn) {
         setShowSearch(true);
@@ -525,7 +510,8 @@ export function Scatterplot({
   };
 
   const getTooltip = ({ object, index }) => {
-    if (!object || object?.type === 'Feature') return;
+    if (object?.type === 'Feature') return;
+    if (index < 0 || index === null) return;
     const text = [];
 
     if (
@@ -533,20 +519,14 @@ export function Scatterplot({
       selectedObs &&
       !_.includes(settings.labelObs, selectedObs.name)
     ) {
-      text.push(getLabel(selectedObs, data.values?.[getOriginalIndex(index)]));
+      text.push(getLabel(selectedObs, data.values?.[index]));
     }
 
     if (
       settings.colorEncoding === COLOR_ENCODINGS.VAR &&
       settings.selectedVar
     ) {
-      text.push(
-        getLabel(
-          settings.selectedVar,
-          data.values?.[getOriginalIndex(index)],
-          true,
-        ),
-      );
+      text.push(getLabel(settings.selectedVar, data.values?.[index], true));
     }
 
     if (settings.labelObs.length) {
@@ -554,14 +534,14 @@ export function Scatterplot({
         ..._.map(labelObsData.data, (v, k) => {
           if (!v) return;
           const labelObs = settings.data.obs[k];
-          return getLabel(labelObs, v[getOriginalIndex(index)]);
+          return getLabel(labelObs, v[index]);
         }),
       );
     }
 
     if (!text.length) return;
 
-    const grayOut = sortedObsIndices && !sortedObsIndices.has(index);
+    const grayOut = obsIndices && !obsIndices.has(index);
 
     return {
       text: text.length ? _.compact(text).join('\n') : null,
@@ -610,15 +590,10 @@ export function Scatterplot({
             setIsRendering(false);
           }}
           useDevicePixels={false}
-          onHover={({ object, index }) => {
-            const active = pointInteractionEnabled && !!object;
-            setHoveredIndex(active ? index : null);
-            setIsHoveringPoint(active);
-          }}
-          getCursor={({ isDragging }) => {
+          getCursor={({ isDragging, isHovering }) => {
             if (mode !== ViewMode) return 'crosshair';
             if (isDragging) return 'grabbing';
-            if (isHoveringPoint) return 'pointer';
+            if (isHovering && pointInteractionEnabled) return 'pointer';
             return 'grab';
           }}
           ref={deckRef}
