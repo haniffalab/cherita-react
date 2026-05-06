@@ -20,13 +20,13 @@ import { COLOR_ENCODINGS } from '../../constants/constants';
 import { useDataset } from '../../context/DatasetContext';
 
 function useVarSelect() {
-  const pendingVars = useRef([]);
+  const pendingVars = useRef(new Map());
 
   const debouncedSelect = useMemo(
     () =>
       _.debounce((dispatch) => {
-        const vars = [...pendingVars.current];
-        pendingVars.current = [];
+        const vars = [...pendingVars.current.values()];
+        pendingVars.current.clear();
 
         dispatch({
           type: 'select.multivar.batch',
@@ -54,7 +54,7 @@ function useVarSelect() {
         type: 'add.var',
         var: item,
       });
-      pendingVars.current.push(item);
+      pendingVars.current.set(item.name, item);
       debouncedSelect(dispatch);
     },
     [debouncedSelect],
