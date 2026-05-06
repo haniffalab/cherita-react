@@ -72,6 +72,7 @@ export function Scatterplot({
   setShowSearch,
   setPlotType,
   isFullscreen = false,
+  isSearchObs,
 }) {
   const { useUnsColors } = useDataset();
   const settings = useSettings();
@@ -614,6 +615,7 @@ export function Scatterplot({
             setShowCategories={setShowCategories}
             setShowSearch={setShowSearch}
             isFullscreen={isFullscreen}
+            isSearchObs={isSearchObs}
           />
         )}
         <div className="cherita-spatial-footer">

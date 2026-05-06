@@ -155,12 +155,12 @@ export function Heatmap({
               className="border-0 p-0 align-baseline"
               onClick={setShowSearch}
             >
-              features
+              {dataset.varLabel.plural}
             </Button>
           ) : (
-            'features'
+            dataset.varLabel.plural
           )}{' '}
-          to display their expression, then choose a{' '}
+          to display their {dataset.valueLabel}, then choose a{' '}
           {showCategoriesBtn ? (
             <Button
               variant="link"
