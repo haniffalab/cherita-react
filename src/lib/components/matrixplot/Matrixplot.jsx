@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { Button } from 'react-bootstrap';
 import Plot from 'react-plotly.js';
 
-import { PLOTLY_MODEBAR_BUTTONS } from '../../constants/constants';
+import { PLOT_TYPES, PLOTLY_MODEBAR_BUTTONS } from '../../constants/constants';
 import { useDataset } from '../../context/DatasetContext';
 import { useFilteredData } from '../../context/FilterContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -19,7 +19,6 @@ export function Matrixplot({
   setShowCategories,
   setShowSearch,
   setShowControls,
-  plotType,
   setPlotType,
   isFullscreen = false,
 }) {
@@ -140,7 +139,7 @@ export function Matrixplot({
       <PlotAlert
         variant="info"
         heading="Set up your matrix plot"
-        plotType={plotType}
+        plotType={PLOT_TYPES.MATRIXPLOT}
         setPlotType={setPlotType}
       >
         <p className="p-0 m-0">
@@ -163,10 +162,10 @@ export function Matrixplot({
               className="border-0 p-0 align-baseline"
               onClick={setShowSearch}
             >
-              features
+              {dataset.varLabel.plural}
             </Button>
           ) : (
-            'features'
+            dataset.varLabel.plural
           )}{' '}
           to display the matrix plot.
         </p>
@@ -177,7 +176,7 @@ export function Matrixplot({
       <PlotAlert
         variant="danger"
         heading="Error displaying the matrix plot"
-        plotType={plotType}
+        plotType={PLOT_TYPES.MATRIXPLOT}
         setPlotType={setPlotType}
       >
         {serverError.message ||

@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { Button } from 'react-bootstrap';
 import Plot from 'react-plotly.js';
 
-import { PLOTLY_MODEBAR_BUTTONS } from '../../constants/constants';
+import { PLOT_TYPES, PLOTLY_MODEBAR_BUTTONS } from '../../constants/constants';
 import { useDataset } from '../../context/DatasetContext';
 import { useFilteredData } from '../../context/FilterContext';
 import {
@@ -22,7 +22,6 @@ export function Dotplot({
   setShowCategories,
   setShowSearch,
   setShowControls,
-  plotType,
   setPlotType,
   isFullscreen = false,
 }) {
@@ -189,7 +188,7 @@ export function Dotplot({
       <PlotAlert
         variant="info"
         heading="Set up your dotplot"
-        plotType={plotType}
+        plotType={PLOT_TYPES.DOTPLOT}
         setPlotType={setPlotType}
       >
         <p className="p-0 m-0">
@@ -200,12 +199,12 @@ export function Dotplot({
               className="border-0 p-0 align-baseline"
               onClick={setShowSearch}
             >
-              features
+              {dataset.varLabel.plural}
             </Button>
           ) : (
-            'features'
+            dataset.varLabel.plural
           )}{' '}
-          to display their expression across groups, then choose a{' '}
+          to display their {dataset.valueLabel} across groups, then choose a{' '}
           {showCategoriesBtn ? (
             <Button
               variant="link"
@@ -226,7 +225,7 @@ export function Dotplot({
       <PlotAlert
         variant="danger"
         heading="Error displaying the dotplot"
-        plotType={plotType}
+        plotType={PLOT_TYPES.DOTPLOT}
         setPlotType={setPlotType}
       >
         {serverError.message ||

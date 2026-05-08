@@ -17,15 +17,13 @@ export function Legend({
   addText = '',
 }) {
   const settings = useSettings();
-  const { getColor } = useColor();
+  const { getColor } = useColor({ isCategorical, colorscale });
 
   const spanList = useMemo(() => {
     return _.range(100).map((i) => {
       var color = rgbToHex(
         getColor({
           value: i / 100,
-          categorical: isCategorical,
-          colorscale: colorscale,
         }),
       );
       return (
@@ -36,7 +34,7 @@ export function Legend({
         ></span>
       );
     });
-  }, [colorscale, getColor, isCategorical]);
+  }, [getColor]);
 
   if (settings.colorEncoding && !isCategorical) {
     return (

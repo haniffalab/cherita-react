@@ -7,8 +7,8 @@ export async function fetchData(
   endpoint,
   params,
   signal = null,
-  ms = 300000,
   apiUrl = null,
+  ms = 300000,
 ) {
   apiUrl = apiUrl || process.env.REACT_APP_API_URL;
   const controller = new AbortController();

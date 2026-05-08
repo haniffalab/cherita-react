@@ -8,3 +8,5 @@ coverage/
 .sass-cache/
 /scss/
 *.tgz
+/website/build/
+/website/node_modules/

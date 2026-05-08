@@ -28,6 +28,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 
 import { ScatterplotControls } from './ScatterplotControls';
+import { useDataset } from '../../context/DatasetContext';
 import {
   useSettings,
   useSettingsDispatch,
@@ -47,7 +48,9 @@ export function SpatialControls({
   setShowCategories,
   setShowSearch,
   isFullscreen,
+  isSearchObs = false,
 }) {
+  const dataset = useDataset();
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
   const [showControls, setShowControls] = useState(false);
@@ -133,7 +136,7 @@ export function SpatialControls({
           {showCategoriesBtn && (
             <OverlayTrigger
               placement="right"
-              overlay={<Tooltip id="tooltip-obs">Browse categories</Tooltip>}
+              overlay={<Tooltip id="tooltip-obs">Explore categories</Tooltip>}
             >
               <Button
                 size={isCompact && 'sm'}
@@ -146,7 +149,14 @@ export function SpatialControls({
           {showSearchBtn && (
             <OverlayTrigger
               placement="right"
-              overlay={<Tooltip id="tooltip-vars">Search features</Tooltip>}
+              overlay={
+                <Tooltip id="tooltip-vars">
+                  Search{' '}
+                  {isSearchObs
+                    ? dataset.obsLabel.plural
+                    : dataset.varLabel.plural}
+                </Tooltip>
+              }
             >
               <Button
                 size={isCompact && 'sm'}

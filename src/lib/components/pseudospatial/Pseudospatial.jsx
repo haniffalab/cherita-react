@@ -113,12 +113,14 @@ export function Pseudospatial({
   plotType,
   setPlotType,
 }) {
-  const { imageUrl } = useDataset();
+  const { imageUrl, valueLabel } = useDataset();
   const settings = useSettings();
   const dispatch = useSettingsDispatch();
   const [data, setData] = useState([]);
   const [layout, setLayout] = useState({});
-  const { getColor } = useColor();
+  const { getColor } = useColor({
+    isCategorical: false,
+  });
   const colorscale = useRef(settings.controls.colorScale);
   const { valueMin, valueMax } = useFilteredData();
 
@@ -163,7 +165,9 @@ export function Pseudospatial({
           if (v === null) {
             return trace;
           }
-          const color = rgbToHex(getColor({ value: (v - min) / (max - min) }));
+          const color = rgbToHex(
+            getColor({ value: (v - min) / Math.max(max - min, 1e-6) }),
+          );
           return {
             ...trace,
             fillcolor: color,
@@ -204,7 +208,9 @@ export function Pseudospatial({
           if (v === null) {
             return trace;
           }
-          const color = rgbToHex(getColor({ value: (v - min) / (max - min) }));
+          const color = rgbToHex(
+            getColor({ value: (v - min) / Math.max(max - min, 1e-6) }),
+          );
           return {
             ...trace,
             fillcolor: color,
@@ -327,7 +333,7 @@ export function Pseudospatial({
               max={layout?.coloraxis?.cmax}
               addText={
                 plotType === PLOT_TYPES.GENE
-                  ? ' - Mean expression'
+                  ? ` - Mean ${valueLabel}`
                   : plotType === PLOT_TYPES.CATEGORICAL
                     ? ' - %'
                     : plotType === PLOT_TYPES.CONTINUOUS
