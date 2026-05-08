@@ -1,5 +1,31 @@
 # Changelog
 
+# [2.1.0](https://github.com/haniffalab/cherita-react/compare/v2.0.0...v2.1.0) (2026-05-08)
+
+
+### Bug Fixes
+
+* avoid duplicates in batch select.multivar ([26bcce8](https://github.com/haniffalab/cherita-react/commit/26bcce8d732362bcf155eae22c4ee91d67d480f2))
+* bug where var with matrix_index 0 not correctly added to active list ([fad437b](https://github.com/haniffalab/cherita-react/commit/fad437b418bc163f236cd8b6ff942ace5ce868a1))
+* bump plotly ([6859887](https://github.com/haniffalab/cherita-react/commit/6859887f3e1116549c7b60ed554cfc4b0056472e))
+* different colors in shader and useColor hook when only one unique value ([ce2512e](https://github.com/haniffalab/cherita-react/commit/ce2512ea3896e56ea985b95da533beca7d76f608))
+* linting errors ([cec7e04](https://github.com/haniffalab/cherita-react/commit/cec7e0462e188c44911961c6a5ded083bb7b9035))
+* make hook for debounced function for selecting vars to accumulate all and add in batch to select.multivar ([f16a4da](https://github.com/haniffalab/cherita-react/commit/f16a4dadcd1dfa51b2cfcfb400fc85f100a7efca)), closes [#193](https://github.com/haniffalab/cherita-react/issues/193)
+* move increased hovered radius to shader ([f538e29](https://github.com/haniffalab/cherita-react/commit/f538e29980c46e1ef6d93208b4f4b1df4d8fdd06))
+* obs explorer label ([bd77995](https://github.com/haniffalab/cherita-react/commit/bd779951b2f8513fae6f96041b079f4e0128d7f5))
+* optimize sorting and highlighting in scatterplot ([7cba7aa](https://github.com/haniffalab/cherita-react/commit/7cba7aaf5b44729d1a5a11815eb03c573de8567d))
+* pointInteractionEnabled with null selectedObsIndex ([160b990](https://github.com/haniffalab/cherita-react/commit/160b990c70717b1b87446fb7f9d1d2ef3eef8962))
+* pseudospatial use of useColor ([7244641](https://github.com/haniffalab/cherita-react/commit/72446419deddd255af3ab79afd2951104c3913c7))
+* remove sorting of data points in favor of setting z position in shader ([d881bf6](https://github.com/haniffalab/cherita-react/commit/d881bf6fcabe46753f7e3e4b8f95bd7ad82b77c1))
+* remove toolbar export ([dbccbbc](https://github.com/haniffalab/cherita-react/commit/dbccbbc2d3226f879154e2df3434ef3f6dc513fb))
+* remove use of searchObsCol for labels as it is only to be used by the backend to provide the search results ([f638574](https://github.com/haniffalab/cherita-react/commit/f638574e1591a43612aa81b3752cc68a113b9f3b))
+* sorting numerical nans ([0e14935](https://github.com/haniffalab/cherita-react/commit/0e14935c86da15c11144120f2ce1c67eddf9c919))
+
+
+### Features
+
+* compute layer attributes in worker ([9c81fa3](https://github.com/haniffalab/cherita-react/commit/9c81fa30f9edeb3dca84d902a7bbdd13e6811ec4))
+
 # [2.0.0](https://github.com/haniffalab/cherita-react/compare/v1.5.0...v2.0.0) (2026-02-19)
 
 
